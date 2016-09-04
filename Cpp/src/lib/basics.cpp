@@ -10,8 +10,8 @@
 #include <iostream>
 #include <string.h>
 
-static char figureNames[2][6] = {{'P', 'K', 'N', 'R', 'Q', 'K'},
-		{'p', 'k', 'n', 'r', 'q', 'k'},
+static char figureNames[2][6] = {{'P', 'N', 'B', 'R', 'Q', 'K'},
+		{'p', 'n', 'b', 'r', 'q', 'k'},
 };
 
 std::string chessPositionToString(chessPosition position) {
