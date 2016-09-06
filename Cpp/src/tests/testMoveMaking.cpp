@@ -26,7 +26,7 @@ testResult testMakeMove(){
 		playerColor color = (playerColor) k;
 
 		for	(uint32_t ind = 0; ind < 1000; ind++) {
-			std::string randomPosition = getZeroPosition();
+			std::string randomPosition = getRandomPosition();
 
 			uint32_t start = getRandomField();
 			uint32_t end   = getRandomField();
@@ -60,7 +60,7 @@ testResult testMakeMove(){
 		playerColor color = (playerColor) k;
 
 		for	(uint32_t ind = 0; ind < 1000; ind++) {
-			std::string randomPosition = getZeroPosition();
+			std::string randomPosition = getRandomPosition();
 
 			uint32_t start = getRandomField();
 			uint32_t end   = getRandomField();
@@ -109,7 +109,7 @@ testResult testUndoMove() {
 		playerColor color = (playerColor) k;
 
 		for	(uint32_t ind = 0; ind < 1000; ind++) {
-			std::string randomPosition = getZeroPosition();
+			std::string randomPosition = getRandomPosition();
 
 			uint32_t start = getRandomField();
 			uint32_t end   = getRandomField();
@@ -143,7 +143,7 @@ testResult testUndoMove() {
 		playerColor color = (playerColor) k;
 
 		for	(uint32_t ind = 0; ind < 1000; ind++) {
-			std::string randomPosition = getZeroPosition();
+			std::string randomPosition = getRandomPosition();
 
 			uint32_t start = getRandomField();
 			uint32_t end   = getRandomField();
