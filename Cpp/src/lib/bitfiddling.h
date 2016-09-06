@@ -10,6 +10,9 @@
 #include <stdint.h>
 
 
+#define LOWESTBITONLY(a) (a & (-a))
+
+#define KILLLSB() (a )
 inline uint16_t findLSB(const uint64_t a){
 	return __builtin_ctzll(a);
 }

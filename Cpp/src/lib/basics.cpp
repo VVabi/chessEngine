@@ -9,10 +9,28 @@
 #include "basics.hpp"
 #include <iostream>
 #include <string.h>
+#include <lib/bitfiddling.h>
 
 static char figureNames[2][6] = {{'P', 'N', 'B', 'R', 'Q', 'K'},
 		{'p', 'n', 'b', 'r', 'q', 'k'},
 };
+
+
+inline figureType toFigureType(uint16_t num){
+#ifdef DEBUG
+
+	if(num > 5) {
+		std::cout << "There are only 6 different figuretypes in chess..." << std::endl;
+		while(1) {
+
+		}
+
+	}
+#endif
+
+	return (figureType) num;
+
+}
 
 std::string chessPositionToString(chessPosition position) {
 	//Not performance-critical
@@ -40,11 +58,49 @@ std::string chessPositionToString(chessPosition position) {
 	return ret;
 }
 
+
+void zeroInitPosition(chessPosition* position) {
+#ifdef DEBUG
+	position->toMove = white;
+	position->pieces = vdt_vector<uint64_t>(2);
+	uint64_t dummy = 0;
+	position->pieces.add(&dummy);
+	position->pieces.add(&dummy);
+
+	vdt_vector<uint64_t> whiteTable = vdt_vector<uint64_t>(NUM_DIFFERENT_PIECES+1);
+	whiteTable.add(&dummy);
+	whiteTable.add(&dummy);
+	whiteTable.add(&dummy);
+	whiteTable.add(&dummy);
+	whiteTable.add(&dummy);
+	whiteTable.add(&dummy);
+	whiteTable.add(&dummy);
+
+	vdt_vector<uint64_t> blackTable = vdt_vector<uint64_t>(NUM_DIFFERENT_PIECES+1);
+	blackTable.add(&dummy);
+	blackTable.add(&dummy);
+	blackTable.add(&dummy);
+	blackTable.add(&dummy);
+	blackTable.add(&dummy);
+	blackTable.add(&dummy);
+	blackTable.add(&dummy);
+
+	position->pieceTables =  vdt_vector<vdt_vector<uint64_t>>(2);
+	position->pieceTables.add(&whiteTable);
+	position->pieceTables.add(&blackTable);
+#else
+	memset(&position, 0, sizeof(chessPosition));
+#endif
+
+
+}
+
 chessPosition stringToChessPosition(std::string strposition) {
 	//Not performance-critical
 	//---------------------------
 	chessPosition position;
-	memset(&position, 0, sizeof(chessPosition));
+	zeroInitPosition(&position);
+
 
 	for (uint8_t ind=0; ind < 64; ind++) {
 		char c = strposition.at(ind);
@@ -104,4 +160,30 @@ chessPosition stringToChessPosition(std::string strposition) {
 
 	}
 	return position;
+}
+
+
+std::string moveToString(chessMove move, chessPosition position) {
+
+	uint64_t mv = move.move;
+	uint64_t occupancy = position.pieces[position.toMove];
+	uint64_t source = mv & occupancy;
+	uint64_t target = mv^source;
+
+	uint16_t sourceField = findLSB(source);
+	uint16_t targetField = findLSB(target);
+
+	char ret[4];
+	ret[0] = FILE(sourceField)+'a';
+	ret[1] = ROW(sourceField)+'1';
+	ret[2] = FILE(targetField)+'a';
+	ret[3] = ROW(targetField)+'1';
+
+	std::string retString = "";
+	retString.push_back(ret[0]);
+	retString.push_back(ret[1]);
+	retString.push_back(ret[2]);
+	retString.push_back(ret[3]);
+	return retString;
+
 }

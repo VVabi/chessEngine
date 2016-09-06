@@ -30,7 +30,10 @@ template<typename T> class vdt_vector{
 
 		T &operator[](uint32_t i){
 			if(i > length){
-				//add fatal
+				std::cout << "vector index out ouf bounds" << std::endl;
+				while(1){
+					//add fatal
+				}
 			}
 			return data[i];
 

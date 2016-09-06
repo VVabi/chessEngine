@@ -1,0 +1,78 @@
+/*
+ * knightmoves.hpp
+ *
+ *  Created on: Sep 4, 2016
+ *      Author: vabi
+ */
+
+#ifndef LIB_DEFINES_KNIGHTMOVES_HPP_
+#define LIB_DEFINES_KNIGHTMOVES_HPP_
+
+#define KNIGHTMOVES0 (1UL << 17) |  (1UL << 10)
+#define KNIGHTMOVES1 (1UL << 18) |  (1UL << 16) |  (1UL << 11)
+#define KNIGHTMOVES2 (1UL << 19) |  (1UL << 17) |  (1UL << 12) |  (1UL << 8)
+#define KNIGHTMOVES3 (1UL << 20) |  (1UL << 18) |  (1UL << 13) |  (1UL << 9)
+#define KNIGHTMOVES4 (1UL << 21) |  (1UL << 19) |  (1UL << 14) |  (1UL << 10)
+#define KNIGHTMOVES5 (1UL << 22) |  (1UL << 20) |  (1UL << 15) |  (1UL << 11)
+#define KNIGHTMOVES6 (1UL << 23) |  (1UL << 21) |  (1UL << 12)
+#define KNIGHTMOVES7 (1UL << 22) |  (1UL << 13)
+#define KNIGHTMOVES8 (1UL << 25) |  (1UL << 2) |  (1UL << 18)
+#define KNIGHTMOVES9 (1UL << 26) |  (1UL << 24) |  (1UL << 3) |  (1UL << 19)
+#define KNIGHTMOVES10 (1UL << 27) |  (1UL << 25) |  (1UL << 4) |  (1UL << 0) |  (1UL << 20) |  (1UL << 16)
+#define KNIGHTMOVES11 (1UL << 28) |  (1UL << 26) |  (1UL << 5) |  (1UL << 1) |  (1UL << 21) |  (1UL << 17)
+#define KNIGHTMOVES12 (1UL << 29) |  (1UL << 27) |  (1UL << 6) |  (1UL << 2) |  (1UL << 22) |  (1UL << 18)
+#define KNIGHTMOVES13 (1UL << 30) |  (1UL << 28) |  (1UL << 7) |  (1UL << 3) |  (1UL << 23) |  (1UL << 19)
+#define KNIGHTMOVES14 (1UL << 31) |  (1UL << 29) |  (1UL << 4) |  (1UL << 20)
+#define KNIGHTMOVES15 (1UL << 30) |  (1UL << 5) |  (1UL << 21)
+#define KNIGHTMOVES16 (1UL << 1) |  (1UL << 33) |  (1UL << 10) |  (1UL << 26)
+#define KNIGHTMOVES17 (1UL << 0) |  (1UL << 2) |  (1UL << 34) |  (1UL << 32) |  (1UL << 11) |  (1UL << 27)
+#define KNIGHTMOVES18 (1UL << 1) |  (1UL << 3) |  (1UL << 35) |  (1UL << 33) |  (1UL << 12) |  (1UL << 8) |  (1UL << 28) |  (1UL << 24)
+#define KNIGHTMOVES19 (1UL << 2) |  (1UL << 4) |  (1UL << 36) |  (1UL << 34) |  (1UL << 13) |  (1UL << 9) |  (1UL << 29) |  (1UL << 25)
+#define KNIGHTMOVES20 (1UL << 3) |  (1UL << 5) |  (1UL << 37) |  (1UL << 35) |  (1UL << 14) |  (1UL << 10) |  (1UL << 30) |  (1UL << 26)
+#define KNIGHTMOVES21 (1UL << 4) |  (1UL << 6) |  (1UL << 38) |  (1UL << 36) |  (1UL << 15) |  (1UL << 11) |  (1UL << 31) |  (1UL << 27)
+#define KNIGHTMOVES22 (1UL << 5) |  (1UL << 7) |  (1UL << 39) |  (1UL << 37) |  (1UL << 12) |  (1UL << 28)
+#define KNIGHTMOVES23 (1UL << 6) |  (1UL << 38) |  (1UL << 13) |  (1UL << 29)
+#define KNIGHTMOVES24 (1UL << 9) |  (1UL << 41) |  (1UL << 18) |  (1UL << 34)
+#define KNIGHTMOVES25 (1UL << 8) |  (1UL << 10) |  (1UL << 42) |  (1UL << 40) |  (1UL << 19) |  (1UL << 35)
+#define KNIGHTMOVES26 (1UL << 9) |  (1UL << 11) |  (1UL << 43) |  (1UL << 41) |  (1UL << 20) |  (1UL << 16) |  (1UL << 36) |  (1UL << 32)
+#define KNIGHTMOVES27 (1UL << 10) |  (1UL << 12) |  (1UL << 44) |  (1UL << 42) |  (1UL << 21) |  (1UL << 17) |  (1UL << 37) |  (1UL << 33)
+#define KNIGHTMOVES28 (1UL << 11) |  (1UL << 13) |  (1UL << 45) |  (1UL << 43) |  (1UL << 22) |  (1UL << 18) |  (1UL << 38) |  (1UL << 34)
+#define KNIGHTMOVES29 (1UL << 12) |  (1UL << 14) |  (1UL << 46) |  (1UL << 44) |  (1UL << 23) |  (1UL << 19) |  (1UL << 39) |  (1UL << 35)
+#define KNIGHTMOVES30 (1UL << 13) |  (1UL << 15) |  (1UL << 47) |  (1UL << 45) |  (1UL << 20) |  (1UL << 36)
+#define KNIGHTMOVES31 (1UL << 14) |  (1UL << 46) |  (1UL << 21) |  (1UL << 37)
+#define KNIGHTMOVES32 (1UL << 17) |  (1UL << 49) |  (1UL << 26) |  (1UL << 42)
+#define KNIGHTMOVES33 (1UL << 16) |  (1UL << 18) |  (1UL << 50) |  (1UL << 48) |  (1UL << 27) |  (1UL << 43)
+#define KNIGHTMOVES34 (1UL << 17) |  (1UL << 19) |  (1UL << 51) |  (1UL << 49) |  (1UL << 28) |  (1UL << 24) |  (1UL << 44) |  (1UL << 40)
+#define KNIGHTMOVES35 (1UL << 18) |  (1UL << 20) |  (1UL << 52) |  (1UL << 50) |  (1UL << 29) |  (1UL << 25) |  (1UL << 45) |  (1UL << 41)
+#define KNIGHTMOVES36 (1UL << 19) |  (1UL << 21) |  (1UL << 53) |  (1UL << 51) |  (1UL << 30) |  (1UL << 26) |  (1UL << 46) |  (1UL << 42)
+#define KNIGHTMOVES37 (1UL << 20) |  (1UL << 22) |  (1UL << 54) |  (1UL << 52) |  (1UL << 31) |  (1UL << 27) |  (1UL << 47) |  (1UL << 43)
+#define KNIGHTMOVES38 (1UL << 21) |  (1UL << 23) |  (1UL << 55) |  (1UL << 53) |  (1UL << 28) |  (1UL << 44)
+#define KNIGHTMOVES39 (1UL << 22) |  (1UL << 54) |  (1UL << 29) |  (1UL << 45)
+#define KNIGHTMOVES40 (1UL << 25) |  (1UL << 57) |  (1UL << 34) |  (1UL << 50)
+#define KNIGHTMOVES41 (1UL << 24) |  (1UL << 26) |  (1UL << 58) |  (1UL << 56) |  (1UL << 35) |  (1UL << 51)
+#define KNIGHTMOVES42 (1UL << 25) |  (1UL << 27) |  (1UL << 59) |  (1UL << 57) |  (1UL << 36) |  (1UL << 32) |  (1UL << 52) |  (1UL << 48)
+#define KNIGHTMOVES43 (1UL << 26) |  (1UL << 28) |  (1UL << 60) |  (1UL << 58) |  (1UL << 37) |  (1UL << 33) |  (1UL << 53) |  (1UL << 49)
+#define KNIGHTMOVES44 (1UL << 27) |  (1UL << 29) |  (1UL << 61) |  (1UL << 59) |  (1UL << 38) |  (1UL << 34) |  (1UL << 54) |  (1UL << 50)
+#define KNIGHTMOVES45 (1UL << 28) |  (1UL << 30) |  (1UL << 62) |  (1UL << 60) |  (1UL << 39) |  (1UL << 35) |  (1UL << 55) |  (1UL << 51)
+#define KNIGHTMOVES46 (1UL << 29) |  (1UL << 31) |  (1UL << 63) |  (1UL << 61) |  (1UL << 36) |  (1UL << 52)
+#define KNIGHTMOVES47 (1UL << 30) |  (1UL << 62) |  (1UL << 37) |  (1UL << 53)
+#define KNIGHTMOVES48 (1UL << 33) |  (1UL << 42) |  (1UL << 58)
+#define KNIGHTMOVES49 (1UL << 32) |  (1UL << 34) |  (1UL << 43) |  (1UL << 59)
+#define KNIGHTMOVES50 (1UL << 33) |  (1UL << 35) |  (1UL << 44) |  (1UL << 40) |  (1UL << 60) |  (1UL << 56)
+#define KNIGHTMOVES51 (1UL << 34) |  (1UL << 36) |  (1UL << 45) |  (1UL << 41) |  (1UL << 61) |  (1UL << 57)
+#define KNIGHTMOVES52 (1UL << 35) |  (1UL << 37) |  (1UL << 46) |  (1UL << 42) |  (1UL << 62) |  (1UL << 58)
+#define KNIGHTMOVES53 (1UL << 36) |  (1UL << 38) |  (1UL << 47) |  (1UL << 43) |  (1UL << 63) |  (1UL << 59)
+#define KNIGHTMOVES54 (1UL << 37) |  (1UL << 39) |  (1UL << 44) |  (1UL << 60)
+#define KNIGHTMOVES55 (1UL << 38) |  (1UL << 45) |  (1UL << 61)
+#define KNIGHTMOVES56 (1UL << 41) |  (1UL << 50)
+#define KNIGHTMOVES57 (1UL << 40) |  (1UL << 42) |  (1UL << 51)
+#define KNIGHTMOVES58 (1UL << 41) |  (1UL << 43) |  (1UL << 52) |  (1UL << 48)
+#define KNIGHTMOVES59 (1UL << 42) |  (1UL << 44) |  (1UL << 53) |  (1UL << 49)
+#define KNIGHTMOVES60 (1UL << 43) |  (1UL << 45) |  (1UL << 54) |  (1UL << 50)
+#define KNIGHTMOVES61 (1UL << 44) |  (1UL << 46) |  (1UL << 55) |  (1UL << 51)
+#define KNIGHTMOVES62 (1UL << 45) |  (1UL << 47) |  (1UL << 52)
+#define KNIGHTMOVES63 (1UL << 46) |  (1UL << 53)
+
+
+
+#endif /* LIB_DEFINES_KNIGHTMOVES_HPP_ */
