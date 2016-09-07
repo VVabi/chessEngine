@@ -17,9 +17,12 @@ using namespace std;
 #include <fstream>
 #define ROOKE4 ((1UL << 25) | (1UL << 26) | (1UL << 27) | (1UL << 29) | (1UL << 30) | (1UL << 12) | (1UL << 20) | (1UL << 36) | (1UL << 44) | (1UL << 52))
 
-extern uint64_t rookFieldTable[];
-extern uint64_t rookMoveTables[64][4096];
-extern uint64_t rookMagicNumbers[];
+extern const uint64_t rookFieldTable[];
+extern const uint64_t bishopFieldTable[];
+extern const uint64_t rookMoveTables[64][4096];
+extern const uint64_t bishopMoveTables[64][512];
+extern const uint64_t rookMagicNumbers[];
+extern const uint64_t bishopMagicNumbers[];
 
 void outPutuint64(uint64_t num){
 
@@ -41,18 +44,28 @@ void outPutuint64(uint64_t num){
 }
 
 int main() {
+	/*ofstream o;
+	o.open("/home/vabi/bishopMoveTables.txt");
+
+	o << generateBishopMoveTablesString();
+	o.close();*/
+
+
+
+
+	//::cout << generateBishopReachableFields() <<std::endl;
 	//std::cout << generateRookMagicNumber(16) << std::endl;
 	//std::cout << generateRookMagicNumbers() << std::endl;
-
-	/*for(int k = 0; k < 1000000; k++) {
+	/*vdt_vector<vdt_vector<uint64_t>> vec =  generateBishopMoveTables();
+	for(int k = 0; k < 1000000; k++) {
 		uint64_t occupancy =  getRandUint64();
 		uint32_t field = getRandomField();
-		uint64_t blocker = occupancy & rookFieldTable[field];
+		uint64_t blocker = occupancy & bishopFieldTable[field];
 
-		uint64_t moves = generateRookMoveTable(field, blocker);
-		uint64_t magicNumber = rookMagicNumbers[field];
-		uint16_t hashValue = (blocker*magicNumber) >> 52;
-		uint64_t magic_moves = rookMoveTables[field][hashValue];
+		uint64_t moves = generateBishopMoveTable(field, blocker);
+		uint64_t magicNumber = bishopMagicNumbers[field];
+		uint16_t hashValue = (blocker*magicNumber) >> 55;
+		uint64_t magic_moves = bishopMoveTables[field][hashValue];
 
 		/*outPutuint64(blocker);
 		outPutuint64(moves);
@@ -63,18 +76,6 @@ int main() {
 		}
 	}*/
 
-
-	/*uint64_t blocker = BIT64(57) | BIT64(39);
-
-	uint16_t field = 63;
-
-	uint64_t magicNumber = rookMagicNumbers[field];
-
-	uint64_t hashValue = (blocker*magicNumber) >> 52;
-	std::cout << hashValue << std::endl;
-	uint64_t moveTable = rookMoveTables[field][hashValue];
-	outPutuint64(blocker);
-	outPutuint64(moveTable);*/
 
 
 
@@ -90,17 +91,40 @@ int main() {
 	std::cout << a <<std::endl;*/
 
 
-	vdt_vector<chessMove> moves = vdt_vector<chessMove>(5);
-	std::string position = "R0BQKB0R0PPPPPPP000RP000000000000000000000000000pppppppprnbqkbnr";
+
+	std::string position = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnr";
 	chessPosition c = stringToChessPosition(position);
-	c.toMove = white;
-	generateAllMoves(&moves, &c);
+	while(1){
 
-	std::cout << moves.length << std::endl;
+		std::string output = chessPositionToOutputString(c);
+		std::cout << output << std::endl;
+		vdt_vector<chessMove> moves = vdt_vector<chessMove>(100);
 
-	for(uint16_t ind=0; ind < moves.length; ind++){
-		std::cout << moveToString(moves[ind], c) << std::endl;
+		std::string nextMove;
+		cin >> nextMove;
+		uint64_t mv = stringToMove(nextMove);
+		generateAllMoves(&moves, &c);
 
+		bool found = false;
+		chessMove m;
+		for(uint16_t ind=0; ind < moves.length; ind++) {
+			if(moves[ind].move == mv){
+				found = true;
+				m = moves[ind];
+			}
+
+
+		}
+
+
+		if(found){
+			std::cout << moveToString(m, c) << std::endl;
+			makeMove(&m, &c);
+
+		} else {
+			std::cout << "Invalid move!" << std::endl;
+		}
+		moves.free_array();
 	}
 	/*testResult ret = testMakeMove();
 	std::cout << ret.passed << std::endl;

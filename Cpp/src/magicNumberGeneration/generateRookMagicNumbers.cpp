@@ -12,8 +12,8 @@
 #include <sstream>      // std::stringstream
 #include <DataTypes/vdt_vector.hpp>
 #include <lib/bitfiddling.h>
-extern uint64_t rookFieldTable[];
-extern uint64_t rookMagicNumbers[];
+extern const uint64_t rookFieldTable[];
+extern const uint64_t rookMagicNumbers[];
 
 
 std::string generateRookMoveTablesString(){

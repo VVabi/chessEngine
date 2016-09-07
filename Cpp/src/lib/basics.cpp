@@ -58,6 +58,37 @@ std::string chessPositionToString(chessPosition position) {
 	return ret;
 }
 
+std::string chessPositionToOutputString(chessPosition position){
+	//Not performance-critical
+	//---------------------------
+	std::string ret = "";
+
+	for (int8_t row=7; row >=0; row--) {
+		for (int8_t column=0; column < 8; column++) {
+		uint64_t num = (1UL << (8*row+column));
+		bool found = false;
+		for	(uint8_t color=0; color < 2; color++) {
+			for	(uint8_t figureCnt = 0; figureCnt < 6; figureCnt++) {
+
+				if (position.pieceTables[color][figureCnt] & num) {
+					ret.push_back(figureNames[color][figureCnt]);
+					found = true;
+				}
+
+			}
+		}
+
+		if (!found) {
+			ret.push_back('0');
+		}
+		}
+		ret.push_back('\n');
+	}
+	return ret;
+
+
+
+}
 
 void zeroInitPosition(chessPosition* position) {
 #ifdef DEBUG
@@ -185,5 +216,19 @@ std::string moveToString(chessMove move, chessPosition position) {
 	retString.push_back(ret[2]);
 	retString.push_back(ret[3]);
 	return retString;
+
+}
+
+uint64_t stringToMove(std::string mv){
+	char sourceColumn = mv[0]-'a';
+	char sourceRow = mv[1]-'1';
+	uint16_t sourceField = sourceRow*8+sourceColumn;
+	char targetColumn = mv[2]-'a';
+	char targetRow = mv[3]-'1';
+	uint16_t targetField = targetRow*8+targetColumn;
+
+	return BIT64(sourceField) | BIT64(targetField);
+
+
 
 }

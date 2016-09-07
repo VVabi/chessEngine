@@ -44,8 +44,10 @@ struct chessPosition {
 };
 
 std::string chessPositionToString(chessPosition position);
+std::string chessPositionToOutputString(chessPosition position);
 chessPosition stringToChessPosition(std::string strposition);
 inline figureType toFigureType(uint16_t num);
 std::string moveToString(chessMove move, chessPosition position);
+uint64_t stringToMove(std::string mv);
 uint64_t getRandUint64();
 #endif /* LIB_BASICS_HPP_ */

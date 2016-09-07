@@ -22,6 +22,10 @@ extern uint64_t rookFieldTable[];
 extern uint64_t rookMoveTables[64][4096];
 extern uint64_t rookMagicNumbers[];
 
+extern uint64_t bishopFieldTable[];
+extern uint64_t bishopMoveTables[64][512];
+extern uint64_t bishopMagicNumbers[];
+
 inline void extractMoves(uint64_t currentPiece, const figureType figure, uint64_t potentialMoves, vdt_vector<chessMove>* vec, chessPosition* position) {
 	playerColor toMove = position->toMove;
 	while (potentialMoves != 0) {
@@ -56,6 +60,26 @@ void generateRookMoves(vdt_vector<chessMove>* vec, chessPosition* position, cons
 		uint64_t blocker = occupancy & rookFieldTable[nextPieceField];
 		uint16_t hashValue = (blocker*magicNumber) >> 52;
 		uint64_t potentialMoves = rookMoveTables[nextPieceField][hashValue];
+		potentialMoves = potentialMoves & (~position->pieces[toMove]);
+		extractMoves(nextPiece, figure, potentialMoves, vec, position);
+		pieces = pieces & (~nextPiece);
+	}
+
+
+}
+
+void generateBishopMoves(vdt_vector<chessMove>* vec, chessPosition* position, const figureType figure) {
+
+	playerColor toMove = position->toMove;
+	uint64_t pieces    = position->pieceTables[toMove][figure];
+	uint64_t occupancy  = position->pieces[white] | position->pieces[black];
+	while (pieces != 0) {
+		uint64_t nextPiece = LOWESTBITONLY(pieces);
+		uint16_t nextPieceField = popLSB(pieces);
+		uint64_t magicNumber = bishopMagicNumbers[nextPieceField];
+		uint64_t blocker = occupancy & bishopFieldTable[nextPieceField];
+		uint16_t hashValue = (blocker*magicNumber) >> 55;
+		uint64_t potentialMoves = bishopMoveTables[nextPieceField][hashValue];
 		potentialMoves = potentialMoves & (~position->pieces[toMove]);
 		extractMoves(nextPiece, figure, potentialMoves, vec, position);
 		pieces = pieces & (~nextPiece);
@@ -170,11 +194,13 @@ void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 }
 
 void generateAllMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
-	/*generateNonSliderMoves(vec, position, knightmovetables, knight);
-	generateNonSliderMoves(vec, position, kingmovetables, king);*/
+	generateNonSliderMoves(vec, position, knightmovetables, knight);
+	generateNonSliderMoves(vec, position, kingmovetables, king);
 	generateRookMoves(vec, position, rook);
 	generateRookMoves(vec, position, queen);
-	//generatePawnMoves(vec, position);
+	generateBishopMoves(vec, position, bishop);
+	generateBishopMoves(vec, position, queen);
+	generatePawnMoves(vec, position);
 }
 
 
