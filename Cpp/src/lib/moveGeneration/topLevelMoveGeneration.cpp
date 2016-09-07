@@ -49,7 +49,6 @@ inline void extractMoves(uint64_t currentPiece, const figureType figure, uint64_
 }
 
 void generateRookMoves(vdt_vector<chessMove>* vec, chessPosition* position, const figureType figure) {
-
 	playerColor toMove = position->toMove;
 	uint64_t pieces    = position->pieceTables[toMove][figure];
 	uint64_t occupancy  = position->pieces[white] | position->pieces[black];
@@ -69,7 +68,6 @@ void generateRookMoves(vdt_vector<chessMove>* vec, chessPosition* position, cons
 }
 
 void generateBishopMoves(vdt_vector<chessMove>* vec, chessPosition* position, const figureType figure) {
-
 	playerColor toMove = position->toMove;
 	uint64_t pieces    = position->pieceTables[toMove][figure];
 	uint64_t occupancy  = position->pieces[white] | position->pieces[black];
@@ -89,7 +87,6 @@ void generateBishopMoves(vdt_vector<chessMove>* vec, chessPosition* position, co
 }
 
 void generateNonSliderMoves(vdt_vector<chessMove>* vec, chessPosition* position, const uint64_t* moveTable, const figureType figure) {
-
 	playerColor toMove = position->toMove;
 	uint64_t pieces    = position->pieceTables[toMove][figure];
 	while (pieces != 0) {
@@ -104,7 +101,6 @@ void generateNonSliderMoves(vdt_vector<chessMove>* vec, chessPosition* position,
 
 
 void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
-
 	//TODO: generate promotions! And this function is too complicated
 	playerColor toMove = position->toMove;
 	uint64_t occupancy  = position->pieces[white] | position->pieces[black];
@@ -195,12 +191,12 @@ void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 
 void generateAllMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 	generateNonSliderMoves(vec, position, knightmovetables, knight);
-	generateNonSliderMoves(vec, position, kingmovetables, king);
 	generateRookMoves(vec, position, rook);
 	generateRookMoves(vec, position, queen);
 	generateBishopMoves(vec, position, bishop);
 	generateBishopMoves(vec, position, queen);
 	generatePawnMoves(vec, position);
+	generateNonSliderMoves(vec, position, kingmovetables, king);
 }
 
 
