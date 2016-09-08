@@ -1,5 +1,0 @@
-struct:ChessMove
-uint64 move
-uint16 figureType
-uint16 captureType
-endstruct

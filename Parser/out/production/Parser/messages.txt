@@ -1,3 +1,0 @@
-struct:ChesssMove
-vdt:ChessMove move
-endstruct
