@@ -25,4 +25,33 @@
 #define NOTFILEA (~( (1UL << 0) | (1UL << 8) | (1UL << 16) | (1UL << 24) | (1UL << 32) | (1UL << 40) | (1UL << 48) | (1UL << 56)))
 #define NOTFILEH (~( (1UL << 7) | (1UL << 15) | (1UL << 23) | (1UL << 31) | (1UL << 39) | (1UL << 47) | (1UL << 55) | (1UL << 63)))
 
+
+#define WHITEKINGSIDECASTLEBLOCKINGFIELDS  ((1UL << 5) | (1UL << 6))
+#define WHITEQUEENSIDECASTLEBLOCKINGFIELDS ((1UL << 1) | (1UL << 2) | (1UL << 3))
+#define BLACKKINGSIDECASTLEBLOCKINGFIELDS  ((1UL << 61) | (1UL << 62))
+#define BLACKQUEENSIDECASTLEBLOCKINGFIELDS ((1UL << 57) | (1UL << 58) | (1UL << 59))
+
+#define WHITEKINGSIDECASTLEMASK  ((1UL << 4) | (1UL << 7))
+#define WHITEQUEENSIDECASTLEMASK ((1UL << 0) | (1UL << 4))
+#define BLACKKINGSIDECASTLEMASK  ((1UL << 60) | (1UL << 63))
+#define BLACKQUEENSIDECASTLEMASK ((1UL << 56) | (1UL << 60))
+
+#define WHITEKINGSIDECASTLEOCCUPANCYCHANGE ((1UL << 4) | (1UL << 5) | (1UL << 6) | (1UL << 7))
+#define WHITEKINGSIDECASTLEROOKMOVE         ((1UL << 5) | (1UL << 7))
+#define WHITEKINGSIDECASTLEKINGMOVE         ((1UL << 4) | (1UL << 6))
+
+
+#define BLACKKINGSIDECASTLEOCCUPANCYCHANGE ((1UL << 60) | (1UL << 61) | (1UL << 62) | (1UL << 63))
+#define BLACKKINGSIDECASTLEROOKMOVE         ((1UL << 61) | (1UL << 63))
+#define BLACKKINGSIDECASTLEKINGMOVE         ((1UL << 60) | (1UL << 62))
+
+#define WHITEQUEENSIDECASTLEOCCUPANCYCHANGE ((1UL << 4) | (1UL << 3) | (1UL << 2) | (1UL << 0))
+#define WHITEQUEENSIDECASTLEROOKMOVE         ((1UL << 0) | (1UL << 3))
+#define WHITEQUEENSIDECASTLEQUEENMOVE         ((1UL << 4) | (1UL << 2))
+
+
+#define BLACKQUEENSIDECASTLEOCCUPANCYCHANGE ((1UL << 60) | (1UL << 59) | (1UL << 58) | (1UL << 56))
+#define BLACKQUEENSIDECASTLEROOKMOVE         ((1UL << 56) | (1UL << 59))
+#define BLACKQUEENSIDECASTLEQUEENMOVE         ((1UL << 60) | (1UL << 58))
+
 #endif /* LIB_DEFINES_BOARDPARTS_HPP_ */

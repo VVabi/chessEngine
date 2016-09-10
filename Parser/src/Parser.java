@@ -34,7 +34,7 @@ public class Parser {
         System.out.println(args[3]);
 
         try {
-            P.parseJava("testFolder", "testFolder");
+            P.parseJava("chessGui/src/communication/messages", "chessGui/src/communication/VDT");
             P.parseCpp("Cpp/src/communication/gen", "Cpp/src/communication/gen");
         } catch (IOException e) {
             e.printStackTrace();
@@ -69,7 +69,7 @@ public class Parser {
     public void parseJava(String messageDirectory, String vdtDirectory) throws IOException {
 
         PrintWriter IDwriter = new PrintWriter(messageDirectory+"/MessageIDs.java", "UTF-8");
-        IDwriter.println("package messages;\n\npublic class MessageIDs{\n");
+        IDwriter.println("package communication.messages;\n\npublic class MessageIDs{\n");
        // PrintWriter cppWriter = new PrintWriter(cppDirectory+"/VMPmessages.h");
        // cppWriter.write("#include <src/DataTypes/fsarray.h>\n");
        // cppWriter.write("#include <string.h>\n");
@@ -88,7 +88,7 @@ public class Parser {
 
 
         IDwriter = new PrintWriter(vdtDirectory+"/VdtIDs.java", "UTF-8");
-        IDwriter.println("package VDT;\n\npublic class VdtIDs{\n");
+        IDwriter.println("package communication.VDT;\n\npublic class VdtIDs{\n");
         for(Structure struct: vdtStructures){
             PrintWriter writer = new PrintWriter(vdtDirectory+"/"+struct.name+".java", "UTF-8");
             writer.print(struct.toJavaClass(typeHash, typeSizes));
@@ -148,7 +148,7 @@ public class Parser {
 
 
     private void generateMessageFactory(String directory) throws IOException{
-        String factory = "package messages;\n";
+        String factory = "package communication.messages;\n";
         factory = factory+"public class MessageFactory{\n";
         factory = factory+"static int header_size = 4;\n";
         factory = factory+"\tpublic static message getMessage(byte[] deflated) throws UnknownMessageException{\n";

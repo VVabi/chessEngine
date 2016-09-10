@@ -1,3 +1,15 @@
-struct:ChesssMove
+struct:ChessMove
 vdt:ChessMove move
+endstruct
+
+struct:RegisterLocation
+int32 location
+endstruct
+
+struct:checkMove
+vdt:string moveString
+endstruct
+
+struct:chessPosition
+vdt:string position
 endstruct

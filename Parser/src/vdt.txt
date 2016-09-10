@@ -3,3 +3,7 @@ uint64 move
 uint16 figureType
 uint16 captureType
 endstruct
+
+struct:string
+array:uint8 chars
+endstruct

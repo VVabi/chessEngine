@@ -58,9 +58,9 @@ public class Structure{
     public String toJavaClass(HashMap<String,String> typeHash, HashMap<String,Integer> typeSizes){
         String javaclass;
         if(!vdtFlag) {
-            javaclass = "package messages;\nimport VDT.*;\npublic class " + name + " extends message{\n\tpublic static final int unique_id=MessageIDs." + name + "_unique_id;\n";
+            javaclass = "package communication.messages;\nimport communication.VDT.*;\npublic class " + name + " extends message{\n\tpublic static final int unique_id=MessageIDs." + name + "_unique_id;\n";
         }else{
-            javaclass = "package VDT;\nimport messages.*;\npublic class " + name + " extends coreVDTType{\n\tpublic static final int unique_id=VdtIDs." + name + "_unique_id;\n";
+            javaclass = "package communication.VDT;\nimport communication.messages.*;\npublic class " + name + " extends coreVDTType{\n\tpublic static final int unique_id=VdtIDs." + name + "_unique_id;\n";
         }
 
         javaclass = javaclass + "\tpublic int getUniqueId(){ return unique_id;}\n";
@@ -352,6 +352,9 @@ public class Structure{
                     else if (type.equals("double")) {
                         ret = ret + "\t\t\ttypeConv.double_to_byte(" + current_name + "[i],mem," + size_counter + "+offset_correction);\n";
                         ret = ret + "\t\t\toffset_correction = offset_correction+8;\n";
+                    }  else if (type.equals("long")) {
+                        ret = ret + "\t\t\ttypeConv.long_to_byte(" + current_name + "[i],mem," + size_counter + "+offset_correction);\n";
+                        ret = ret + "\t\t\toffset_correction = offset_correction+8;\n";
                     }
                     ret = ret + "\t\t}\n";
                 } else {
@@ -364,6 +367,9 @@ public class Structure{
                     }
                     else if (type.equals("double")) {
                         ret = ret + "\t\ttypeConv.double_to_byte(" + current_name + ",mem," + size_counter + "+offset_correction);\n";
+                    }
+                    else if (type.equals("long")) {
+                        ret = ret + "\t\ttypeConv.long_to_byte(" + current_name + ",mem," + size_counter + "+offset_correction);\n";
                     }
 
                     size_counter = size_counter + size;
@@ -446,7 +452,10 @@ public class Structure{
                         ret = ret + "\t\t\t" + current_name + "[i] = typeConv.byte_to_double(mem," + size_counter + "+offset_correction);\n";
                         ret = ret + "\t\t\toffset_correction = offset_correction+8;\n";
                     }
-
+                    else if (type.equals("long")) {
+                        ret = ret + "\t\t\t" + current_name + "[i] = typeConv.byte_to_long(mem," + size_counter + "+offset_correction);\n";
+                        ret = ret + "\t\t\toffset_correction = offset_correction+8;\n";
+                    }
                 ret = ret + "\t\t}\n";
                 } else {
                     if (type.equals("int")) {
@@ -455,9 +464,10 @@ public class Structure{
                         ret = ret + "\t\t" + current_name + "=typeConv.byte_to_short(mem," + size_counter + "+offset_correction);\n";
                     } else if (type.equals("byte")) {
                         ret = ret + "\t\t" + current_name + "=mem[" + size_counter + "+offset_correction];\n";
-
                     } else if (type.equals("double")) {
                         ret = ret + "\t\t" + current_name + "=typeConv.byte_to_double(mem," + size_counter + "+offset_correction);\n";
+                    } else if (type.equals("long")) {
+                        ret = ret + "\t\t" + current_name + "=typeConv.byte_to_long(mem," + size_counter + "+offset_correction);\n";
                     }
                     size_counter = size_counter + size;
                 }

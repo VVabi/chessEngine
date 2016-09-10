@@ -22,7 +22,7 @@
 
 enum figureType {pawn=0, knight=1, bishop=2, rook=3, queen=4, king=5, none};
 enum moveType   {pawnMove=0, knightMove=1, bishopMove=2, rookMove=3, queenMove=4, kingMove=5,
-	castlingSmall, castlingBig, enpassant, promotionQueen, promotionRook, promotionKnight, promotionBishop};
+	castlingKingside, castlingQueenside, enpassant, promotionQueen, promotionRook, promotionKnight, promotionBishop};
 enum playerColor {white=0, black=1};
 
 struct chessMove{
@@ -36,10 +36,14 @@ struct chessPosition {
 	playerColor toMove;
 	vdt_vector<uint64_t> pieces;
 	vdt_vector<vdt_vector<uint64_t>> pieceTables;
+	uint8_t castlingRights; //TODO: This takes WAY too much space, use a uint8 and flags!
+	uint64_t enPassantField; //the field of the CAPTURED pawn
 #else
 	playerColor toMove;
 	uint64_t pieces[2];
 	uint64_t pieceTables[2][NUM_DIFFERENT_PIECES+1]; //the +1 is a dummy allowing simpler move execution.
+	uint8_t castlingRights;
+	uint64_t enPassantField; //the field of the CAPTURED pawn
 #endif
 };
 

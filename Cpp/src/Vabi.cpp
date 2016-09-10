@@ -19,6 +19,8 @@ using namespace std;
 #include <tr1/memory>
 #include <communication/Network/message.h>
 #include <communication/gen/VMPmessages.h>
+#include <communication/Network/network.h>
+
 #define ROOKE4 ((1UL << 25) | (1UL << 26) | (1UL << 27) | (1UL << 29) | (1UL << 30) | (1UL << 12) | (1UL << 20) | (1UL << 36) | (1UL << 44) | (1UL << 52))
 
 extern const uint64_t rookFieldTable[];
@@ -49,7 +51,45 @@ void outPutuint64(uint64_t num){
 
 int main() {
 
+	initialize_network("127.0.0.1", 9876);
+	std::string position = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnr";
+	chessPosition c = stringToChessPosition(position);
 
+	while(1){
+		receive_from_network();
+		auto checkMove = VMP_receive<VMPcheckMove>();
+
+		if(checkMove){
+			std::string nextMove = std::string((char*) checkMove->moveString.chars.data, 4);
+			vdt_vector<chessMove> moves = vdt_vector<chessMove>(100);
+			uint64_t mv = stringToMove(nextMove);
+			generateAllMoves(&moves, &c);
+
+			bool found = false;
+			chessMove m;
+			for(uint16_t ind=0; ind < moves.length; ind++) {
+				if(moves[ind].move == mv){
+					found = true;
+					m = moves[ind];
+				}
+			}
+
+			if(found){
+				std::cout << moveToString(m, c) << std::endl;
+				makeMove(&m, &c);
+				std::string newPosition = chessPositionToString(c);
+				fsarray<uint8_t> raw_str = fsarray<uint8_t>(newPosition.length());
+				memcpy(raw_str.data, newPosition.c_str(), 64);
+				VDTstring str = VDTstring(raw_str);
+				auto newPosMsg = std::unique_ptr<VMPchessPosition>(new VMPchessPosition(str));
+				send_msg(std::move(newPosMsg), 0);
+			} else {
+				std::cout << "Invalid move!" << std::endl;
+			}
+			moves.free_array();
+
+		}
+	}
 
 
 	/*ofstream o;

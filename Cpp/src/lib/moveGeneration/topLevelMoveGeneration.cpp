@@ -26,6 +26,8 @@ extern uint64_t bishopFieldTable[];
 extern uint64_t bishopMoveTables[64][512];
 extern uint64_t bishopMagicNumbers[];
 
+extern uint64_t castlingBlockers[2][2];
+
 inline void extractMoves(uint64_t currentPiece, const figureType figure, uint64_t potentialMoves, vdt_vector<chessMove>* vec, chessPosition* position) {
 	playerColor toMove = position->toMove;
 	while (potentialMoves != 0) {
@@ -189,7 +191,41 @@ void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 	}
 }
 
+#define KINGSIDE  0
+#define QUEENSIDE 1
+
+
+
+void generateCastling(vdt_vector<chessMove>* vec, chessPosition* position){
+	playerColor toMove = position->toMove;
+	uint8_t castlingMask = (toMove? 12: 3);
+	if(position->castlingRights & castlingMask){
+		uint64_t occupancy = (position->pieces[white]) | (position->pieces[black]);
+
+
+		uint8_t castlingOffset = (toMove? 2: 0);
+
+		if ((position->castlingRights & (1 << castlingOffset)) && ((occupancy & castlingBlockers[toMove][KINGSIDE]) == 0)){
+			chessMove mv;
+			mv.move = (toMove ? BLACKKINGSIDECASTLEMASK: WHITEKINGSIDECASTLEMASK);
+			mv.captureType = none;
+			mv.type        = castlingKingside;
+			vec->add(&mv);
+		}
+
+		if ((position->castlingRights & (1 << (castlingOffset+1))) && ((occupancy & castlingBlockers[toMove][QUEENSIDE]) == 0)){
+			chessMove mv;
+			mv.move = (toMove ? BLACKQUEENSIDECASTLEMASK: WHITEQUEENSIDECASTLEMASK);
+			mv.captureType = none;
+			mv.type        = castlingQueenside;
+			vec->add(&mv);
+		}
+	}
+}
+
+
 void generateAllMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
+	generateCastling(vec, position);
 	generateNonSliderMoves(vec, position, knightmovetables, knight);
 	generateRookMoves(vec, position, rook);
 	generateRookMoves(vec, position, queen);

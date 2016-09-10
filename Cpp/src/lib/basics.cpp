@@ -10,6 +10,7 @@
 #include <iostream>
 #include <string.h>
 #include <lib/bitfiddling.h>
+#include <lib/Defines/boardParts.hpp>
 
 static char figureNames[2][6] = {{'P', 'N', 'B', 'R', 'Q', 'K'},
 		{'p', 'n', 'b', 'r', 'q', 'k'},
@@ -190,6 +191,7 @@ chessPosition stringToChessPosition(std::string strposition) {
 
 
 	}
+	position.castlingRights = 15;
 	return position;
 }
 

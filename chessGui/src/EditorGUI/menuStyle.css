@@ -1,0 +1,83 @@
+.button{
+   
+    -fx-background-color:
+
+        linear-gradient(#9d9e9d 0%, #6b6a6b 20%, #343534 80%, #242424 100%);
+       
+    //-fx-background-insets: 0,1,4,5,6;
+    //-fx-background-radius: 9,8,5,4,3;
+    //-fx-padding: 5 10 5 10;
+    -fx-font-family: "Helvetica";
+    -fx-font-size: 9px;
+    -fx-font-weight: bold;
+    -fx-text-fill: lightgray;
+    -fx-effect: dropshadow( three-pass-box , rgba(255,255,255,0.2) , 1, 0.0 , 0 , 1);
+ 
+}
+
+.button:hover {
+  -fx-background-color: linear-gradient(#ffffff 0%, coral 100%);
+}
+
+#background{
+    -fx-background-color: linear-gradient(to bottom right, #9d9e9d 0%, #242424 100%);
+    -fx-background-repeat: stretch;   
+    -fx-background-position: center center;
+    
+}
+
+.menu-bar{
+    -fx-background-color: linear-gradient(#9d9e9d 0%, #242424 100%); 
+    
+}
+
+.menu-bar .label{
+     -fx-font-family: "Helvetica";
+    -fx-font-size: 9px;
+    -fx-font-weight: bold;
+    -fx-text-fill: lightgray; 
+}
+
+.menu:hover{
+    -fx-background-color: linear-gradient(#ffffff 0%, coral 100%);
+    
+}
+
+.menu-item:hover, menu-item:focused, menu-item:showing{
+    -fx-background-color: linear-gradient(#ffffff 0%, coral 100%);
+}
+
+
+
+
+ .menu-bar .menu-button:hover, .menu-bar .menu-button:focused, .menu-bar .menu-button:showing {
+        -fx-background: -fx-accent;
+        -fx-background-color: linear-gradient(#ffffff 0%, coral 100%);;
+        -fx-text-fill: -fx-selection-bar-text;
+    }
+
+.menu{
+    -fx-font-family: "Helvetica";
+    -fx-font-size: 9px;
+    -fx-font-weight: bold;
+    -fx-text-fill: lightgray;
+}
+
+.context-menu {
+    -fx-skin: "com.sun.javafx.scene.control.skin.ContextMenuSkin";
+    -fx-background-color: linear-gradient(#9d9e9d 0%, #242424 100%);
+}
+
+.menu-item{
+    -fx-font-family: "Helvetica";
+    -fx-font-size: 9px;
+    -fx-font-weight: bold;
+    -fx-text-fill: lightgray;
+    
+}
+
+#rect{ 
+    -fx-background-color: linear-gradient(to bottom right, #FFB536 0%, #EF6060 100%);
+    -fx-background-repeat: stretch;   
+    -fx-background-position: center center;
+}

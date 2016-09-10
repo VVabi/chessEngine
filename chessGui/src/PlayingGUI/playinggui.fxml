@@ -1,0 +1,82 @@
+
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import ChessBoard.ChessBoard?>
+
+
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+<VBox fx:controller="PlayingGUI.PlayingController"
+        xmlns:fx="http://javafx.com/fxml" spacing="20">
+    <padding><Insets top="0" right="0" bottom="0" left="0"/></padding>
+
+    <MenuBar fx:id="menuBar">
+        <menus>
+            <Menu text="File">
+                <items>
+                    <MenuItem text="New"/>
+                    <MenuItem text="Open"/>
+                    <MenuItem text="Save"/>
+                    <MenuItem text="Save As"/>
+                    <SeparatorMenuItem  />
+                    <MenuItem text="Exit"/>
+                </items>
+            </Menu>
+            <Menu text="Edit">
+                <items>
+                    <MenuItem text="Copy"/>
+                    <MenuItem text="Cut"/>
+                    <MenuItem text="Paste"/>
+                </items>
+            </Menu>
+            <Menu text="Help">
+                <items>
+                    <MenuItem text="Search" disable="true"/>
+                    <MenuItem text="Online Manual" visible="false"/>
+                    <SeparatorMenuItem />
+                    <MenuItem text="About" />
+                </items>
+            </Menu>
+        </menus>
+    </MenuBar>
+
+    <GridPane
+              xmlns:fx="http://javafx.com/fxml" alignment="center" hgap="10" vgap="10">
+        <padding><Insets top="25" right="0" bottom="10" left="0"/></padding>
+
+
+
+        <VBox
+              xmlns:fx="http://javafx.com/fxml" spacing="20">
+            <padding><Insets top="0" right="25" bottom="0" left="25"/></padding>
+            <Button text="New Game"  prefWidth="160" prefHeight="20" onAction="#handleNewGame"></Button>
+            <Button text="Undo move"  prefWidth="160" prefHeight="20" onAction="#handleUndo"></Button>
+            <Button text="Edit position"  prefWidth="160" prefHeight="20" onAction="#handleEdit"></Button>
+            <Button text="Change sides"  prefWidth="160" prefHeight="20" onAction="#handleChangeSides"></Button>
+            <Button text="Make computer move"  prefWidth="160" prefHeight="20" onAction="#handleForceMove"></Button>
+            <ImageView fx:id="waitImage">
+                <image>
+                    <Image url="@ajax_loader_metal_64.gif" />
+                </image>
+                <visible>
+                    false
+                </visible>
+            </ImageView>
+
+        </VBox>
+
+        <ChessBoard fx:id="chessboard" onAction="#handleClicked"
+                    GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+
+
+
+    </GridPane>
+
+
+
+</VBox>
