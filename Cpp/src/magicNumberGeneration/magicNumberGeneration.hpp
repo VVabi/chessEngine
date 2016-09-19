@@ -18,11 +18,11 @@ uint64_t generateBishopMagicNumber(uint16_t fieldIndex);
 std::string generateRookMagicNumbers();
 std::string generateBishopMagicNumbers();
 
-vdt_vector<vdt_vector<uint64_t>> generateRookMoveTables();
+vdt_vector<vdt_vector<uint64_t> > generateRookMoveTables();
 uint64_t generateRookMoveTable(uint16_t field, uint64_t blocker);
 std::string generateRookMoveTablesString();
 
-vdt_vector<vdt_vector<uint64_t>> generateBishopMoveTables();
+vdt_vector<vdt_vector<uint64_t> > generateBishopMoveTables();
 uint64_t generateBishopMoveTable(uint16_t field, uint64_t blocker);
 std::string generateBishopMoveTablesString();
 #endif /* MAGICNUMBERGENERATION_MAGICNUMBERGENERATION_HPP_ */

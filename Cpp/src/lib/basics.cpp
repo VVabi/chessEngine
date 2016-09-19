@@ -127,6 +127,9 @@ void zeroInitPosition(chessPosition* position) {
 	position->figureEval    = 0;
 #else
 	memset(position, 0, sizeof(chessPosition));
+	position->madeMoves = vdt_vector<chessMove>(150);
+	position->castlingAndEpStack = vdt_vector<uint16_t>(150);
+	std::cout << "Initializing board..." << std::endl;
 #endif
 
 

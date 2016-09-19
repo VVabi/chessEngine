@@ -74,8 +74,8 @@ uint64_t generateBishopMoveTable(uint16_t field, uint64_t blocker){
 	return bishopMoveTable;
 }
 
- vdt_vector<vdt_vector<uint64_t>> generateBishopMoveTables(){
-	 vdt_vector<vdt_vector<uint64_t>> ret = vdt_vector<vdt_vector<uint64_t>>(64);
+ vdt_vector<vdt_vector<uint64_t> > generateBishopMoveTables(){
+	 vdt_vector<vdt_vector<uint64_t> > ret = vdt_vector<vdt_vector<uint64_t> >(64);
 	for(uint16_t field=0; field < 64; field++) {
 		uint64_t magicNumber = bishopMagicNumbers[field];
 		vdt_vector<uint64_t> fieldMoveTables = vdt_vector<uint64_t>(512);
@@ -109,7 +109,7 @@ uint64_t generateBishopMoveTable(uint16_t field, uint64_t blocker){
 }
 
  std::string generateBishopMoveTablesString(){
- 	vdt_vector<vdt_vector<uint64_t>> vec =  generateBishopMoveTables();
+ 	vdt_vector<vdt_vector<uint64_t> > vec =  generateBishopMoveTables();
 
  	std::stringstream ss;
  	ss << std::hex;

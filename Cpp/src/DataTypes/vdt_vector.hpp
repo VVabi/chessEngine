@@ -28,6 +28,12 @@ template<typename T> class vdt_vector{
 			}
 		}
 
+		vdt_vector(T* buffer, uint32_t len){
+			length = 0;
+			allocated_length = len;
+			data = buffer;
+		}
+
 		T &operator[](uint32_t i){
 			if(i > length){
 				std::cout << "vector index out ouf bounds" << std::endl;

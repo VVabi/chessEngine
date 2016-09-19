@@ -1,0 +1,275 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  ns/call  ns/call  name    
+ 24.50      4.77     4.77 124120396    38.44    38.44  generatePawnMoves(vdt_vector<chessMove>*, chessPosition*)
+ 20.39      8.74     3.97 248240792    16.00    16.00  generateBishopMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
+ 19.37     12.51     3.77 248240792    15.19    15.19  generateNonSliderMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType)
+ 14.56     15.35     2.84 248240792    11.42    11.42  generateRookMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
+  6.27     16.57     1.22 125037154     9.76     9.76  makeMove(chessMove*, chessPosition*)
+  4.52     17.45     0.88                             std::__cxx11::_List_base<std::unique_ptr<raw_message, std::default_delete<raw_message> >, std::allocator<std::unique_ptr<raw_message, std::default_delete<raw_message> > > >::_M_clear()
+  4.39     18.30     0.86 125037154     6.84     6.84  undoMove(chessPosition*)
+  2.90     18.87     0.57 125037154     4.52     4.52  isFieldAttacked(chessPosition*, playerColor, unsigned short)
+  2.77     19.41     0.54 124120396     4.35    89.57  generateAllMoves(vdt_vector<chessMove>*, chessPosition*)
+  0.21     19.45     0.04                             generateRookReachableFields[abi:cxx11]()
+  0.13     19.47     0.03                             calcPieceTableValue(chessPosition*)
+  0.00     19.47     0.00        2     0.00     0.00  _GLOBAL__sub_I__Z13getRandUint64v
+  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z12outPutuint64m
+  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z12testMakeMovev
+  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z15getZeroPositionB5cxx11v
+  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z15isFieldAttackedP13chessPosition11playerColort
+  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z17generateRookMovesP10vdt_vectorI9chessMoveEP13chessPosition10figureType
+  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z18initialize_networkPKci
+  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z19calcPieceTableValueP13chessPosition
+  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z20calcFigureEvaluationP13chessPosition
+  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z21chessPositionToStringB5cxx1113chessPosition
+  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z23generateBishopMoveTabletm
+  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z27generateRookReachableFieldsB5cxx11v
+  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z28generateRookMoveTablesStringB5cxx11v
+  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z29generateBishopReachableFieldsB5cxx11v
+  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z8makeMoveP9chessMoveP13chessPosition
+  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN13ClientHandlerD2Ev
+  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN6SocketC2EPKci
+  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN9VMPServer11get_messageEj
+  0.00     19.47     0.00        1     0.00     0.00  zeroInitPosition(chessPosition*)
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+ seconds   for by this function and those listed above it.
+
+ self      the number of seconds accounted for by this
+seconds    function alone.  This is the major sort for this
+           listing.
+
+calls      the number of times this function was invoked, if
+           this function is profiled, else blank.
+
+ self      the average number of milliseconds spent in this
+ms/call    function per call, if this function is profiled,
+	   else blank.
+
+ total     the average number of milliseconds spent in this
+ms/call    function and its descendents per call, if this
+	   function is profiled, else blank.
+
+name       the name of the function.  This is the minor sort
+           for this listing. The index shows the location of
+	   the function in the gprof listing. If the index is
+	   in parenthesis it shows where it would appear in
+	   the gprof listing if it were to be printed.
+
+Copyright (C) 2012-2015 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+		     Call graph (explanation follows)
+
+
+granularity: each sample hit covers 2 byte(s) for 0.05% of 19.47 seconds
+
+index % time    self  children    called     name
+                             124120395             std::__cxx11::_List_base<std::unique_ptr<raw_message, std::default_delete<raw_message> >, std::allocator<std::unique_ptr<raw_message, std::default_delete<raw_message> > > >::_M_clear() [1]
+[1]     99.7    0.88   18.53       0+124120395 std::__cxx11::_List_base<std::unique_ptr<raw_message, std::default_delete<raw_message> >, std::allocator<std::unique_ptr<raw_message, std::default_delete<raw_message> > > >::_M_clear() [1]
+                0.54   10.58 124120396/124120396     generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [2]
+                4.77    0.00 124120396/124120396     generatePawnMoves(vdt_vector<chessMove>*, chessPosition*) [3]
+                1.22    0.00 125037154/125037154     makeMove(chessMove*, chessPosition*) [7]
+                0.86    0.00 125037154/125037154     undoMove(chessPosition*) [8]
+                0.57    0.00 125037154/125037154     isFieldAttacked(chessPosition*, playerColor, unsigned short) [9]
+                             124120395             std::__cxx11::_List_base<std::unique_ptr<raw_message, std::default_delete<raw_message> >, std::allocator<std::unique_ptr<raw_message, std::default_delete<raw_message> > > >::_M_clear() [1]
+-----------------------------------------------
+                0.54   10.58 124120396/124120396     std::__cxx11::_List_base<std::unique_ptr<raw_message, std::default_delete<raw_message> >, std::allocator<std::unique_ptr<raw_message, std::default_delete<raw_message> > > >::_M_clear() [1]
+[2]     57.1    0.54   10.58 124120396         generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [2]
+                3.97    0.00 248240792/248240792     generateBishopMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [4]
+                3.77    0.00 248240792/248240792     generateNonSliderMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType) [5]
+                2.84    0.00 248240792/248240792     generateRookMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [6]
+-----------------------------------------------
+                4.77    0.00 124120396/124120396     std::__cxx11::_List_base<std::unique_ptr<raw_message, std::default_delete<raw_message> >, std::allocator<std::unique_ptr<raw_message, std::default_delete<raw_message> > > >::_M_clear() [1]
+[3]     24.5    4.77    0.00 124120396         generatePawnMoves(vdt_vector<chessMove>*, chessPosition*) [3]
+-----------------------------------------------
+                3.97    0.00 248240792/248240792     generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [2]
+[4]     20.4    3.97    0.00 248240792         generateBishopMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [4]
+-----------------------------------------------
+                3.77    0.00 248240792/248240792     generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [2]
+[5]     19.4    3.77    0.00 248240792         generateNonSliderMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType) [5]
+-----------------------------------------------
+                2.84    0.00 248240792/248240792     generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [2]
+[6]     14.6    2.84    0.00 248240792         generateRookMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [6]
+-----------------------------------------------
+                1.22    0.00 125037154/125037154     std::__cxx11::_List_base<std::unique_ptr<raw_message, std::default_delete<raw_message> >, std::allocator<std::unique_ptr<raw_message, std::default_delete<raw_message> > > >::_M_clear() [1]
+[7]      6.3    1.22    0.00 125037154         makeMove(chessMove*, chessPosition*) [7]
+-----------------------------------------------
+                0.86    0.00 125037154/125037154     std::__cxx11::_List_base<std::unique_ptr<raw_message, std::default_delete<raw_message> >, std::allocator<std::unique_ptr<raw_message, std::default_delete<raw_message> > > >::_M_clear() [1]
+[8]      4.4    0.86    0.00 125037154         undoMove(chessPosition*) [8]
+-----------------------------------------------
+                0.57    0.00 125037154/125037154     std::__cxx11::_List_base<std::unique_ptr<raw_message, std::default_delete<raw_message> >, std::allocator<std::unique_ptr<raw_message, std::default_delete<raw_message> > > >::_M_clear() [1]
+[9]      2.9    0.57    0.00 125037154         isFieldAttacked(chessPosition*, playerColor, unsigned short) [9]
+-----------------------------------------------
+                                                 <spontaneous>
+[10]     0.2    0.04    0.00                 generateRookReachableFields[abi:cxx11]() [10]
+-----------------------------------------------
+                                                 <spontaneous>
+[11]     0.1    0.03    0.00                 calcPieceTableValue(chessPosition*) [11]
+-----------------------------------------------
+                0.00    0.00       2/2           __libc_csu_init [94]
+[19]     0.0    0.00    0.00       2         _GLOBAL__sub_I__Z13getRandUint64v [19]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [94]
+[20]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z12outPutuint64m [20]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [94]
+[21]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z12testMakeMovev [21]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [94]
+[22]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z15getZeroPositionB5cxx11v [22]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [94]
+[23]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z15isFieldAttackedP13chessPosition11playerColort [23]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [94]
+[24]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z17generateRookMovesP10vdt_vectorI9chessMoveEP13chessPosition10figureType [24]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [94]
+[25]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z18initialize_networkPKci [25]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [94]
+[26]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z19calcPieceTableValueP13chessPosition [26]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [94]
+[27]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z20calcFigureEvaluationP13chessPosition [27]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [94]
+[28]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z21chessPositionToStringB5cxx1113chessPosition [28]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [94]
+[29]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z23generateBishopMoveTabletm [29]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [94]
+[30]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z27generateRookReachableFieldsB5cxx11v [30]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [94]
+[31]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z28generateRookMoveTablesStringB5cxx11v [31]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [94]
+[32]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z29generateBishopReachableFieldsB5cxx11v [32]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [94]
+[33]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z8makeMoveP9chessMoveP13chessPosition [33]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [94]
+[34]     0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN13ClientHandlerD2Ev [34]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [94]
+[35]     0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN6SocketC2EPKci [35]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [94]
+[36]     0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN9VMPServer11get_messageEj [36]
+-----------------------------------------------
+                0.00    0.00       1/1           stringToChessPosition(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [58]
+[37]     0.0    0.00    0.00       1         zeroInitPosition(chessPosition*) [37]
+-----------------------------------------------
+
+ This table describes the call tree of the program, and was sorted by
+ the total amount of time spent in each function and its children.
+
+ Each entry in this table consists of several lines.  The line with the
+ index number at the left hand margin lists the current function.
+ The lines above it list the functions that called this function,
+ and the lines below it list the functions this one called.
+ This line lists:
+     index	A unique number given to each element of the table.
+		Index numbers are sorted numerically.
+		The index number is printed next to every function name so
+		it is easier to look up where the function is in the table.
+
+     % time	This is the percentage of the `total' time that was spent
+		in this function and its children.  Note that due to
+		different viewpoints, functions excluded by options, etc,
+		these numbers will NOT add up to 100%.
+
+     self	This is the total amount of time spent in this function.
+
+     children	This is the total amount of time propagated into this
+		function by its children.
+
+     called	This is the number of times the function was called.
+		If the function called itself recursively, the number
+		only includes non-recursive calls, and is followed by
+		a `+' and the number of recursive calls.
+
+     name	The name of the current function.  The index number is
+		printed after it.  If the function is a member of a
+		cycle, the cycle number is printed between the
+		function's name and the index number.
+
+
+ For the function's parents, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the function into this parent.
+
+     children	This is the amount of time that was propagated from
+		the function's children into this parent.
+
+     called	This is the number of times this parent called the
+		function `/' the total number of times the function
+		was called.  Recursive calls to the function are not
+		included in the number after the `/'.
+
+     name	This is the name of the parent.  The parent's index
+		number is printed after it.  If the parent is a
+		member of a cycle, the cycle number is printed between
+		the name and the index number.
+
+ If the parents of the function cannot be determined, the word
+ `<spontaneous>' is printed in the `name' field, and all the other
+ fields are blank.
+
+ For the function's children, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the child into the function.
+
+     children	This is the amount of time that was propagated from the
+		child's children to the function.
+
+     called	This is the number of times the function called
+		this child `/' the total number of times the child
+		was called.  Recursive calls by the child are not
+		listed in the number after the `/'.
+
+     name	This is the name of the child.  The child's index
+		number is printed after it.  If the child is a
+		member of a cycle, the cycle number is printed
+		between the name and the index number.
+
+ If there are any cycles (circles) in the call graph, there is an
+ entry for the cycle-as-a-whole.  This entry shows who called the
+ cycle (as parents) and the members of the cycle (as children.)
+ The `+' recursive calls entry shows the number of function calls that
+ were internal to the cycle, and the calls entry for each member shows,
+ for that member, how many times it was called from other members of
+ the cycle.
+
+Copyright (C) 2012-2015 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+Index by function name
+
+  [20] _GLOBAL__sub_I__Z12outPutuint64m [29] _GLOBAL__sub_I__Z23generateBishopMoveTabletm [37] zeroInitPosition(chessPosition*)
+  [21] _GLOBAL__sub_I__Z12testMakeMovev [30] _GLOBAL__sub_I__Z27generateRookReachableFieldsB5cxx11v [3] generatePawnMoves(vdt_vector<chessMove>*, chessPosition*)
+  [19] _GLOBAL__sub_I__Z13getRandUint64v [31] _GLOBAL__sub_I__Z28generateRookMoveTablesStringB5cxx11v [6] generateRookMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
+  [22] _GLOBAL__sub_I__Z15getZeroPositionB5cxx11v [32] _GLOBAL__sub_I__Z29generateBishopReachableFieldsB5cxx11v [11] calcPieceTableValue(chessPosition*)
+  [23] _GLOBAL__sub_I__Z15isFieldAttackedP13chessPosition11playerColort [33] _GLOBAL__sub_I__Z8makeMoveP9chessMoveP13chessPosition [4] generateBishopMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
+  [24] _GLOBAL__sub_I__Z17generateRookMovesP10vdt_vectorI9chessMoveEP13chessPosition10figureType [34] _GLOBAL__sub_I__ZN13ClientHandlerD2Ev [5] generateNonSliderMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType)
+  [25] _GLOBAL__sub_I__Z18initialize_networkPKci [35] _GLOBAL__sub_I__ZN6SocketC2EPKci [10] generateRookReachableFields[abi:cxx11]()
+  [26] _GLOBAL__sub_I__Z19calcPieceTableValueP13chessPosition [36] _GLOBAL__sub_I__ZN9VMPServer11get_messageEj [7] makeMove(chessMove*, chessPosition*)
+  [27] _GLOBAL__sub_I__Z20calcFigureEvaluationP13chessPosition [9] isFieldAttacked(chessPosition*, playerColor, unsigned short) [8] undoMove(chessPosition*)
+  [28] _GLOBAL__sub_I__Z21chessPositionToStringB5cxx1113chessPosition [2] generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [1] std::__cxx11::_List_base<std::unique_ptr<raw_message, std::default_delete<raw_message> >, std::allocator<std::unique_ptr<raw_message, std::default_delete<raw_message> > > >::_M_clear()

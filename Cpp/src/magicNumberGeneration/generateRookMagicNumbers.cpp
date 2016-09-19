@@ -17,7 +17,7 @@ extern const uint64_t rookMagicNumbers[];
 
 
 std::string generateRookMoveTablesString(){
-	vdt_vector<vdt_vector<uint64_t>> vec =  generateRookMoveTables();
+	vdt_vector<vdt_vector<uint64_t> > vec =  generateRookMoveTables();
 
 	std::stringstream ss;
 	ss << std::hex;
@@ -87,8 +87,8 @@ uint64_t generateRookMoveTable(uint16_t field, uint64_t blocker){
 	return rookMoveTable;
 }
 
- vdt_vector<vdt_vector<uint64_t>> generateRookMoveTables(){
-	 vdt_vector<vdt_vector<uint64_t>> ret = vdt_vector<vdt_vector<uint64_t>>(64);
+ vdt_vector<vdt_vector<uint64_t >> generateRookMoveTables(){
+	 vdt_vector<vdt_vector<uint64_t> > ret = vdt_vector<vdt_vector<uint64_t> >(64);
 	for(uint16_t field=0; field < 64; field++) {
 		uint64_t magicNumber = rookMagicNumbers[field];
 		vdt_vector<uint64_t> fieldMoveTables = vdt_vector<uint64_t>(4096);

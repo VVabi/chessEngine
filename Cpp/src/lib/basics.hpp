@@ -46,7 +46,7 @@ struct chessPosition {
 	uint8_t enPassantField; //the field of the CAPTURED pawn
 	int16_t figureEval;
 	int16_t pieceTableEval;
-	uint64_t zobristHash;
+	//uint64_t zobristHash;
 	vdt_vector<chessMove> madeMoves;
 	vdt_vector<uint16_t> castlingAndEpStack;
 };
