@@ -59,6 +59,11 @@ template<typename T> class vdt_vector{
 			length++;
 		}
 
+		T pop(){
+			length = (length > 0 ? length-1:length);
+			return data[length];
+		}
+
 		void free_array(){
 			if(data != NULL){
 				delete[] data;

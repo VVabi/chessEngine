@@ -20,31 +20,35 @@
 #define FILE(x) (x & 7)
 #define ROW(x)  (x >> 3)
 
-enum figureType {pawn=0, knight=1, bishop=2, rook=3, queen=4, king=5, none};
-enum moveType   {pawnMove=0, knightMove=1, bishopMove=2, rookMove=3, queenMove=4, kingMove=5,
+enum figureType: uint16_t {pawn=0, knight=1, bishop=2, rook=3, queen=4, king=5, none};
+enum moveType: uint16_t   {pawnMove=0, knightMove=1, bishopMove=2, rookMove=3, queenMove=4, kingMove=5,
 	castlingKingside, castlingQueenside, enpassant, promotionQueen, promotionRook, promotionKnight, promotionBishop};
-enum playerColor {white=0, black=1};
+enum playerColor: uint16_t {white=0, black=1};
 
 struct chessMove{
 	uint64_t move;
+	uint16_t sourceField;
+	uint16_t targetField;
 	moveType type;
 	figureType captureType;
 };
 
 struct chessPosition {
 #ifdef DEBUG
-	playerColor toMove;
 	vdt_vector<uint64_t> pieces;
 	vdt_vector<vdt_vector<uint64_t>> pieceTables;
-	uint8_t castlingRights; //TODO: This takes WAY too much space, use a uint8 and flags!
-	uint64_t enPassantField; //the field of the CAPTURED pawn
 #else
-	playerColor toMove;
 	uint64_t pieces[2];
 	uint64_t pieceTables[2][NUM_DIFFERENT_PIECES+1]; //the +1 is a dummy allowing simpler move execution.
-	uint8_t castlingRights;
-	uint64_t enPassantField; //the field of the CAPTURED pawn
 #endif
+	playerColor toMove;
+	uint8_t castlingRights;
+	uint8_t enPassantField; //the field of the CAPTURED pawn
+	int16_t figureEval;
+	int16_t pieceTableEval;
+	uint64_t zobristHash;
+	vdt_vector<chessMove> madeMoves;
+	vdt_vector<uint16_t> castlingAndEpStack;
 };
 
 std::string chessPositionToString(chessPosition position);

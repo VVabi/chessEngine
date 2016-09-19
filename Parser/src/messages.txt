@@ -13,3 +13,6 @@ endstruct
 struct:chessPosition
 vdt:string position
 endstruct
+
+struct:undoMove
+endstruct

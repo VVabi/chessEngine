@@ -123,7 +123,7 @@ testResult testUndoMove() {
 			move.type 		 = (moveType) getFigureTypeFromChar(piece);
 			move.captureType = none;
 			makeMove(&move, &pos);
-			undoMove(&move, &pos);
+			undoMove(&pos);
 			std::string newPosition = chessPositionToString(pos);
 
 
@@ -158,7 +158,7 @@ testResult testUndoMove() {
 			move.type 		 = (moveType) getFigureTypeFromChar(piece);
 			move.captureType = getFigureTypeFromChar(capturePiece);
 			makeMove(&move, &pos);
-			undoMove(&move, &pos);
+			undoMove(&pos);
 			std::string newPosition = chessPositionToString(pos);
 
 

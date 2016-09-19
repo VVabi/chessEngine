@@ -9,6 +9,7 @@ import core.PlayingEventInterface;
 import core.events.CheckMoveEvent;
 import core.events.NewPositionEvent;
 import core.events.TurnBoardEvent;
+import core.events.UndoMoveEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
@@ -78,13 +79,8 @@ public class PlayingController {
 
     @FXML
     public void handleUndo(){
+        eventInterface.addEngineEvent(new UndoMoveEvent());
 
-       /* if(new_position != null){
-            chessboard.setPosition(new_position.substring(0,64));
-            sidetomove = new_position.charAt(64);
-
-
-        }*/
     }
 
     @FXML

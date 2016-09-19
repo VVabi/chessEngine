@@ -9,7 +9,7 @@
 #define LIB_MOVEMAKING_MOVEMAKING_HPP_
 
 void makeMove(chessMove* move, chessPosition* position);
-void undoMove(chessMove* move, chessPosition* position);
+void undoMove(chessPosition* position);
 
 
 #endif /* LIB_MOVEMAKING_MOVEMAKING_HPP_ */

@@ -3,12 +3,10 @@ package core;
 import PlayingGUI.PlayingGUI;
 import communication.VDT.VDTstring;
 import communication.VMPServer.VMPServer;
-import communication.messages.MessageIDs;
-import communication.messages.VMPcheckMove;
-import communication.messages.VMPchessPosition;
-import communication.messages.message;
+import communication.messages.*;
 import core.events.CheckMoveEvent;
 import core.events.NewPositionEvent;
+import core.events.UndoMoveEvent;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -86,6 +84,11 @@ public class Core {
                 VMPcheckMove mv = new VMPcheckMove(new VDTstring(ev.move.getBytes()));
                 server.send(mv, 0);
             }
+            else if(e instanceof UndoMoveEvent) {
+                VMPundoMove undo = new VMPundoMove();
+                server.send(undo, 0);
+            }
+
         }
         message m = server.getMessage(MessageIDs.VMPchessPosition_unique_id);
         if(m != null) {

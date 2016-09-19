@@ -28,7 +28,8 @@ extern uint64_t bishopMagicNumbers[];
 
 extern uint64_t castlingBlockers[2][2];
 
-inline void extractMoves(uint64_t currentPiece, const figureType figure, uint64_t potentialMoves, vdt_vector<chessMove>* vec, chessPosition* position) {
+inline void extractMoves(const uint64_t currentPiece, const figureType figure, uint64_t potentialMoves, vdt_vector<chessMove>* vec, chessPosition* position) {
+	uint16_t sourceField = findLSB(currentPiece);
 	playerColor toMove = position->toMove;
 	while (potentialMoves != 0) {
 		uint64_t nextMove = LOWESTBITONLY(potentialMoves);
@@ -44,6 +45,8 @@ inline void extractMoves(uint64_t currentPiece, const figureType figure, uint64_
 		chessMove move;
 		move.move = nextMove | currentPiece;
 		move.type = (moveType) figure;
+		move.sourceField = sourceField;
+		move.targetField = findLSB(nextMove);
 		move.captureType = captureType;
 		vec->add(&move);
 		potentialMoves = potentialMoves & (~nextMove);
@@ -84,8 +87,6 @@ void generateBishopMoves(vdt_vector<chessMove>* vec, chessPosition* position, co
 		extractMoves(nextPiece, figure, potentialMoves, vec, position);
 		pieces = pieces & (~nextPiece);
 	}
-
-
 }
 
 void generateNonSliderMoves(vdt_vector<chessMove>* vec, chessPosition* position, const uint64_t* moveTable, const figureType figure) {
@@ -117,6 +118,8 @@ void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 		move.move = target | source;
 		move.type = pawnMove;
 		move.captureType = none;
+		move.sourceField = findLSB(source);
+		move.targetField = findLSB(target);
 		vec->add(&move);
 		forward = forward & (~target);
 	}
@@ -134,6 +137,8 @@ void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 		move.move = target | source;
 		move.type = pawnMove;
 		move.captureType = none;
+		move.sourceField = findLSB(source);
+		move.targetField = findLSB(target);
 		vec->add(&move);
 		forward = forward & (~target);
 	}
@@ -160,6 +165,8 @@ void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 		move.move = target | source;
 		move.type = pawnMove;
 		move.captureType = captureType;
+		move.sourceField = findLSB(source);
+		move.targetField = findLSB(target);
 		vec->add(&move);
 		takesLeft		 	= takesLeft & (~target);
 	}
@@ -186,6 +193,8 @@ void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 		move.move = target | source;
 		move.type = pawnMove;
 		move.captureType = captureType;
+		move.sourceField = findLSB(source);
+		move.targetField = findLSB(target);
 		vec->add(&move);
 		takesRight		 	= takesRight & (~target);
 	}
@@ -210,6 +219,8 @@ void generateCastling(vdt_vector<chessMove>* vec, chessPosition* position){
 			mv.move = (toMove ? BLACKKINGSIDECASTLEMASK: WHITEKINGSIDECASTLEMASK);
 			mv.captureType = none;
 			mv.type        = castlingKingside;
+			mv.sourceField = (toMove ? 60: 4);
+			mv.targetField = (toMove ? 63: 7);
 			vec->add(&mv);
 		}
 
@@ -218,6 +229,8 @@ void generateCastling(vdt_vector<chessMove>* vec, chessPosition* position){
 			mv.move = (toMove ? BLACKQUEENSIDECASTLEMASK: WHITEQUEENSIDECASTLEMASK);
 			mv.captureType = none;
 			mv.type        = castlingQueenside;
+			mv.sourceField = (toMove ? 60: 4);
+			mv.targetField = (toMove ? 56: 0);
 			vec->add(&mv);
 		}
 	}
@@ -233,6 +246,21 @@ void generateAllMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 	generateBishopMoves(vec, position, queen);
 	generatePawnMoves(vec, position);
 	generateNonSliderMoves(vec, position, kingmovetables, king);
+
+#ifdef DEBUG
+	std::cout << "Checking moves..." << std::endl;
+
+	for(uint16_t ind = 0; ind < vec->length; ind++){
+		chessMove mv = (*vec)[ind];
+		if( mv.move != (BIT64(mv.sourceField) | BIT64(mv.targetField))) {
+			std::cout << "Move source/target is wrong..." << std::endl;
+
+		}
+
+	}
+
+
+#endif
 }
 
 

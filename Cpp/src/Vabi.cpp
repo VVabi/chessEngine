@@ -50,7 +50,6 @@ void outPutuint64(uint64_t num){
 }
 
 int main() {
-
 	initialize_network("127.0.0.1", 9876);
 	std::string position = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnr";
 	chessPosition c = stringToChessPosition(position);
@@ -87,7 +86,21 @@ int main() {
 				std::cout << "Invalid move!" << std::endl;
 			}
 			moves.free_array();
+			std::cout << "Figureeval " << c.figureEval << std::endl;
+			std::cout << "Piece table eval " << c.pieceTableEval << std::endl;
+		}
 
+		auto undo = VMP_receive<VMPundoMove>();
+
+		if (undo) {
+			std::cout << "Got undo event!" << std::endl;
+			undoMove(&c);
+			std::string newPosition = chessPositionToString(c);
+			fsarray<uint8_t> raw_str = fsarray<uint8_t>(newPosition.length());
+			memcpy(raw_str.data, newPosition.c_str(), 64);
+			VDTstring str = VDTstring(raw_str);
+			auto newPosMsg = std::unique_ptr<VMPchessPosition>(new VMPchessPosition(str));
+			send_msg(std::move(newPosMsg), 0);
 		}
 	}
 

@@ -120,8 +120,13 @@ void zeroInitPosition(chessPosition* position) {
 	position->pieceTables =  vdt_vector<vdt_vector<uint64_t>>(2);
 	position->pieceTables.add(&whiteTable);
 	position->pieceTables.add(&blackTable);
+	position->zobristHash    = 0;
+	position->enPassantField = 0;
+	position->madeMoves = vdt_vector<chessMove>(150);
+	position->castlingAndEpStack = vdt_vector<uint16_t>(150);
+	position->figureEval    = 0;
 #else
-	memset(&position, 0, sizeof(chessPosition));
+	memset(position, 0, sizeof(chessPosition));
 #endif
 
 
