@@ -26,6 +26,8 @@ extern uint64_t bishopMoveTables[64][512];
 extern uint64_t bishopMagicNumbers[];
 
 extern uint64_t castlingBlockers[2][2];
+extern uint64_t enPassantMoveTable[2][8];
+extern uint16_t enPassantTargetFields[2][8];
 
 inline void extractMoves(const uint64_t currentPiece, const figureType figure, uint64_t potentialMoves, vdt_vector<chessMove>* vec, chessPosition* position) {
 	uint16_t sourceField = findLSB(currentPiece);
@@ -235,6 +237,28 @@ void generateCastling(vdt_vector<chessMove>* vec, chessPosition* position){
 	}
 }
 
+static void generateEnPassant(vdt_vector<chessMove>* vec, chessPosition* position){
+
+	if(position->enPassantFile > 7){
+		return;
+	}
+
+	uint64_t mask = (enPassantMoveTable[position->toMove][position->enPassantFile]) & (position->pieceTables[position->toMove][pawn]);
+
+	while(mask) {
+		uint16_t source = popLSB(mask);
+		uint16_t target = enPassantTargetFields[position->toMove][position->enPassantFile];
+
+		chessMove mov;
+		mov.sourceField = source;
+		mov.targetField = target;
+		mov.move        = BIT64(target) | BIT64(source);
+		mov.captureType = pawn;
+		mov.type        = enpassant;
+		vec->add(&mov);
+	}
+}
+
 
 void generateAllMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 	generateCastling(vec, position);
@@ -245,6 +269,7 @@ void generateAllMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 	generateBishopMoves(vec, position, bishop);
 	generateBishopMoves(vec, position, queen);
 	generatePawnMoves(vec, position);
+	generateEnPassant(vec, position);
 
 
 #ifdef DEBUG

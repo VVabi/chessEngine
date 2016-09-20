@@ -43,7 +43,7 @@ struct chessPosition {
 #endif
 	playerColor toMove;
 	uint8_t castlingRights;
-	uint8_t enPassantField; //the field of the CAPTURED pawn
+	uint8_t enPassantFile; //the file of the CAPTURED pawn
 	int16_t figureEval;
 	int16_t pieceTableEval;
 	//uint64_t zobristHash;

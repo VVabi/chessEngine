@@ -15,4 +15,9 @@ vdt:string position
 endstruct
 
 struct:undoMove
+uint8 dummy
+endstruct
+
+struct:forceMove
+uint8 dummy
 endstruct

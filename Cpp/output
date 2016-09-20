@@ -3,36 +3,28 @@ Flat profile:
 Each sample counts as 0.01 seconds.
   %   cumulative   self              self     total           
  time   seconds   seconds    calls  ns/call  ns/call  name    
- 24.50      4.77     4.77 124120396    38.44    38.44  generatePawnMoves(vdt_vector<chessMove>*, chessPosition*)
- 20.39      8.74     3.97 248240792    16.00    16.00  generateBishopMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
- 19.37     12.51     3.77 248240792    15.19    15.19  generateNonSliderMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType)
- 14.56     15.35     2.84 248240792    11.42    11.42  generateRookMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
-  6.27     16.57     1.22 125037154     9.76     9.76  makeMove(chessMove*, chessPosition*)
-  4.52     17.45     0.88                             std::__cxx11::_List_base<std::unique_ptr<raw_message, std::default_delete<raw_message> >, std::allocator<std::unique_ptr<raw_message, std::default_delete<raw_message> > > >::_M_clear()
-  4.39     18.30     0.86 125037154     6.84     6.84  undoMove(chessPosition*)
-  2.90     18.87     0.57 125037154     4.52     4.52  isFieldAttacked(chessPosition*, playerColor, unsigned short)
-  2.77     19.41     0.54 124120396     4.35    89.57  generateAllMoves(vdt_vector<chessMove>*, chessPosition*)
-  0.21     19.45     0.04                             generateRookReachableFields[abi:cxx11]()
-  0.13     19.47     0.03                             calcPieceTableValue(chessPosition*)
-  0.00     19.47     0.00        2     0.00     0.00  _GLOBAL__sub_I__Z13getRandUint64v
-  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z12outPutuint64m
-  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z12testMakeMovev
-  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z15getZeroPositionB5cxx11v
-  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z15isFieldAttackedP13chessPosition11playerColort
-  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z17generateRookMovesP10vdt_vectorI9chessMoveEP13chessPosition10figureType
-  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z18initialize_networkPKci
-  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z19calcPieceTableValueP13chessPosition
-  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z20calcFigureEvaluationP13chessPosition
-  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z21chessPositionToStringB5cxx1113chessPosition
-  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z23generateBishopMoveTabletm
-  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z27generateRookReachableFieldsB5cxx11v
-  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z28generateRookMoveTablesStringB5cxx11v
-  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z29generateBishopReachableFieldsB5cxx11v
-  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z8makeMoveP9chessMoveP13chessPosition
-  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN13ClientHandlerD2Ev
-  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN6SocketC2EPKci
-  0.00     19.47     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN9VMPServer11get_messageEj
-  0.00     19.47     0.00        1     0.00     0.00  zeroInitPosition(chessPosition*)
+ 25.92      1.06     1.06 125049325     8.48     8.48  generateRookMagicNumbers[abi:cxx11]()
+ 25.43      2.10     1.04 145338177     7.16     7.16  generateRookReachableFields[abi:cxx11]()
+ 14.18      2.68     0.58 125049325     4.64     4.64  generatePawnMoves(vdt_vector<chessMove>*, chessPosition*)
+ 12.72      3.20     0.52                             Socket::Socket(char const*, int)
+  7.58      3.51     0.31 15216639    20.38    20.38  makeMove(chessMove*, chessPosition*)
+  6.11      3.76     0.25                             Socket::binary_read(unsigned char*, unsigned int)
+  3.91      3.92     0.16                             undoMove(chessPosition*)
+  1.71      3.99     0.07                             Socket::binary_write(unsigned char*, unsigned int)
+  1.22      4.04     0.05  5072213     9.86   103.56  generateNonSliderMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType)
+  0.73      4.07     0.03                             generateRookMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
+  0.49      4.09     0.02  5072213     3.94     3.94  generateBishopMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
+  0.00      4.09     0.00       20     0.00     0.00  calcPieceTableValue(chessPosition*)
+  0.00      4.09     0.00       10     0.00     0.00  _init
+  0.00      4.09     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z12testMakeMovev
+  0.00      4.09     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z15getZeroPositionB5cxx11v
+  0.00      4.09     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z17generateRookMovesP10vdt_vectorI9chessMoveEP13chessPosition10figureType
+  0.00      4.09     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z23generateBishopMoveTabletm
+  0.00      4.09     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z27generateRookReachableFieldsB5cxx11v
+  0.00      4.09     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z28generateRookMoveTablesStringB5cxx11v
+  0.00      4.09     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z29generateBishopReachableFieldsB5cxx11v
+  0.00      4.09     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z8makeMoveP9chessMoveP13chessPosition
+  0.00      4.09     0.00        1     0.00     0.00  main
 
  %         the percentage of the total running time of the
 time       program used by this function.
@@ -70,107 +62,90 @@ notice and this notice are preserved.
 		     Call graph (explanation follows)
 
 
-granularity: each sample hit covers 2 byte(s) for 0.05% of 19.47 seconds
+granularity: each sample hit covers 2 byte(s) for 0.24% of 4.09 seconds
 
 index % time    self  children    called     name
-                             124120395             std::__cxx11::_List_base<std::unique_ptr<raw_message, std::default_delete<raw_message> >, std::allocator<std::unique_ptr<raw_message, std::default_delete<raw_message> > > >::_M_clear() [1]
-[1]     99.7    0.88   18.53       0+124120395 std::__cxx11::_List_base<std::unique_ptr<raw_message, std::default_delete<raw_message> >, std::allocator<std::unique_ptr<raw_message, std::default_delete<raw_message> > > >::_M_clear() [1]
-                0.54   10.58 124120396/124120396     generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [2]
-                4.77    0.00 124120396/124120396     generatePawnMoves(vdt_vector<chessMove>*, chessPosition*) [3]
-                1.22    0.00 125037154/125037154     makeMove(chessMove*, chessPosition*) [7]
-                0.86    0.00 125037154/125037154     undoMove(chessPosition*) [8]
-                0.57    0.00 125037154/125037154     isFieldAttacked(chessPosition*, playerColor, unsigned short) [9]
-                             124120395             std::__cxx11::_List_base<std::unique_ptr<raw_message, std::default_delete<raw_message> >, std::allocator<std::unique_ptr<raw_message, std::default_delete<raw_message> > > >::_M_clear() [1]
------------------------------------------------
-                0.54   10.58 124120396/124120396     std::__cxx11::_List_base<std::unique_ptr<raw_message, std::default_delete<raw_message> >, std::allocator<std::unique_ptr<raw_message, std::default_delete<raw_message> > > >::_M_clear() [1]
-[2]     57.1    0.54   10.58 124120396         generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [2]
-                3.97    0.00 248240792/248240792     generateBishopMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [4]
-                3.77    0.00 248240792/248240792     generateNonSliderMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType) [5]
-                2.84    0.00 248240792/248240792     generateRookMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [6]
------------------------------------------------
-                4.77    0.00 124120396/124120396     std::__cxx11::_List_base<std::unique_ptr<raw_message, std::default_delete<raw_message> >, std::allocator<std::unique_ptr<raw_message, std::default_delete<raw_message> > > >::_M_clear() [1]
-[3]     24.5    4.77    0.00 124120396         generatePawnMoves(vdt_vector<chessMove>*, chessPosition*) [3]
------------------------------------------------
-                3.97    0.00 248240792/248240792     generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [2]
-[4]     20.4    3.97    0.00 248240792         generateBishopMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [4]
------------------------------------------------
-                3.77    0.00 248240792/248240792     generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [2]
-[5]     19.4    3.77    0.00 248240792         generateNonSliderMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType) [5]
------------------------------------------------
-                2.84    0.00 248240792/248240792     generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [2]
-[6]     14.6    2.84    0.00 248240792         generateRookMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [6]
------------------------------------------------
-                1.22    0.00 125037154/125037154     std::__cxx11::_List_base<std::unique_ptr<raw_message, std::default_delete<raw_message> >, std::allocator<std::unique_ptr<raw_message, std::default_delete<raw_message> > > >::_M_clear() [1]
-[7]      6.3    1.22    0.00 125037154         makeMove(chessMove*, chessPosition*) [7]
------------------------------------------------
-                0.86    0.00 125037154/125037154     std::__cxx11::_List_base<std::unique_ptr<raw_message, std::default_delete<raw_message> >, std::allocator<std::unique_ptr<raw_message, std::default_delete<raw_message> > > >::_M_clear() [1]
-[8]      4.4    0.86    0.00 125037154         undoMove(chessPosition*) [8]
------------------------------------------------
-                0.57    0.00 125037154/125037154     std::__cxx11::_List_base<std::unique_ptr<raw_message, std::default_delete<raw_message> >, std::allocator<std::unique_ptr<raw_message, std::default_delete<raw_message> > > >::_M_clear() [1]
-[9]      2.9    0.57    0.00 125037154         isFieldAttacked(chessPosition*, playerColor, unsigned short) [9]
+                             124132536             Socket::Socket(char const*, int) [1]
+[1]     47.3    0.52    1.41       0+124132536 Socket::Socket(char const*, int) [1]
+                0.89    0.00 124132536/145338177     generateRookReachableFields[abi:cxx11]() [4]
+                0.05    0.48 5072213/5072213     generateNonSliderMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType) [7]
+                             124132536             Socket::Socket(char const*, int) [1]
 -----------------------------------------------
                                                  <spontaneous>
-[10]     0.2    0.04    0.00                 generateRookReachableFields[abi:cxx11]() [10]
+[2]     32.0    0.25    1.06                 Socket::binary_read(unsigned char*, unsigned int) [2]
+                1.06    0.00 125049325/125049325     generateRookMagicNumbers[abi:cxx11]() [3]
+-----------------------------------------------
+                1.06    0.00 125049325/125049325     Socket::binary_read(unsigned char*, unsigned int) [2]
+[3]     25.9    1.06    0.00 125049325         generateRookMagicNumbers[abi:cxx11]() [3]
+-----------------------------------------------
+                0.01    0.00  916789/145338177     Socket::binary_write(unsigned char*, unsigned int) [5]
+                0.15    0.00 20288852/145338177     generateNonSliderMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType) [7]
+                0.89    0.00 124132536/145338177     Socket::Socket(char const*, int) [1]
+[4]     25.4    1.04    0.00 145338177         generateRookReachableFields[abi:cxx11]() [4]
 -----------------------------------------------
                                                  <spontaneous>
-[11]     0.1    0.03    0.00                 calcPieceTableValue(chessPosition*) [11]
+[5]     16.1    0.07    0.59                 Socket::binary_write(unsigned char*, unsigned int) [5]
+                0.58    0.00 125049325/125049325     generatePawnMoves(vdt_vector<chessMove>*, chessPosition*) [6]
+                0.01    0.00  916789/145338177     generateRookReachableFields[abi:cxx11]() [4]
+                0.00    0.00      20/20          calcPieceTableValue(chessPosition*) [19]
 -----------------------------------------------
-                0.00    0.00       2/2           __libc_csu_init [94]
-[19]     0.0    0.00    0.00       2         _GLOBAL__sub_I__Z13getRandUint64v [19]
+                0.58    0.00 125049325/125049325     Socket::binary_write(unsigned char*, unsigned int) [5]
+[6]     14.2    0.58    0.00 125049325         generatePawnMoves(vdt_vector<chessMove>*, chessPosition*) [6]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [94]
-[20]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z12outPutuint64m [20]
+                0.05    0.48 5072213/5072213     Socket::Socket(char const*, int) [1]
+[7]     12.8    0.05    0.48 5072213         generateNonSliderMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType) [7]
+                0.31    0.00 15216639/15216639     makeMove(chessMove*, chessPosition*) [8]
+                0.15    0.00 20288852/145338177     generateRookReachableFields[abi:cxx11]() [4]
+                0.02    0.00 5072213/5072213     generateBishopMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [11]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [94]
+                0.31    0.00 15216639/15216639     generateNonSliderMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType) [7]
+[8]      7.6    0.31    0.00 15216639         makeMove(chessMove*, chessPosition*) [8]
+-----------------------------------------------
+                                                 <spontaneous>
+[9]      3.9    0.16    0.00                 undoMove(chessPosition*) [9]
+-----------------------------------------------
+                                                 <spontaneous>
+[10]     0.7    0.03    0.00                 generateRookMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [10]
+-----------------------------------------------
+                0.02    0.00 5072213/5072213     generateNonSliderMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType) [7]
+[11]     0.5    0.02    0.00 5072213         generateBishopMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [11]
+-----------------------------------------------
+                0.00    0.00       1/1           VMPServer::send_message(std::unique_ptr<message, std::default_delete<message> >, unsigned int) [120]
+[12]     0.0    0.00    0.00       1         main [12]
+-----------------------------------------------
+                0.00    0.00      20/20          Socket::binary_write(unsigned char*, unsigned int) [5]
+[19]     0.0    0.00    0.00      20         calcPieceTableValue(chessPosition*) [19]
+-----------------------------------------------
+                0.00    0.00      10/10          VMPServer::send_message(std::unique_ptr<message, std::default_delete<message> >, unsigned int) [120]
+[20]     0.0    0.00    0.00      10         _init [20]
+-----------------------------------------------
+                0.00    0.00       1/1           VMPServer::send_message(std::unique_ptr<message, std::default_delete<message> >, unsigned int) [120]
 [21]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z12testMakeMovev [21]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [94]
+                0.00    0.00       1/1           VMPServer::send_message(std::unique_ptr<message, std::default_delete<message> >, unsigned int) [120]
 [22]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z15getZeroPositionB5cxx11v [22]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [94]
-[23]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z15isFieldAttackedP13chessPosition11playerColort [23]
+                0.00    0.00       1/1           VMPServer::send_message(std::unique_ptr<message, std::default_delete<message> >, unsigned int) [120]
+[23]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z17generateRookMovesP10vdt_vectorI9chessMoveEP13chessPosition10figureType [23]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [94]
-[24]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z17generateRookMovesP10vdt_vectorI9chessMoveEP13chessPosition10figureType [24]
+                0.00    0.00       1/1           VMPServer::send_message(std::unique_ptr<message, std::default_delete<message> >, unsigned int) [120]
+[24]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z23generateBishopMoveTabletm [24]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [94]
-[25]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z18initialize_networkPKci [25]
+                0.00    0.00       1/1           VMPServer::send_message(std::unique_ptr<message, std::default_delete<message> >, unsigned int) [120]
+[25]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z27generateRookReachableFieldsB5cxx11v [25]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [94]
-[26]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z19calcPieceTableValueP13chessPosition [26]
+                0.00    0.00       1/1           VMPServer::send_message(std::unique_ptr<message, std::default_delete<message> >, unsigned int) [120]
+[26]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z28generateRookMoveTablesStringB5cxx11v [26]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [94]
-[27]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z20calcFigureEvaluationP13chessPosition [27]
+                0.00    0.00       1/1           VMPServer::send_message(std::unique_ptr<message, std::default_delete<message> >, unsigned int) [120]
+[27]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z29generateBishopReachableFieldsB5cxx11v [27]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [94]
-[28]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z21chessPositionToStringB5cxx1113chessPosition [28]
+                0.00    0.00       1/1           VMPServer::send_message(std::unique_ptr<message, std::default_delete<message> >, unsigned int) [120]
+[28]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z8makeMoveP9chessMoveP13chessPosition [28]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [94]
-[29]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z23generateBishopMoveTabletm [29]
------------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [94]
-[30]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z27generateRookReachableFieldsB5cxx11v [30]
------------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [94]
-[31]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z28generateRookMoveTablesStringB5cxx11v [31]
------------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [94]
-[32]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z29generateBishopReachableFieldsB5cxx11v [32]
------------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [94]
-[33]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z8makeMoveP9chessMoveP13chessPosition [33]
------------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [94]
-[34]     0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN13ClientHandlerD2Ev [34]
------------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [94]
-[35]     0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN6SocketC2EPKci [35]
------------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [94]
-[36]     0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN9VMPServer11get_messageEj [36]
------------------------------------------------
-                0.00    0.00       1/1           stringToChessPosition(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [58]
-[37]     0.0    0.00    0.00       1         zeroInitPosition(chessPosition*) [37]
+                                   1             generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [56]
+[56]     0.0    0.00    0.00       0+1       generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [56]
+                                   1             generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [56]
 -----------------------------------------------
 
  This table describes the call tree of the program, and was sorted by
@@ -263,13 +238,11 @@ notice and this notice are preserved.
 
 Index by function name
 
-  [20] _GLOBAL__sub_I__Z12outPutuint64m [29] _GLOBAL__sub_I__Z23generateBishopMoveTabletm [37] zeroInitPosition(chessPosition*)
-  [21] _GLOBAL__sub_I__Z12testMakeMovev [30] _GLOBAL__sub_I__Z27generateRookReachableFieldsB5cxx11v [3] generatePawnMoves(vdt_vector<chessMove>*, chessPosition*)
-  [19] _GLOBAL__sub_I__Z13getRandUint64v [31] _GLOBAL__sub_I__Z28generateRookMoveTablesStringB5cxx11v [6] generateRookMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
-  [22] _GLOBAL__sub_I__Z15getZeroPositionB5cxx11v [32] _GLOBAL__sub_I__Z29generateBishopReachableFieldsB5cxx11v [11] calcPieceTableValue(chessPosition*)
-  [23] _GLOBAL__sub_I__Z15isFieldAttackedP13chessPosition11playerColort [33] _GLOBAL__sub_I__Z8makeMoveP9chessMoveP13chessPosition [4] generateBishopMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
-  [24] _GLOBAL__sub_I__Z17generateRookMovesP10vdt_vectorI9chessMoveEP13chessPosition10figureType [34] _GLOBAL__sub_I__ZN13ClientHandlerD2Ev [5] generateNonSliderMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType)
-  [25] _GLOBAL__sub_I__Z18initialize_networkPKci [35] _GLOBAL__sub_I__ZN6SocketC2EPKci [10] generateRookReachableFields[abi:cxx11]()
-  [26] _GLOBAL__sub_I__Z19calcPieceTableValueP13chessPosition [36] _GLOBAL__sub_I__ZN9VMPServer11get_messageEj [7] makeMove(chessMove*, chessPosition*)
-  [27] _GLOBAL__sub_I__Z20calcFigureEvaluationP13chessPosition [9] isFieldAttacked(chessPosition*, playerColor, unsigned short) [8] undoMove(chessPosition*)
-  [28] _GLOBAL__sub_I__Z21chessPositionToStringB5cxx1113chessPosition [2] generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [1] std::__cxx11::_List_base<std::unique_ptr<raw_message, std::default_delete<raw_message> >, std::allocator<std::unique_ptr<raw_message, std::default_delete<raw_message> > > >::_M_clear()
+  [21] _GLOBAL__sub_I__Z12testMakeMovev [6] generatePawnMoves(vdt_vector<chessMove>*, chessPosition*) [9] undoMove(chessPosition*)
+  [22] _GLOBAL__sub_I__Z15getZeroPositionB5cxx11v [10] generateRookMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [2] Socket::binary_read(unsigned char*, unsigned int)
+  [23] _GLOBAL__sub_I__Z17generateRookMovesP10vdt_vectorI9chessMoveEP13chessPosition10figureType [19] calcPieceTableValue(chessPosition*) [5] Socket::binary_write(unsigned char*, unsigned int)
+  [24] _GLOBAL__sub_I__Z23generateBishopMoveTabletm [11] generateBishopMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [1] Socket::Socket(char const*, int)
+  [25] _GLOBAL__sub_I__Z27generateRookReachableFieldsB5cxx11v [7] generateNonSliderMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType) [20] _init
+  [26] _GLOBAL__sub_I__Z28generateRookMoveTablesStringB5cxx11v [3] generateRookMagicNumbers[abi:cxx11]() [12] main
+  [27] _GLOBAL__sub_I__Z29generateBishopReachableFieldsB5cxx11v [4] generateRookReachableFields[abi:cxx11]()
+  [28] _GLOBAL__sub_I__Z8makeMoveP9chessMoveP13chessPosition [8] makeMove(chessMove*, chessPosition*)

@@ -25,6 +25,7 @@ using namespace std;
 #include <sys/time.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <Search/search.hpp>
 
 void outPutuint64(uint64_t num){
 
@@ -60,19 +61,9 @@ uint32_t perftNodes(chessPosition* c, uint16_t depth){
 	uint32_t nodes = 0;
 	vdt_vector<chessMove> moves = moveVectors[depth];
 	generateAllMoves(&moves, c);
-	if(depth == 1){
-		return moves.length;
-	}
 	bool isMate = true;
 	for(uint16_t ind=0; ind < moves.length; ind++){
 		if(moves[ind].captureType != none){
-			uint64_t opponentPieces = c->pieces[c->toMove];
-			if(!(moves[ind].move & opponentPieces)) {
-				std::cout << "GOTCHA!" << std::endl;
-				std::cout << moves[ind].captureType << std::endl;
-				std::cout << moves[ind].type << std::endl;
-			}
-
 			if(moves[ind].captureType == king){
 				std::cout << "Taking the king should be impossible" << std::endl;
 				uint16_t kingField = findLSB(c->pieceTables[1-c->toMove][king]);
@@ -81,6 +72,7 @@ uint32_t perftNodes(chessPosition* c, uint16_t depth){
 		}
 		makeMove(&moves[ind], c);
 		uint16_t kingField = findLSB(c->pieceTables[1-c->toMove][king]);
+		uint32_t additional_nodes = 0;
 		if(isFieldAttacked(c, c->toMove, kingField)){
 
 		} else {
@@ -88,9 +80,17 @@ uint32_t perftNodes(chessPosition* c, uint16_t depth){
 			if(moves[ind].captureType != none){
 				captures++;
 			}
-			nodes = nodes+perftNodes(c, depth-1);
+			additional_nodes = perftNodes(c, depth-1);
+			nodes = nodes+additional_nodes;
+
+
 		}
 		undoMove(c);
+		if(!isMate){
+			if(depth == 6) {
+				std::cout << moveToString(moves[ind], *c) << " : " << additional_nodes << std::endl;
+			}
+		}
 	}
 	if(isMate){
 		mates++;
@@ -100,7 +100,23 @@ uint32_t perftNodes(chessPosition* c, uint16_t depth){
 
 int main() {
 
-	for(uint16_t ind=0; ind < 10; ind++){
+	/*std::string position = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnr";
+	chessPosition c = stringToChessPosition(position);
+
+	chessMove bestMove;
+	int32_t eval = negamax(&c, 3, -100000, 100000, &bestMove);
+
+	std::cout << eval << std::endl;
+	std::cout << moveToString(bestMove, c) << std::endl;
+	std::string newPosition = chessPositionToString(c);
+	std::cout << newPosition << std::endl;
+	makeMove( &bestMove, &c);
+	eval = negamax(&c, 3, -100000, 100000, &bestMove);
+	std::cout << eval << std::endl;
+	std::cout << moveToString(bestMove, c) << std::endl;
+	newPosition = chessPositionToString(c);
+	std::cout << newPosition << std::endl;*/
+	/*for(uint16_t ind=0; ind < 10; ind++){
 		moveVectors[ind] = vdt_vector<chessMove>(buffer+100*ind, 100);
 	}
 	//std::string position = "R000K00RPPPBBPPP00N00Q0p0p00P000000PN000bn00pnp0p0ppqpb0r000k00r";
@@ -112,7 +128,7 @@ int main() {
 	long mtime, seconds, useconds;
 
 	gettimeofday(&start, NULL);
-	uint32_t val = perftNodes(&c, 7);
+	uint32_t val = perftNodes(&c, 5);
 	gettimeofday(&end, NULL);
 
 	seconds  = end.tv_sec  - start.tv_sec;
@@ -125,8 +141,8 @@ int main() {
 
 
 
-	return 0;
-	/*initialize_network("127.0.0.1", 9876);
+	return 0;*/
+	initialize_network("127.0.0.1", 9876);
 	std::string position = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnr";
 	chessPosition c = stringToChessPosition(position);
 
@@ -165,6 +181,29 @@ int main() {
 					VDTstring str = VDTstring(raw_str);
 					auto newPosMsg = std::unique_ptr<VMPchessPosition>(new VMPchessPosition(str));
 					send_msg(std::move(newPosMsg), 0);
+					chessMove bestMove;
+					resetNodes();
+					struct timeval start, end;
+					long mtime, seconds, useconds;
+					gettimeofday(&start, NULL);
+					int32_t eval = negamax(&c, 6, -100000, 100000, &bestMove);
+					gettimeofday(&end, NULL);
+
+					seconds  = end.tv_sec  - start.tv_sec;
+					useconds = end.tv_usec - start.tv_usec;
+
+					mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
+					uint32_t nodeCount = getNodes();
+					double nps = ((double) nodeCount)/((double) mtime)*1000.0;
+					std::cout << "Searched " <<  nodeCount << " positions in " << mtime << " for " << nps << " nodes per second" << std::endl;
+					std::cout << "Forced move " << moveToString(bestMove, c) << std::endl;
+					makeMove(&bestMove, &c);
+					std::string newPosition2 = chessPositionToString(c);
+					fsarray<uint8_t> raw_str2 = fsarray<uint8_t>(newPosition2.length());
+					memcpy(raw_str2.data, newPosition2.c_str(), 64);
+					VDTstring str2 = VDTstring(raw_str2);
+					auto newPosMsg2 = std::unique_ptr<VMPchessPosition>(new VMPchessPosition(str2));
+					send_msg(std::move(newPosMsg2), 0);
 				}
 			} else {
 				std::cout << "Invalid move!" << std::endl;
@@ -179,6 +218,22 @@ int main() {
 		if (undo) {
 			std::cout << "Got undo event!" << std::endl;
 			undoMove(&c);
+			std::string newPosition = chessPositionToString(c);
+			fsarray<uint8_t> raw_str = fsarray<uint8_t>(newPosition.length());
+			memcpy(raw_str.data, newPosition.c_str(), 64);
+			VDTstring str = VDTstring(raw_str);
+			auto newPosMsg = std::unique_ptr<VMPchessPosition>(new VMPchessPosition(str));
+			send_msg(std::move(newPosMsg), 0);
+		}
+
+		auto forceMove =  VMP_receive<VMPforceMove>();
+
+		if(forceMove) {
+
+			chessMove bestMove;
+			int32_t eval = negamax(&c, 4, -100000, 100000, &bestMove);
+			std::cout << "Forced move " << moveToString(bestMove, c) << std::endl;
+			makeMove(&bestMove, &c);
 			std::string newPosition = chessPositionToString(c);
 			fsarray<uint8_t> raw_str = fsarray<uint8_t>(newPosition.length());
 			memcpy(raw_str.data, newPosition.c_str(), 64);

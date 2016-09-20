@@ -15,18 +15,21 @@ extern int16_t pieceTables[7][2][64];
 
 void makeMove(chessMove* move, chessPosition* position) {
 
-	uint16_t to_push = position->castlingRights | (((uint16_t) position->enPassantField) << 8);
+	uint16_t to_push = position->castlingRights | (((uint16_t) position->enPassantFile) << 8);
 	position->castlingAndEpStack.add(&to_push);
 	uint8_t castlingRights = position->castlingRights;
-	position->castlingRights = (move->move & WHITEKINGSIDECASTLEMASK  ? (castlingRights & 14):castlingRights);
-	position->castlingRights = (move->move & WHITEQUEENSIDECASTLEMASK ? (castlingRights & 13):castlingRights);
-	position->castlingRights = (move->move & BLACKKINGSIDECASTLEMASK  ? (castlingRights & 11):castlingRights);
-	position->castlingRights = (move->move & BLACKQUEENSIDECASTLEMASK ? (castlingRights &  7):castlingRights);
-
+	castlingRights = (move->move & WHITEKINGSIDECASTLEMASK  ? (castlingRights & 14):castlingRights);
+	castlingRights = (move->move & WHITEQUEENSIDECASTLEMASK ? (castlingRights & 13):castlingRights);
+	castlingRights = (move->move & BLACKKINGSIDECASTLEMASK  ? (castlingRights & 11):castlingRights);
+	castlingRights = (move->move & BLACKQUEENSIDECASTLEMASK ? (castlingRights &  7):castlingRights);
+	position->castlingRights = castlingRights;
 	position->figureEval     = position->figureEval+(1-2*position->toMove)*figureValues[move->captureType];
-
+	position->enPassantFile  = 8;
 	switch(move->type){
 		case pawnMove:
+			if(((move->targetField-move->sourceField) & 15) == 0) { //pawn went two ahead
+				position->enPassantFile = FILE(move->targetField);
+			}
 		case knightMove:
 		case bishopMove:
 		case rookMove:
@@ -39,8 +42,8 @@ void makeMove(chessMove* move, chessPosition* position) {
 			position->pieceTables[toMove][move->type] 			= position->pieceTables[toMove][move->type]^move->move;
 			position->pieceTables[1-toMove][move->captureType] 	= position->pieceTables[1-toMove][move->captureType] & (~move->move);
 
-			//position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*(pieceTables[move->type][toMove][move->targetField]-pieceTables[move->type][toMove][move->sourceField]);
-			//position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*pieceTables[move->captureType][1-toMove][move->targetField];
+			position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*(pieceTables[move->type][toMove][move->targetField]-pieceTables[move->type][toMove][move->sourceField]);
+			position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*pieceTables[move->captureType][1-toMove][move->targetField];
 			position->toMove = (playerColor) (1-position->toMove);
 			//TODO: add figure eval
 			//TODO: Add hash
@@ -56,12 +59,12 @@ void makeMove(chessMove* move, chessPosition* position) {
 				position->pieces[toMove] 		     = position->pieces[toMove]^(WHITEKINGSIDECASTLEOCCUPANCYCHANGE);
 				position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(WHITEKINGSIDECASTLEROOKMOVE);
 				position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(WHITEKINGSIDECASTLEKINGMOVE);
-				//position->pieceTableEval             = position->pieceTableEval-pieceTables[rook][white][7]+pieceTables[rook][white][5]-pieceTables[king][white][4]+pieceTables[king][white][6];
+				position->pieceTableEval             = position->pieceTableEval-pieceTables[rook][white][7]+pieceTables[rook][white][5]-pieceTables[king][white][4]+pieceTables[king][white][6];
 			} else {
 				position->pieces[toMove] 		     = position->pieces[toMove]^(BLACKKINGSIDECASTLEOCCUPANCYCHANGE);
 				position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(BLACKKINGSIDECASTLEROOKMOVE);
 				position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(BLACKKINGSIDECASTLEKINGMOVE);
-				//position->pieceTableEval             = position->pieceTableEval-(-pieceTables[rook][black][63]+pieceTables[rook][black][61]-pieceTables[king][black][60]+pieceTables[king][black][62]);
+				position->pieceTableEval             = position->pieceTableEval-(-pieceTables[rook][black][63]+pieceTables[rook][black][61]-pieceTables[king][black][60]+pieceTables[king][black][62]);
 			}
 			position->toMove = (playerColor) (1-position->toMove);
 			break;
@@ -73,17 +76,34 @@ void makeMove(chessMove* move, chessPosition* position) {
 				position->pieces[toMove] 		     = position->pieces[toMove]^(WHITEQUEENSIDECASTLEOCCUPANCYCHANGE);
 				position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(WHITEQUEENSIDECASTLEROOKMOVE);
 				position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(WHITEQUEENSIDECASTLEQUEENMOVE);
-				//position->pieceTableEval             = position->pieceTableEval-pieceTables[rook][white][0]+pieceTables[rook][white][3]-pieceTables[king][white][4]+pieceTables[king][white][2];
+				position->pieceTableEval             = position->pieceTableEval-pieceTables[rook][white][0]+pieceTables[rook][white][3]-pieceTables[king][white][4]+pieceTables[king][white][2];
 			} else {
 				position->pieces[toMove] 		     = position->pieces[toMove]^(BLACKQUEENSIDECASTLEOCCUPANCYCHANGE);
 				position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(BLACKQUEENSIDECASTLEROOKMOVE);
 				position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(BLACKQUEENSIDECASTLEQUEENMOVE);
-				//position->pieceTableEval             = position->pieceTableEval-(-pieceTables[rook][black][56]+pieceTables[rook][black][59]-pieceTables[king][black][60]+pieceTables[king][black][58]);
+				position->pieceTableEval             = position->pieceTableEval-(-pieceTables[rook][black][56]+pieceTables[rook][black][59]-pieceTables[king][black][60]+pieceTables[king][black][58]);
 			}
 			position->toMove = (playerColor) (1-position->toMove);
 			break;
 		}
+		case enpassant:
+		{
+			playerColor toMove 									= position->toMove;
+			position->pieces[toMove] 							= position->pieces[toMove]^move->move;
 
+			position->pieceTables[toMove][pawn] 			    = position->pieceTables[toMove][pawn]^move->move;
+			uint16_t shift = (toMove? move->targetField+8: move->targetField-8);
+			position->pieceTables[1-toMove][move->captureType] 	= position->pieceTables[1-toMove][pawn] ^ BIT64(shift);
+			position->pieces[1-toMove] 							= position->pieces[1-toMove] ^BIT64(shift);
+
+			position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*(pieceTables[pawn][toMove][move->targetField]-pieceTables[pawn][toMove][move->sourceField]);
+			position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*pieceTables[pawn][1-toMove][shift];
+			//TODO: add piecetable value for captured pawn
+
+			position->toMove = (playerColor) (1-position->toMove);
+
+			break;
+		}
 		default:
 			break;
 	}
@@ -92,7 +112,7 @@ void makeMove(chessMove* move, chessPosition* position) {
 
 	#ifdef DEBUG
 
-	/*int16_t eval = calcFigureEvaluation(position);
+	int16_t eval = calcFigureEvaluation(position);
 
 	if(eval != position->figureEval){
 		std::cout << "Figure evaluation is wrong after moveMake!" << std::endl;
@@ -102,7 +122,7 @@ void makeMove(chessMove* move, chessPosition* position) {
 
 	if(pieceTableEval != position->pieceTableEval){
 		std::cout << "Piece table evaluation is wrong after moveMake!" << std::endl;
-	}*/
+	}
 
 	#endif
 }
@@ -120,7 +140,7 @@ void undoMove(chessPosition* position) {
 	uint16_t flags = position->castlingAndEpStack.pop();
 	position->figureEval     = position->figureEval+(1-2*position->toMove)*figureValues[move.captureType];
 	position->castlingRights = flags & 0xFF;
-	position->enPassantField = ((flags >> 8)) & 0xFF;
+	position->enPassantFile = ((flags >> 8)) & 0xFF;
 
 
 	switch(move.type){
@@ -138,12 +158,14 @@ void undoMove(chessPosition* position) {
 				uint64_t isCapture = ((none == move.captureType) ? 0:UINT64_MAX);
 				position->pieces[1-toMove] 							= (position->pieces[1-toMove] | (isCapture & move.move)) & (~position->pieces[toMove]);
 				position->pieceTables[1-toMove][move.captureType] 	= (position->pieceTables[1-toMove][move.captureType] | (isCapture & move.move)) & (~position->pieces[toMove]);
-				//position->pieceTableEval = position->pieceTableEval-(1-2*toMove)*(pieceTables[move.type][toMove][move.targetField]-pieceTables[move.type][toMove][move.sourceField]);
-				//position->pieceTableEval = position->pieceTableEval-(1-2*toMove)*pieceTables[move.captureType][1-toMove][move.targetField];
+				position->pieceTableEval = position->pieceTableEval-(1-2*toMove)*(pieceTables[move.type][toMove][move.targetField]-pieceTables[move.type][toMove][move.sourceField]);
+				position->pieceTableEval = position->pieceTableEval-(1-2*toMove)*pieceTables[move.captureType][1-toMove][move.targetField];
 				break;
 				}
 		case castlingKingside:
 			{
+
+				//TODO: remove the ifs
 				position->toMove = (playerColor) (1-position->toMove);
 				playerColor toMove = position->toMove;
 
@@ -151,12 +173,12 @@ void undoMove(chessPosition* position) {
 					position->pieces[toMove] 		     = position->pieces[toMove]^(WHITEKINGSIDECASTLEOCCUPANCYCHANGE);
 					position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(WHITEKINGSIDECASTLEROOKMOVE);
 					position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(WHITEKINGSIDECASTLEKINGMOVE);
-					//position->pieceTableEval             = position->pieceTableEval-(-pieceTables[rook][white][7]+pieceTables[rook][white][5]-pieceTables[king][white][4]+pieceTables[king][white][6]);
+					position->pieceTableEval             = position->pieceTableEval-(-pieceTables[rook][white][7]+pieceTables[rook][white][5]-pieceTables[king][white][4]+pieceTables[king][white][6]);
 				} else {
 					position->pieces[toMove] 		     = position->pieces[toMove]^(BLACKKINGSIDECASTLEOCCUPANCYCHANGE);
 					position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(BLACKKINGSIDECASTLEROOKMOVE);
 					position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(BLACKKINGSIDECASTLEKINGMOVE);
-					//position->pieceTableEval             = position->pieceTableEval-pieceTables[rook][black][63]+pieceTables[rook][black][61]-pieceTables[king][black][60]+pieceTables[king][black][62];
+					position->pieceTableEval             = position->pieceTableEval-pieceTables[rook][black][63]+pieceTables[rook][black][61]-pieceTables[king][black][60]+pieceTables[king][black][62];
 				}
 
 				break;
@@ -169,24 +191,37 @@ void undoMove(chessPosition* position) {
 					position->pieces[toMove] 		     = position->pieces[toMove]^(WHITEQUEENSIDECASTLEOCCUPANCYCHANGE);
 					position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(WHITEQUEENSIDECASTLEROOKMOVE);
 					position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(WHITEQUEENSIDECASTLEQUEENMOVE);
-					//position->pieceTableEval             = position->pieceTableEval-(-pieceTables[rook][white][0]+pieceTables[rook][white][3]-pieceTables[king][white][4]+pieceTables[king][white][2]);
+					position->pieceTableEval             = position->pieceTableEval-(-pieceTables[rook][white][0]+pieceTables[rook][white][3]-pieceTables[king][white][4]+pieceTables[king][white][2]);
 				} else {
 					position->pieces[toMove] 		     = position->pieces[toMove]^(BLACKQUEENSIDECASTLEOCCUPANCYCHANGE);
 					position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(BLACKQUEENSIDECASTLEROOKMOVE);
 					position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(BLACKQUEENSIDECASTLEQUEENMOVE);
-					//position->pieceTableEval             = position->pieceTableEval-pieceTables[rook][black][56]+pieceTables[rook][black][59]-pieceTables[king][black][60]+pieceTables[king][black][58];
+					position->pieceTableEval             = position->pieceTableEval-pieceTables[rook][black][56]+pieceTables[rook][black][59]-pieceTables[king][black][60]+pieceTables[king][black][58];
 				}
 
 				break;
 			}
+			case enpassant: {
+				position->toMove = (playerColor) (1-position->toMove);
+				playerColor toMove 									= position->toMove;
+				position->pieces[toMove] 							= position->pieces[toMove]^move.move;
+				position->pieceTables[toMove][pawn] 			    = position->pieceTables[toMove][pawn]^move.move;
+				uint16_t shift 										= (toMove? move.targetField+8: move.targetField-8);
+				position->pieceTables[1-toMove][pawn] 				= position->pieceTables[1-toMove][pawn] ^ BIT64(shift);
+				position->pieces[1-toMove] 							= position->pieces[1-toMove] ^ BIT64(shift);
+				position->pieceTableEval = position->pieceTableEval-(1-2*toMove)*(pieceTables[pawn][toMove][move.targetField]-pieceTables[pawn][toMove][move.sourceField]);
+				position->pieceTableEval = position->pieceTableEval-(1-2*toMove)*pieceTables[pawn][1-toMove][shift];
+				break;
+			}
 
+				//TODO: update pieceTables
 			default:
 				break;
 	}
 
 	#ifdef DEBUG
 
-	/*int16_t eval = calcFigureEvaluation(position);
+	int16_t eval = calcFigureEvaluation(position);
 
 	if(eval != position->figureEval){
 		std::cout << "Figure evaluation is wrong after undoMove!" << std::endl;
@@ -196,6 +231,6 @@ void undoMove(chessPosition* position) {
 
 	if(pieceTableEval != position->pieceTableEval){
 		std::cout << "Piece table evaluation is wrong after undoMove!" << std::endl;
-	}*/
+	}
 	#endif
 }

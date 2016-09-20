@@ -6,10 +6,7 @@ import ChessBoard.ChessBoard;
 import core.ChessEvent;
 import core.PEventInterface;
 import core.PlayingEventInterface;
-import core.events.CheckMoveEvent;
-import core.events.NewPositionEvent;
-import core.events.TurnBoardEvent;
-import core.events.UndoMoveEvent;
+import core.events.*;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
@@ -56,17 +53,7 @@ public class PlayingController {
 
     @FXML
     public synchronized void handleForceMove(){
-        System.out.println("Forcing move...");
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                waitImage.setVisible(true);
-                findMove();
-                waitImage.setVisible(false);
-            }
-        };
-
-        (new Thread(r)).start();
+        eventInterface.addEngineEvent(new ForceMoveEvent());
     }
 
     @FXML
