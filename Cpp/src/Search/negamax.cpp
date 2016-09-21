@@ -25,6 +25,8 @@ uint32_t getNodes(){
 }
 
 
+static chessMove buffer[900];
+
 int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t beta, chessMove* bestMove) {
 
 
@@ -32,7 +34,7 @@ int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t 
 		return (1-2*position->toMove)*(position->figureEval+position->pieceTableEval);
 	}
 
-	vdt_vector<chessMove> moves = vdt_vector<chessMove>(100);
+	vdt_vector<chessMove> moves = vdt_vector<chessMove>(buffer+depth*100,100);
 	generateAllMoves(&moves, position);
 
 	bool isMate = true;
@@ -58,13 +60,16 @@ int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t 
 		}
 		undoMove(position);
 		if(alpha >= beta) {
+			//moves.free_array();
 			return beta;
 		}
 	}
 
 	if(isMate){
+		//moves.free_array();
 		return -100000+depth;
 	}
+	//moves.free_array();
 	return alpha;
 
 

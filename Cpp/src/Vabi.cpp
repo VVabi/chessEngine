@@ -47,7 +47,7 @@ void outPutuint64(uint64_t num){
 }
 
 
-chessMove buffer[900];
+static chessMove buffer[900];
 uint32_t captures = 0;
 uint32_t mates    = 0;
 

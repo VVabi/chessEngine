@@ -29,6 +29,8 @@ extern uint64_t castlingBlockers[2][2];
 extern uint64_t enPassantMoveTable[2][8];
 extern uint16_t enPassantTargetFields[2][8];
 
+uint64_t promotionRows[] = {LASTROW, FIRSTROW};
+
 inline void extractMoves(const uint64_t currentPiece, const figureType figure, uint64_t potentialMoves, vdt_vector<chessMove>* vec, chessPosition* position) {
 	uint16_t sourceField = findLSB(currentPiece);
 	playerColor toMove = position->toMove;
@@ -121,13 +123,17 @@ void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 		move.captureType = none;
 		move.sourceField = findLSB(source);
 		move.targetField = findLSB(target);
+		uint64_t promotionRow = promotionRows[position->toMove];
+		if(move.move & promotionRow){
+			move.type = promotionQueen;
+		}
 		vec->add(&move);
 		forward = forward & (~target);
 	}
 
 	uint64_t homerow   			= (toMove ? SEVENTHROW : SECONDROW);
 	uint64_t onHomeRow 			= pawns & homerow;
-	forward   			= (toMove?  onHomeRow >> 16:  onHomeRow << 16);
+	forward   					= (toMove?  onHomeRow >> 16:  onHomeRow << 16);
 	uint64_t occupancyShifted 	= (toMove?  occupancy >> 8:  occupancy << 8);
 	forward            			= forward & (~occupancy) & (~occupancyShifted);
 
@@ -168,6 +174,10 @@ void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 		move.captureType = captureType;
 		move.sourceField = findLSB(source);
 		move.targetField = findLSB(target);
+		uint64_t promotionRow = promotionRows[position->toMove];
+		if(move.move & promotionRow){
+			move.type = promotionQueen;
+		}
 		vec->add(&move);
 		takesLeft		 	= takesLeft & (~target);
 	}
@@ -196,6 +206,10 @@ void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 		move.captureType = captureType;
 		move.sourceField = findLSB(source);
 		move.targetField = findLSB(target);
+		uint64_t promotionRow = promotionRows[position->toMove];
+		if(move.move & promotionRow){
+			move.type = promotionQueen;
+		}
 		vec->add(&move);
 		takesRight		 	= takesRight & (~target);
 	}
