@@ -98,24 +98,69 @@ uint32_t perftNodes(chessPosition* c, uint16_t depth){
 	return nodes;
 }
 
-int main() {
 
-	/*std::string position = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnr";
+uint32_t runSinglePositionPerformanceTest(std::string position, uint16_t depth) {
 	chessPosition c = stringToChessPosition(position);
-
+	c.castlingRights = 0;
+	c.toMove = (position.at(66) == 'w' ? white: black);
+	resetNodes();
 	chessMove bestMove;
-	int32_t eval = negamax(&c, 3, -100000, 100000, &bestMove);
+	resetQuiescenceNodes();
+	struct timeval start, end;
+	long mtime, seconds, useconds;
+	gettimeofday(&start, NULL);
+	int32_t eval = negamax(&c, depth, -100000, 100000, &bestMove);
+	gettimeofday(&end, NULL);
 
-	std::cout << eval << std::endl;
-	std::cout << moveToString(bestMove, c) << std::endl;
-	std::string newPosition = chessPositionToString(c);
-	std::cout << newPosition << std::endl;
-	makeMove( &bestMove, &c);
-	eval = negamax(&c, 3, -100000, 100000, &bestMove);
-	std::cout << eval << std::endl;
-	std::cout << moveToString(bestMove, c) << std::endl;
-	newPosition = chessPositionToString(c);
-	std::cout << newPosition << std::endl;*/
+	seconds  = end.tv_sec  - start.tv_sec;
+	useconds = end.tv_usec - start.tv_usec;
+
+	mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
+	uint32_t nodeCount = getNodes()+getQuiescenceNodes();
+	double nps = ((double) nodeCount)/((double) mtime)*1000.0;
+	std::cout << "Searched " <<  nodeCount << " positions in " << mtime << " for " << nps << " nodes per second" << std::endl;
+	std::cout << "Forced move " << moveToString(bestMove, c) << std::endl;
+	std::cout << "Evaluation "  << eval << std::endl;
+
+	return nodeCount;
+
+}
+
+
+int main() {
+	/*std::string position = "RNBQKBNRPPPPPPPP0q000000000000000000000000000000pppppppprnbqkbnr";
+	chessPosition c = stringToChessPosition(position);
+	AttackTable t = makeAttackTable(&c, white);
+
+	outPutuint64(t.attackTables[pawn]);
+	outPutuint64(t.attackTables[knight]);
+	outPutuint64(t.attackTables[bishop]);
+	outPutuint64(t.attackTables[rook]);
+	outPutuint64(t.attackTables[queen]);*/
+
+	/*std::ifstream infile("chesspositions.txt");
+	std::string line;
+	uint32_t totalNodes = 0;
+	while (std::getline(infile, line))
+	{
+		 totalNodes = totalNodes+runSinglePositionPerformanceTest(line, 3);
+	    // process pair (a,b)
+	}
+
+	std::cout << "Total Nodes " << totalNodes << std::endl;*/
+
+ 	/*std::string position = "RNBQKBNRPPPPPPPP0pr00000000000000000000000000000pppppppprnbqkbnr";
+	chessPosition c = stringToChessPosition(position);
+	vdt_vector<chessMove> moves = vdt_vector<chessMove>(100);
+
+	generateAllMoves(&moves, &c);
+	orderStandardMoves(&c, &moves);
+
+	for (uint16_t ind=0; ind < moves.length; ind++) {
+		std::cout << moveToString(moves[ind], c) << " " << moves[ind].sortEval << std::endl;
+	}*/
+
+
 	/*for(uint16_t ind=0; ind < 10; ind++){
 		moveVectors[ind] = vdt_vector<chessMove>(buffer+100*ind, 100);
 	}
@@ -183,21 +228,23 @@ int main() {
 					send_msg(std::move(newPosMsg), 0);
 					chessMove bestMove;
 					resetNodes();
+					resetQuiescenceNodes();
 					struct timeval start, end;
 					long mtime, seconds, useconds;
 					gettimeofday(&start, NULL);
-					int32_t eval = negamax(&c, 6, -100000, 100000, &bestMove);
+					int32_t eval = negamax(&c, 6, -100005, 100005, &bestMove);
 					gettimeofday(&end, NULL);
 
 					seconds  = end.tv_sec  - start.tv_sec;
 					useconds = end.tv_usec - start.tv_usec;
 
 					mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
-					uint32_t nodeCount = getNodes();
+					uint32_t nodeCount = getNodes()+getQuiescenceNodes();
 					double nps = ((double) nodeCount)/((double) mtime)*1000.0;
 					std::cout << "Searched " <<  nodeCount << " positions in " << mtime << " for " << nps << " nodes per second" << std::endl;
 					std::cout << "Forced move " << moveToString(bestMove, c) << std::endl;
-					makeMove(&bestMove, &c);
+					std::cout << "Evaluation "  << eval << std::endl;
+	 				makeMove(&bestMove, &c);
 					std::string newPosition2 = chessPositionToString(c);
 					fsarray<uint8_t> raw_str2 = fsarray<uint8_t>(newPosition2.length());
 					memcpy(raw_str2.data, newPosition2.c_str(), 64);

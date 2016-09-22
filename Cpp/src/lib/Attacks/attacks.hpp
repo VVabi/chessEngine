@@ -7,9 +7,15 @@
 
 #ifndef LIB_ATTACKS_ATTACKS_HPP_
 #define LIB_ATTACKS_ATTACKS_HPP_
+struct AttackTable{
+	uint64_t attackTables[6];
+	uint64_t completeAttackTable;
+};
+
+
 
 bool isFieldAttacked(chessPosition* position, playerColor attackingSide, uint16_t field);
 
-
+AttackTable makeAttackTable(chessPosition* position, playerColor attackingSide);
 
 #endif /* LIB_ATTACKS_ATTACKS_HPP_ */

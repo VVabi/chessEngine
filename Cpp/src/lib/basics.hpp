@@ -31,6 +31,10 @@ struct chessMove{
 	uint16_t targetField;
 	moveType type;
 	figureType captureType;
+	int16_t sortEval;
+	bool operator<(chessMove move) const{
+		return sortEval > move.sortEval;
+	}
 };
 
 struct chessPosition {
