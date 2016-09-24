@@ -22,7 +22,7 @@
 
 enum figureType: uint16_t {pawn=0, knight=1, bishop=2, rook=3, queen=4, king=5, none};
 enum moveType: uint16_t   {pawnMove=0, knightMove=1, bishopMove=2, rookMove=3, queenMove=4, kingMove=5,
-	castlingKingside, castlingQueenside, enpassant, promotionQueen, promotionRook, promotionKnight, promotionBishop};
+	castlingKingside=6, castlingQueenside=7, enpassant=8, promotionKnight=9, promotionBishop, promotionRook, promotionQueen};
 enum playerColor: uint16_t {white=0, black=1};
 
 struct chessMove{
@@ -50,7 +50,7 @@ struct chessPosition {
 	uint8_t enPassantFile; //the file of the CAPTURED pawn
 	int16_t figureEval;
 	int16_t pieceTableEval;
-	//uint64_t zobristHash;
+	uint64_t zobristHash;
 	vdt_vector<chessMove> madeMoves;
 	vdt_vector<uint16_t> castlingAndEpStack;
 };

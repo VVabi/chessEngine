@@ -54,7 +54,7 @@ uint32_t getRandomField(){
 
 figureType getFigureTypeFromChar(char piece) {
 
-	figureType type;
+	figureType type = pawn;
 
 	switch(piece) {
 

@@ -14,7 +14,8 @@
 
 testResult testMakeMove(){
 	testResult ret;
-	ret.passed = true;
+	ret.passed   = true;
+	ret.testName = "testMakeMove";
 
 	/*This tests tests moves which are not legal chessmoves. However, the makemove function has to correctly execute the moves nevertheless.
 	 */

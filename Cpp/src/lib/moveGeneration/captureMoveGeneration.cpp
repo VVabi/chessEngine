@@ -114,7 +114,6 @@ void generateNonSliderCaptureMoves(vdt_vector<chessMove>* vec, chessPosition* po
 void generatePawnCaptureMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 	//TODO: generate promotions! And this function is too complicated
 	playerColor toMove = position->toMove;
-	uint64_t occupancy  = position->pieces[white] | position->pieces[black];
 	uint64_t pawns     = position->pieceTables[toMove][pawn];
 
 	uint64_t takesLeft = (toMove? pawns >> 9 : pawns << 7) & NOTFILEH & position->pieces[1-toMove];

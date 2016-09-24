@@ -13,21 +13,11 @@
 #include <lib/bitfiddling.h>
 #include <algorithm>
 #include <lib/Attacks/attacks.hpp>
+#include <hashTables/hashTables.hpp>
 
-//TODO: for debug purposes I want these rangechecked!
-extern uint64_t knightmovetables[];
-extern uint64_t kingmovetables[];
-extern uint64_t rookFieldTable[];
-extern uint64_t rookMoveTables[64][4096];
-extern uint64_t rookMagicNumbers[];
 
-extern uint64_t bishopFieldTable[];
-extern uint64_t bishopMoveTables[64][512];
-extern uint64_t bishopMagicNumbers[];
+extern uint16_t moveOrderingHashTable[];
 
-extern uint64_t castlingBlockers[2][2];
-extern uint64_t enPassantMoveTable[2][8];
-extern uint16_t enPassantTargetFields[2][8];
 
 
 extern int16_t figureValues[];
@@ -65,7 +55,9 @@ void calcCaptureSortEval(chessPosition* position, chessMove* mv) {
 }
 
 
-void calcSortEval(chessPosition* position, chessMove* mv, AttackTable* opponentAttackTable, AttackTable* ownAttackTable) {
+static inline void calcSortEval(chessPosition* position, chessMove* mv, AttackTable* opponentAttackTable, AttackTable* ownAttackTable) {
+
+	uint16_t hashedMove = moveOrderingHashTable[position->zobristHash & HASHSIZE] ;
 
 	int16_t sortEval = 0;
 
@@ -144,6 +136,10 @@ void calcSortEval(chessPosition* position, chessMove* mv, AttackTable* opponentA
 			sortEval = sortEval + 20;
 
 		}
+	}
+
+	if( ((mv->sourceField) | (mv->targetField << 8)) == hashedMove) {
+		sortEval = sortEval+2000;
 	}
 
 	mv->sortEval = sortEval;

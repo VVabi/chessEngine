@@ -49,7 +49,7 @@ public class figuresCanvas extends Canvas {
         int row;
         int column;
         GraphicsContext gc = getGraphicsContext2D();
-        if (position.length() == 64) {
+        if (position.length() >= 64) {
             gc.clearRect(0, 0, 8 * fieldsize, 8 * fieldsize);
             for (int i = 0; i < 64; i++) {
                 row = i / 8;

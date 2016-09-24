@@ -26,6 +26,7 @@ using namespace std;
 #include <stdio.h>
 #include <unistd.h>
 #include <Search/search.hpp>
+#include <hashTables/hashTables.hpp>
 
 void outPutuint64(uint64_t num){
 
@@ -47,56 +48,6 @@ void outPutuint64(uint64_t num){
 }
 
 
-static chessMove buffer[900];
-uint32_t captures = 0;
-uint32_t mates    = 0;
-
-
-vdt_vector<chessMove> moveVectors[10];
-
-uint32_t perftNodes(chessPosition* c, uint16_t depth){
-	if(depth == 0){
-		return 1;
-	}
-	uint32_t nodes = 0;
-	vdt_vector<chessMove> moves = moveVectors[depth];
-	generateAllMoves(&moves, c);
-	bool isMate = true;
-	for(uint16_t ind=0; ind < moves.length; ind++){
-		if(moves[ind].captureType != none){
-			if(moves[ind].captureType == king){
-				std::cout << "Taking the king should be impossible" << std::endl;
-				uint16_t kingField = findLSB(c->pieceTables[1-c->toMove][king]);
-				isFieldAttacked(c, c->toMove, kingField);
-			}
-		}
-		makeMove(&moves[ind], c);
-		uint16_t kingField = findLSB(c->pieceTables[1-c->toMove][king]);
-		uint32_t additional_nodes = 0;
-		if(isFieldAttacked(c, c->toMove, kingField)){
-
-		} else {
-			isMate = false;
-			if(moves[ind].captureType != none){
-				captures++;
-			}
-			additional_nodes = perftNodes(c, depth-1);
-			nodes = nodes+additional_nodes;
-
-
-		}
-		undoMove(c);
-		if(!isMate){
-			if(depth == 6) {
-				std::cout << moveToString(moves[ind], *c) << " : " << additional_nodes << std::endl;
-			}
-		}
-	}
-	if(isMate){
-		mates++;
-	}
-	return nodes;
-}
 
 
 uint32_t runSinglePositionPerformanceTest(std::string position, uint16_t depth) {
@@ -128,6 +79,8 @@ uint32_t runSinglePositionPerformanceTest(std::string position, uint16_t depth) 
 
 
 int main() {
+	fillZobristHash();
+	//runTests();
 	/*std::string position = "RNBQKBNRPPPPPPPP0q000000000000000000000000000000pppppppprnbqkbnr";
 	chessPosition c = stringToChessPosition(position);
 	AttackTable t = makeAttackTable(&c, white);
@@ -138,16 +91,21 @@ int main() {
 	outPutuint64(t.attackTables[rook]);
 	outPutuint64(t.attackTables[queen]);*/
 
-	/*std::ifstream infile("chesspositions.txt");
-	std::string line;
-	uint32_t totalNodes = 0;
-	while (std::getline(infile, line))
-	{
-		 totalNodes = totalNodes+runSinglePositionPerformanceTest(line, 3);
-	    // process pair (a,b)
-	}
 
-	std::cout << "Total Nodes " << totalNodes << std::endl;*/
+	/*for(int depth = 3; depth < 6; depth++) {
+		std::ifstream infile("chesspositions.txt");
+		std::string line;
+		uint64_t totalNodes = 0;
+		while (std::getline(infile, line))
+		{
+			 totalNodes = totalNodes+runSinglePositionPerformanceTest(line, depth);
+
+		}
+
+		std::cout << "Depth " << depth << " Total Nodes " << totalNodes << std::endl;
+
+	}*/
+
 
  	/*std::string position = "RNBQKBNRPPPPPPPP0pr00000000000000000000000000000pppppppprnbqkbnr";
 	chessPosition c = stringToChessPosition(position);
@@ -187,14 +145,17 @@ int main() {
 
 
 	return 0;*/
-	initialize_network("127.0.0.1", 9876);
-	std::string position = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnr";
+
+	perftTest();
+	/*initialize_network("127.0.0.1", 9876);
+	std::string position = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwKQkq";
 	chessPosition c = stringToChessPosition(position);
 
+
 	while(1){
+
 		receive_from_network();
 		auto checkMove = VMP_receive<VMPcheckMove>();
-
 		if(checkMove){
 			std::string nextMove = std::string((char*) checkMove->moveString.chars.data, 4);
 			vdt_vector<chessMove> moves = vdt_vector<chessMove>(100);
@@ -232,12 +193,13 @@ int main() {
 					struct timeval start, end;
 					long mtime, seconds, useconds;
 					gettimeofday(&start, NULL);
-					int32_t eval = negamax(&c, 6, -100005, 100005, &bestMove);
+					negamax(&c, 6, -100005, 100005, &bestMove);
+					negamax(&c, 7, -100005, 100005, &bestMove);
+					int32_t eval = negamax(&c, 8, -100005, 100005, &bestMove);
 					gettimeofday(&end, NULL);
 
 					seconds  = end.tv_sec  - start.tv_sec;
 					useconds = end.tv_usec - start.tv_usec;
-
 					mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
 					uint32_t nodeCount = getNodes()+getQuiescenceNodes();
 					double nps = ((double) nodeCount)/((double) mtime)*1000.0;
@@ -247,7 +209,7 @@ int main() {
 	 				makeMove(&bestMove, &c);
 					std::string newPosition2 = chessPositionToString(c);
 					fsarray<uint8_t> raw_str2 = fsarray<uint8_t>(newPosition2.length());
-					memcpy(raw_str2.data, newPosition2.c_str(), 64);
+					memcpy(raw_str2.data, newPosition2.c_str(), 69);
 					VDTstring str2 = VDTstring(raw_str2);
 					auto newPosMsg2 = std::unique_ptr<VMPchessPosition>(new VMPchessPosition(str2));
 					send_msg(std::move(newPosMsg2), 0);
@@ -278,7 +240,7 @@ int main() {
 		if(forceMove) {
 
 			chessMove bestMove;
-			int32_t eval = negamax(&c, 4, -100000, 100000, &bestMove);
+			negamax(&c, 4, -100000, 100000, &bestMove);
 			std::cout << "Forced move " << moveToString(bestMove, c) << std::endl;
 			makeMove(&bestMove, &c);
 			std::string newPosition = chessPositionToString(c);
@@ -288,7 +250,7 @@ int main() {
 			auto newPosMsg = std::unique_ptr<VMPchessPosition>(new VMPchessPosition(str));
 			send_msg(std::move(newPosMsg), 0);
 		}
-	}
+	}*/
 
 
 	/*ofstream o;

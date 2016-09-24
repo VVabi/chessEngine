@@ -14,7 +14,11 @@
 #include <lib/Attacks/attacks.hpp>
 #include <lib/bitfiddling.h>
 #include "search.hpp"
+#include <hashTables/hashTables.hpp>
+
 static uint32_t nodes = 0;
+
+extern uint16_t moveOrderingHashTable[];
 
 void resetNodes(){
 	nodes = 0;
@@ -38,6 +42,8 @@ int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t 
 	vdt_vector<chessMove> moves = vdt_vector<chessMove>(buffer+depth*100,100);
 	generateAllMoves(&moves, position);
 	orderStandardMoves(position, &moves);
+
+	//TODO: we currently detect stalemate as checkmate!!
 	bool isMate = true;
 	for(uint16_t ind=0; ind < moves.length; ind++){
 		makeMove(&moves[ind], position);
@@ -61,11 +67,15 @@ int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t 
 		}
 		undoMove(position);
 		if(alpha >= beta) {
+			uint32_t hashIndex = position->zobristHash & HASHSIZE;
+			moveOrderingHashTable[hashIndex] = (bestMove->sourceField | (bestMove->targetField << 8));
+
 			//moves.free_array();
 			return beta;
 		}
 	}
-
+	uint32_t hashIndex = position->zobristHash & HASHSIZE;
+	moveOrderingHashTable[hashIndex] = (bestMove->sourceField | (bestMove->targetField << 8));
 	if(isMate){
 		//moves.free_array();
 		return -99000-depth;

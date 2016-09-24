@@ -67,7 +67,6 @@ public class PlayingController {
     @FXML
     public void handleUndo(){
         eventInterface.addEngineEvent(new UndoMoveEvent());
-
     }
 
     @FXML
@@ -204,7 +203,7 @@ public class PlayingController {
             chessboard.toggleSideDown();
         }
         if(e instanceof NewPositionEvent){
-            sidetomove = (sidetomove == 'w' ? 'b' : 'w'); //TODO: this is of course not sound!
+            sidetomove = ((NewPositionEvent) e).newPosition.charAt(64);
             chessboard.setPosition(((NewPositionEvent) e).newPosition);
             System.out.println(((NewPositionEvent) e).newPosition);
         }

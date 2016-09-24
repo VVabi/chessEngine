@@ -11,6 +11,8 @@
 #include <string.h>
 #include <lib/bitfiddling.h>
 #include <lib/Defines/boardParts.hpp>
+#include <hashTables/hashTables.hpp>
+#include <lib/DebugFunctions/debugFunctions.hpp>
 
 static char figureNames[2][6] = {{'P', 'N', 'B', 'R', 'Q', 'K'},
 		{'p', 'n', 'b', 'r', 'q', 'k'},
@@ -56,6 +58,40 @@ std::string chessPositionToString(chessPosition position) {
 			ret.push_back('0');
 		}
 	}
+
+	if(position.toMove == white) {
+		ret.push_back('w');
+	} else {
+		ret.push_back('b');
+	}
+
+	uint8_t castlingRights = position.castlingRights;
+
+	if(castlingRights & 1) {
+		ret.push_back('K');
+	} else {
+		ret.push_back('0');
+	}
+
+	if(castlingRights & 2) {
+		ret.push_back('Q');
+	} else {
+		ret.push_back('0');
+	}
+
+	if(castlingRights & 4) {
+		ret.push_back('k');
+	} else {
+		ret.push_back('0');
+	}
+
+	if(castlingRights & 8) {
+		ret.push_back('q');
+	} else {
+		ret.push_back('0');
+	}
+
+
 	return ret;
 }
 
@@ -120,7 +156,7 @@ void zeroInitPosition(chessPosition* position) {
 	position->pieceTables =  vdt_vector<vdt_vector<uint64_t>>(2);
 	position->pieceTables.add(&whiteTable);
 	position->pieceTables.add(&blackTable);
-	//position->zobristHash    = 0;
+
 	position->enPassantFile = 0;
 	position->madeMoves = vdt_vector<chessMove>(150);
 	position->castlingAndEpStack = vdt_vector<uint16_t>(150);
@@ -129,9 +165,9 @@ void zeroInitPosition(chessPosition* position) {
 	memset(position, 0, sizeof(chessPosition));
 	position->madeMoves = vdt_vector<chessMove>(150);
 	position->castlingAndEpStack = vdt_vector<uint16_t>(150);
-	std::cout << "Initializing board..." << std::endl;
 #endif
-
+	position->zobristHash    = calcZobristHash(position);
+	position->pieceTableEval = calcPieceTableValue(position);
 
 }
 
@@ -141,6 +177,10 @@ chessPosition stringToChessPosition(std::string strposition) {
 	chessPosition position;
 	zeroInitPosition(&position);
 
+	if (strposition.length() != 69) {
+		std::cout << "Invalid chess position string!!" << std::endl;
+		return position;
+	}
 
 	for (uint8_t ind=0; ind < 64; ind++) {
 		char c = strposition.at(ind);
@@ -193,13 +233,41 @@ chessPosition stringToChessPosition(std::string strposition) {
 					position.pieceTables[black][pawn]  		|= (1UL << ind);
 					position.pieces[black] 					|= (1UL << ind);
 					break;
+				case '0':
+					break;
 				default:
+					std::cout << "invalid position string" << std::endl;
 					break;
 			}
 
 
 	}
-	position.castlingRights = 15;
+
+	if(strposition.at(64) == 'w') {
+		position.toMove = white;
+	} else if(strposition.at(64) == 'b') {
+		position.toMove = black;
+	} else {
+		std::cout << "invalid position string" << std::endl;
+	}
+
+	position.castlingRights = 0;
+	if (strposition.at(65) == 'K') {
+		position.castlingRights = position.castlingRights | 1;
+	}
+	if (strposition.at(66) == 'Q') {
+		position.castlingRights = position.castlingRights | 2;
+	}
+	if (strposition.at(67) == 'k') {
+		position.castlingRights = position.castlingRights | 4;
+	}
+	if (strposition.at(68) == 'q') {
+		position.castlingRights = position.castlingRights | 8;
+	}
+
+	position.pieceTableEval = calcPieceTableValue(&position);
+	position.zobristHash    = calcZobristHash(&position);
+	position.figureEval   = calcFigureEvaluation(&position);
 	return position;
 }
 
@@ -238,7 +306,4 @@ uint64_t stringToMove(std::string mv){
 	uint16_t targetField = targetRow*8+targetColumn;
 
 	return BIT64(sourceField) | BIT64(targetField);
-
-
-
 }

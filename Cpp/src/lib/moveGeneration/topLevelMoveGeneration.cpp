@@ -126,8 +126,16 @@ void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 		uint64_t promotionRow = promotionRows[position->toMove];
 		if(move.move & promotionRow){
 			move.type = promotionQueen;
+			vec->add(&move);
+			move.type = promotionRook;
+			vec->add(&move);
+			move.type = promotionBishop;
+			vec->add(&move);
+			move.type = promotionKnight;
+			vec->add(&move);
+		} else {
+			vec->add(&move);
 		}
-		vec->add(&move);
 		forward = forward & (~target);
 	}
 
@@ -177,8 +185,16 @@ void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 		uint64_t promotionRow = promotionRows[position->toMove];
 		if(move.move & promotionRow){
 			move.type = promotionQueen;
+			vec->add(&move);
+			move.type = promotionRook;
+			vec->add(&move);
+			move.type = promotionBishop;
+			vec->add(&move);
+			move.type = promotionKnight;
+			vec->add(&move);
+		} else {
+			vec->add(&move);
 		}
-		vec->add(&move);
 		takesLeft		 	= takesLeft & (~target);
 	}
 
@@ -209,8 +225,16 @@ void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 		uint64_t promotionRow = promotionRows[position->toMove];
 		if(move.move & promotionRow){
 			move.type = promotionQueen;
+			vec->add(&move);
+			move.type = promotionRook;
+			vec->add(&move);
+			move.type = promotionBishop;
+			vec->add(&move);
+			move.type = promotionKnight;
+			vec->add(&move);
+		} else {
+			vec->add(&move);
 		}
-		vec->add(&move);
 		takesRight		 	= takesRight & (~target);
 	}
 }

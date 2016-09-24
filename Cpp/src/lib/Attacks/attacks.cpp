@@ -156,10 +156,10 @@ AttackTable makeAttackTable(chessPosition* position, playerColor attackingSide) 
 
 
 	//kings
-	uint64_t king = position->pieceTables[attackingSide][knight];
+	uint64_t kingField = position->pieceTables[attackingSide][knight];
 	uint64_t kingAttackTable = 0;
-	while(king){
-		uint16_t nextKing = popLSB(king);
+	while(kingField){
+		uint16_t nextKing = popLSB(kingField);
 		kingAttackTable = kingAttackTable | kingmovetables[nextKing];
 	}
 	retTable.attackTables[king] = kingAttackTable;
