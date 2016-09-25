@@ -17,4 +17,8 @@ uint32_t getNodes();
 uint32_t getQuiescenceNodes();
 void resetQuiescenceNodes();
 
+void resetIndices();
+
+int32_t* getIndexCounts();
+
 #endif /* SEARCH_SEARCH_HPP_ */

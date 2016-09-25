@@ -27,7 +27,7 @@ testResult testMakeMove(){
 		playerColor color = (playerColor) k;
 
 		for	(uint32_t ind = 0; ind < 1000; ind++) {
-			std::string randomPosition = getRandomPosition();
+			std::string randomPosition = getRandomPosition(color);
 
 			uint32_t start = getRandomField();
 			uint32_t end   = getRandomField();
@@ -35,7 +35,7 @@ testResult testMakeMove(){
 			randomPosition[start] = piece;
 			randomPosition[end]   = '0';
 			chessPosition pos = stringToChessPosition(randomPosition);
-			pos.toMove = color;
+
 			chessMove move;
 			move.move 		 = BIT64(start) | BIT64(end);
 			move.type 		 = (moveType) getFigureTypeFromChar(piece);
@@ -45,7 +45,7 @@ testResult testMakeMove(){
 
 			randomPosition[start] = '0';
 			randomPosition[end]   = piece;
-
+			randomPosition[64]    = (color == black ? 'w' : 'b');
 			if (randomPosition.compare(newPosition)) {
 				std::cout << "move making error!" << std::endl;
 				ret.passed = false;
@@ -61,7 +61,7 @@ testResult testMakeMove(){
 		playerColor color = (playerColor) k;
 
 		for	(uint32_t ind = 0; ind < 1000; ind++) {
-			std::string randomPosition = getRandomPosition();
+			std::string randomPosition = getRandomPosition(color);
 
 			uint32_t start = getRandomField();
 			uint32_t end   = getRandomField();
@@ -80,7 +80,7 @@ testResult testMakeMove(){
 
 			randomPosition[start] = '0';
 			randomPosition[end]   = piece;
-
+			randomPosition[64]    = (color == black ? 'w' : 'b');
 			if (randomPosition.compare(newPosition)) {
 				std::cout << "move making error!" << std::endl;
 				ret.passed = false;
@@ -99,7 +99,7 @@ testResult testMakeMove(){
 testResult testUndoMove() {
 	testResult ret;
 	ret.passed = true;
-
+	ret.testName = "testUndoMove";
 	/*This tests tests moves which are not legal chessmoves. However, the makemove function has to correctly execute the moves nevertheless.
 	 */
 
@@ -110,7 +110,7 @@ testResult testUndoMove() {
 		playerColor color = (playerColor) k;
 
 		for	(uint32_t ind = 0; ind < 1000; ind++) {
-			std::string randomPosition = getRandomPosition();
+			std::string randomPosition = getRandomPosition(color);
 
 			uint32_t start = getRandomField();
 			uint32_t end   = getRandomField();
@@ -144,7 +144,7 @@ testResult testUndoMove() {
 		playerColor color = (playerColor) k;
 
 		for	(uint32_t ind = 0; ind < 1000; ind++) {
-			std::string randomPosition = getRandomPosition();
+			std::string randomPosition = getRandomPosition(color);
 
 			uint32_t start = getRandomField();
 			uint32_t end   = getRandomField();

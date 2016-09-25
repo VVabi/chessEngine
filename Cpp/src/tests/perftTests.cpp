@@ -97,16 +97,32 @@ uint32_t perftNodes(chessPosition* position, uint16_t depth){
 //uint32_t perftReference = {8902, 197281,4865609,119060324,3195901860};
 
 testResult testPerftTestSuite(){
-	//std::string position = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwKQkq";
-
-	//std::string position = "R000K00RPPPBBPPP00N00Q0p0p00P000000PN000bn00pnp0p0ppqpb0r000k00rwKQkq";
-	std::string position = "000000000000P0P0000000000R000p0kKP00000r000p000000p0000000000000w0000";
-	chessPosition c = stringToChessPosition(position);
 	testResult ret;
 	ret.passed   = true;
 	ret.testName = "perftTest";
 
-	std::cout << perftNodes(&c,7) << std::endl;
+	std::string position = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwKQkq";
+	chessPosition c = stringToChessPosition(position);
+	if(perftNodes(&c,7) != 3195901860) {
+		ret.passed = false;
+		return ret;
+	}
+
+	position = "R000K00RPPPBBPPP00N00Q0p0p00P000000PN000bn00pnp0p0ppqpb0r000k00rwKQkq";
+	c = stringToChessPosition(position);
+	if(perftNodes(&c,5) != 193690690) {
+		ret.passed = false;
+		return ret;
+	}
+
+	position = "000000000000P0P0000000000R000p0kKP00000r000p000000p0000000000000w0000";
+	c = stringToChessPosition(position);
+	if(perftNodes(&c,7) != 178633661) {
+		ret.passed = false;
+		return ret;
+	}
+
+
 
 
 	return ret;

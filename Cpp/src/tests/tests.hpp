@@ -16,7 +16,7 @@ struct testResult {
 };
 
 std::string getZeroPosition();
-std::string getRandomPosition();
+std::string getRandomPosition(playerColor color);
 char getRandomPiece(playerColor color);
 uint32_t getRandomField();
 figureType getFigureTypeFromChar(char piece);
@@ -25,5 +25,5 @@ uint32_t perftNodes(chessPosition* c, uint16_t depth);
 
 testResult testMakeMove();
 testResult testUndoMove();
-testResult perftTest();
+testResult testPerftTestSuite();
 #endif /* TESTS_TESTS_HPP_ */

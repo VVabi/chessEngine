@@ -14,6 +14,12 @@
 #include <lib/Attacks/attacks.hpp>
 #include <lib/bitfiddling.h>
 #include "search.hpp"
+#include <hashTables/hashTables.hpp>
+
+
+
+extern uint16_t moveOrderingHashTable[];
+
 
 static uint32_t nodes = 0;
 
@@ -38,7 +44,9 @@ int32_t negamaxQuiescence(chessPosition* position, int32_t alpha, int32_t beta, 
 	if(alpha >= beta) {
 		return beta;
 	}
-
+	chessMove bestMove;
+	bestMove.sourceField = 0;
+	bestMove.targetField = 0;
 	vdt_vector<chessMove> moves = vdt_vector<chessMove>(buffer+depth*50, 50);
 	generateAllCaptureMoves(&moves, position);
 	orderCaptureMoves(position, &moves);
@@ -56,6 +64,7 @@ int32_t negamaxQuiescence(chessPosition* position, int32_t alpha, int32_t beta, 
 
 			if(value > alpha){
 				alpha = value;
+				bestMove = moves[ind];
 
 			}
 
@@ -64,6 +73,8 @@ int32_t negamaxQuiescence(chessPosition* position, int32_t alpha, int32_t beta, 
 		}
 		undoMove(position);
 		if(alpha >= beta) {
+			/*uint32_t hashIndex = position->zobristHash & HASHSIZE;
+			moveOrderingHashTable[hashIndex] = (bestMove.sourceField | (bestMove.targetField << 8));*/
 			//moves.free_array();
 			return beta;
 		}

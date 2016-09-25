@@ -36,7 +36,7 @@ int16_t captureEvals[6][7] = {
 
 };
 
-void calcCaptureSortEval(chessPosition* position, chessMove* mv) {
+void calcCaptureSortEval(chessPosition* position, chessMove* mv, uint16_t hashedMove) {
 
 	int16_t sortEval = 0;
 	if( ((uint16_t) mv->type) < 6) {
@@ -51,13 +51,15 @@ void calcCaptureSortEval(chessPosition* position, chessMove* mv) {
 		}
 	}
 
+
+	/*if( ((mv->sourceField) | (mv->targetField << 8)) == hashedMove) {
+		sortEval = sortEval+2000;
+	}*/
 	mv->sortEval = sortEval;
 }
 
 
-static inline void calcSortEval(chessPosition* position, chessMove* mv, AttackTable* opponentAttackTable, AttackTable* ownAttackTable) {
-
-	uint16_t hashedMove = moveOrderingHashTable[position->zobristHash & HASHSIZE] ;
+static inline void calcSortEval(chessPosition* position, chessMove* mv, AttackTable* opponentAttackTable, AttackTable* ownAttackTable, uint16_t hashedMove) {
 
 	int16_t sortEval = 0;
 
@@ -77,7 +79,7 @@ static inline void calcSortEval(chessPosition* position, chessMove* mv, AttackTa
 	bool sourceAttacked = false;
 	bool targetAttacked = false;
 	bool sourceCovered  = false;
-	bool targetCovered  = false; //TODO: this doesnt work as intended - the target of a move is usually covered...
+	bool targetCovered  = false; //TODO: this doesnt work as intended - the target of a move is usually covered... - or may be covered after the move, eg. h7h5 from startposition, even if it wasnt before
 
 
 
@@ -95,6 +97,9 @@ static inline void calcSortEval(chessPosition* position, chessMove* mv, AttackTa
 		targetAttacked = true;
 	}
 
+	if( (mv->captureType == none) && (mv->type > pawnMove) && (BIT64(mv->targetField) & opponentAttackTable->attackTables[pawn])) {
+		sortEval = sortEval-100;
+	}
 
 
 	if(sourceCovered){
@@ -115,26 +120,24 @@ static inline void calcSortEval(chessPosition* position, chessMove* mv, AttackTa
 		}
 	}
 
-	if(targetAttacked){
+	if(targetAttacked  && (mv->captureType == none)){
 		sortEval = sortEval-100;
 		if(mv->type == kingMove){
 			sortEval = sortEval-1000;
 		}
-		if(!targetCovered){
+		if(!targetCovered){ //TODO: same problem as above, this never happens
 			sortEval = sortEval-100;
 		}
 	}
-
 
 	if( (mv->captureType != none) && ((BIT64(mv->targetField) & opponentAttackTable->completeAttackTable) == 0)) {
 		sortEval = sortEval+figureValues[mv->captureType];
 	}
 
-	if(position->madeMoves.length > 0){
+	if((position->madeMoves.length > 0) && (mv->captureType != none)){
 		chessMove previousMove = position->madeMoves[position->madeMoves.length];
 		if(previousMove.targetField == mv->sourceField) { //recapture is usually good
-			sortEval = sortEval + 20;
-
+			sortEval = sortEval + 200;
 		}
 	}
 
@@ -150,9 +153,9 @@ void orderStandardMoves(chessPosition* position, vdt_vector<chessMove>* moves) {
 
 	AttackTable opponentAttackTable = makeAttackTable(position, (playerColor) (1-position->toMove));
 	AttackTable ownAttackTable 		= makeAttackTable(position, position->toMove);
-
+	uint16_t hashedMove = moveOrderingHashTable[position->zobristHash & HASHSIZE];
 	for (uint16_t ind=0; ind < moves->length; ind++) {
-		calcSortEval(position, &(*moves)[ind], &opponentAttackTable, &ownAttackTable);
+		calcSortEval(position, &(*moves)[ind], &opponentAttackTable, &ownAttackTable, hashedMove);
 	}
 
 
@@ -163,9 +166,9 @@ void orderStandardMoves(chessPosition* position, vdt_vector<chessMove>* moves) {
 
 void orderCaptureMoves(chessPosition* position, vdt_vector<chessMove>* moves) {
 
-
+	uint16_t hashedMove = moveOrderingHashTable[position->zobristHash & HASHSIZE] ;
 	for (uint16_t ind=0; ind < moves->length; ind++) {
-		calcCaptureSortEval(position, &(*moves)[ind]);
+		calcCaptureSortEval(position, &(*moves)[ind], hashedMove);
 	}
 
 

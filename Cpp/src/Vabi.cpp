@@ -80,7 +80,7 @@ uint32_t runSinglePositionPerformanceTest(std::string position, uint16_t depth) 
 
 int main() {
 	fillZobristHash();
-	//runTests();
+	runTests();
 	/*std::string position = "RNBQKBNRPPPPPPPP0q000000000000000000000000000000pppppppprnbqkbnr";
 	chessPosition c = stringToChessPosition(position);
 	AttackTable t = makeAttackTable(&c, white);
@@ -146,7 +146,7 @@ int main() {
 
 	return 0;*/
 
-	perftTest();
+	//perftTest();
 	/*initialize_network("127.0.0.1", 9876);
 	std::string position = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwKQkq";
 	chessPosition c = stringToChessPosition(position);
@@ -190,6 +190,7 @@ int main() {
 					chessMove bestMove;
 					resetNodes();
 					resetQuiescenceNodes();
+					resetIndices();
 					struct timeval start, end;
 					long mtime, seconds, useconds;
 					gettimeofday(&start, NULL);
@@ -206,6 +207,13 @@ int main() {
 					std::cout << "Searched " <<  nodeCount << " positions in " << mtime << " for " << nps << " nodes per second" << std::endl;
 					std::cout << "Forced move " << moveToString(bestMove, c) << std::endl;
 					std::cout << "Evaluation "  << eval << std::endl;
+					int32_t* indices = getIndexCounts();
+					for(uint16_t k=0; k < 50; k++){
+						std::cout << indices[k] << " ";
+					}
+
+					std::cout << std::endl;
+
 	 				makeMove(&bestMove, &c);
 					std::string newPosition2 = chessPositionToString(c);
 					fsarray<uint8_t> raw_str2 = fsarray<uint8_t>(newPosition2.length());
@@ -229,7 +237,7 @@ int main() {
 			undoMove(&c);
 			std::string newPosition = chessPositionToString(c);
 			fsarray<uint8_t> raw_str = fsarray<uint8_t>(newPosition.length());
-			memcpy(raw_str.data, newPosition.c_str(), 64);
+			memcpy(raw_str.data, newPosition.c_str(), 69);
 			VDTstring str = VDTstring(raw_str);
 			auto newPosMsg = std::unique_ptr<VMPchessPosition>(new VMPchessPosition(str));
 			send_msg(std::move(newPosMsg), 0);
@@ -240,12 +248,12 @@ int main() {
 		if(forceMove) {
 
 			chessMove bestMove;
-			negamax(&c, 4, -100000, 100000, &bestMove);
+			negamax(&c, 8, -100000, 100000, &bestMove);
 			std::cout << "Forced move " << moveToString(bestMove, c) << std::endl;
 			makeMove(&bestMove, &c);
 			std::string newPosition = chessPositionToString(c);
 			fsarray<uint8_t> raw_str = fsarray<uint8_t>(newPosition.length());
-			memcpy(raw_str.data, newPosition.c_str(), 64);
+			memcpy(raw_str.data, newPosition.c_str(), 69);
 			VDTstring str = VDTstring(raw_str);
 			auto newPosMsg = std::unique_ptr<VMPchessPosition>(new VMPchessPosition(str));
 			send_msg(std::move(newPosMsg), 0);

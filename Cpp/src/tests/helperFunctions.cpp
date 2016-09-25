@@ -21,7 +21,7 @@ static char randomTokens[] = {'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', 
 
 static char figures[2][6] = { {'P', 'N', 'B', 'R', 'Q', 'K'}, {'p', 'n', 'b', 'r', 'q', 'k'}};
 
-std::string getRandomPosition() {
+std::string getRandomPosition(playerColor color) {
 	srand (time(NULL));
 
 	std::string ret = "";
@@ -31,6 +31,16 @@ std::string getRandomPosition() {
 		ret.push_back(randomTokens[index]);
 	}
 
+	if (color == black) {
+		ret.push_back('b');
+	} else {
+		ret.push_back('w');
+	}
+
+	ret.push_back('0');
+	ret.push_back('0');
+	ret.push_back('0');
+	ret.push_back('0');
 	return ret;
 }
 

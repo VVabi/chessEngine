@@ -20,6 +20,16 @@ static uint32_t nodes = 0;
 
 extern uint16_t moveOrderingHashTable[];
 
+static int32_t indices[150] = {0};
+
+void resetIndices(){
+	memset(indices, 0, 150*sizeof(int32_t));
+}
+
+int32_t* getIndexCounts(){
+	return indices;
+}
+
 void resetNodes(){
 	nodes = 0;
 }
@@ -33,7 +43,7 @@ static chessMove buffer[900];
 
 int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t beta, chessMove* bestMove) {
 
-
+	int16_t bestIndex = -1;
 	if(depth == 0) {
 		//return (1-2*position->toMove)*(position->figureEval+position->pieceTableEval);
 		return negamaxQuiescence(position, alpha, beta, 0);
@@ -60,19 +70,32 @@ int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t 
 			if(value > alpha){
 				alpha = value;
 				*bestMove = moves[ind];
+				bestIndex = ind;
 			}
 
 
 
 		}
 		undoMove(position);
+
+		if(depth == 8) {
+			std::cout << "Searched " << moveToString(moves[ind], *position) << " with eval " << alpha << " and sortEval " << moves[ind].sortEval << std::endl;
+		}
 		if(alpha >= beta) {
 			uint32_t hashIndex = position->zobristHash & HASHSIZE;
 			moveOrderingHashTable[hashIndex] = (bestMove->sourceField | (bestMove->targetField << 8));
 
+			if(bestIndex != -1){
+				indices[bestIndex]++;
+			}
+
 			//moves.free_array();
 			return beta;
 		}
+	}
+
+	if(bestIndex != -1){
+		indices[bestIndex]++;
 	}
 	uint32_t hashIndex = position->zobristHash & HASHSIZE;
 	moveOrderingHashTable[hashIndex] = (bestMove->sourceField | (bestMove->targetField << 8));

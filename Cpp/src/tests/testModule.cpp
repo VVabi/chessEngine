@@ -11,14 +11,12 @@
 
 typedef testResult (*testFunction)( void );
 
-static testFunction funcs[] = { testMakeMove };
+static testFunction funcs[] = { testMakeMove, testUndoMove, testPerftTestSuite};
 
 
-int numTests = 1;
+int numTests = 3;
 
 void runTests() {
-
-
 	for(uint16_t ind=0; ind < numTests; ind++){
 		testResult ret = funcs[ind]();
 		std::cout << "Test " << ret.testName << " ";
@@ -27,11 +25,6 @@ void runTests() {
 		} else {
 			std::cout << "FAILED" << std::endl;
 		}
-
-
 	}
-
-
-
 }
 
