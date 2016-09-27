@@ -58,6 +58,7 @@ template<typename T> class vdt_vector{
 				T* buffer = new T[new_length];
 				allocated_length = new_length;
 				memcpy(buffer, data, length*sizeof(T));
+				std::cout << "NEED TO RESIZE VECTOR! WTF?" << std::endl;
 				delete[] data;
 				data = buffer;
 			}

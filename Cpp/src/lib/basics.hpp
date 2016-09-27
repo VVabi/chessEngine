@@ -16,6 +16,8 @@
 
 #define BIT64(x) (1UL << x)
 
+#define PIECETABLE(a)  			((a & 0xFFFF)-(1 << 15)-64*500)
+#define ENDGAMEPIECETABLE(a)  	((a >> 16)-(1 << 15)-64*500)
 
 #define FILE(x) (x & 7)
 #define ROW(x)  (x >> 3)
@@ -49,7 +51,7 @@ struct chessPosition {
 	uint8_t castlingRights;
 	uint8_t enPassantFile; //the file of the CAPTURED pawn
 	int16_t figureEval;
-	int16_t pieceTableEval;
+	uint32_t pieceTableEval;
 	uint64_t zobristHash;
 	vdt_vector<chessMove> madeMoves;
 	vdt_vector<uint16_t> castlingAndEpStack;
@@ -62,4 +64,5 @@ inline figureType toFigureType(uint16_t num);
 std::string moveToString(chessMove move, chessPosition position);
 uint64_t stringToMove(std::string mv);
 uint64_t getRandUint64();
+void debug_incremental_calculations(chessPosition* position);
 #endif /* LIB_BASICS_HPP_ */

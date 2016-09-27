@@ -158,16 +158,16 @@ void zeroInitPosition(chessPosition* position) {
 	position->pieceTables.add(&blackTable);
 
 	position->enPassantFile = 0;
-	position->madeMoves = vdt_vector<chessMove>(150);
-	position->castlingAndEpStack = vdt_vector<uint16_t>(150);
+	position->madeMoves = vdt_vector<chessMove>(300);
+	position->castlingAndEpStack = vdt_vector<uint16_t>(300);
 	position->figureEval    = 0;
 #else
 	memset(position, 0, sizeof(chessPosition));
-	position->madeMoves = vdt_vector<chessMove>(150);
-	position->castlingAndEpStack = vdt_vector<uint16_t>(150);
+	position->madeMoves = vdt_vector<chessMove>(300);
+	position->castlingAndEpStack = vdt_vector<uint16_t>(300);
 #endif
 	position->zobristHash    = calcZobristHash(position);
-	position->pieceTableEval = calcPieceTableValue(position);
+
 
 }
 
@@ -265,9 +265,11 @@ chessPosition stringToChessPosition(std::string strposition) {
 		position.castlingRights = position.castlingRights | 8;
 	}
 
-	position.pieceTableEval = calcPieceTableValue(&position);
-	position.zobristHash    = calcZobristHash(&position);
 	position.figureEval   = calcFigureEvaluation(&position);
+	position.pieceTableEval = ((1 << 15) + position.figureEval+ calcPieceTableValue(&position))
+							+(((1 << 14) + calcEndGamePieceTableValue(&position)+position.figureEval) << 16);
+	position.zobristHash    = calcZobristHash(&position);
+
 	return position;
 }
 
@@ -307,3 +309,37 @@ uint64_t stringToMove(std::string mv){
 
 	return BIT64(sourceField) | BIT64(targetField);
 }
+
+
+void debug_incremental_calculations(chessPosition* position) {
+
+	int16_t eval = calcFigureEvaluation(position);
+
+	if(eval != position->figureEval){
+		std::cout << "Figure evaluation is wrong after moveMake!" << std::endl;
+	}
+
+	int16_t pieceTableEval = calcPieceTableValue(position)+eval;
+	int32_t buffer =  position->pieceTableEval & 0xFFFF;
+	int32_t buffer2  = buffer-(1 << 15);
+
+	if(pieceTableEval !=  buffer2){
+		std::cout << "Piece table evaluation is wrong after moveMake!" << std::endl;
+	}
+
+	int16_t endgamepieceTableEval = calcEndGamePieceTableValue(position)+eval;
+	buffer =  (position->pieceTableEval >> 16);
+	buffer2  = buffer-(1 << 14);
+	if(endgamepieceTableEval !=  buffer2){
+		std::cout << "endgame Piece table evaluation is wrong after moveMake!" << std::endl;
+	}
+
+	uint64_t hash = calcZobristHash(position);
+	if(hash != position->zobristHash){
+		std::cout << "zobrist hash wrong after make move" << std::endl;
+	}
+
+
+
+}
+

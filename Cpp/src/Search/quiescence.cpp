@@ -15,7 +15,7 @@
 #include <lib/bitfiddling.h>
 #include "search.hpp"
 #include <hashTables/hashTables.hpp>
-
+#include <lib/Evaluation/evaluation.hpp>
 
 
 extern uint16_t moveOrderingHashTable[];
@@ -36,7 +36,7 @@ static chessMove buffer[32*50];
 
 int32_t negamaxQuiescence(chessPosition* position, int32_t alpha, int32_t beta, uint16_t depth) {
 
-	int32_t baseEval = (1-2*position->toMove)*(position->figureEval+position->pieceTableEval);
+	int32_t baseEval = evaluation(position);
 
 	if(baseEval > alpha){
 		alpha = baseEval;

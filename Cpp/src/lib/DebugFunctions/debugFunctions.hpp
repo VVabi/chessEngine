@@ -10,4 +10,5 @@
 
 int16_t calcFigureEvaluation(chessPosition* position);
 int16_t calcPieceTableValue(chessPosition* position);
+int16_t calcEndGamePieceTableValue(chessPosition* position);
 #endif /* LIB_DEBUGFUNCTIONS_DEBUGFUNCTIONS_HPP_ */

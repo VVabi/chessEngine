@@ -27,6 +27,29 @@ using namespace std;
 #include <unistd.h>
 #include <Search/search.hpp>
 #include <hashTables/hashTables.hpp>
+#include <selfPlaying/selfPlaying.hpp>
+#include <lib/Evaluation/evaluation.hpp>
+#include <stdlib.h>     /* srand, rand */
+#include <time.h>       /* time */
+
+
+extern int32_t completePieceTables[7][2][64];
+extern int16_t endGamepieceTables[7][2][64];
+extern int16_t pieceTables[7][2][64];
+extern uint16_t figureValues[];
+
+
+uint64_t get_timestamp(){
+	struct timeval start;
+	uint64_t mtime, seconds, useconds;
+	gettimeofday(&start, NULL);
+	seconds  = start.tv_sec;
+	useconds = start.tv_usec;
+
+	mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
+	return mtime;
+
+}
 
 void outPutuint64(uint64_t num){
 
@@ -58,20 +81,21 @@ uint32_t runSinglePositionPerformanceTest(std::string position, uint16_t depth) 
 	chessMove bestMove;
 	resetQuiescenceNodes();
 	struct timeval start, end;
-	long mtime, seconds, useconds;
+	//long mtime, seconds, useconds;
 	gettimeofday(&start, NULL);
-	int32_t eval = negamax(&c, depth, -100000, 100000, &bestMove);
+	//int32_t eval = negamax(&c, depth, -100000, 100000, &bestMove);
+	negamax(&c, depth, -100000, 100000, &bestMove);
 	gettimeofday(&end, NULL);
 
-	seconds  = end.tv_sec  - start.tv_sec;
+	/*seconds  = end.tv_sec  - start.tv_sec;
 	useconds = end.tv_usec - start.tv_usec;
 
-	mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
+	mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;*/
 	uint32_t nodeCount = getNodes()+getQuiescenceNodes();
-	double nps = ((double) nodeCount)/((double) mtime)*1000.0;
-	std::cout << "Searched " <<  nodeCount << " positions in " << mtime << " for " << nps << " nodes per second" << std::endl;
+	//double nps = ((double) nodeCount)/((double) mtime)*1000.0;
+	/*std::cout << "Searched " <<  nodeCount << " positions in " << mtime << " for " << nps << " nodes per second" << std::endl;
 	std::cout << "Forced move " << moveToString(bestMove, c) << std::endl;
-	std::cout << "Evaluation "  << eval << std::endl;
+	std::cout << "Evaluation "  << eval << std::endl;*/
 
 	return nodeCount;
 
@@ -79,8 +103,29 @@ uint32_t runSinglePositionPerformanceTest(std::string position, uint16_t depth) 
 
 
 int main() {
+
+	for(uint32_t index=0; index < 7; index++) {
+		for(uint32_t t=0; t < 2; t++) {
+			for(uint32_t k=0; k < 64; k++) {
+					completePieceTables[index][t][k] = ((uint16_t) (pieceTables[index][t][k]+figureValues[index])) |  ( ((uint16_t) (endGamepieceTables[index][t][k]+figureValues[index])) << 16);
+			}
+		}
+	}
+
+	srand (time(NULL));
 	fillZobristHash();
-	runTests();
+	/*std::string position = "R000K00RP0000000P00000000000000000000000000000000000ppppr000k00rwKQkq";
+	chessPosition c = stringToChessPosition(position);
+	std::cout << evaluation(&c) << std::endl;*/
+	/*uint64_t pawns = BIT64(10) | BIT64(18) | BIT64(11) | BIT64(12) | BIT64(36);
+
+	std::cout << staticPawnEval(pawns, white) << std::endl;*/
+
+	/*selfPlayResult k = playSelf(3,3,10);
+	std::cout << k.engine1Wins<< std::endl;
+	std::cout << k.draws << std::endl;
+	std::cout << k.engine2Wins << std::endl;*/
+	//runTests();
 	/*std::string position = "RNBQKBNRPPPPPPPP0q000000000000000000000000000000pppppppprnbqkbnr";
 	chessPosition c = stringToChessPosition(position);
 	AttackTable t = makeAttackTable(&c, white);
@@ -92,8 +137,8 @@ int main() {
 	outPutuint64(t.attackTables[queen]);*/
 
 
-	/*for(int depth = 3; depth < 6; depth++) {
-		std::ifstream infile("chesspositions.txt");
+	/*for(int depth = 3; depth < 8; depth++) {
+		std::ifstream infile("chesspositionsfixed.txt");
 		std::string line;
 		uint64_t totalNodes = 0;
 		while (std::getline(infile, line))
@@ -147,7 +192,7 @@ int main() {
 	return 0;*/
 
 	//perftTest();
-	/*initialize_network("127.0.0.1", 9876);
+	initialize_network("127.0.0.1", 9876);
 	std::string position = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwKQkq";
 	chessPosition c = stringToChessPosition(position);
 
@@ -191,17 +236,16 @@ int main() {
 					resetNodes();
 					resetQuiescenceNodes();
 					resetIndices();
-					struct timeval start, end;
-					long mtime, seconds, useconds;
-					gettimeofday(&start, NULL);
-					negamax(&c, 6, -100005, 100005, &bestMove);
-					negamax(&c, 7, -100005, 100005, &bestMove);
-					int32_t eval = negamax(&c, 8, -100005, 100005, &bestMove);
-					gettimeofday(&end, NULL);
 
-					seconds  = end.tv_sec  - start.tv_sec;
-					useconds = end.tv_usec - start.tv_usec;
-					mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
+					uint64_t start_ts  = get_timestamp();
+					uint16_t depth = 6;
+					int32_t eval = 0;
+					while(get_timestamp()-start_ts < 2000) {
+						eval = negamax(&c, depth, -100005, 100005, &bestMove);
+						depth++;
+					}
+					std::cout << "Depth searched " << depth << std::endl;
+					uint64_t mtime = get_timestamp()-start_ts;
 					uint32_t nodeCount = getNodes()+getQuiescenceNodes();
 					double nps = ((double) nodeCount)/((double) mtime)*1000.0;
 					std::cout << "Searched " <<  nodeCount << " positions in " << mtime << " for " << nps << " nodes per second" << std::endl;
@@ -258,7 +302,7 @@ int main() {
 			auto newPosMsg = std::unique_ptr<VMPchessPosition>(new VMPchessPosition(str));
 			send_msg(std::move(newPosMsg), 0);
 		}
-	}*/
+	}
 
 
 	/*ofstream o;

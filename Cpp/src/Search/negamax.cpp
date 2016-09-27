@@ -39,7 +39,7 @@ uint32_t getNodes(){
 }
 
 
-static chessMove buffer[900];
+static chessMove buffer[1500];
 
 int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t beta, chessMove* bestMove) {
 
@@ -78,9 +78,9 @@ int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t 
 		}
 		undoMove(position);
 
-		if(depth == 8) {
+		/*if(depth == 8) {
 			std::cout << "Searched " << moveToString(moves[ind], *position) << " with eval " << alpha << " and sortEval " << moves[ind].sortEval << std::endl;
-		}
+		}*/
 		if(alpha >= beta) {
 			uint32_t hashIndex = position->zobristHash & HASHSIZE;
 			moveOrderingHashTable[hashIndex] = (bestMove->sourceField | (bestMove->targetField << 8));
