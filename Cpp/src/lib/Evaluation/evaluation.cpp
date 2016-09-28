@@ -33,7 +33,7 @@ static int32_t rookOpenFiles(chessPosition* position, uint8_t* pawnOccupancy) {
 
 }
 
-int32_t evaluation(chessPosition* position){
+int32_t evaluation(chessPosition* position, int32_t alpha, int32_t beta){
 
 	//evaluation from the point of view of WHITE, sign changed in the end if necessary
 	//--------------------------------------------------------------------------------------
@@ -41,6 +41,16 @@ int32_t evaluation(chessPosition* position){
 	int32_t buffer =  position->pieceTableEval & 0xFFFF;
 	buffer  = buffer-(1 << 15);
 	eval = eval+buffer;
+
+
+	int32_t evalsigned = (1-2*position->toMove)*eval;
+
+	if( (evalsigned < alpha - 500) || (evalsigned > beta+500)) {
+		//std::cout << "Futility pruning in eval" << std::endl;
+		return evalsigned;
+	}
+
+
 	uint8_t pawnColumnOccupancy[2];
 	eval = eval+pawnEvaluation(position, pawnColumnOccupancy);
 
@@ -55,6 +65,8 @@ int32_t evaluation(chessPosition* position){
 	}
 
 	eval = eval+(rand() & 7)-3;
+
+
 	return (1-2*position->toMove)*eval;
 
 }

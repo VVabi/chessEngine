@@ -36,7 +36,7 @@ static chessMove buffer[32*50];
 
 int32_t negamaxQuiescence(chessPosition* position, int32_t alpha, int32_t beta, uint16_t depth) {
 
-	int32_t baseEval = evaluation(position);
+	int32_t baseEval = evaluation(position, alpha, beta);
 
 	if(baseEval > alpha){
 		alpha = baseEval;

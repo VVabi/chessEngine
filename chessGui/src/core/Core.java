@@ -93,6 +93,11 @@ public class Core {
                 VMPforceMove force = new VMPforceMove((byte) 1);
                 server.send(force, 0);
             }
+            else if(e instanceof NewPositionEvent){
+                NewPositionEvent ev = (NewPositionEvent) e;
+                VMPchessPosition position = new VMPchessPosition(new VDTstring(ev.newPosition.getBytes()));
+                server.send(position, 0);
+            }
 
         }
         message m = server.getMessage(MessageIDs.VMPchessPosition_unique_id);

@@ -8,7 +8,7 @@
 #ifndef EVALUATION_EVALUATION_HPP_
 #define EVALUATION_EVALUATION_HPP_
 
-int32_t evaluation(chessPosition* position);
+int32_t evaluation(chessPosition* position, int32_t alpha, int32_t beta);
 int32_t pawnEvaluation(chessPosition* position, uint8_t* pawnColumnOccupancy);
 int32_t staticPawnEval(uint64_t pawns, playerColor color);
 

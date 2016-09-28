@@ -343,3 +343,8 @@ void debug_incremental_calculations(chessPosition* position) {
 
 }
 
+void free_position(chessPosition* position) {
+	position->castlingAndEpStack.free_array();
+	position->madeMoves.free_array();
+}
+

@@ -46,9 +46,10 @@ public class PlayingController {
 
     public void returnFromEditor(String position){
         editor.exit();
-        evaluationField.setText("");
-        chessboard.setPosition(position.substring(0,64));
-        sidetomove = position.charAt(64);
+       // evaluationField.setText("");
+        NewPositionEvent e = new NewPositionEvent();
+        e.newPosition    = position;
+        eventInterface.addEngineEvent(e);
     }
 
     @FXML

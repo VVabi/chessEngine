@@ -65,4 +65,5 @@ std::string moveToString(chessMove move, chessPosition position);
 uint64_t stringToMove(std::string mv);
 uint64_t getRandUint64();
 void debug_incremental_calculations(chessPosition* position);
+void free_position(chessPosition* position);
 #endif /* LIB_BASICS_HPP_ */
