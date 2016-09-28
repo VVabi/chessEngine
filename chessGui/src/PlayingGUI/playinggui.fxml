@@ -72,7 +72,8 @@
         <ChessBoard fx:id="chessboard" onAction="#handleClicked"
                     GridPane.columnIndex="1" GridPane.rowIndex="0"/>
 
-
+        <TextArea fx:id="debugArea"  prefWidth="320" prefHeight="600"
+                    GridPane.columnIndex="2" GridPane.rowIndex="0"/>
 
 
     </GridPane>

@@ -19,6 +19,7 @@ class networkUserInterface: public userInterface {
 		}
 		void initialize();
 		void sendNewPosition(std::string position);
+		void sendSearchInfo(uint64_t nodes, uint32_t time, uint32_t eval, uint32_t depth, std::string bestMove);
 		bool receiveMove(std::string& move);
 		bool receiveUndoMove();
 		bool receiveForceMove();

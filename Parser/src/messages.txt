@@ -21,3 +21,11 @@ endstruct
 struct:forceMove
 uint8 dummy
 endstruct
+
+struct:searchInfo
+uint64 nodes
+uint32 time
+uint32 depth
+int32 eval
+vdt:string moveString
+endstruct

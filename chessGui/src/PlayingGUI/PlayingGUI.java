@@ -34,9 +34,9 @@ public class PlayingGUI {
         }
         root.setId("background");
         stage.setTitle("Vabi2.0");
-        scene = new Scene(root, 750,600);
+        scene = new Scene(root, 1280,600);
         scene.getStylesheets().add(PlayingGUI.class.getResource("menuStyle.css").toExternalForm());
-        stage.setResizable(false);
+        //stage.setResizable(false);
         stage.setScene(scene);
         stage.show();
 

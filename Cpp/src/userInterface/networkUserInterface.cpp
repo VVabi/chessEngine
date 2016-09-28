@@ -64,3 +64,11 @@ bool networkUserInterface::receiveNewPosition(std::string& position) {
 	return false;
 
 }
+
+void networkUserInterface::sendSearchInfo(uint64_t nodes, uint32_t time, uint32_t eval, uint32_t depth, std::string bestMove) {
+	fsarray<uint8_t> raw_str = fsarray<uint8_t>(bestMove.length());
+	memcpy(raw_str.data, bestMove.c_str(), bestMove.length());
+	VDTstring str = VDTstring(raw_str);
+	auto searchInfo = std::unique_ptr<VMPsearchInfo>(new VMPsearchInfo(nodes, time, depth, eval, str));
+	send_msg(std::move(searchInfo), 0);
+}

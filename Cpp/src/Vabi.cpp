@@ -101,27 +101,31 @@ uint32_t runSinglePositionPerformanceTest(std::string position, uint16_t depth) 
 	return nodeCount;
 
 }
+networkUserInterface* userInterface;
 
-
-int32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maximal_time, uint32_t* nodeCount, uint64_t* mtime) {
+uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maximal_time, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval) {
 	resetNodes();
 	resetQuiescenceNodes();
 	resetIndices();
 	uint64_t start_ts  = get_timestamp();
 	uint16_t depth = 6;
-	int32_t eval = 0;
+	*eval = 0;
 	while((get_timestamp()-start_ts < maximal_time) && (depth < 14)) {
-		eval = negamax(position, depth, -100005, 100005, bestMove);
-		if(eval > 90000) {
+		*eval = negamax(position, depth, -100005, 100005, bestMove);
+
+		std::cout << depth <<std::endl;
+		*nodeCount = getNodes()+getQuiescenceNodes();
+		*mtime = get_timestamp()-start_ts;
+		userInterface->sendSearchInfo(*nodeCount, *mtime, *eval, depth, moveToString(*bestMove, *position));
+		depth++;
+		if(*eval > 90000) {
 			break;
 		}
-		std::cout << depth <<std::endl;
-		depth++;
 	}
 	depth--;
 	std::cout << "Depth searched " << depth << std::endl;
 	*mtime = get_timestamp()-start_ts;
-	*nodeCount = getNodes()+getQuiescenceNodes();
+
 	double nps = ((double) *nodeCount)/((double) *mtime)*1000.0;
 	std::cout << "Searched " <<  *nodeCount << " positions in " << *mtime << " for " << nps << " nodes per second" << std::endl;
 	std::cout << "Forced move " << moveToString(*bestMove, *position) << std::endl;
@@ -131,11 +135,11 @@ int32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxima
 		std::cout << indices[k] << " ";
 	}
 	std::cout << std::endl;
-	return eval;
+	return depth;
 }
 
 
-networkUserInterface* userInterface;
+
 
 int main() {
 
@@ -191,11 +195,13 @@ int main() {
 					chessMove bestMove;
 					uint32_t nodeCount;
 					uint64_t mtime;
-					int32_t eval = searchMove(&position, &bestMove, 2000, &nodeCount, &mtime);
+					int32_t eval = 0;
+					searchMove(&position, &bestMove, 2000, &nodeCount, &mtime, &eval);
 					std::cout << eval << std::endl;
 					makeMove(&bestMove, &position);
 					std::string newPosition2 = chessPositionToString(position);
 					userInterface->sendNewPosition(newPosition2);
+
 				}
 			} else {
 				std::cout << "Invalid move!" << std::endl;
@@ -218,11 +224,12 @@ int main() {
 			chessMove bestMove;
 			uint32_t nodeCount;
 			uint64_t mtime;
-			int32_t eval = searchMove(&position, &bestMove, 2000, &nodeCount, &mtime);
-			std::cout << eval << std::endl;
+			int32_t eval = 0;
+			searchMove(&position, &bestMove, 2000, &nodeCount, &mtime, &eval);
 			makeMove(&bestMove, &position);
 			std::string newPosition = chessPositionToString(position);
 			userInterface->sendNewPosition(newPosition);
+
 		}
 	}
 

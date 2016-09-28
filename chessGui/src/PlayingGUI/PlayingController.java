@@ -9,6 +9,7 @@ import core.PlayingEventInterface;
 import core.events.*;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import EditorGUI.EditorGUI;
@@ -18,6 +19,7 @@ import EditorGUI.EditorGUI;
  */
 public class PlayingController {
 
+    @FXML private TextArea debugArea;
     @FXML private ChessBoard chessboard;
     @FXML private ImageView waitImage;
     boolean isClicked = false;
@@ -27,7 +29,7 @@ public class PlayingController {
 
     int clickedfield = 0;
 
-   core.PlayingEventInterface eventInterface;
+    core.PlayingEventInterface eventInterface;
 
     public PlayingController(){
 
@@ -59,10 +61,20 @@ public class PlayingController {
 
     @FXML
     public void handleNewGame(){
+        String position = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwKQkq";
+        NewPositionEvent e = new NewPositionEvent();
+        e.newPosition    = position;
+        eventInterface.addEngineEvent(e);
 
-        String position = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnr";
-        setPosition(position);
+    }
 
+    public void handleDebugInfo(SearchDebugEvent e) {
+        debugArea.clear();
+        debugArea.appendText("Depth " + e.depth+"\n");
+        debugArea.appendText("Eval  " + e.eval+"\n");
+        debugArea.appendText("Nodes " + e.nodes + " in " + e.time + " ms"+"\n");
+        debugArea.appendText("NPS " + ((int) (1000.0*((double) e.nodes)/((double) e.time)))+"\n");
+        debugArea.appendText("Best move " + e.move+"\n");
     }
 
     @FXML
@@ -208,6 +220,11 @@ public class PlayingController {
             chessboard.setPosition(((NewPositionEvent) e).newPosition);
             System.out.println(((NewPositionEvent) e).newPosition);
         }
+        if(e instanceof SearchDebugEvent){
+            handleDebugInfo((SearchDebugEvent) e);
+        }
+
+
 
     }
 

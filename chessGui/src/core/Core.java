@@ -4,10 +4,7 @@ import PlayingGUI.PlayingGUI;
 import communication.VDT.VDTstring;
 import communication.VMPServer.VMPServer;
 import communication.messages.*;
-import core.events.CheckMoveEvent;
-import core.events.ForceMoveEvent;
-import core.events.NewPositionEvent;
-import core.events.UndoMoveEvent;
+import core.events.*;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -62,7 +59,7 @@ public class Core {
             public void run() {
                 ChessEvent gevent = engineEventInterface.consumeGuiEvent();
                 while(gevent != null){
-                    engineEventInterface.addGuiEvent(gevent);
+                    playingEventInterface.addGuiEvent(gevent);
                     gevent = engineEventInterface.consumeGuiEvent();
                 }
             }
@@ -102,11 +99,18 @@ public class Core {
         }
         message m = server.getMessage(MessageIDs.VMPchessPosition_unique_id);
         if(m != null) {
-            VMPchessPosition pos =(VMPchessPosition) m;
-            String position = new String(pos.position.chars);
-            NewPositionEvent newPositionEvent = new NewPositionEvent();
-            newPositionEvent.newPosition = position;
-            playingEventInterface.addGuiEvent(newPositionEvent);
+
+                VMPchessPosition pos = (VMPchessPosition) m;
+                String position = new String(pos.position.chars);
+                NewPositionEvent newPositionEvent = new NewPositionEvent();
+                newPositionEvent.newPosition = position;
+                engineEventInterface.addGuiEvent(newPositionEvent);
+      }
+        m = server.getMessage(MessageIDs.VMPsearchInfo_unique_id);
+        if(m != null) {
+            VMPsearchInfo info = (VMPsearchInfo) m;
+            SearchDebugEvent ev = new SearchDebugEvent(info.nodes, info.time, info.eval, info.depth, new String(info.moveString.chars));
+            engineEventInterface.addGuiEvent(ev);
         }
     }
 }
