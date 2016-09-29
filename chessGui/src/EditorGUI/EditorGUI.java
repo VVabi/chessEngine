@@ -42,7 +42,7 @@ public class EditorGUI {
 
         econtroller.setPlayController(pcontroller);
         econtroller.setPosition(position);
-
+        econtroller.setMovingSide(position.charAt(64));
     }
 
     public void exit(){
@@ -51,5 +51,8 @@ public class EditorGUI {
 
     }
 
+    public char getMovingSide(){
+        return econtroller.getMovingSide();
+    }
 
 }

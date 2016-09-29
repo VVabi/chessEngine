@@ -81,6 +81,11 @@ public class FigureChooser extends Canvas {
         }
     }
 
+    public void setMovingside(char c){
+        movingside = c;
+        draw();
+    }
+
     public char getMovingside(){
         return movingside;
     }

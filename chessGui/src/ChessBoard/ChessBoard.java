@@ -13,7 +13,7 @@ import javafx.scene.layout.Pane;
  */
 public class ChessBoard extends Pane {
 
-    String position = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnr";
+    String position = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwKQkq";
     boolean whitesidedown = true;
     int fieldsize = 60;
     fieldCanvas fieldcanvas;

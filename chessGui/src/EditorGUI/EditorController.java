@@ -5,6 +5,7 @@ import ChessBoard.ChessBoard;
 import PlayingGUI.PlayingController;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
+import javafx.scene.control.CheckBox;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
@@ -17,6 +18,14 @@ public class EditorController {
     private FigureChooser chooser;
     @FXML
     private ChessBoard chessboard;
+    @FXML
+    private CheckBox wkcastle;
+    @FXML
+    private CheckBox wqcastle;
+    @FXML
+    private CheckBox bkcastle;
+    @FXML
+    private CheckBox bqcastle;
 
 
     PlayingController pcontroller;
@@ -50,10 +59,21 @@ public class EditorController {
 
     @FXML
     public void handlePlay(){
-        System.out.println(getPosition()+chooser.getMovingside()+"nnnn");
-        pcontroller.returnFromEditor(getPosition()+chooser.getMovingside()+"nnnn");
+        String castling = (wkcastle.isSelected()? "K":"0")+ (wqcastle.isSelected()? "Q":"0")+(bkcastle.isSelected()? "k":"0")+(bqcastle.isSelected()? "q":"0");
+        String ret = getPosition().substring(0,64)+chooser.getMovingside()+castling;
+        System.out.println(ret);
+        pcontroller.returnFromEditor(ret);
 
     }
+
+    public void setMovingSide(char side) {
+        chooser.setMovingside(side);
+    }
+
+    public char getMovingSide() {
+        return chooser.getMovingside();
+    }
+
 
     @FXML
     public void handleChooserClicked(MouseEvent event){
@@ -76,6 +96,21 @@ public class EditorController {
 
     public void setPosition(String pos){
         chessboard.setPosition(pos);
+
+        if(pos.charAt(65) == 'K'){
+            wkcastle.setSelected(true);
+        }
+        if(pos.charAt(66) == 'Q'){
+            wqcastle.setSelected(true);
+        }
+        if(pos.charAt(67) == 'k'){
+           bkcastle.setSelected(true);
+        }
+        if(pos.charAt(68) == 'q'){
+            bqcastle.setSelected(true);
+        }
+
+
     }
 
 }

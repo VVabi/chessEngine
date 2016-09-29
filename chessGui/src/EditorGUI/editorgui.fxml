@@ -4,6 +4,7 @@
 <?import ChessBoard.FigureChooser?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <GridPane fx:controller="EditorGUI.EditorController"
           xmlns:fx="http://javafx.com/fxml" alignment="center" hgap="10" vgap="10">
     <padding><Insets top="25" right="25" bottom="10" left="25"/></padding>
@@ -12,6 +13,12 @@
         <padding><Insets top="0" right="25" bottom="0" left="25"/></padding>
         <Button text="Clear"  prefWidth="160" prefHeight="20" onAction="#handleClear"></Button>
         <Button text="Play"  prefWidth="160" prefHeight="20" onAction="#handlePlay"></Button>
+        <CheckBox fx:id="wkcastle" text="White kingside" prefWidth="160" prefHeight="20"></CheckBox>
+        <CheckBox fx:id="wqcastle" text="White queenside" prefWidth="160" prefHeight="20"></CheckBox>
+        <CheckBox fx:id="bkcastle" text="Black kingside" prefWidth="160" prefHeight="20"></CheckBox>
+        <CheckBox fx:id="bqcastle" text="Black queenside" prefWidth="160" prefHeight="20"></CheckBox>
+
+
     </VBox>
 
     <ChessBoard fx:id="chessboard" onAction="#handleClicked"

@@ -51,11 +51,15 @@ int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t 
 
 	vdt_vector<chessMove> moves = vdt_vector<chessMove>(buffer+depth*100,100);
 	generateAllMoves(&moves, position);
-	orderStandardMoves(position, &moves);
+	bool isInCheck = orderStandardMoves(position, &moves);
 
 	//TODO: we currently detect stalemate as checkmate!!
-	bool isMate = true;
+	bool legalMovesAvailable = false;
 	for(uint16_t ind=0; ind < moves.length; ind++){
+		if(moves[ind].sortEval < -10000){
+			break;
+		}
+
 		makeMove(&moves[ind], position);
 		uint16_t kingField = findLSB( position->pieceTables[1- position->toMove][king]);
 
@@ -63,7 +67,7 @@ int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t 
 
 		} else {
 			nodes++;
-			isMate = false;
+			legalMovesAvailable = true;
 			chessMove mv;
 			int32_t value = -negamax(position, depth-1, -beta, -alpha, &mv);
 
@@ -99,9 +103,12 @@ int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t 
 	}
 	uint32_t hashIndex = position->zobristHash & HASHSIZE;
 	moveOrderingHashTable[hashIndex] = (bestMove->sourceField | (bestMove->targetField << 8));
-	if(isMate){
-		//moves.free_array();
-		return -99000-depth;
+	if(!legalMovesAvailable){
+		if(isInCheck){
+			return -99000-depth;
+		} else {
+			return 0;
+		}
 	}
 	//moves.free_array();
 	return alpha;

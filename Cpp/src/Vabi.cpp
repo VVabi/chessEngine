@@ -13,13 +13,9 @@ using namespace std;
 #include <tests/tests.hpp>
 #include <DataTypes/vdt_vector.hpp>
 #include <lib/moveGeneration/moveGeneration.hpp>
-#include <magicNumberGeneration/magicNumberGeneration.hpp>
 #include <fstream>
 #include <DataTypes/threadSafeQueue.hpp>
 #include <tr1/memory>
-#include <communication/Network/message.h>
-#include <communication/gen/VMPmessages.h>
-#include <communication/Network/network.h>
 #include <lib/Attacks/attacks.hpp>
 #include <lib/bitfiddling.h>
 #include <sys/time.h>
@@ -153,6 +149,14 @@ int main() {
 
 	srand (time(NULL));
 	fillZobristHash();
+	//runTests();
+	/*std::string positionStrTest = "R000K00RP0PBBPPP00P00Q0p0000P000000P0000bn00pnp0p0pNqpb0r000k00rbKQkq";
+	chessPosition positionT = stringToChessPosition(positionStrTest);
+	vdt_vector<chessMove> moves = vdt_vector<chessMove>(100);
+
+	generateAllMoves(&moves, &positionT);
+	orderStandardMoves(&positionT, &moves);*/
+	//return 0;
 	userInterface = new networkUserInterface();
 
 
@@ -164,19 +168,19 @@ int main() {
 		if(userInterface->receiveNewPosition(positionstr)){
 			free_position(&position);
 			position = stringToChessPosition(positionstr);
-			fsarray<uint8_t> raw_str = fsarray<uint8_t>(69);
-			memcpy(raw_str.data, positionstr.c_str(), 69);
-			VDTstring str = VDTstring(raw_str);
-			auto newPosMsg = std::unique_ptr<VMPchessPosition>(new VMPchessPosition(str));
-			send_msg(std::move(newPosMsg), 0);
+			userInterface->sendNewPosition(positionstr);
 		}
 		if(userInterface->receiveMove(move)){
 			vdt_vector<chessMove> moves = vdt_vector<chessMove>(100);
 			uint64_t mv = stringToMove(move);
 			generateAllMoves(&moves, &position);
+			orderStandardMoves(&position, &moves);
 			bool found = false;
 			chessMove m;
 			for(uint16_t ind=0; ind < moves.length; ind++) {
+				if(moves[ind].sortEval < -10000) {
+					break;
+				}
 				if(moves[ind].move == mv){
 					found = true;
 					m = moves[ind];
@@ -213,11 +217,7 @@ int main() {
 			std::cout << "Got undo event!" << std::endl;
 			undoMove(&position);
 			std::string newPosition = chessPositionToString(position);
-			fsarray<uint8_t> raw_str = fsarray<uint8_t>(newPosition.length());
-			memcpy(raw_str.data, newPosition.c_str(), 69);
-			VDTstring str = VDTstring(raw_str);
-			auto newPosMsg = std::unique_ptr<VMPchessPosition>(new VMPchessPosition(str));
-			send_msg(std::move(newPosMsg), 0);
+			userInterface->sendNewPosition(newPosition);
 		}
 
 		if(userInterface->receiveForceMove()) {
