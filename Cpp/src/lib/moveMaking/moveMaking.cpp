@@ -76,14 +76,14 @@ inline static void makeEnPassant(chessMove* move, chessPosition* position) {
 	playerColor toMove 									= position->toMove;
 	position->pieces[toMove] 							= position->pieces[toMove]^move->move;
 	position->pieceTables[toMove][pawn] 			    = position->pieceTables[toMove][pawn]^move->move;
-	uint16_t shift = (toMove? move->targetField+8: move->targetField-8);
+	uint16_t shift 										= (toMove? move->targetField+8: move->targetField-8);
 	position->pieceTables[1-toMove][move->captureType] 	= position->pieceTables[1-toMove][pawn] ^ BIT64(shift);
-	position->pieces[1-toMove] 							= position->pieces[1-toMove] ^BIT64(shift);
+	position->pieces[1-toMove] 							= position->pieces[1-toMove] ^ BIT64(shift);
 	position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*(completePieceTables[pawn][toMove][move->targetField]-completePieceTables[pawn][toMove][move->sourceField]);
 	position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*completePieceTables[pawn][1-toMove][shift];
 
 	position->zobristHash = position->zobristHash^zobristHash[pawn][toMove][move->targetField]^zobristHash[pawn][toMove][move->sourceField]^zobristHash[pawn][1-toMove][shift];
-
+	//position->totalFigureEval     = position->totalFigureEval-figureValues[pawn];
 }
 
 
@@ -99,7 +99,7 @@ inline static void makePromotion(chessMove* move, chessPosition* position, figur
 	position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*completePieceTables[move->captureType][1-toMove][move->targetField];
 	position->zobristHash = position->zobristHash^zobristHash[promotedFigure][toMove][move->targetField]^zobristHash[pawn][toMove][move->sourceField]^zobristHash[move->captureType][1-toMove][move->targetField];
 	position->figureEval     = position->figureEval+(1-2*toMove)*(figureValues[promotedFigure]-figureValues[pawn]);
-
+	position->totalFigureEval     = position->totalFigureEval+(figureValues[promotedFigure]-figureValues[pawn]);
 }
 
 void makeMove(chessMove* move, chessPosition* position) {
@@ -113,6 +113,7 @@ void makeMove(chessMove* move, chessPosition* position) {
 	castlingRights = (move->move & BLACKQUEENSIDECASTLEMASK ? (castlingRights &  7):castlingRights);
 	position->castlingRights = castlingRights;
 	position->figureEval     = position->figureEval+(1-2*position->toMove)*figureValues[move->captureType];
+	position->totalFigureEval     = position->totalFigureEval-figureValues[move->captureType];
 	position->enPassantFile  = 8;
 	switch(move->type){
 		case pawnMove:

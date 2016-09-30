@@ -23,7 +23,7 @@ uint32_t perftNodes(chessPosition* position, uint16_t depth){
 	uint32_t nodes = 0;
 	vdt_vector<chessMove> moves = vdt_vector<chessMove>(150);
 	generateAllMoves(&moves, position);
-	orderStandardMoves(position, &moves);
+	orderStandardMoves(position, &moves, 0);
 	bool isMate = true;
 	for(uint16_t ind=0; ind < moves.length; ind++){
 		if(moves[ind].sortEval < -10000){

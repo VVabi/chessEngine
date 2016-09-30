@@ -51,6 +51,7 @@ struct chessPosition {
 	uint8_t castlingRights;
 	uint8_t enPassantFile; //the file of the CAPTURED pawn
 	int16_t figureEval;
+	uint16_t totalFigureEval;
 	uint32_t pieceTableEval;
 	uint64_t zobristHash;
 	vdt_vector<chessMove> madeMoves;

@@ -10,7 +10,7 @@
 int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t beta, chessMove* bestMove);
 int32_t negamaxQuiescence(chessPosition* position, int32_t alpha, int32_t beta, uint16_t depth);
 void resetNodes();
-bool orderStandardMoves(chessPosition* position, vdt_vector<chessMove>* moves);
+bool orderStandardMoves(chessPosition* position, vdt_vector<chessMove>* moves, uint16_t depth);
 void orderCaptureMoves(chessPosition* position, vdt_vector<chessMove>* moves);
 uint32_t getNodes();
 
@@ -19,6 +19,17 @@ void resetQuiescenceNodes();
 
 void resetIndices();
 
-int32_t* getIndexCounts();
+uint32_t getCalled();
 
+void resetCalled();
+uint32_t getSortCalled();
+void resetSortCalled();
+int32_t* getIndexCounts();
+uint32_t getqCalled();
+
+void resetqIndices();
+int32_t* getqIndexCounts();
+void resetqCalled();
+uint32_t getSortqCalled();
+void resetSortqCalled();
 #endif /* SEARCH_SEARCH_HPP_ */

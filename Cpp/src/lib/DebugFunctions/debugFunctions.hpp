@@ -9,6 +9,7 @@
 #define LIB_DEBUGFUNCTIONS_DEBUGFUNCTIONS_HPP_
 
 int16_t calcFigureEvaluation(chessPosition* position);
+uint16_t calcTotalFigureEvaluation(chessPosition* position);
 int16_t calcPieceTableValue(chessPosition* position);
 int16_t calcEndGamePieceTableValue(chessPosition* position);
 #endif /* LIB_DEBUGFUNCTIONS_DEBUGFUNCTIONS_HPP_ */

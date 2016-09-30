@@ -22,5 +22,13 @@ int16_t calcFigureEvaluation(chessPosition* position) {
 }
 
 
-
+uint16_t calcTotalFigureEvaluation(chessPosition* position) {
+	uint16_t val = 0;
+	for(uint16_t ind=0; ind < 5; ind++) {
+		uint64_t whitePieces = position->pieceTables[white][ind];
+		uint64_t blackPieces = position->pieceTables[black][ind];
+		val = val+figureValues[ind]*(popcount(whitePieces)+popcount(blackPieces));
+	}
+	return val;
+}
 

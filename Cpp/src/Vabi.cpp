@@ -29,6 +29,7 @@ using namespace std;
 #include <time.h>       /* time */
 #include <userInterface/userInterface.hpp>
 #include <userInterface/networkUserInterface.hpp>
+#include <algorithm>
 
 extern int32_t completePieceTables[7][2][64];
 extern int16_t endGamepieceTables[7][2][64];
@@ -70,10 +71,8 @@ void outPutuint64(uint64_t num){
 
 
 
-uint32_t runSinglePositionPerformanceTest(std::string position, uint16_t depth) {
+uint64_t runSinglePositionPerformanceTest(std::string position, uint16_t depth, uint64_t* negamaxNodes, uint64_t* qNodes) {
 	chessPosition c = stringToChessPosition(position);
-	c.castlingRights = 0;
-	c.toMove = (position.at(66) == 'w' ? white: black);
 	resetNodes();
 	chessMove bestMove;
 	resetQuiescenceNodes();
@@ -88,7 +87,9 @@ uint32_t runSinglePositionPerformanceTest(std::string position, uint16_t depth) 
 	useconds = end.tv_usec - start.tv_usec;
 
 	mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;*/
-	uint32_t nodeCount = getNodes()+getQuiescenceNodes();
+	uint64_t nodeCount = getNodes()+getQuiescenceNodes();
+	*negamaxNodes = getNodes();
+	*qNodes       = getQuiescenceNodes();
 	//double nps = ((double) nodeCount)/((double) mtime)*1000.0;
 	/*std::cout << "Searched " <<  nodeCount << " positions in " << mtime << " for " << nps << " nodes per second" << std::endl;
 	std::cout << "Forced move " << moveToString(bestMove, c) << std::endl;
@@ -98,19 +99,30 @@ uint32_t runSinglePositionPerformanceTest(std::string position, uint16_t depth) 
 
 }
 networkUserInterface* userInterface;
+extern uint16_t killerMoves[20][2];
 
 uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maximal_time, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval) {
+	memset(killerMoves,0, 20*2*sizeof(uint16_t));
 	resetNodes();
 	resetQuiescenceNodes();
 	resetIndices();
+	resetqIndices();
+	resetCalled();
+	resetSortCalled();
+	resetqCalled();
+	resetSortqCalled();
 	uint64_t start_ts  = get_timestamp();
 	uint16_t depth = 6;
+	uint64_t qnodes = 0;
+	uint64_t nodes = 0;
 	*eval = 0;
 	while((get_timestamp()-start_ts < maximal_time) && (depth < 14)) {
 		*eval = negamax(position, depth, -100005, 100005, bestMove);
 
 		std::cout << depth <<std::endl;
 		*nodeCount = getNodes()+getQuiescenceNodes();
+		qnodes = getQuiescenceNodes();
+		nodes  = getNodes();
 		*mtime = get_timestamp()-start_ts;
 		userInterface->sendSearchInfo(*nodeCount, *mtime, *eval, depth, moveToString(*bestMove, *position));
 		depth++;
@@ -124,11 +136,20 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 
 	double nps = ((double) *nodeCount)/((double) *mtime)*1000.0;
 	std::cout << "Searched " <<  *nodeCount << " positions in " << *mtime << " for " << nps << " nodes per second" << std::endl;
+	std::cout << "Qnodes " <<  qnodes << " normal nodes " << nodes <<std::endl;
 	std::cout << "Forced move " << moveToString(*bestMove, *position) << std::endl;
 	std::cout << "Evaluation "  << eval << std::endl;
+	std::cout << "Negamax called " << getCalled() << " with depth >0; sort called " << getSortCalled() << " times for ratio " << ((double) getSortCalled())/((double) getCalled()) << std::endl;
+	std::cout << "Quiescence called " << getqCalled() << " with depth >0; sort called " << getSortqCalled() << " times for ratio " << ((double) getSortqCalled())/((double) getqCalled()) << std::endl;
+
 	int32_t* indices = getIndexCounts();
 	for(uint16_t k=0; k < 50; k++){
 		std::cout << indices[k] << " ";
+	}
+	std::cout << std::endl;
+	int32_t* qindices = getqIndexCounts();
+	for(uint16_t k=0; k < 50; k++){
+		std::cout << qindices[k] << " ";
 	}
 	std::cout << std::endl;
 	return depth;
@@ -149,6 +170,31 @@ int main() {
 
 	srand (time(NULL));
 	fillZobristHash();
+
+	/*for(int depth = 3; depth < 5; depth++){
+		ifstream file;
+		file.open("chesspositionsfixed.txt");
+		std::string line;
+		uint64_t negamaxNodes = 0;
+		uint64_t qNodes = 0;
+
+		uint32_t nodes = 0;
+		while(std::getline(file, line)){
+			uint64_t nmNodes = 0;
+			uint64_t qn = 0;
+			nodes = nodes + runSinglePositionPerformanceTest(line, depth, &nmNodes, &qn);
+			negamaxNodes = negamaxNodes+nmNodes;
+			qNodes = qNodes+qn;
+
+		}
+		std::cout << "Depth " << depth  << " Nodes " << nodes << std::endl;
+		std::cout << "negamaxnodes " <<  negamaxNodes << std::endl;
+		std::cout << "qnodes " <<  qNodes << std::endl;
+		file.close();
+
+	}
+
+	return 0;*/
 	//runTests();
 	/*std::string positionStrTest = "R000K00RP0PBBPPP00P00Q0p0000P000000P0000bn00pnp0p0pNqpb0r000k00rbKQkq";
 	chessPosition positionT = stringToChessPosition(positionStrTest);
@@ -174,7 +220,8 @@ int main() {
 			vdt_vector<chessMove> moves = vdt_vector<chessMove>(100);
 			uint64_t mv = stringToMove(move);
 			generateAllMoves(&moves, &position);
-			orderStandardMoves(&position, &moves);
+			orderStandardMoves(&position, &moves, 0);
+			std::sort(moves.data, moves.data+moves.length);
 			bool found = false;
 			chessMove m;
 			for(uint16_t ind=0; ind < moves.length; ind++) {

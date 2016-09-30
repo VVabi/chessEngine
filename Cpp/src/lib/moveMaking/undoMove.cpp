@@ -79,7 +79,6 @@ inline static void undoEnPassant(chessPosition* position, chessMove move) {
 	position->pieceTableEval 							= position->pieceTableEval-(1-2*toMove)*(completePieceTables[pawn][toMove][move.targetField]-completePieceTables[pawn][toMove][move.sourceField]);
 	position->pieceTableEval 							= position->pieceTableEval-(1-2*toMove)*completePieceTables[pawn][1-toMove][shift];
 	position->zobristHash = position->zobristHash^zobristHash[pawn][toMove][move.targetField]^zobristHash[pawn][toMove][move.sourceField]^zobristHash[pawn][1-toMove][shift];
-
 }
 
 inline static void undoPromotion(chessPosition* position, chessMove move, figureType promotedFigure) {
@@ -94,6 +93,7 @@ inline static void undoPromotion(chessPosition* position, chessMove move, figure
 	position->pieceTableEval 							= position->pieceTableEval-(1-2*toMove)*(completePieceTables[promotedFigure][toMove][move.targetField]-completePieceTables[pawn][toMove][move.sourceField]);
 	position->pieceTableEval 							= position->pieceTableEval-(1-2*toMove)*completePieceTables[move.captureType][1-toMove][move.targetField];
 	position->figureEval     							= position->figureEval-(1-2*toMove)*(figureValues[promotedFigure]-figureValues[pawn]);
+	position->totalFigureEval     						= position->totalFigureEval-(figureValues[promotedFigure]-figureValues[pawn]);
 	position->zobristHash = position->zobristHash^zobristHash[promotedFigure][toMove][move.targetField]^zobristHash[pawn][toMove][move.sourceField]^zobristHash[move.captureType][1-toMove][move.targetField];
 }
 
@@ -109,6 +109,7 @@ void undoMove(chessPosition* position) {
 	chessMove move = position->madeMoves.pop();
 	uint16_t flags = position->castlingAndEpStack.pop();
 	position->figureEval     = position->figureEval+(1-2*position->toMove)*figureValues[move.captureType];
+	position->totalFigureEval     = position->totalFigureEval+figureValues[move.captureType];
 	position->castlingRights = flags & 0xFF;
 	position->enPassantFile = ((flags >> 8)) & 0xFF;
 

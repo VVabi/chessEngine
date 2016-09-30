@@ -167,6 +167,7 @@ void zeroInitPosition(chessPosition* position) {
 	position->castlingAndEpStack = vdt_vector<uint16_t>(300);
 #endif
 	position->zobristHash    = calcZobristHash(position);
+	position->enPassantFile = 8;
 
 
 }
@@ -265,6 +266,7 @@ chessPosition stringToChessPosition(std::string strposition) {
 		position.castlingRights = position.castlingRights | 8;
 	}
 
+	position.totalFigureEval   = calcTotalFigureEvaluation(&position);
 	position.figureEval   = calcFigureEvaluation(&position);
 	position.pieceTableEval = ((1 << 15) + position.figureEval+ calcPieceTableValue(&position))
 							+(((1 << 14) + calcEndGamePieceTableValue(&position)+position.figureEval) << 16);
@@ -315,8 +317,16 @@ void debug_incremental_calculations(chessPosition* position) {
 
 	int16_t eval = calcFigureEvaluation(position);
 
-	if(eval != position->figureEval){
+	/*if(eval != position->figureEval){
 		std::cout << "Figure evaluation is wrong after moveMake!" << std::endl;
+	}*/
+
+	uint16_t totalEval = calcTotalFigureEvaluation(position);
+
+	if(totalEval != position->totalFigureEval){
+		std::cout << chessPositionToOutputString(*position) << std::endl;
+		std::cout << chessPositionToString(*position) << std::endl;
+		std::cout << "Total figure evaluation is wrong after moveMake!" << std::endl;
 	}
 
 	int16_t pieceTableEval = calcPieceTableValue(position)+eval;

@@ -23,6 +23,7 @@ extern uint16_t moveOrderingHashTable[];
 extern int16_t figureValues[];
 extern int16_t pieceTables[7][2][64];
 
+extern uint16_t killerMoves[20][2];
 
 #define WHITEKINGCASTLECHESSFIELDS ((1UL << 4) | (1UL << 5) | (1UL << 6))
 #define WHITEQUEENCASTLECHESSFIELDS ((1UL << 4) | (1UL << 3) | (1UL << 2))
@@ -51,21 +52,19 @@ void calcCaptureSortEval(chessPosition* position, chessMove* mv, uint16_t hashed
 	if(position->madeMoves.length > 0){
 		chessMove previousMove = position->madeMoves[position->madeMoves.length];
 		if(previousMove.targetField == mv->sourceField) { //recapture is usually good
-			sortEval = sortEval + 20;
-
+			sortEval = sortEval + 200;
 		}
 	}
 
 
-	/*if( ((mv->sourceField) | (mv->targetField << 8)) == hashedMove) {
+	if( ((mv->sourceField) | (mv->targetField << 8)) == hashedMove) {
 		sortEval = sortEval+2000;
-	}*/
+	}
 	mv->sortEval = sortEval;
 }
 
-void outPutuint64(uint64_t num);
 
-static inline void calcSortEval(chessPosition* position, chessMove* mv, AttackTable* opponentAttackTable, AttackTable* ownAttackTable, uint16_t hashedMove) {
+static inline void calcSortEval(chessPosition* position, chessMove* mv, AttackTable* opponentAttackTable, AttackTable* ownAttackTable, uint16_t hashedMove, uint16_t killerA, uint16_t killerB) {
 
 	int16_t sortEval = 0;
 
@@ -148,6 +147,17 @@ static inline void calcSortEval(chessPosition* position, chessMove* mv, AttackTa
 		}
 	}
 
+
+	uint16_t moveHash = (mv->sourceField) | (mv->targetField << 8);
+
+	if(moveHash == killerA){
+			sortEval = sortEval+90;
+	}
+
+	if(moveHash == killerB){
+			sortEval = sortEval+89;
+	}
+
 	if( ((mv->sourceField) | (mv->targetField << 8)) == hashedMove) {
 		sortEval = sortEval+2000;
 	}
@@ -161,29 +171,42 @@ static inline void calcSortEval(chessPosition* position, chessMove* mv, AttackTa
 
 
 	} else if(mv->type == castlingQueenside) {
-		sortEval  = 0;
+		sortEval  = 40;
 		if(queenBlockers[position->toMove] & opponentAttackTable->completeAttackTable) {
 			sortEval = INT16_MIN;
 		}
 	}
 
-
+	if(mv->type == enpassant){
+		sortEval = 120;
+	}
 	mv->sortEval = sortEval;
-
 }
 
-bool orderStandardMoves(chessPosition* position, vdt_vector<chessMove>* moves) {
+bool orderStandardMoves(chessPosition* position, vdt_vector<chessMove>* moves, uint16_t depth) {
 
 	AttackTable opponentAttackTable = makeAttackTable(position, (playerColor) (1-position->toMove));
 	AttackTable ownAttackTable 		= makeAttackTable(position, position->toMove);
 	uint16_t hashedMove = moveOrderingHashTable[position->zobristHash & HASHSIZE];
 	bool isInCheck      = ((opponentAttackTable.completeAttackTable & position->pieceTables[position->toMove][king]) != 0);
+	int16_t bestEval = INT16_MIN;
+	uint16_t bestIndex = 0;
+	uint16_t killerMoveA = killerMoves[depth][0];
+	uint16_t killerMoveB = killerMoves[depth][1];
 	for (uint16_t ind=0; ind < moves->length; ind++) {
-		calcSortEval(position, &(*moves)[ind], &opponentAttackTable, &ownAttackTable, hashedMove);
+		calcSortEval(position, &(*moves)[ind], &opponentAttackTable, &ownAttackTable, hashedMove, killerMoveA, killerMoveB);
+		if((*moves)[ind].sortEval > bestEval){
+			bestEval = (*moves)[ind].sortEval;
+			bestIndex = ind;
+		}
 	}
 
+	chessMove buffer = (*moves)[0];
+	(*moves)[0] = (*moves)[bestIndex];
+	(*moves)[bestIndex] = buffer;
 
-	std::sort(moves->data, moves->data+moves->length);
+
+	//std::sort(moves->data, moves->data+moves->length);
 	return isInCheck;
 
 }
@@ -191,12 +214,22 @@ bool orderStandardMoves(chessPosition* position, vdt_vector<chessMove>* moves) {
 void orderCaptureMoves(chessPosition* position, vdt_vector<chessMove>* moves) {
 
 	uint16_t hashedMove = moveOrderingHashTable[position->zobristHash & HASHSIZE] ;
+	int16_t bestEval = INT16_MIN;
+	uint16_t bestIndex = 0;
+
 	for (uint16_t ind=0; ind < moves->length; ind++) {
 		calcCaptureSortEval(position, &(*moves)[ind], hashedMove);
+		if((*moves)[ind].sortEval > bestEval){
+			bestEval = (*moves)[ind].sortEval;
+			bestIndex = ind;
+		}
 	}
 
+	chessMove buffer = (*moves)[0];
+	(*moves)[0] = (*moves)[bestIndex];
+	(*moves)[bestIndex] = buffer;
 
-	std::sort(moves->data, moves->data+moves->length);
+	//std::sort(moves->data, moves->data+moves->length);
 
 
 }
