@@ -29,7 +29,10 @@ using namespace std;
 #include <time.h>       /* time */
 #include <userInterface/userInterface.hpp>
 #include <userInterface/networkUserInterface.hpp>
+#include <userInterface/uciInterface.hpp>
 #include <algorithm>
+#include <fstream>
+#include <sstream>
 
 extern int32_t completePieceTables[7][2][64];
 extern int16_t endGamepieceTables[7][2][64];
@@ -98,7 +101,7 @@ uint64_t runSinglePositionPerformanceTest(std::string position, uint16_t depth, 
 	return nodeCount;
 
 }
-networkUserInterface* userInterface;
+userInterface* userInterface;
 extern uint16_t killerMoves[20][2];
 
 uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maximal_time, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval) {
@@ -113,16 +116,16 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 	resetSortqCalled();
 	uint64_t start_ts  = get_timestamp();
 	uint16_t depth = 6;
-	uint64_t qnodes = 0;
-	uint64_t nodes = 0;
+	/*uint64_t qnodes = 0;
+	uint64_t nodes = 0;*/
 	*eval = 0;
 	while((get_timestamp()-start_ts < maximal_time) && (depth < 14)) {
 		*eval = negamax(position, depth, -100005, 100005, bestMove);
 
-		std::cout << depth <<std::endl;
+		//std::cout << depth <<std::endl;
 		*nodeCount = getNodes()+getQuiescenceNodes();
-		qnodes = getQuiescenceNodes();
-		nodes  = getNodes();
+		//qnodes = getQuiescenceNodes();
+		//nodes  = getNodes();
 		*mtime = get_timestamp()-start_ts;
 		userInterface->sendSearchInfo(*nodeCount, *mtime, *eval, depth, moveToString(*bestMove, *position));
 		depth++;
@@ -131,10 +134,10 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 		}
 	}
 	depth--;
-	std::cout << "Depth searched " << depth << std::endl;
+	//std::cout << "Depth searched " << depth << std::endl;
 	*mtime = get_timestamp()-start_ts;
 
-	double nps = ((double) *nodeCount)/((double) *mtime)*1000.0;
+	/*double nps = ((double) *nodeCount)/((double) *mtime)*1000.0;
 	std::cout << "Searched " <<  *nodeCount << " positions in " << *mtime << " for " << nps << " nodes per second" << std::endl;
 	std::cout << "Qnodes " <<  qnodes << " normal nodes " << nodes <<std::endl;
 	std::cout << "Forced move " << moveToString(*bestMove, *position) << std::endl;
@@ -151,14 +154,89 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 	for(uint16_t k=0; k < 50; k++){
 		std::cout << qindices[k] << " ";
 	}
-	std::cout << std::endl;
+	std::cout << std::endl;*/
 	return depth;
 }
 
+bool checkMove(chessPosition& position, std::string move){
+	vdt_vector<chessMove> moves = vdt_vector<chessMove>(100);
+		uint64_t mv = stringToMove(move);
+		generateAllMoves(&moves, &position);
+		orderStandardMoves(&position, &moves, 0);
+		std::sort(moves.data, moves.data+moves.length);
+		bool found = false;
+		chessMove m;
+		for(uint16_t ind=0; ind < moves.length; ind++) {
+			if(moves[ind].sortEval < -10000) {
+				break;
+			}
+			if(moves[ind].move == mv){
+				found = true;
+				m = moves[ind];
+				break;
+			}
+			if(moves[ind].type == castlingKingside){
+				if(position.toMove == white){
+					if(move == "e1g1"){
+						found = true;
+						m = moves[ind];
+						break;
+					}
 
+				}
+				if(position.toMove == black){
+					if(move == "e8g8"){
+						found = true;
+						m = moves[ind];
+						break;
+					}
+
+				}
+			}
+
+			if(moves[ind].type == castlingQueenside){
+				if(position.toMove == white){
+					if(move == "e1c1"){
+						found = true;
+						m = moves[ind];
+						break;
+					}
+
+				}
+				if(position.toMove == black){
+					if(move == "e8c8"){
+						found = true;
+						m = moves[ind];
+						break;
+					}
+
+				}
+			}
+
+		}
+		if(found){
+			//std::cout << moveToString(m, position) << std::endl;
+			makeMove(&m, &position);
+			uint16_t kingField = findLSB(position.pieceTables[1-position.toMove][king]);
+			if(isFieldAttacked(&position, position.toMove, kingField)){
+				//std::cout << "Illegal move!" << std::endl;
+				undoMove(&position);
+			} else {
+				std::string newPosition = chessPositionToString(position);
+				userInterface->sendNewPosition(newPosition);
+			}
+		} else {
+			std::cout << "Invalid move!" << std::endl;
+		}
+		moves.free_array();
+		return found;
+}
 
 
 int main() {
+
+
+
 
 	for(uint32_t index=0; index < 7; index++) {
 		for(uint32_t t=0; t < 2; t++) {
@@ -171,6 +249,10 @@ int main() {
 	srand (time(NULL));
 	fillZobristHash();
 
+	/*std::string positionstr = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwK00q";
+		chessPosition position = stringToChessPosition(positionstr);
+	std::cout << chessPositionToFenString(position) << std::endl;
+	return 0;*/
 	/*for(int depth = 3; depth < 5; depth++){
 		ifstream file;
 		file.open("chesspositionsfixed.txt");
@@ -203,17 +285,26 @@ int main() {
 	generateAllMoves(&moves, &positionT);
 	orderStandardMoves(&positionT, &moves);*/
 	//return 0;
-	userInterface = new networkUserInterface();
-
+	//userInterface = new networkUserInterface();
+	userInterface = new uciInterface();
 
 	std::string positionstr = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwKQkq";
 	chessPosition position = stringToChessPosition(positionstr);
 	std::string move;
 
 	while(1){
-		if(userInterface->receiveNewPosition(positionstr)){
+		userInterface->readInput();
+		std::vector<std::string> moveList = std::vector<std::string>();
+		if(userInterface->receiveNewPosition(positionstr, moveList)){
 			free_position(&position);
 			position = stringToChessPosition(positionstr);
+
+			for(std::string seg: moveList){
+				//std::cout << seg << std::endl;
+				if(!checkMove(position, seg)){
+					std::cout << "Illegal move detected" << std::endl;
+				}
+			}
 			userInterface->sendNewPosition(positionstr);
 		}
 		if(userInterface->receiveMove(move)){
@@ -276,6 +367,17 @@ int main() {
 			makeMove(&bestMove, &position);
 			std::string newPosition = chessPositionToString(position);
 			userInterface->sendNewPosition(newPosition);
+
+		}
+
+		std::string newPosition;
+		if(userInterface->receiveAnalyze(newPosition)){
+			chessMove bestMove;
+			uint32_t nodeCount;
+			uint64_t mtime;
+			int32_t eval = 0;
+			searchMove(&position, &bestMove, 20, &nodeCount, &mtime, &eval);
+			userInterface->sendBestMove(moveToString(bestMove, position));
 
 		}
 	}

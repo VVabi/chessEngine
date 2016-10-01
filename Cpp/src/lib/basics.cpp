@@ -278,6 +278,22 @@ chessPosition stringToChessPosition(std::string strposition) {
 
 std::string moveToString(chessMove move, chessPosition position) {
 
+	if(move.type == castlingKingside){
+			if(position.toMove == white){
+				return "e1g1";
+			} else {
+				return "e8g8";
+			}
+	}
+
+	if(move.type == castlingQueenside){
+			if(position.toMove == white){
+				return "e1c1";
+			} else {
+				return "e8c8";
+			}
+	}
+
 	uint64_t mv = move.move;
 	uint64_t occupancy = position.pieces[position.toMove];
 	uint64_t source = mv & occupancy;
@@ -297,6 +313,19 @@ std::string moveToString(chessMove move, chessPosition position) {
 	retString.push_back(ret[1]);
 	retString.push_back(ret[2]);
 	retString.push_back(ret[3]);
+
+	if(move.type == promotionBishop){
+		retString.push_back('b');
+	}
+	if(move.type == promotionKnight){
+		retString.push_back('n');
+	}
+	if(move.type == promotionRook){
+		retString.push_back('r');
+	}
+	if(move.type == promotionQueen){
+		retString.push_back('q');
+	}
 	return retString;
 
 }
@@ -356,5 +385,85 @@ void debug_incremental_calculations(chessPosition* position) {
 void free_position(chessPosition* position) {
 	position->castlingAndEpStack.free_array();
 	position->madeMoves.free_array();
+}
+
+std::string chessPositionToFenString(chessPosition position){
+
+	std::string str = chessPositionToString(position);
+	std::string FEN = "";
+
+	for(int16_t row=7; row > -1; row--) {
+		uint16_t empty = 0;
+
+		for(uint16_t column=0; column < 8; column++){
+			uint8_t field = 8*row+column;
+			char current = str.at(field);
+			if(current == '0'){
+				empty++;
+			} else {
+				if(empty > 0){
+					FEN = FEN+std::to_string(empty);
+					empty = 0;
+				}
+				FEN.push_back(current);
+			}
+
+
+		}
+		if(empty > 0){
+			FEN = FEN+std::to_string(empty);
+		}
+		if(row > 0) {
+			FEN.push_back('\\');
+		}
+	}
+
+
+	FEN.push_back(' ');
+
+	FEN.push_back(str.at(64));
+
+	FEN.push_back(' ');
+
+
+	uint8_t castling = position.castlingRights;
+
+	if(castling & 1){
+		FEN.push_back('K');
+	}
+	if(castling & 2){
+		FEN.push_back('Q');
+	}
+	if(castling & 4){
+		FEN.push_back('k');
+	}
+	if(castling & 8){
+		FEN.push_back('q');
+	}
+	if(!castling){
+		FEN.push_back('-');
+	}
+
+	FEN.push_back(' ');
+
+	if(position.enPassantFile > 7){
+		FEN.push_back('-');
+	} else {
+		if(position.toMove == white) { //BLACK made the ep move
+			uint16_t field = 40+position.enPassantFile;
+			FEN = FEN+std::to_string(field);
+		} else { //WHITE amde the ep move
+			uint16_t field = 16+position.enPassantFile;
+			FEN = FEN+std::to_string(field);
+		}
+
+	}
+	FEN.push_back(' ');
+	FEN.push_back('0');
+	FEN.push_back(' ');
+	uint16_t moves = position.madeMoves.length;
+	FEN = FEN+std::to_string(moves+1);
+	return FEN;
+
 }
 

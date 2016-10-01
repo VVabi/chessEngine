@@ -11,7 +11,7 @@
 #include "userInterface.hpp"
 #include <communication/gen/VMPmessages.h>
 #include <communication/gen/VDT.h>
-
+#include <vector>
 class networkUserInterface: public userInterface {
 	public:
 		networkUserInterface(){
@@ -19,11 +19,14 @@ class networkUserInterface: public userInterface {
 		}
 		void initialize();
 		void sendNewPosition(std::string position);
-		void sendSearchInfo(uint64_t nodes, uint32_t time, uint32_t eval, uint32_t depth, std::string bestMove);
+		void sendSearchInfo(uint64_t nodes, uint32_t time, int32_t eval, uint32_t depth, std::string bestMove);
 		bool receiveMove(std::string& move);
 		bool receiveUndoMove();
 		bool receiveForceMove();
-		bool receiveNewPosition(std::string& position);
+		bool receiveNewPosition(std::string& position, std::vector<std::string>& moves);
+		void readInput() {};
+		void sendBestMove(std::string position) {};
+		bool receiveAnalyze(std::string& position) { return false; }
 };
 
 #endif /* USERINTERFACE_NETWORKUSERINTERFACE_HPP_ */

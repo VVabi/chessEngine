@@ -11,6 +11,7 @@
 #include "networkUserInterface.hpp"
 
 
+
 void networkUserInterface::initialize(){
 	initialize_network("127.0.0.1", 9876);
 }
@@ -54,7 +55,7 @@ bool networkUserInterface::receiveForceMove(){
 	return false;
 }
 
-bool networkUserInterface::receiveNewPosition(std::string& position) {
+bool networkUserInterface::receiveNewPosition(std::string& position, std::vector<std::string>& moves) {
 	receive_from_network();
 	auto newPosition = VMP_receive<VMPchessPosition>();
 	if(newPosition){
@@ -65,7 +66,7 @@ bool networkUserInterface::receiveNewPosition(std::string& position) {
 
 }
 
-void networkUserInterface::sendSearchInfo(uint64_t nodes, uint32_t time, uint32_t eval, uint32_t depth, std::string bestMove) {
+void networkUserInterface::sendSearchInfo(uint64_t nodes, uint32_t time, int32_t eval, uint32_t depth, std::string bestMove) {
 	fsarray<uint8_t> raw_str = fsarray<uint8_t>(bestMove.length());
 	memcpy(raw_str.data, bestMove.c_str(), bestMove.length());
 	VDTstring str = VDTstring(raw_str);
