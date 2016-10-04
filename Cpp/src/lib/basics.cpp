@@ -387,7 +387,7 @@ void free_position(chessPosition* position) {
 	position->madeMoves.free_array();
 }
 
-std::string chessPositionToFenString(chessPosition position){
+std::string chessPositionToFenString(chessPosition position, bool EPD){
 
 	std::string str = chessPositionToString(position);
 	std::string FEN = "";
@@ -451,18 +451,39 @@ std::string chessPositionToFenString(chessPosition position){
 	} else {
 		if(position.toMove == white) { //BLACK made the ep move
 			uint16_t field = 40+position.enPassantFile;
-			FEN = FEN+std::to_string(field);
-		} else { //WHITE amde the ep move
+			if(EPD){
+				char file = (field & 7)+'a';
+				char row  = (field/8)+'0';
+				FEN.push_back(file);
+				FEN.push_back(row);
+
+			} else {
+				FEN = FEN+std::to_string(field);
+			}
+
+		} else { //WHITE made the ep move
 			uint16_t field = 16+position.enPassantFile;
-			FEN = FEN+std::to_string(field);
+			if(EPD){
+				char file = (field & 7)+'a';
+				char row  = (field/8)+'0';
+				FEN.push_back(file);
+				FEN.push_back(row);
+
+			} else {
+				FEN = FEN+std::to_string(field);
+			}
 		}
 
 	}
-	FEN.push_back(' ');
-	FEN.push_back('0');
-	FEN.push_back(' ');
-	uint16_t moves = position.madeMoves.length;
-	FEN = FEN+std::to_string(moves+1);
+
+	if(!EPD){
+		FEN.push_back(' ');
+		FEN.push_back('0');
+		FEN.push_back(' ');
+
+		uint16_t moves = position.madeMoves.length;
+		FEN = FEN+std::to_string(moves+1);
+	}
 	return FEN;
 
 }

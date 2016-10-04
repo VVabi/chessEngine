@@ -8,11 +8,50 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import PlayingGUI.PlayingGUI;
+import uciClient.UciProcessing;
+import uciClient.uciEngineHandler;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        final Core cor = new Core(primaryStage);
+/*        uciEngineHandler vabiHandler = new uciEngineHandler("/home/vabi/code/chessEngine/Cpp/Release/Vabi");
+
+        List<String> moves = new ArrayList<>();
+        while(true){
+            vabiHandler.setPosition(moves);
+            vabiHandler.startSearch();
+            String mv = vabiHandler.readBestmove();
+            moves.add(mv);
+            System.out.println(mv);
+            stockfishHandler.setPosition(moves);
+            stockfishHandler.startSearch();
+            mv = stockfishHandler.readBestmove();
+            moves.add(mv);
+            System.out.println(mv);
+            if("(none)".equals(mv)){
+                break;
+            }
+        }*/
+
+
+         final Core cor = new Core(primaryStage);
+         Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    UciProcessing uciProcessing = new UciProcessing();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        (new Thread(r)).start();
     }
 
 

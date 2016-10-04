@@ -87,9 +87,28 @@ int32_t evaluation(chessPosition* position, int32_t alpha, int32_t beta){
 		eval = eval+rookOpenFiles(position, pawnColumnOccupancy);
 	}
 
-	eval = eval+(rand() & 7)-3;
+
+	uint64_t numWhiteBishops = popcount(position->pieceTables[white][bishop]);
+
+	if(numWhiteBishops > 1){
+		eval = eval+50;
+	}
+
+	uint64_t numblackBishops = popcount(position->pieceTables[black][bishop]);
+
+	if(numblackBishops > 1){
+		eval = eval-50;
+	}
 
 
+
+
+	int32_t kingSafetyComplete = kingSafety(position, pawnColumnOccupancy, &whiteAttackTable, &blackAttackTable);;
+	int32_t kingSafetyTapered = (taperingValues[phase]*kingSafetyComplete) >> 8;
+
+	eval = eval+kingSafetyTapered;
+
+	eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?
 	return (1-2*position->toMove)*eval;
 
 }

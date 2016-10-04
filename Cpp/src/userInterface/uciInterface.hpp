@@ -26,6 +26,7 @@ class uciInterface: public userInterface {
 		void readInput();
 		void sendBestMove(std::string position);
 		bool receiveAnalyze(std::string& position);
+		bool positionRequested();
 };
 
 

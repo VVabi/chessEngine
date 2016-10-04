@@ -27,6 +27,7 @@ class networkUserInterface: public userInterface {
 		void readInput() {};
 		void sendBestMove(std::string position) {};
 		bool receiveAnalyze(std::string& position) { return false; }
+		bool positionRequested() { return false;}
 };
 
 #endif /* USERINTERFACE_NETWORKUSERINTERFACE_HPP_ */

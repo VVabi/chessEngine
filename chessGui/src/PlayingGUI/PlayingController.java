@@ -7,6 +7,7 @@ import core.ChessEvent;
 import core.PEventInterface;
 import core.PlayingEventInterface;
 import core.events.*;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
@@ -69,12 +70,19 @@ public class PlayingController {
     }
 
     public void handleDebugInfo(SearchDebugEvent e) {
-        debugArea.clear();
-        debugArea.appendText("Depth " + e.depth+"\n");
-        debugArea.appendText("Eval  " + e.eval+"\n");
-        debugArea.appendText("Nodes " + e.nodes + " in " + e.time + " ms"+"\n");
-        debugArea.appendText("NPS " + ((int) (1000.0*((double) e.nodes)/((double) e.time)))+"\n");
-        debugArea.appendText("Best move " + e.move+"\n");
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                debugArea.clear();
+                debugArea.appendText("Depth " + e.depth+"\n");
+                debugArea.appendText("Eval  " + e.eval+"\n");
+                debugArea.appendText("Nodes " + e.nodes + " in " + e.time + " ms"+"\n");
+                debugArea.appendText("NPS " + ((int) (1000.0*((double) e.nodes)/((double) e.time)))+"\n");
+                debugArea.appendText("Best move " + e.move+"\n");
+            }
+        });
+
     }
 
     @FXML
@@ -211,14 +219,13 @@ public class PlayingController {
     Thread eventThread;
 
     public void reactToEvent(ChessEvent e){
-        System.out.println("Reacting to event...");
+
         if(e instanceof TurnBoardEvent){
             chessboard.toggleSideDown();
         }
         if(e instanceof NewPositionEvent){
             sidetomove = ((NewPositionEvent) e).newPosition.charAt(64);
             chessboard.setPosition(((NewPositionEvent) e).newPosition);
-            System.out.println(((NewPositionEvent) e).newPosition);
         }
         if(e instanceof SearchDebugEvent){
             handleDebugInfo((SearchDebugEvent) e);

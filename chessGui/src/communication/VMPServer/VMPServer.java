@@ -225,7 +225,7 @@ public class VMPServer {
 
             //if(client.getLocations().contains(location)){
                 client.send_msg(new Packet(m, location));
-                System.out.println("sent msg");
+                //System.out.println("sent msg");
            // }
 
         }

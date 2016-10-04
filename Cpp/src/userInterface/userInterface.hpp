@@ -23,6 +23,7 @@ class userInterface {
 		virtual void readInput()=0;
 		virtual void sendBestMove(std::string position)=0;
 		virtual bool receiveAnalyze(std::string& position)=0;
+		virtual bool positionRequested()=0;
 };
 
 

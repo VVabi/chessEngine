@@ -223,7 +223,7 @@ bool checkMove(chessPosition& position, std::string move){
 				undoMove(&position);
 			} else {
 				std::string newPosition = chessPositionToString(position);
-				userInterface->sendNewPosition(newPosition);
+				//userInterface->sendNewPosition(newPosition);
 			}
 		} else {
 			std::cout << "Invalid move!" << std::endl;
@@ -233,9 +233,9 @@ bool checkMove(chessPosition& position, std::string move){
 }
 
 
+
+
 int main() {
-
-
 
 
 	for(uint32_t index=0; index < 7; index++) {
@@ -249,10 +249,11 @@ int main() {
 	srand (time(NULL));
 	fillZobristHash();
 
-	/*std::string positionstr = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwK00q";
-		chessPosition position = stringToChessPosition(positionstr);
-	std::cout << chessPositionToFenString(position) << std::endl;
+	/*std::string positionStrTest = "000000K000000P0P0000000000000000000000000000000000000000bk000r0qw0000";
+	chessPosition p = stringToChessPosition(positionStrTest);
+	std::cout << evaluation(&p, -110000, 110000) << std::endl;
 	return 0;*/
+
 	/*for(int depth = 3; depth < 5; depth++){
 		ifstream file;
 		file.open("chesspositionsfixed.txt");
@@ -294,8 +295,11 @@ int main() {
 
 	while(1){
 		userInterface->readInput();
+
+
 		std::vector<std::string> moveList = std::vector<std::string>();
 		if(userInterface->receiveNewPosition(positionstr, moveList)){
+
 			free_position(&position);
 			position = stringToChessPosition(positionstr);
 
@@ -305,8 +309,17 @@ int main() {
 					std::cout << "Illegal move detected" << std::endl;
 				}
 			}
-			userInterface->sendNewPosition(positionstr);
+
+			//TODO: this does not work in UCI!!!
+			//userInterface->sendNewPosition(positionstr);
 		}
+
+		if(userInterface->positionRequested()){
+			std::string positionStr = chessPositionToString(position);
+			userInterface->sendNewPosition(positionStr);
+
+		}
+
 		if(userInterface->receiveMove(move)){
 			vdt_vector<chessMove> moves = vdt_vector<chessMove>(100);
 			uint64_t mv = stringToMove(move);
@@ -380,6 +393,8 @@ int main() {
 			userInterface->sendBestMove(moveToString(bestMove, position));
 
 		}
+
+
 	}
 
 

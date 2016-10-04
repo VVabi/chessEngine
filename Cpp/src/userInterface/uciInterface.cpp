@@ -37,6 +37,7 @@ inputMessage uciInput;
 inputMessage readyInput;
 inputMessage positionInput;
 inputMessage goInput;
+inputMessage positionRequest;
 
 void uciInterface::readInput(){
 	std::string next = readLine();
@@ -61,6 +62,11 @@ void uciInterface::readInput(){
 	if(cmd == "go"){
 		goInput.msg = next;
 		goInput.valid = true;
+	}
+
+	if(cmd == "getPosition"){
+		positionRequest.msg = next;
+		positionRequest.valid = true;
 	}
 
 }
@@ -107,7 +113,7 @@ void uciInterface::sendBestMove(std::string move) {
 }
 
 void uciInterface::sendNewPosition(std::string position) {
-
+	std::cout << "currentPosition " << position << std::endl;
 
 }
 
@@ -123,6 +129,14 @@ bool uciInterface::receiveAnalyze(std::string& position){
 
 }
 
+
+bool uciInterface::positionRequested(){
+	if(positionRequest.valid){
+		positionRequest.valid = false;
+		return true;
+	}
+	return false;
+}
 
 void uciInterface::sendSearchInfo(uint64_t nodes, uint32_t time, int32_t eval, uint32_t depth, std::string bestMove){
 	double nps = ((double) nodes)/((double) time)*1000.0;
@@ -145,6 +159,7 @@ bool uciInterface::receiveForceMove() {
 	return false;
 
 }
+
 
 
 bool uciInterface::receiveNewPosition(std::string& position, std::vector<std::string>& moves) {

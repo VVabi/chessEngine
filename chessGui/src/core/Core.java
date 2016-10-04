@@ -76,7 +76,7 @@ public class Core {
         //TODO: move to another place
         ChessEvent e = engineEventInterface.consumeEngineEvent();
         if(e != null){
-            System.out.println("Got engine event");
+            //System.out.println("Got engine event");
             if(e instanceof CheckMoveEvent){
                 CheckMoveEvent ev = (CheckMoveEvent) e;
                 VMPcheckMove mv = new VMPcheckMove(new VDTstring(ev.move.getBytes()));
