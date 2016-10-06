@@ -84,6 +84,9 @@ int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t 
 	bool foundGoodMove = false;
 	for(uint16_t ind=0; ind < moves.length; ind++){
 
+
+
+
 		if(ind == 1){
 			sortCalled++;
 			std::sort(moves.data, moves.data+moves.length);
@@ -103,6 +106,24 @@ int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t 
 		} else {
 			nodes++;
 			legalMovesAvailable = true;
+			if((depth > 2)) {
+				//check that the side to move is not in check.
+				uint16_t kingField2 = findLSB( position->pieceTables[position->toMove][king]);
+
+				if(!isFieldAttacked( position, (playerColor) (1-position->toMove), kingField2)){
+					makeNullMove(position);
+					chessMove mv;
+					int32_t value = negamax(position, depth-1-2, alpha-1, alpha, &mv);
+					undoNullMove(position);
+					if(value < alpha) {
+						undoMove(position);
+						//std::cout << "nullmove pruning successful!" << std::endl;
+						continue;
+					}
+				}
+			}
+
+
 			chessMove mv;
 			int32_t value = -negamax(position, depth-1, -beta, -alpha, &mv);
 

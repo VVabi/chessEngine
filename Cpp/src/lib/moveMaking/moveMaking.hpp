@@ -10,6 +10,7 @@
 
 void makeMove(chessMove* move, chessPosition* position);
 void undoMove(chessPosition* position);
-
+void makeNullMove(chessPosition* position);
+void undoNullMove(chessPosition* position);
 
 #endif /* LIB_MOVEMAKING_MOVEMAKING_HPP_ */

@@ -103,10 +103,10 @@ int32_t evaluation(chessPosition* position, int32_t alpha, int32_t beta){
 
 
 
-	int32_t kingSafetyComplete = kingSafety(position, pawnColumnOccupancy, &whiteAttackTable, &blackAttackTable);;
+	/*int32_t kingSafetyComplete = kingSafety(position, pawnColumnOccupancy, &whiteAttackTable, &blackAttackTable);;
 	int32_t kingSafetyTapered = (taperingValues[phase]*kingSafetyComplete) >> 8;
 
-	eval = eval+kingSafetyTapered;
+	eval = eval+kingSafetyTapered;*/
 
 	eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?
 	return (1-2*position->toMove)*eval;

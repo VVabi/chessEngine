@@ -17,6 +17,14 @@ extern int16_t figureValues[];
 extern int32_t completePieceTables[7][2][64];
 
 
+void undoNullMove(chessPosition* position) {
+	uint16_t flags = position->castlingAndEpStack.pop();
+	position->castlingRights = flags & 0xFF;
+	position->enPassantFile = ((flags >> 8)) & 0xFF;
+	position->zobristHash = position->zobristHash^movingSideHash[0];
+	position->toMove = (playerColor) (1-position->toMove);
+}
+
 inline static void undoNormalMove(chessPosition* position, chessMove move) {
 	position->toMove = (playerColor) (1-position->toMove);
 	playerColor toMove 									= position->toMove;

@@ -19,12 +19,26 @@ public class UciProcessing {
     VMPServer server;
     uciEngineHandler  vabiHandler;
     uciEngineHandler stockFishHandler;
+    double res = 0;
 
-    public UciProcessing() throws IOException {
+    public UciProcessing(String engine1, String engine2, int numGames) throws IOException {
 
-        CountDownLatch cd = new CountDownLatch(1);
+       /* CountDownLatch cd = new CountDownLatch(1);
         server = new VMPServer(9999, 0, cd);
         server.connect("127.0.0.1", 9876);
+        try {
+            cd.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
+
+        vabiHandler = new uciEngineHandler(engine1);
+        stockFishHandler = new uciEngineHandler(engine2);
+
+
+    }
+
+    public double play() throws IOException {
 
         double total = 0;
 
@@ -33,8 +47,7 @@ public class UciProcessing {
         int losses = 0;
         for(int k=0; k < 100; k++) {
             //stockFishHandler = new uciEngineHandler("/home/vabi/code/stockfish-7-linux/Linux/stockfish");
-            stockFishHandler = new uciEngineHandler("/home/vabi/code/chessEngine/Cpp/TestRelease/Vabi");
-            vabiHandler = new uciEngineHandler("/home/vabi/code/chessEngine/Cpp/Release/Vabi");
+
 
             System.out.println("Started engines");
             List<String> moves = new ArrayList<>();
@@ -55,7 +68,7 @@ public class UciProcessing {
                 vabiHandler.setPosition(moves);
                 String current = vabiHandler.getCurrentPosition();
                 VMPchessPosition position = new VMPchessPosition(new VDTstring(current.getBytes()));
-                server.send(position, 0);
+                //server.send(position, 0);
                 vabiHandler.startSearch();
 
 
@@ -74,7 +87,7 @@ public class UciProcessing {
                 vabiHandler.setPosition(moves);
                 current = vabiHandler.getCurrentPosition();
                 position = new VMPchessPosition(new VDTstring(current.getBytes()));
-                server.send(position, 0);
+                //server.send(position, 0);
                 //System.out.println(mv[0]);
                 stockFishHandler.setPosition(moves);
                 stockFishHandler.startSearch();
@@ -113,11 +126,14 @@ public class UciProcessing {
         System.out.println("Wins "+wins + " Draws "+draws+" Losses "+losses);
         double elo_diff = 400*(Math.log10(1-total/100.0)-Math.log10(total/100.0));
         System.out.println("Elo difference is " +elo_diff);
-
+        res = total;
+        return total;
 
     }
 
-
+    public double getResult() {
+        return res;
+    }
 
 
 

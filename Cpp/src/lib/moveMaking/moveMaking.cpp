@@ -16,6 +16,13 @@ extern int32_t completePieceTables[7][2][64];
 extern uint64_t zobristHash[7][2][64];
 extern uint64_t movingSideHash[2];
 
+void makeNullMove(chessPosition* position){
+	uint16_t to_push = position->castlingRights | (((uint16_t) position->enPassantFile) << 8);
+	position->castlingAndEpStack.add(&to_push);
+	position->enPassantFile  = 8;
+	position->zobristHash = position->zobristHash^movingSideHash[0];
+	position->toMove = (playerColor) (1-position->toMove);
+}
 
 inline static void makeNormalMove(chessMove* move, chessPosition* position) {
 	playerColor toMove 									= position->toMove;

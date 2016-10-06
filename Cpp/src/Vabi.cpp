@@ -127,6 +127,8 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 		//qnodes = getQuiescenceNodes();
 		//nodes  = getNodes();
 		*mtime = get_timestamp()-start_ts;
+		/*double nps = ((double) *nodeCount)/((double) *mtime)*1000.0;
+		std::cout << "Searched " <<  *nodeCount << " positions in " << *mtime << " for " << nps << " nodes per second" << std::endl;*/
 		userInterface->sendSearchInfo(*nodeCount, *mtime, *eval, depth, moveToString(*bestMove, *position));
 		depth++;
 		if(*eval > 90000) {
@@ -137,9 +139,8 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 	//std::cout << "Depth searched " << depth << std::endl;
 	*mtime = get_timestamp()-start_ts;
 
-	/*double nps = ((double) *nodeCount)/((double) *mtime)*1000.0;
-	std::cout << "Searched " <<  *nodeCount << " positions in " << *mtime << " for " << nps << " nodes per second" << std::endl;
-	std::cout << "Qnodes " <<  qnodes << " normal nodes " << nodes <<std::endl;
+
+	/*std::cout << "Qnodes " <<  qnodes << " normal nodes " << nodes <<std::endl;
 	std::cout << "Forced move " << moveToString(*bestMove, *position) << std::endl;
 	std::cout << "Evaluation "  << eval << std::endl;
 	std::cout << "Negamax called " << getCalled() << " with depth >0; sort called " << getSortCalled() << " times for ratio " << ((double) getSortCalled())/((double) getCalled()) << std::endl;
@@ -286,8 +287,8 @@ int main() {
 	generateAllMoves(&moves, &positionT);
 	orderStandardMoves(&positionT, &moves);*/
 	//return 0;
-	//userInterface = new networkUserInterface();
-	userInterface = new uciInterface();
+	userInterface = new networkUserInterface();
+	//userInterface = new uciInterface();
 
 	std::string positionstr = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwKQkq";
 	chessPosition position = stringToChessPosition(positionstr);
@@ -311,7 +312,7 @@ int main() {
 			}
 
 			//TODO: this does not work in UCI!!!
-			//userInterface->sendNewPosition(positionstr);
+			userInterface->sendNewPosition(positionstr);
 		}
 
 		if(userInterface->positionRequested()){
@@ -389,7 +390,7 @@ int main() {
 			uint32_t nodeCount;
 			uint64_t mtime;
 			int32_t eval = 0;
-			searchMove(&position, &bestMove, 20, &nodeCount, &mtime, &eval);
+			searchMove(&position, &bestMove, 2000, &nodeCount, &mtime, &eval);
 			userInterface->sendBestMove(moveToString(bestMove, position));
 
 		}
