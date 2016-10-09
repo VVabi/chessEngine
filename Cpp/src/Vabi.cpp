@@ -34,6 +34,7 @@ using namespace std;
 #include <fstream>
 #include <sstream>
 
+
 extern int32_t completePieceTables[7][2][64];
 extern int16_t endGamepieceTables[7][2][64];
 extern int16_t pieceTables[7][2][64];
@@ -74,7 +75,7 @@ void outPutuint64(uint64_t num){
 
 
 
-uint64_t runSinglePositionPerformanceTest(std::string position, uint16_t depth, uint64_t* negamaxNodes, uint64_t* qNodes) {
+uint64_t runSinglePositionPerformanceTest(std::string position, uint16_t depth, uint64_t* negamaxNodes, uint64_t* qNodes, bool useAspiration) {
 	chessPosition c = stringToChessPosition(position);
 	resetNodes();
 	chessMove bestMove;
@@ -83,7 +84,36 @@ uint64_t runSinglePositionPerformanceTest(std::string position, uint16_t depth, 
 	//long mtime, seconds, useconds;
 	gettimeofday(&start, NULL);
 	//int32_t eval = negamax(&c, depth, -100000, 100000, &bestMove);
-	negamax(&c, depth, -100000, 100000, &bestMove);
+	int32_t alpha = -100005;
+	int32_t beta  = 100005;
+	int32_t searchdepth = 3;
+	while(searchdepth <= depth && (searchdepth < 14)) {
+
+		bool succeeded = false;
+		int32_t eval = negamax(&c, searchdepth, alpha, beta, &bestMove);
+
+		if(useAspiration) {
+			if ((eval <= alpha)) {
+				alpha = alpha-100;
+			} else if(eval >= beta){
+				beta = beta+100;
+			}
+
+			else {
+				succeeded = true;
+			}
+
+
+		} else {
+			succeeded = true;
+		}
+
+		if(succeeded){
+			searchdepth++;
+			alpha = eval-50;
+			beta  = eval+50;
+		}
+	}
 	gettimeofday(&end, NULL);
 
 	/*seconds  = end.tv_sec  - start.tv_sec;
@@ -101,10 +131,10 @@ uint64_t runSinglePositionPerformanceTest(std::string position, uint16_t depth, 
 	return nodeCount;
 
 }
-userInterface* userInterface;
+userInterface* UI;
 extern uint16_t killerMoves[20][2];
 
-uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maximal_time, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval) {
+uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maximal_time, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval, bool doAspiration = true) {
 	memset(killerMoves,0, 20*2*sizeof(uint16_t));
 	resetNodes();
 	resetQuiescenceNodes();
@@ -119,8 +149,21 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 	/*uint64_t qnodes = 0;
 	uint64_t nodes = 0;*/
 	*eval = 0;
+	int32_t alpha = -100005;
+	int32_t beta  = 100005;
 	while((get_timestamp()-start_ts < maximal_time) && (depth < 14)) {
-		*eval = negamax(position, depth, -100005, 100005, bestMove);
+		*eval = negamax(position, depth, alpha, beta, bestMove);
+
+
+		if(doAspiration) {
+			if ((*eval <= alpha) || (*eval >= beta)) {
+				//std::cout << "Aspiration window search failed, researching..." <<std::endl;
+				*eval = negamax(position, depth, -100005, 100005, bestMove);
+			}
+
+			alpha = *eval-50;
+			beta  = *eval+50;
+		}
 
 		//std::cout << depth <<std::endl;
 		*nodeCount = getNodes()+getQuiescenceNodes();
@@ -129,7 +172,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 		*mtime = get_timestamp()-start_ts;
 		/*double nps = ((double) *nodeCount)/((double) *mtime)*1000.0;
 		std::cout << "Searched " <<  *nodeCount << " positions in " << *mtime << " for " << nps << " nodes per second" << std::endl;*/
-		userInterface->sendSearchInfo(*nodeCount, *mtime, *eval, depth, moveToString(*bestMove, *position));
+		UI->sendSearchInfo(*nodeCount, *mtime, *eval, depth, moveToString(*bestMove, *position));
 		depth++;
 		if(*eval > 90000) {
 			break;
@@ -216,7 +259,7 @@ bool checkMove(chessPosition& position, std::string move){
 
 		}
 		if(found){
-			//std::cout << moveToString(m, position) << std::endl;
+			std::cout << moveToString(m, position) << std::endl;
 			makeMove(&m, &position);
 			uint16_t kingField = findLSB(position.pieceTables[1-position.toMove][king]);
 			if(isFieldAttacked(&position, position.toMove, kingField)){
@@ -235,8 +278,47 @@ bool checkMove(chessPosition& position, std::string move){
 
 
 
+int32_t createDebugEvaluation(const chessPosition* position, VDTevaluation* evalDebug){
+	int32_t eval = evaluation(position, -110000, 110000);
+	int32_t debugEval = debugEvaluation(position, evalDebug);
+	std::cout << "Eval " << eval << std::endl;
+	std::cout << "DebugEval " << debugEval << std::endl;
+	if(eval != debugEval){
+		return 0;
+	}
+	return 1;
+}
+
+void sendNewPosition(chessPosition* position) {
+	VDTevaluation evalDebug;
+	int32_t valid = createDebugEvaluation(position, &evalDebug);
+
+	std::string newPosition = chessPositionToString(*position);
+	UI->sendNewPosition(newPosition);
+	UI->sendDebugEval(evalDebug, valid);
+}
+
 
 int main() {
+
+	/*ifstream with("/home/vabi/deltapruning2.txt");
+	ifstream without("/home/vabi/deltapruning.txt");
+
+	int withAsp, withoutAsp;
+	int totalWith = 0;
+	int totalWithout = 0;
+	while(with >> withAsp){
+		without >> withoutAsp;
+		totalWith = totalWith+withAsp;
+		totalWithout = totalWithout+withoutAsp;
+		double ratio = ((double) withAsp)/((double) withoutAsp);
+		std::cout << withAsp << " " << withoutAsp << " " << ratio << std::endl;
+
+	}
+
+	double ratio = ((double) totalWith)/((double) totalWithout);
+	std::cout << totalWith << " " << totalWithout << " " << ratio << std::endl;
+	return 0;*/
 
 
 	for(uint32_t index=0; index < 7; index++) {
@@ -254,8 +336,7 @@ int main() {
 	chessPosition p = stringToChessPosition(positionStrTest);
 	std::cout << evaluation(&p, -110000, 110000) << std::endl;
 	return 0;*/
-
-	/*for(int depth = 3; depth < 5; depth++){
+	for(int depth = 3; depth < 9; depth++){
 		ifstream file;
 		file.open("chesspositionsfixed.txt");
 		std::string line;
@@ -264,9 +345,17 @@ int main() {
 
 		uint32_t nodes = 0;
 		while(std::getline(file, line)){
+			//std::cout << line << std::endl;
 			uint64_t nmNodes = 0;
 			uint64_t qn = 0;
-			nodes = nodes + runSinglePositionPerformanceTest(line, depth, &nmNodes, &qn);
+			uint64_t newNodes = runSinglePositionPerformanceTest(line, depth, &nmNodes, &qn, true);
+			if(newNodes != qn+nmNodes){
+				std::cout << "WTF???" << std::endl;
+			}
+			nodes = nodes + newNodes;
+			//std::cout << newNodes << std::endl;
+			//std::cout << nmNodes << std::endl;
+			//std::cout << qn << std::endl;
 			negamaxNodes = negamaxNodes+nmNodes;
 			qNodes = qNodes+qn;
 
@@ -278,7 +367,7 @@ int main() {
 
 	}
 
-	return 0;*/
+	return 0;
 	//runTests();
 	/*std::string positionStrTest = "R000K00RP0PBBPPP00P00Q0p0000P000000P0000bn00pnp0p0pNqpb0r000k00rbKQkq";
 	chessPosition positionT = stringToChessPosition(positionStrTest);
@@ -287,19 +376,22 @@ int main() {
 	generateAllMoves(&moves, &positionT);
 	orderStandardMoves(&positionT, &moves);*/
 	//return 0;
-	userInterface = new networkUserInterface();
-	//userInterface = new uciInterface();
+	//UI = new networkUserInterface();
+	UI = new uciInterface();
 
 	std::string positionstr = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwKQkq";
 	chessPosition position = stringToChessPosition(positionstr);
+
+
+
 	std::string move;
 
 	while(1){
-		userInterface->readInput();
+		UI->readInput();
 
 
 		std::vector<std::string> moveList = std::vector<std::string>();
-		if(userInterface->receiveNewPosition(positionstr, moveList)){
+		if(UI->receiveNewPosition(positionstr, moveList)){
 
 			free_position(&position);
 			position = stringToChessPosition(positionstr);
@@ -312,16 +404,14 @@ int main() {
 			}
 
 			//TODO: this does not work in UCI!!!
-			userInterface->sendNewPosition(positionstr);
+			//sendNewPosition(&position);
 		}
 
-		if(userInterface->positionRequested()){
-			std::string positionStr = chessPositionToString(position);
-			userInterface->sendNewPosition(positionStr);
-
+		if(UI->positionRequested()){
+			sendNewPosition(&position);
 		}
 
-		if(userInterface->receiveMove(move)){
+		if(UI->receiveMove(move)){
 			vdt_vector<chessMove> moves = vdt_vector<chessMove>(100);
 			uint64_t mv = stringToMove(move);
 			generateAllMoves(&moves, &position);
@@ -346,8 +436,7 @@ int main() {
 					std::cout << "Illegal move!" << std::endl;
 					undoMove(&position);
 				} else {
-					std::string newPosition = chessPositionToString(position);
-					userInterface->sendNewPosition(newPosition);
+					sendNewPosition(&position);
 					chessMove bestMove;
 					uint32_t nodeCount;
 					uint64_t mtime;
@@ -355,8 +444,7 @@ int main() {
 					searchMove(&position, &bestMove, 2000, &nodeCount, &mtime, &eval);
 					std::cout << eval << std::endl;
 					makeMove(&bestMove, &position);
-					std::string newPosition2 = chessPositionToString(position);
-					userInterface->sendNewPosition(newPosition2);
+					sendNewPosition(&position);
 
 				}
 			} else {
@@ -365,34 +453,32 @@ int main() {
 			moves.free_array();
 		}
 
-		if (userInterface->receiveUndoMove()) {
+		if (UI->receiveUndoMove()) {
 			std::cout << "Got undo event!" << std::endl;
 			undoMove(&position);
-			std::string newPosition = chessPositionToString(position);
-			userInterface->sendNewPosition(newPosition);
+			sendNewPosition(&position);
 		}
 
-		if(userInterface->receiveForceMove()) {
+		if(UI->receiveForceMove()) {
 			chessMove bestMove;
 			uint32_t nodeCount;
 			uint64_t mtime;
 			int32_t eval = 0;
 			searchMove(&position, &bestMove, 2000, &nodeCount, &mtime, &eval);
+
 			makeMove(&bestMove, &position);
-			std::string newPosition = chessPositionToString(position);
-			userInterface->sendNewPosition(newPosition);
+			sendNewPosition(&position);
 
 		}
 
 		std::string newPosition;
-		if(userInterface->receiveAnalyze(newPosition)){
+		if(UI->receiveAnalyze(newPosition)){
 			chessMove bestMove;
 			uint32_t nodeCount;
 			uint64_t mtime;
 			int32_t eval = 0;
-			searchMove(&position, &bestMove, 2000, &nodeCount, &mtime, &eval);
-			userInterface->sendBestMove(moveToString(bestMove, position));
-
+			searchMove(&position, &bestMove, 4000, &nodeCount, &mtime, &eval);
+			UI->sendBestMove(moveToString(bestMove, position));
 		}
 
 

@@ -31,7 +31,7 @@ void fillZobristHash(){
 	}
 }
 
-uint64_t calcZobristHash(chessPosition* position){
+uint64_t calcZobristHash(const chessPosition* position){
 	uint64_t hash = 0;
 	for(uint16_t movingSide = 0; movingSide < 2; movingSide++){
 		for(uint16_t figureType = 0; figureType < 6; figureType++){

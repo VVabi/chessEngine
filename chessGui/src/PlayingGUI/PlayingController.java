@@ -3,6 +3,8 @@ package PlayingGUI;
 
 import ChessBoard.ChessBoard;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import core.ChessEvent;
 import core.PEventInterface;
 import core.PlayingEventInterface;
@@ -21,6 +23,7 @@ import EditorGUI.EditorGUI;
 public class PlayingController {
 
     @FXML private TextArea debugArea;
+    @FXML private TextArea EvalDebugArea;
     @FXML private ChessBoard chessboard;
     @FXML private ImageView waitImage;
     boolean isClicked = false;
@@ -68,6 +71,21 @@ public class PlayingController {
         eventInterface.addEngineEvent(e);
 
     }
+
+    public void handleEvalDebugInfo(EvalDebugEvent e) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String result = gson.toJson(e.evalDebugStruct);
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                EvalDebugArea.clear();
+                EvalDebugArea.setText(result);
+                EvalDebugArea.appendText(Integer.toString(e.valid));
+            }
+        });
+    }
+
 
     public void handleDebugInfo(SearchDebugEvent e) {
 
@@ -229,6 +247,10 @@ public class PlayingController {
         }
         if(e instanceof SearchDebugEvent){
             handleDebugInfo((SearchDebugEvent) e);
+        }
+
+        if(e instanceof EvalDebugEvent) {
+            handleEvalDebugInfo((EvalDebugEvent) e);
         }
 
 

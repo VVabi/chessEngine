@@ -17,9 +17,11 @@
 #include <hashTables/hashTables.hpp>
 #include <lib/Evaluation/evaluation.hpp>
 #include <algorithm>
+#include <assert.h>
 
 extern uint16_t moveOrderingHashTable[];
 static int32_t qindices[150] = {0};
+extern int16_t figureValues[];
 
 void resetqIndices(){
 	memset(qindices, 0, 150*sizeof(int32_t));
@@ -63,6 +65,8 @@ static chessMove buffer[32*50];
 
 int32_t negamaxQuiescence(chessPosition* position, int32_t alpha, int32_t beta, uint16_t depth) {
 
+	assert(alpha < beta);
+
 	int32_t baseEval = evaluation(position, alpha, beta);
 
 	if(baseEval > alpha){
@@ -71,6 +75,17 @@ int32_t negamaxQuiescence(chessPosition* position, int32_t alpha, int32_t beta, 
 	if(alpha >= beta) {
 		return beta;
 	}
+	//delta pruning preparations
+	//--------------------------------
+	int32_t marginDifference = alpha - baseEval; //always >= 0!
+	assert(marginDifference >= 0);
+
+	//position is truely hopeless.Note that this DOES NOT SAVE NODES - the individual checks below will also fail! But we save some processing time
+	//------------------------------------
+	if(marginDifference > 1100) { //TODO: take promotions into account!
+		return alpha;
+	}
+
 	chessMove bestMove;
 	bestMove.sourceField = 0;
 	bestMove.targetField = 0;
@@ -80,12 +95,23 @@ int32_t negamaxQuiescence(chessPosition* position, int32_t alpha, int32_t beta, 
 	if(moves.length > 0){
 		qcalled++;
 	}
+
+
+
 	int16_t bestIndex = -1;
 	for(uint16_t ind=0; ind < moves.length; ind++){
 		if(ind == 1){
 			sortqCalled++;
 			std::sort(moves.data, moves.data+moves.length);
 		}
+
+		//delta pruning. TODO: make define
+		//----------------------------------------------------
+		int32_t gainValue = figureValues[moves[ind].captureType];
+		if(gainValue < marginDifference-200){
+			continue;
+		}
+
 
 		makeMove(&moves[ind], position);
 		uint16_t kingField = findLSB( position->pieceTables[1- position->toMove][king]);
@@ -94,18 +120,12 @@ int32_t negamaxQuiescence(chessPosition* position, int32_t alpha, int32_t beta, 
 
 		} else {
 			nodes++;
-
-
 			int32_t value = -negamaxQuiescence(position, -beta, -alpha, depth+1);
-
 			if(value > alpha){
 				alpha = value;
 				bestMove = moves[ind];
 				bestIndex = ind;
 			}
-
-
-
 		}
 		undoMove(position);
 		if(alpha >= beta) {
@@ -121,6 +141,8 @@ int32_t negamaxQuiescence(chessPosition* position, int32_t alpha, int32_t beta, 
 
 	if(bestIndex != -1){
 		qindices[bestIndex]++;
+		uint32_t hashIndex = position->zobristHash & HASHSIZE;
+		moveOrderingHashTable[hashIndex] = (bestMove.sourceField | (bestMove.targetField << 8));
 	}
 
 	//TODO: write to hash table here as well?

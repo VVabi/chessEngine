@@ -1,15 +1,16 @@
 /*
- * pawnEvaluation.cpp
+ * debugPawnEvaluation.cpp
  *
- *  Created on: Sep 25, 2016
+ *  Created on: Oct 8, 2016
  *      Author: vabi
  */
+
 
 
 #include <lib/basics.hpp>
 #include "evaluation.hpp"
 #include <lib/bitfiddling.h>
-
+#include <communication/gen/VDT.h>
 
 extern uint64_t files[];
 extern uint64_t  passedPawnMasks[2][64];
@@ -19,7 +20,7 @@ static short const passedPawnEvalValues[2][64] = {{ 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
 
 
 
-int32_t passedPawnEval(uint64_t whitePawns, uint64_t blackPawns) {
+int32_t debugPassedPawnEval(uint64_t whitePawns, uint64_t blackPawns) {
 
 	int32_t eval = 0;
 	uint64_t whitePawnBuffer = whitePawns;
@@ -42,7 +43,7 @@ int32_t passedPawnEval(uint64_t whitePawns, uint64_t blackPawns) {
 
 }
 
-int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOccupancy) { //all stuff depending only on own pawn structure, not the opponents
+int32_t debugStaticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOccupancy) { //all stuff depending only on own pawn structure, not the opponents
 
 
 	int32_t eval = 0;
@@ -73,14 +74,17 @@ int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOcc
 }
 
 
-int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupancy) {
+int32_t debugPawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupancy, VDTpawnEvaluation* pawnEval) {
 
 	uint32_t eval=0;
 	uint64_t whitePawns = position->pieceTables[white][pawn];
 	uint64_t blackPawns = position->pieceTables[black][pawn];
 
-
-	eval = eval+staticPawnEval(whitePawns, white, pawnColumnOccupancy)+staticPawnEval(blackPawns, black,  pawnColumnOccupancy+1);
-	eval = eval+passedPawnEval(whitePawns, blackPawns);
+	int32_t staticPawn = debugStaticPawnEval(whitePawns, white, pawnColumnOccupancy)+debugStaticPawnEval(blackPawns, black,  pawnColumnOccupancy+1);
+	pawnEval->doubledPawns = staticPawn;
+	eval = eval+staticPawn;
+	int32_t passedPawn = debugPassedPawnEval(whitePawns, blackPawns);
+	eval = eval+passedPawn;
+	pawnEval->passedPawn = passedPawn;
 	return eval;
 }

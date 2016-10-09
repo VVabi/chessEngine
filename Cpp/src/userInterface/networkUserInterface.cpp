@@ -73,3 +73,10 @@ void networkUserInterface::sendSearchInfo(uint64_t nodes, uint32_t time, int32_t
 	auto searchInfo = std::unique_ptr<VMPsearchInfo>(new VMPsearchInfo(nodes, time, depth, eval, str));
 	send_msg(std::move(searchInfo), 0);
 }
+
+void networkUserInterface::sendDebugEval(VDTevaluation eval, int32_t valid) {
+
+	auto debugEval = std::unique_ptr<VMPevalDebug>(new VMPevalDebug(eval, valid));
+	send_msg(std::move(debugEval), 0);
+
+}

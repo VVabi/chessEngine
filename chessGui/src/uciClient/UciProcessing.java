@@ -21,19 +21,21 @@ public class UciProcessing {
     uciEngineHandler stockFishHandler;
     double res = 0;
 
+    String engine1;
+    String engine2;
     public UciProcessing(String engine1, String engine2, int numGames) throws IOException {
 
-       /* CountDownLatch cd = new CountDownLatch(1);
+        CountDownLatch cd = new CountDownLatch(1);
         server = new VMPServer(9999, 0, cd);
         server.connect("127.0.0.1", 9876);
         try {
             cd.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }*/
+        }
+        this.engine1 = engine1;
+        this.engine2 = engine2;
 
-        vabiHandler = new uciEngineHandler(engine1);
-        stockFishHandler = new uciEngineHandler(engine2);
 
 
     }
@@ -47,7 +49,8 @@ public class UciProcessing {
         int losses = 0;
         for(int k=0; k < 100; k++) {
             //stockFishHandler = new uciEngineHandler("/home/vabi/code/stockfish-7-linux/Linux/stockfish");
-
+            vabiHandler = new uciEngineHandler(engine1);
+            stockFishHandler = new uciEngineHandler(engine2);
 
             System.out.println("Started engines");
             List<String> moves = new ArrayList<>();
@@ -68,7 +71,7 @@ public class UciProcessing {
                 vabiHandler.setPosition(moves);
                 String current = vabiHandler.getCurrentPosition();
                 VMPchessPosition position = new VMPchessPosition(new VDTstring(current.getBytes()));
-                //server.send(position, 0);
+                server.send(position, 0);
                 vabiHandler.startSearch();
 
 
@@ -87,7 +90,7 @@ public class UciProcessing {
                 vabiHandler.setPosition(moves);
                 current = vabiHandler.getCurrentPosition();
                 position = new VMPchessPosition(new VDTstring(current.getBytes()));
-                //server.send(position, 0);
+                server.send(position, 0);
                 //System.out.println(mv[0]);
                 stockFishHandler.setPosition(moves);
                 stockFishHandler.startSearch();

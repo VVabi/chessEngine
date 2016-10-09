@@ -29,3 +29,8 @@ uint32 depth
 int32 eval
 vdt:string moveString
 endstruct
+
+struct:evalDebug
+vdt:evaluation eval
+int32 valid
+endstruct

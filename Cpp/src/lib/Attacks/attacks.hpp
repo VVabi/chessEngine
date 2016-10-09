@@ -14,8 +14,8 @@ struct AttackTable{
 
 
 
-bool isFieldAttacked(chessPosition* position, playerColor attackingSide, uint16_t field);
+bool isFieldAttacked(const chessPosition* position, playerColor attackingSide, uint16_t field);
 
-AttackTable makeAttackTable(chessPosition* position, playerColor attackingSide);
+AttackTable makeAttackTable(const chessPosition* position, playerColor attackingSide);
 
 #endif /* LIB_ATTACKS_ATTACKS_HPP_ */

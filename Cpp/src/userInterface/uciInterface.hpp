@@ -10,7 +10,7 @@
 
 #include "userInterface.hpp"
 #include <vector>
-
+#include <communication/gen/VDT.h>
 class uciInterface: public userInterface {
 	public:
 		uciInterface(){
@@ -27,6 +27,7 @@ class uciInterface: public userInterface {
 		void sendBestMove(std::string position);
 		bool receiveAnalyze(std::string& position);
 		bool positionRequested();
+		void sendDebugEval(VDTevaluation eval, int32_t valid) { return; };
 };
 
 

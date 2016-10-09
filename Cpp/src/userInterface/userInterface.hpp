@@ -10,6 +10,7 @@
 
 #include <string>
 #include <vector>
+#include <communication/gen/VDT.h>
 class userInterface {
 	public:
 		virtual void initialize()=0;
@@ -24,6 +25,7 @@ class userInterface {
 		virtual void sendBestMove(std::string position)=0;
 		virtual bool receiveAnalyze(std::string& position)=0;
 		virtual bool positionRequested()=0;
+		virtual void sendDebugEval(VDTevaluation eval, int32_t valid)=0;
 };
 
 

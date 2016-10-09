@@ -12,7 +12,7 @@
 #define HASHSIZE 0xFFFFFFF
 
 void fillZobristHash();
-uint64_t calcZobristHash(chessPosition* position);
+uint64_t calcZobristHash(const chessPosition* position);
 
 
 #endif /* HASHTABLES_HASHTABLES_HPP_ */

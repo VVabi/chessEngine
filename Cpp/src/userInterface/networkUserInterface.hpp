@@ -11,6 +11,7 @@
 #include "userInterface.hpp"
 #include <communication/gen/VMPmessages.h>
 #include <communication/gen/VDT.h>
+#include <communication/gen/VDT.h>
 #include <vector>
 class networkUserInterface: public userInterface {
 	public:
@@ -28,6 +29,7 @@ class networkUserInterface: public userInterface {
 		void sendBestMove(std::string position) {};
 		bool receiveAnalyze(std::string& position) { return false; }
 		bool positionRequested() { return false;}
+		void sendDebugEval(VDTevaluation eval, int32_t valid);
 };
 
 #endif /* USERINTERFACE_NETWORKUSERINTERFACE_HPP_ */

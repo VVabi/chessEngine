@@ -128,7 +128,7 @@ std::string chessPositionToOutputString(chessPosition position){
 }
 
 void zeroInitPosition(chessPosition* position) {
-#ifdef DEBUG
+#ifdef DEBUGAAA
 	position->toMove = white;
 	position->pieces = vdt_vector<uint64_t>(2);
 	uint64_t dummy = 0;
@@ -272,6 +272,8 @@ chessPosition stringToChessPosition(std::string strposition) {
 							+(((1 << 14) + calcEndGamePieceTableValue(&position)+position.figureEval) << 16);
 	position.zobristHash    = calcZobristHash(&position);
 
+
+	debug_incremental_calculations(&position);
 	return position;
 }
 
@@ -342,7 +344,7 @@ uint64_t stringToMove(std::string mv){
 }
 
 
-void debug_incremental_calculations(chessPosition* position) {
+void debug_incremental_calculations(const chessPosition* position) {
 
 	int16_t eval = calcFigureEvaluation(position);
 

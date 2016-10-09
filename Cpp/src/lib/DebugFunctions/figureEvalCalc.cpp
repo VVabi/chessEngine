@@ -11,7 +11,7 @@
 
 extern int16_t figureValues[];
 
-int16_t calcFigureEvaluation(chessPosition* position) {
+int16_t calcFigureEvaluation(const chessPosition* position) {
 	int16_t val = 0;
 	for(uint16_t ind=0; ind < 5; ind++) {
 		uint64_t whitePieces = position->pieceTables[white][ind];
@@ -22,7 +22,7 @@ int16_t calcFigureEvaluation(chessPosition* position) {
 }
 
 
-uint16_t calcTotalFigureEvaluation(chessPosition* position) {
+uint16_t calcTotalFigureEvaluation(const chessPosition* position) {
 	uint16_t val = 0;
 	for(uint16_t ind=0; ind < 5; ind++) {
 		uint64_t whitePieces = position->pieceTables[white][ind];

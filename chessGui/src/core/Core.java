@@ -112,5 +112,11 @@ public class Core {
             SearchDebugEvent ev = new SearchDebugEvent(info.nodes, info.time, info.eval, info.depth, new String(info.moveString.chars));
             engineEventInterface.addGuiEvent(ev);
         }
+
+        m = server.getMessage(MessageIDs.VMPevalDebug_unique_id);
+        if(m != null) {
+            EvalDebugEvent ev = new EvalDebugEvent(((VMPevalDebug) m).eval, ((VMPevalDebug) m).valid);
+            engineEventInterface.addGuiEvent(ev);
+        }
     }
 }

@@ -24,7 +24,7 @@ extern uint64_t bishopMagicNumbers[];
 
 
 
-bool isFieldAttacked(chessPosition* position, playerColor attackingSide, uint16_t field){
+bool isFieldAttacked(const chessPosition* position, playerColor attackingSide, uint16_t field){
 
 	//knights
 	uint64_t knights = position->pieceTables[attackingSide][knight];
@@ -81,7 +81,7 @@ bool isFieldAttacked(chessPosition* position, playerColor attackingSide, uint16_
 }
 
 
-AttackTable makeAttackTable(chessPosition* position, playerColor attackingSide) {
+AttackTable makeAttackTable(const chessPosition* position, playerColor attackingSide) {
 
 	AttackTable retTable;
 	//pawns

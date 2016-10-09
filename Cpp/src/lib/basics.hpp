@@ -40,7 +40,7 @@ struct chessMove{
 };
 
 struct chessPosition {
-#ifdef DEBUG
+#ifdef DEBUGAAAA
 	vdt_vector<uint64_t> pieces;
 	vdt_vector<vdt_vector<uint64_t>> pieceTables;
 #else
@@ -65,7 +65,7 @@ inline figureType toFigureType(uint16_t num);
 std::string moveToString(chessMove move, chessPosition position);
 uint64_t stringToMove(std::string mv);
 uint64_t getRandUint64();
-void debug_incremental_calculations(chessPosition* position);
+void debug_incremental_calculations(const chessPosition* position);
 void free_position(chessPosition* position);
 std::string chessPositionToFenString(chessPosition position, bool EPD=false);
 #endif /* LIB_BASICS_HPP_ */

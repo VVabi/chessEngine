@@ -17,6 +17,7 @@
 #include <hashTables/hashTables.hpp>
 #include <algorithm>
 #include <assert.h>
+#include <lib/Evaluation/evaluation.hpp>
 
 static uint32_t nodes = 0;
 
@@ -75,6 +76,16 @@ int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t 
 		return negamaxQuiescence(position, alpha, beta, 0);
 	}
 
+	//futility
+	if(depth == 1){
+		int32_t base = evaluation(position, alpha-151, beta);
+		if(base+150 < alpha){
+			//in this case, trying a silent move is pointless.
+			//std::cout << "Successful futility pruning" << std::endl;
+			return  negamaxQuiescence(position, alpha, beta, 0);
+		}
+	}
+
 	vdt_vector<chessMove> moves = vdt_vector<chessMove>(buffer+depth*100,100);
 	generateAllMoves(&moves, position);
 	bool isInCheck = orderStandardMoves(position, &moves, depth);
@@ -84,9 +95,6 @@ int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t 
 	bool foundGoodMove = false;
 	for(uint16_t ind=0; ind < moves.length; ind++){
 
-
-
-
 		if(ind == 1){
 			sortCalled++;
 			std::sort(moves.data, moves.data+moves.length);
@@ -95,7 +103,6 @@ int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t 
 		if(moves[ind].sortEval < -10000){
 			break;
 		}
-
 
 
 		makeMove(&moves[ind], position);
