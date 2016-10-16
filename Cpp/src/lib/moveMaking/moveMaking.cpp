@@ -15,13 +15,17 @@ extern int16_t figureValues[];
 extern int32_t completePieceTables[7][2][64];
 extern uint64_t zobristHash[7][2][64];
 extern uint64_t movingSideHash[2];
+extern uint16_t repetitionData[16384];
 
 void makeNullMove(chessPosition* position){
-	uint16_t to_push = position->castlingRights | (((uint16_t) position->enPassantFile) << 8);
-	position->castlingAndEpStack.add(&to_push);
-	position->enPassantFile  = 8;
+	position->data.hash = position->zobristHash;
+	position->dataStack.add(&position->data);
+	position->data.enPassantFile  = 8;
+	position->data.fiftyMoveRuleCounter = 0;
 	position->zobristHash = position->zobristHash^movingSideHash[0];
 	position->toMove = (playerColor) (1-position->toMove);
+	chessMove move;
+	position->madeMoves.add(&move);
 }
 
 inline static void makeNormalMove(chessMove* move, chessPosition* position) {
@@ -35,8 +39,6 @@ inline static void makeNormalMove(chessMove* move, chessPosition* position) {
 	position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*completePieceTables[move->captureType][1-toMove][move->targetField];
 
 	position->zobristHash    = position->zobristHash^zobristHash[move->type][toMove][move->targetField]^zobristHash[move->type][toMove][move->sourceField]^zobristHash[move->captureType][1-toMove][move->targetField];
-
-
 }
 
 
@@ -111,21 +113,30 @@ inline static void makePromotion(chessMove* move, chessPosition* position, figur
 
 void makeMove(chessMove* move, chessPosition* position) {
 
-	uint16_t to_push = position->castlingRights | (((uint16_t) position->enPassantFile) << 8);
-	position->castlingAndEpStack.add(&to_push);
-	uint8_t castlingRights = position->castlingRights;
+	position->data.hash = position->zobristHash;
+	position->dataStack.add(&position->data);
+	position->data.fiftyMoveRuleCounter = position->data.fiftyMoveRuleCounter+1;
+
+	bool isPawn = (move->type == pawnMove) || (move->type == enpassant) || (move->type == promotionQueen) || (move->type == promotionRook) || (move->type == promotionBishop) || (move->type == promotionKnight);
+	bool isCapture = (move->captureType != none);
+
+	if(isPawn || isCapture){
+		position->data.fiftyMoveRuleCounter = 0;
+	}
+
+	uint8_t castlingRights = position->data.castlingRights;
 	castlingRights = (move->move & WHITEKINGSIDECASTLEMASK  ? (castlingRights & 14):castlingRights);
 	castlingRights = (move->move & WHITEQUEENSIDECASTLEMASK ? (castlingRights & 13):castlingRights);
 	castlingRights = (move->move & BLACKKINGSIDECASTLEMASK  ? (castlingRights & 11):castlingRights);
 	castlingRights = (move->move & BLACKQUEENSIDECASTLEMASK ? (castlingRights &  7):castlingRights);
-	position->castlingRights = castlingRights;
+	position->data.castlingRights = castlingRights;
 	position->figureEval     = position->figureEval+(1-2*position->toMove)*figureValues[move->captureType];
 	position->totalFigureEval     = position->totalFigureEval-figureValues[move->captureType];
-	position->enPassantFile  = 8;
+	position->data.enPassantFile  = 8;
 	switch(move->type){
 		case pawnMove:
 			if(((move->targetField-move->sourceField) & 15) == 0) { //pawn went two ahead
-				position->enPassantFile = FILE(move->targetField);
+				position->data.enPassantFile = FILE(move->targetField);
 			}
 		case knightMove:
 		case bishopMove:
@@ -166,6 +177,7 @@ void makeMove(chessMove* move, chessPosition* position) {
 	position->madeMoves.add(move);
 	position->toMove = (playerColor) (1-position->toMove);
 	position->zobristHash = position->zobristHash^movingSideHash[0];
+	repetitionData[position->zobristHash & 16383]++;
 	#ifdef DEBUG
 
 	debug_incremental_calculations(position);

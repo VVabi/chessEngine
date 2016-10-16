@@ -2,66 +2,84 @@ Flat profile:
 
 Each sample counts as 0.01 seconds.
   %   cumulative   self              self     total           
- time   seconds   seconds    calls  ms/call  ms/call  name    
- 12.95      0.36     0.36  9521455     0.00     0.00  calcZobristHash(chessPosition*)
- 11.15      0.67     0.31  1199248     0.00     0.00  orderStandardMoves(chessPosition*, vdt_vector<chessMove>*)
- 10.43      0.96     0.29 19002076     0.00     0.00  staticPawnEval(unsigned long, playerColor, unsigned char*)
-  9.35      1.22     0.26 21400572     0.00     0.00  makeAttackTable(chessPosition*, playerColor)
-  8.63      1.46     0.24  5321378     0.00     0.00  calcCaptureSortEval(chessPosition*, chessMove*, unsigned short)
-  6.84      1.65     0.19 11381512     0.00     0.00  undoMove(chessPosition*)
-  6.12      1.82     0.17  9501038     0.00     0.00  passedPawnEval(unsigned long, unsigned long)
-  4.68      1.95     0.13  9501038     0.00     0.00  evaluation(chessPosition*)
-  4.32      2.07     0.12 11383014     0.00     0.00  makeMove(chessMove*, chessPosition*)
-  3.60      2.17     0.10     1502     0.07     1.84  negamax(chessPosition*, unsigned short, int, int, chessMove*)
-  2.88      2.25     0.08 11381512     0.00     0.00  isFieldAttacked(chessPosition*, playerColor, unsigned short)
-  2.52      2.32     0.07 10054204     0.00     0.00  generateRookCaptureMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
-  2.52      2.39     0.07  3133342     0.00     0.00  negamaxQuiescence(chessPosition*, int, int, unsigned short)
-  2.34      2.46     0.07  5027102     0.00     0.00  generatePawnCaptureMoves(vdt_vector<chessMove>*, chessPosition*)
-  2.16      2.52     0.06 10054204     0.00     0.00  generateNonSliderCaptureMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType)
-  1.80      2.57     0.05 10054204     0.00     0.00  generateBishopCaptureMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
-  1.44      2.61     0.04  5027102     0.00     0.00  orderCaptureMoves(chessPosition*, vdt_vector<chessMove>*)
-  1.44      2.65     0.04  2398496     0.00     0.00  generateRookMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
-  1.44      2.69     0.04  2398496     0.00     0.00  generateBishopMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
-  1.44      2.73     0.04  2398496     0.00     0.00  generateNonSliderMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType)
-  0.90      2.75     0.03  5027102     0.00     0.00  generateAllCaptureMoves(vdt_vector<chessMove>*, chessPosition*)
-  0.72      2.77     0.02  1199248     0.00     0.00  generatePawnMoves(vdt_vector<chessMove>*, chessPosition*)
-  0.36      2.78     0.01       20     0.50     0.50  calcPieceTableValue(chessPosition*)
-  0.00      2.78     0.00  9501038     0.00     0.00  pawnEvaluation(chessPosition*, unsigned char*)
-  0.00      2.78     0.00  1199248     0.00     0.00  generateAllMoves(vdt_vector<chessMove>*, chessPosition*)
-  0.00      2.78     0.00  1199248     0.00     0.00  generateCastling(vdt_vector<chessMove>*, chessPosition*)
-  0.00      2.78     0.00     1502     0.00     1.84  selfPlayMakeMove(chessPosition*, unsigned short, unsigned short)
-  0.00      2.78     0.00      769     0.00     0.00  getRandUint64()
-  0.00      2.78     0.00      769     0.00     0.00  std::mersenne_twister_engine<unsigned long, 64ul, 312ul, 156ul, 31ul, 13043109905998158313ul, 29ul, 6148914691236517205ul, 17ul, 8202884508482404352ul, 37ul, 18444473444759240704ul, 43ul, 6364136223846793005ul>::operator()()
-  0.00      2.78     0.00       20     0.00     0.00  testUndoMove()
-  0.00      2.78     0.00       10     0.00     0.50  zeroInitPosition(chessPosition*)
-  0.00      2.78     0.00       10     0.00   278.04  playSingleGameSelf(unsigned short, unsigned short, bool)
-  0.00      2.78     0.00       10     0.00     0.00  calcFigureEvaluation(chessPosition*)
-  0.00      2.78     0.00       10     0.00     1.00  stringToChessPosition(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >)
-  0.00      2.78     0.00        6     0.00     0.00  _GLOBAL__sub_I_moveOrderingHashTable
-  0.00      2.78     0.00        2     0.00     0.00  _GLOBAL__sub_I_enablePawnEval
-  0.00      2.78     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z10perftNodesP13chessPositiont
-  0.00      2.78     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z12outPutuint64m
-  0.00      2.78     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z12resetIndicesv
-  0.00      2.78     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z12testMakeMovev
-  0.00      2.78     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z13getRandUint64v
-  0.00      2.78     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z14passedPawnEvalmm
-  0.00      2.78     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z15getZeroPositionB5cxx11v
-  0.00      2.78     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z15isFieldAttackedP13chessPosition11playerColort
-  0.00      2.78     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z16selfPlayMakeMoveP13chessPositiontt
-  0.00      2.78     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z17generateRookMovesP10vdt_vectorI9chessMoveEP13chessPosition10figureType
-  0.00      2.78     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z19calcPieceTableValueP13chessPosition
-  0.00      2.78     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z20calcFigureEvaluationP13chessPosition
-  0.00      2.78     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z20resetQuiescenceNodesv
-  0.00      2.78     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z21chessPositionToStringB5cxx1113chessPosition
-  0.00      2.78     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z23generateBishopMoveTabletm
-  0.00      2.78     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z24generateRookCaptureMovesP10vdt_vectorI9chessMoveEP13chessPosition10figureType
-  0.00      2.78     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z27generateRookReachableFieldsB5cxx11v
-  0.00      2.78     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z28generateRookMoveTablesStringB5cxx11v
-  0.00      2.78     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z29generateBishopReachableFieldsB5cxx11v
-  0.00      2.78     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z8makeMoveP9chessMoveP13chessPosition
-  0.00      2.78     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z8undoMoveP13chessPosition
-  0.00      2.78     0.00        1     0.00     0.00  _GLOBAL__sub_I_captureEvals
-  0.00      2.78     0.00        1     0.00     0.00  _GLOBAL__sub_I_numTests
+ time   seconds   seconds    calls  us/call  us/call  name    
+ 21.24     16.71    16.71 45872084     0.36     0.40  orderStandardMoves(chessPosition const*, vdt_vector<chessMove>*, unsigned short)
+ 11.73     25.94     9.23 538387964     0.02     0.02  makeAttackTable(chessPosition const*, playerColor)
+ 11.45     34.95     9.01 159083155     0.06     0.06  orderCaptureMoves(chessPosition*, vdt_vector<chessMove>*)
+  9.66     42.55     7.60 223321898     0.03     0.03  pawnEvaluation(chessPosition const*, unsigned char*)
+  5.16     46.61     4.06 294254939     0.01     0.01  makeMove(chessMove*, chessPosition*)
+  3.93     49.70     3.09 279582464     0.01     0.07  evaluation(chessPosition const*, int, int)
+  3.80     52.69     2.99 49750960     0.06     0.75  negamax(chessPosition*, unsigned short, int, int, chessMove*)
+  3.72     55.62     2.93 309970568     0.01     0.01  generateRookCaptureMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
+  3.43     58.32     2.70 294254939     0.01     0.01  undoMove(chessPosition*)
+  3.30     60.92     2.60 309970568     0.01     0.01  generateBishopCaptureMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
+  3.15     63.39     2.48 309970568     0.01     0.01  generateNonSliderCaptureMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType)
+  3.10     65.83     2.44 91744168     0.03     0.03  generateRookMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
+  3.08     68.25     2.42 89688923     0.03     0.46  negamaxQuiescence(chessPosition*, int, int, unsigned short)
+  2.19     69.97     1.72 91744168     0.02     0.02  generateNonSliderMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType)
+  2.10     71.62     1.65 304788923     0.01     0.01  isFieldAttacked(chessPosition const*, playerColor, unsigned short)
+  1.88     73.10     1.48 45872084     0.03     0.03  generatePawnMoves(vdt_vector<chessMove>*, chessPosition*)
+  1.87     74.58     1.48 91744168     0.02     0.02  generateBishopMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
+  1.72     75.94     1.36 154985284     0.01     0.01  generatePawnCaptureMoves(vdt_vector<chessMove>*, chessPosition*)
+  1.35     77.00     1.06  4107531     0.26     0.26  getNodes()
+  0.85     77.66     0.67 154985284     0.00     0.06  generateAllCaptureMoves(vdt_vector<chessMove>*, chessPosition*)
+  0.39     77.97     0.31 45872084     0.01     0.16  generateAllMoves(vdt_vector<chessMove>*, chessPosition*)
+  0.27     78.18     0.21 49730255     0.00     0.00  resetSortqCalled()
+  0.11     78.27     0.09     9660     9.32     9.32  calcEndGamePieceTableValue(chessPosition const*)
+  0.11     78.36     0.09                             debugPawnEvaluation(chessPosition const*, unsigned char*, VDTpawnEvaluation*)
+  0.11     78.45     0.09 45872084     0.00     0.00  generateCastling(vdt_vector<chessMove>*, chessPosition*)
+  0.11     78.54     0.09  9716818     0.01     0.01  makeNullMove(chessPosition*)
+  0.10     78.62     0.08                             staticPawnEval(unsigned long, playerColor, unsigned char*)
+  0.06     78.67     0.05  9716818     0.00     0.00  undoNullMove(chessPosition*)
+  0.03     78.69     0.02                             calcCaptureSortEval(chessPosition*, chessMove*, unsigned short)
+  0.01     78.70     0.01    14490     0.69     0.69  calcZobristHash(chessPosition const*)
+  0.00     78.70     0.00     9660     0.00     0.00  getQuiescenceNodes()
+  0.00     78.70     0.00     9660     0.00     0.00  calcPieceTableValue(chessPosition const*)
+  0.00     78.70     0.00     9660     0.00     0.00  calcFigureEvaluation(chessPosition const*)
+  0.00     78.70     0.00     9660     0.00     0.00  calcTotalFigureEvaluation(chessPosition const*)
+  0.00     78.70     0.00     4830     0.00     0.00  resetNodes()
+  0.00     78.70     0.00     4830     0.00     0.69  zeroInitPosition(chessPosition*)
+  0.00     78.70     0.00     4830     0.00     0.00  resetQuiescenceNodes()
+  0.00     78.70     0.00     4830     0.00    20.71  stringToChessPosition(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >)
+  0.00     78.70     0.00     4830     0.00    10.01  debug_incremental_calculations(chessPosition const*)
+  0.00     78.70     0.00      769     0.00     0.00  getRandUint64()
+  0.00     78.70     0.00      769     0.00     0.00  std::mersenne_twister_engine<unsigned long, 64ul, 312ul, 156ul, 31ul, 13043109905998158313ul, 29ul, 6148914691236517205ul, 17ul, 8202884508482404352ul, 37ul, 18444473444759240704ul, 43ul, 6364136223846793005ul>::operator()()
+  0.00     78.70     0.00        2     0.00     0.00  _GLOBAL__sub_I_attacksCloseToKingEvals
+  0.00     78.70     0.00        2     0.00     0.00  _GLOBAL__sub_I_moveOrderingHashTable
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I_UI
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z10perftNodesP13chessPositiont
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z12makeNullMoveP13chessPosition
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z12testMakeMovev
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z12undoNullMoveP13chessPosition
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z13getRandUint64v
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z13get_timestampv
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z13resetqIndicesv
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z14passedPawnEvalmm
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z15debugEvaluationPK13chessPositionP13VDTevaluation
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z15getZeroPositionB5cxx11v
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z15isFieldAttackedPK13chessPosition11playerColort
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z16selfPlayMakeMoveP13chessPositiontt
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z16zeroInitPositionP13chessPosition
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z17generateRookMovesP10vdt_vectorI9chessMoveEP13chessPosition10figureType
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z18initialize_networkPKci
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z19calcPieceTableValuePK13chessPosition
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z19debugPassedPawnEvalmm
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z20calcFigureEvaluationPK13chessPosition
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z23generateBishopMoveTabletm
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z24generateRookCaptureMovesP10vdt_vectorI9chessMoveEP13chessPosition10figureType
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z27generateRookReachableFieldsB5cxx11v
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z28generateRookMoveTablesStringB5cxx11v
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z29generateBishopReachableFieldsB5cxx11v
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z6inputsB5cxx11
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z9getCalledv
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN13ClientHandlerD2Ev
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN20networkUserInterface10initializeEv
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN6SocketC2EPKci
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN9VMPServer11get_messageEj
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I_enablePawnEval
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I_kingBlockers
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I_main
+  0.00     78.70     0.00        1     0.00     0.00  _GLOBAL__sub_I_numTests
 
  %         the percentage of the total running time of the
 time       program used by this function.
@@ -99,249 +117,317 @@ notice and this notice are preserved.
 		     Call graph (explanation follows)
 
 
-granularity: each sample hit covers 2 byte(s) for 0.36% of 2.78 seconds
+granularity: each sample hit covers 2 byte(s) for 0.01% of 78.70 seconds
 
 index % time    self  children    called     name
-                0.00    2.78      10/10          playSelf(unsigned short, unsigned short, unsigned int) [2]
-[1]    100.0    0.00    2.78      10         playSingleGameSelf(unsigned short, unsigned short, bool) [1]
-                0.00    2.77    1502/1502        selfPlayMakeMove(chessPosition*, unsigned short, unsigned short) [3]
-                0.00    0.01      10/10          stringToChessPosition(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [28]
-                0.00    0.00      20/20          testUndoMove() [41]
+                                                 <spontaneous>
+[1]     99.8    0.00   78.51                 runPerformanceTests() [1]
+                5.41   72.99   20705/20705       negamax(chessPosition*, unsigned short, int, int, chessMove*) <cycle 1> [4]
+                0.00    0.10    4830/4830        stringToChessPosition(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [25]
+                0.00    0.00    9660/4107531     getNodes() [23]
+                0.00    0.00    9660/9660        getQuiescenceNodes() [43]
+                0.00    0.00    4830/4830        resetQuiescenceNodes() [48]
+                0.00    0.00    4830/4830        resetNodes() [47]
+-----------------------------------------------
+[2]     99.6    5.41   72.99   20705+139419178 <cycle 1 as a whole> [2]
+                2.42   38.88 89688923+146411065     negamaxQuiescence(chessPosition*, int, int, unsigned short) <cycle 1> [3]
+                2.99   34.12 49750960+135540302     negamax(chessPosition*, unsigned short, int, int, chessMove*) <cycle 1> [4]
+-----------------------------------------------
+                             146411065             negamaxQuiescence(chessPosition*, int, int, unsigned short) <cycle 1> [3]
+                             89688923             negamax(chessPosition*, unsigned short, int, int, chessMove*) <cycle 1> [4]
+[3]     52.5    2.42   38.88 89688923+146411065 negamaxQuiescence(chessPosition*, int, int, unsigned short) <cycle 1> [3]
+                2.61   12.89 236099988/279582464     evaluation(chessPosition const*, int, int) [5]
+                0.67    9.36 154985284/154985284     generateAllCaptureMoves(vdt_vector<chessMove>*, chessPosition*) [7]
+                8.78    0.00 154985284/159083155     orderCaptureMoves(chessPosition*, vdt_vector<chessMove>*) [9]
+                2.12    0.00 153891075/294254939     makeMove(chessMove*, chessPosition*) [12]
+                1.41    0.00 153891075/294254939     undoMove(chessPosition*) [14]
+                0.83    0.00 153891075/304788923     isFieldAttacked(chessPosition const*, playerColor, unsigned short) [19]
+                0.21    0.00 49730255/49730255     resetSortqCalled() [24]
+                             49730255             negamax(chessPosition*, unsigned short, int, int, chessMove*) <cycle 1> [4]
+                             146411065             negamaxQuiescence(chessPosition*, int, int, unsigned short) <cycle 1> [3]
+-----------------------------------------------
+                             135540302             negamax(chessPosition*, unsigned short, int, int, chessMove*) <cycle 1> [4]
+                             49730255             negamaxQuiescence(chessPosition*, int, int, unsigned short) <cycle 1> [3]
+                5.41   72.99   20705/20705       runPerformanceTests() [1]
+[4]     47.2    2.99   34.12 49750960+135540302 negamax(chessPosition*, unsigned short, int, int, chessMove*) <cycle 1> [4]
+               16.71    1.57 45872084/45872084     orderStandardMoves(chessPosition const*, vdt_vector<chessMove>*, unsigned short) [6]
+                0.31    7.21 45872084/45872084     generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [11]
+                0.48    2.37 43482476/279582464     evaluation(chessPosition const*, int, int) [5]
+                1.94    0.00 140363864/294254939     makeMove(chessMove*, chessPosition*) [12]
+                1.29    0.00 140363864/294254939     undoMove(chessPosition*) [14]
+                1.06    0.00 4097871/4107531     getNodes() [23]
+                0.82    0.00 150897848/304788923     isFieldAttacked(chessPosition const*, playerColor, unsigned short) [19]
+                0.23    0.00 4097871/159083155     orderCaptureMoves(chessPosition*, vdt_vector<chessMove>*) [9]
+                0.09    0.00 9716818/9716818     makeNullMove(chessPosition*) [29]
+                0.05    0.00 9716818/9716818     undoNullMove(chessPosition*) [32]
+                             89688923             negamaxQuiescence(chessPosition*, int, int, unsigned short) <cycle 1> [3]
+                             135540302             negamax(chessPosition*, unsigned short, int, int, chessMove*) <cycle 1> [4]
+-----------------------------------------------
+                0.48    2.37 43482476/279582464     negamax(chessPosition*, unsigned short, int, int, chessMove*) <cycle 1> [4]
+                2.61   12.89 236099988/279582464     negamaxQuiescence(chessPosition*, int, int, unsigned short) <cycle 1> [3]
+[5]     23.3    3.09   15.26 279582464         evaluation(chessPosition const*, int, int) [5]
+                7.66    0.00 446643796/538387964     makeAttackTable(chessPosition const*, playerColor) [8]
+                7.60    0.00 223321898/223321898     pawnEvaluation(chessPosition const*, unsigned char*) [10]
+-----------------------------------------------
+               16.71    1.57 45872084/45872084     negamax(chessPosition*, unsigned short, int, int, chessMove*) <cycle 1> [4]
+[6]     23.2   16.71    1.57 45872084         orderStandardMoves(chessPosition const*, vdt_vector<chessMove>*, unsigned short) [6]
+                1.57    0.00 91744168/538387964     makeAttackTable(chessPosition const*, playerColor) [8]
+-----------------------------------------------
+                0.67    9.36 154985284/154985284     negamaxQuiescence(chessPosition*, int, int, unsigned short) <cycle 1> [3]
+[7]     12.7    0.67    9.36 154985284         generateAllCaptureMoves(vdt_vector<chessMove>*, chessPosition*) [7]
+                2.93    0.00 309970568/309970568     generateRookCaptureMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [13]
+                2.60    0.00 309970568/309970568     generateBishopCaptureMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [15]
+                2.48    0.00 309970568/309970568     generateNonSliderCaptureMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType) [16]
+                1.36    0.00 154985284/154985284     generatePawnCaptureMoves(vdt_vector<chessMove>*, chessPosition*) [22]
+-----------------------------------------------
+                1.57    0.00 91744168/538387964     orderStandardMoves(chessPosition const*, vdt_vector<chessMove>*, unsigned short) [6]
+                7.66    0.00 446643796/538387964     evaluation(chessPosition const*, int, int) [5]
+[8]     11.7    9.23    0.00 538387964         makeAttackTable(chessPosition const*, playerColor) [8]
+-----------------------------------------------
+                0.23    0.00 4097871/159083155     negamax(chessPosition*, unsigned short, int, int, chessMove*) <cycle 1> [4]
+                8.78    0.00 154985284/159083155     negamaxQuiescence(chessPosition*, int, int, unsigned short) <cycle 1> [3]
+[9]     11.4    9.01    0.00 159083155         orderCaptureMoves(chessPosition*, vdt_vector<chessMove>*) [9]
+-----------------------------------------------
+                7.60    0.00 223321898/223321898     evaluation(chessPosition const*, int, int) [5]
+[10]     9.7    7.60    0.00 223321898         pawnEvaluation(chessPosition const*, unsigned char*) [10]
+-----------------------------------------------
+                0.31    7.21 45872084/45872084     negamax(chessPosition*, unsigned short, int, int, chessMove*) <cycle 1> [4]
+[11]     9.6    0.31    7.21 45872084         generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [11]
+                2.44    0.00 91744168/91744168     generateRookMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [17]
+                1.72    0.00 91744168/91744168     generateNonSliderMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType) [18]
+                1.48    0.00 45872084/45872084     generatePawnMoves(vdt_vector<chessMove>*, chessPosition*) [20]
+                1.48    0.00 91744168/91744168     generateBishopMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [21]
+                0.09    0.00 45872084/45872084     generateCastling(vdt_vector<chessMove>*, chessPosition*) [28]
+-----------------------------------------------
+                1.94    0.00 140363864/294254939     negamax(chessPosition*, unsigned short, int, int, chessMove*) <cycle 1> [4]
+                2.12    0.00 153891075/294254939     negamaxQuiescence(chessPosition*, int, int, unsigned short) <cycle 1> [3]
+[12]     5.2    4.06    0.00 294254939         makeMove(chessMove*, chessPosition*) [12]
+-----------------------------------------------
+                2.93    0.00 309970568/309970568     generateAllCaptureMoves(vdt_vector<chessMove>*, chessPosition*) [7]
+[13]     3.7    2.93    0.00 309970568         generateRookCaptureMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [13]
+-----------------------------------------------
+                1.29    0.00 140363864/294254939     negamax(chessPosition*, unsigned short, int, int, chessMove*) <cycle 1> [4]
+                1.41    0.00 153891075/294254939     negamaxQuiescence(chessPosition*, int, int, unsigned short) <cycle 1> [3]
+[14]     3.4    2.70    0.00 294254939         undoMove(chessPosition*) [14]
+-----------------------------------------------
+                2.60    0.00 309970568/309970568     generateAllCaptureMoves(vdt_vector<chessMove>*, chessPosition*) [7]
+[15]     3.3    2.60    0.00 309970568         generateBishopCaptureMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [15]
+-----------------------------------------------
+                2.48    0.00 309970568/309970568     generateAllCaptureMoves(vdt_vector<chessMove>*, chessPosition*) [7]
+[16]     3.1    2.48    0.00 309970568         generateNonSliderCaptureMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType) [16]
+-----------------------------------------------
+                2.44    0.00 91744168/91744168     generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [11]
+[17]     3.1    2.44    0.00 91744168         generateRookMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [17]
+-----------------------------------------------
+                1.72    0.00 91744168/91744168     generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [11]
+[18]     2.2    1.72    0.00 91744168         generateNonSliderMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType) [18]
+-----------------------------------------------
+                0.82    0.00 150897848/304788923     negamax(chessPosition*, unsigned short, int, int, chessMove*) <cycle 1> [4]
+                0.83    0.00 153891075/304788923     negamaxQuiescence(chessPosition*, int, int, unsigned short) <cycle 1> [3]
+[19]     2.1    1.65    0.00 304788923         isFieldAttacked(chessPosition const*, playerColor, unsigned short) [19]
+-----------------------------------------------
+                1.48    0.00 45872084/45872084     generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [11]
+[20]     1.9    1.48    0.00 45872084         generatePawnMoves(vdt_vector<chessMove>*, chessPosition*) [20]
+-----------------------------------------------
+                1.48    0.00 91744168/91744168     generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [11]
+[21]     1.9    1.48    0.00 91744168         generateBishopMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [21]
+-----------------------------------------------
+                1.36    0.00 154985284/154985284     generateAllCaptureMoves(vdt_vector<chessMove>*, chessPosition*) [7]
+[22]     1.7    1.36    0.00 154985284         generatePawnCaptureMoves(vdt_vector<chessMove>*, chessPosition*) [22]
+-----------------------------------------------
+                             9194859             getNodes() [23]
+                0.00    0.00    9660/4107531     runPerformanceTests() [1]
+                1.06    0.00 4097871/4107531     negamax(chessPosition*, unsigned short, int, int, chessMove*) <cycle 1> [4]
+[23]     1.3    1.06    0.00 4107531+9194859 getNodes() [23]
+                             9194859             getNodes() [23]
+-----------------------------------------------
+                0.21    0.00 49730255/49730255     negamaxQuiescence(chessPosition*, int, int, unsigned short) <cycle 1> [3]
+[24]     0.3    0.21    0.00 49730255         resetSortqCalled() [24]
+-----------------------------------------------
+                0.00    0.10    4830/4830        runPerformanceTests() [1]
+[25]     0.1    0.00    0.10    4830         stringToChessPosition(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [25]
+                0.00    0.05    4830/4830        debug_incremental_calculations(chessPosition const*) [31]
+                0.05    0.00    4830/9660        calcEndGamePieceTableValue(chessPosition const*) [26]
+                0.00    0.00    4830/4830        zeroInitPosition(chessPosition*) [35]
+                0.00    0.00    4830/14490       calcZobristHash(chessPosition const*) [34]
+                0.00    0.00    4830/9660        calcTotalFigureEvaluation(chessPosition const*) [46]
+                0.00    0.00    4830/9660        calcFigureEvaluation(chessPosition const*) [45]
+                0.00    0.00    4830/9660        calcPieceTableValue(chessPosition const*) [44]
+-----------------------------------------------
+                0.05    0.00    4830/9660        stringToChessPosition(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [25]
+                0.05    0.00    4830/9660        debug_incremental_calculations(chessPosition const*) [31]
+[26]     0.1    0.09    0.00    9660         calcEndGamePieceTableValue(chessPosition const*) [26]
 -----------------------------------------------
                                                  <spontaneous>
-[2]    100.0    0.00    2.78                 playSelf(unsigned short, unsigned short, unsigned int) [2]
-                0.00    2.78      10/10          playSingleGameSelf(unsigned short, unsigned short, bool) [1]
+[27]     0.1    0.09    0.00                 debugPawnEvaluation(chessPosition const*, unsigned char*, VDTpawnEvaluation*) [27]
 -----------------------------------------------
-                0.00    2.77    1502/1502        playSingleGameSelf(unsigned short, unsigned short, bool) [1]
-[3]     99.6    0.00    2.77    1502         selfPlayMakeMove(chessPosition*, unsigned short, unsigned short) [3]
-                0.10    2.67    1502/1502        negamax(chessPosition*, unsigned short, int, int, chessMove*) [4]
-                0.00    0.00    1502/11383014     makeMove(chessMove*, chessPosition*) [18]
+                0.09    0.00 45872084/45872084     generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [11]
+[28]     0.1    0.09    0.00 45872084         generateCastling(vdt_vector<chessMove>*, chessPosition*) [28]
 -----------------------------------------------
-                             4331088             negamax(chessPosition*, unsigned short, int, int, chessMove*) [4]
-                0.10    2.67    1502/1502        selfPlayMakeMove(chessPosition*, unsigned short, unsigned short) [3]
-[4]     99.6    0.10    2.67    1502+4331088 negamax(chessPosition*, unsigned short, int, int, chessMove*) [4]
-                0.07    1.86 3133342/3133342     negamaxQuiescence(chessPosition*, int, int, unsigned short) [5]
-                0.31    0.08 1199248/1199248     orderStandardMoves(chessPosition*, vdt_vector<chessMove>*) [8]
-                0.00    0.14 1199248/1199248     generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [17]
-                0.08    0.00 4621304/11381512     undoMove(chessPosition*) [15]
-                0.05    0.00 4621304/11383014     makeMove(chessMove*, chessPosition*) [18]
-                0.05    0.00 1277175/9521455     calcZobristHash(chessPosition*) [9]
-                0.03    0.00 4621304/11381512     isFieldAttacked(chessPosition*, playerColor, unsigned short) [19]
-                             4331088             negamax(chessPosition*, unsigned short, int, int, chessMove*) [4]
+                0.09    0.00 9716818/9716818     negamax(chessPosition*, unsigned short, int, int, chessMove*) <cycle 1> [4]
+[29]     0.1    0.09    0.00 9716818         makeNullMove(chessPosition*) [29]
 -----------------------------------------------
-                             6367696             negamaxQuiescence(chessPosition*, int, int, unsigned short) [5]
-                0.07    1.86 3133342/3133342     negamax(chessPosition*, unsigned short, int, int, chessMove*) [4]
-[5]     69.4    0.07    1.86 3133342+6367696 negamaxQuiescence(chessPosition*, int, int, unsigned short) [5]
-                0.13    0.69 9501038/9501038     evaluation(chessPosition*) [6]
-                0.31    0.00 8244260/9521455     calcZobristHash(chessPosition*) [9]
-                0.03    0.25 5027102/5027102     generateAllCaptureMoves(vdt_vector<chessMove>*, chessPosition*) [11]
-                0.04    0.19 5027102/5027102     orderCaptureMoves(chessPosition*, vdt_vector<chessMove>*) [14]
-                0.11    0.00 6760208/11381512     undoMove(chessPosition*) [15]
-                0.07    0.00 6760208/11383014     makeMove(chessMove*, chessPosition*) [18]
-                0.05    0.00 6760208/11381512     isFieldAttacked(chessPosition*, playerColor, unsigned short) [19]
-                             6367696             negamaxQuiescence(chessPosition*, int, int, unsigned short) [5]
+                                                 <spontaneous>
+[30]     0.1    0.08    0.00                 staticPawnEval(unsigned long, playerColor, unsigned char*) [30]
 -----------------------------------------------
-                0.13    0.69 9501038/9501038     negamaxQuiescence(chessPosition*, int, int, unsigned short) [5]
-[6]     29.5    0.13    0.69 9501038         evaluation(chessPosition*) [6]
-                0.00    0.46 9501038/9501038     pawnEvaluation(chessPosition*, unsigned char*) [7]
-                0.23    0.00 19002076/21400572     makeAttackTable(chessPosition*, playerColor) [12]
+                0.00    0.05    4830/4830        stringToChessPosition(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [25]
+[31]     0.1    0.00    0.05    4830         debug_incremental_calculations(chessPosition const*) [31]
+                0.05    0.00    4830/9660        calcEndGamePieceTableValue(chessPosition const*) [26]
+                0.00    0.00    4830/14490       calcZobristHash(chessPosition const*) [34]
+                0.00    0.00    4830/9660        calcFigureEvaluation(chessPosition const*) [45]
+                0.00    0.00    4830/9660        calcTotalFigureEvaluation(chessPosition const*) [46]
+                0.00    0.00    4830/9660        calcPieceTableValue(chessPosition const*) [44]
 -----------------------------------------------
-                0.00    0.46 9501038/9501038     evaluation(chessPosition*) [6]
-[7]     16.5    0.00    0.46 9501038         pawnEvaluation(chessPosition*, unsigned char*) [7]
-                0.29    0.00 19002076/19002076     staticPawnEval(unsigned long, playerColor, unsigned char*) [10]
-                0.17    0.00 9501038/9501038     passedPawnEval(unsigned long, unsigned long) [16]
+                0.05    0.00 9716818/9716818     negamax(chessPosition*, unsigned short, int, int, chessMove*) <cycle 1> [4]
+[32]     0.1    0.05    0.00 9716818         undoNullMove(chessPosition*) [32]
 -----------------------------------------------
-                0.31    0.08 1199248/1199248     negamax(chessPosition*, unsigned short, int, int, chessMove*) [4]
-[8]     14.1    0.31    0.08 1199248         orderStandardMoves(chessPosition*, vdt_vector<chessMove>*) [8]
-                0.05    0.00 1199248/5321378     calcCaptureSortEval(chessPosition*, chessMove*, unsigned short) [13]
-                0.03    0.00 2398496/21400572     makeAttackTable(chessPosition*, playerColor) [12]
+                                                 <spontaneous>
+[33]     0.0    0.02    0.00                 calcCaptureSortEval(chessPosition*, chessMove*, unsigned short) [33]
 -----------------------------------------------
-                             36048871             calcZobristHash(chessPosition*) [9]
-                0.00    0.00      10/9521455     zeroInitPosition(chessPosition*) [30]
-                0.00    0.00      10/9521455     stringToChessPosition(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [28]
-                0.05    0.00 1277175/9521455     negamax(chessPosition*, unsigned short, int, int, chessMove*) [4]
-                0.31    0.00 8244260/9521455     negamaxQuiescence(chessPosition*, int, int, unsigned short) [5]
-[9]     12.9    0.36    0.00 9521455+36048871 calcZobristHash(chessPosition*) [9]
-                             36048871             calcZobristHash(chessPosition*) [9]
+                0.00    0.00    4830/14490       stringToChessPosition(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [25]
+                0.00    0.00    4830/14490       zeroInitPosition(chessPosition*) [35]
+                0.00    0.00    4830/14490       debug_incremental_calculations(chessPosition const*) [31]
+[34]     0.0    0.01    0.00   14490         calcZobristHash(chessPosition const*) [34]
 -----------------------------------------------
-                0.29    0.00 19002076/19002076     pawnEvaluation(chessPosition*, unsigned char*) [7]
-[10]    10.4    0.29    0.00 19002076         staticPawnEval(unsigned long, playerColor, unsigned char*) [10]
+                0.00    0.00    4830/4830        stringToChessPosition(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [25]
+[35]     0.0    0.00    0.00    4830         zeroInitPosition(chessPosition*) [35]
+                0.00    0.00    4830/14490       calcZobristHash(chessPosition const*) [34]
 -----------------------------------------------
-                0.03    0.25 5027102/5027102     negamaxQuiescence(chessPosition*, int, int, unsigned short) [5]
-[11]     9.7    0.03    0.25 5027102         generateAllCaptureMoves(vdt_vector<chessMove>*, chessPosition*) [11]
-                0.07    0.00 10054204/10054204     generateRookCaptureMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [20]
-                0.07    0.00 5027102/5027102     generatePawnCaptureMoves(vdt_vector<chessMove>*, chessPosition*) [21]
-                0.06    0.00 10054204/10054204     generateNonSliderCaptureMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType) [22]
-                0.05    0.00 10054204/10054204     generateBishopCaptureMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [23]
+                0.00    0.00    9660/9660        runPerformanceTests() [1]
+[43]     0.0    0.00    0.00    9660         getQuiescenceNodes() [43]
 -----------------------------------------------
-                0.03    0.00 2398496/21400572     orderStandardMoves(chessPosition*, vdt_vector<chessMove>*) [8]
-                0.23    0.00 19002076/21400572     evaluation(chessPosition*) [6]
-[12]     9.4    0.26    0.00 21400572         makeAttackTable(chessPosition*, playerColor) [12]
+                0.00    0.00    4830/9660        stringToChessPosition(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [25]
+                0.00    0.00    4830/9660        debug_incremental_calculations(chessPosition const*) [31]
+[44]     0.0    0.00    0.00    9660         calcPieceTableValue(chessPosition const*) [44]
 -----------------------------------------------
-                             2309390             calcCaptureSortEval(chessPosition*, chessMove*, unsigned short) [13]
-                0.05    0.00 1199248/5321378     orderStandardMoves(chessPosition*, vdt_vector<chessMove>*) [8]
-                0.19    0.00 4122130/5321378     orderCaptureMoves(chessPosition*, vdt_vector<chessMove>*) [14]
-[13]     8.6    0.24    0.00 5321378+2309390 calcCaptureSortEval(chessPosition*, chessMove*, unsigned short) [13]
-                             2309390             calcCaptureSortEval(chessPosition*, chessMove*, unsigned short) [13]
+                0.00    0.00    4830/9660        stringToChessPosition(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [25]
+                0.00    0.00    4830/9660        debug_incremental_calculations(chessPosition const*) [31]
+[45]     0.0    0.00    0.00    9660         calcFigureEvaluation(chessPosition const*) [45]
 -----------------------------------------------
-                0.04    0.19 5027102/5027102     negamaxQuiescence(chessPosition*, int, int, unsigned short) [5]
-[14]     8.1    0.04    0.19 5027102         orderCaptureMoves(chessPosition*, vdt_vector<chessMove>*) [14]
-                0.19    0.00 4122130/5321378     calcCaptureSortEval(chessPosition*, chessMove*, unsigned short) [13]
+                0.00    0.00    4830/9660        stringToChessPosition(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [25]
+                0.00    0.00    4830/9660        debug_incremental_calculations(chessPosition const*) [31]
+[46]     0.0    0.00    0.00    9660         calcTotalFigureEvaluation(chessPosition const*) [46]
 -----------------------------------------------
-                0.08    0.00 4621304/11381512     negamax(chessPosition*, unsigned short, int, int, chessMove*) [4]
-                0.11    0.00 6760208/11381512     negamaxQuiescence(chessPosition*, int, int, unsigned short) [5]
-[15]     6.8    0.19    0.00 11381512         undoMove(chessPosition*) [15]
+                0.00    0.00    4830/4830        runPerformanceTests() [1]
+[47]     0.0    0.00    0.00    4830         resetNodes() [47]
 -----------------------------------------------
-                0.17    0.00 9501038/9501038     pawnEvaluation(chessPosition*, unsigned char*) [7]
-[16]     6.1    0.17    0.00 9501038         passedPawnEval(unsigned long, unsigned long) [16]
+                0.00    0.00    4830/4830        runPerformanceTests() [1]
+[48]     0.0    0.00    0.00    4830         resetQuiescenceNodes() [48]
 -----------------------------------------------
-                0.00    0.14 1199248/1199248     negamax(chessPosition*, unsigned short, int, int, chessMove*) [4]
-[17]     5.0    0.00    0.14 1199248         generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [17]
-                0.04    0.00 2398496/2398496     generateNonSliderMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType) [26]
-                0.04    0.00 2398496/2398496     generateRookMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [24]
-                0.04    0.00 2398496/2398496     generateBishopMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [25]
-                0.02    0.00 1199248/1199248     generatePawnMoves(vdt_vector<chessMove>*, chessPosition*) [27]
-                0.00    0.00 1199248/1199248     generateCastling(vdt_vector<chessMove>*, chessPosition*) [38]
+                0.00    0.00     769/769         fillZobristHash() [113]
+[49]     0.0    0.00    0.00     769         getRandUint64() [49]
+                0.00    0.00     769/769         std::mersenne_twister_engine<unsigned long, 64ul, 312ul, 156ul, 31ul, 13043109905998158313ul, 29ul, 6148914691236517205ul, 17ul, 8202884508482404352ul, 37ul, 18444473444759240704ul, 43ul, 6364136223846793005ul>::operator()() [50]
 -----------------------------------------------
-                0.00    0.00    1502/11383014     selfPlayMakeMove(chessPosition*, unsigned short, unsigned short) [3]
-                0.05    0.00 4621304/11383014     negamax(chessPosition*, unsigned short, int, int, chessMove*) [4]
-                0.07    0.00 6760208/11383014     negamaxQuiescence(chessPosition*, int, int, unsigned short) [5]
-[18]     4.3    0.12    0.00 11383014         makeMove(chessMove*, chessPosition*) [18]
+                0.00    0.00     769/769         getRandUint64() [49]
+[50]     0.0    0.00    0.00     769         std::mersenne_twister_engine<unsigned long, 64ul, 312ul, 156ul, 31ul, 13043109905998158313ul, 29ul, 6148914691236517205ul, 17ul, 8202884508482404352ul, 37ul, 18444473444759240704ul, 43ul, 6364136223846793005ul>::operator()() [50]
 -----------------------------------------------
-                0.03    0.00 4621304/11381512     negamax(chessPosition*, unsigned short, int, int, chessMove*) [4]
-                0.05    0.00 6760208/11381512     negamaxQuiescence(chessPosition*, int, int, unsigned short) [5]
-[19]     2.9    0.08    0.00 11381512         isFieldAttacked(chessPosition*, playerColor, unsigned short) [19]
+                0.00    0.00       2/2           __libc_csu_init [262]
+[51]     0.0    0.00    0.00       2         _GLOBAL__sub_I_attacksCloseToKingEvals [51]
 -----------------------------------------------
-                0.07    0.00 10054204/10054204     generateAllCaptureMoves(vdt_vector<chessMove>*, chessPosition*) [11]
-[20]     2.5    0.07    0.00 10054204         generateRookCaptureMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [20]
+                0.00    0.00       2/2           __libc_csu_init [262]
+[52]     0.0    0.00    0.00       2         _GLOBAL__sub_I_moveOrderingHashTable [52]
 -----------------------------------------------
-                0.07    0.00 5027102/5027102     generateAllCaptureMoves(vdt_vector<chessMove>*, chessPosition*) [11]
-[21]     2.3    0.07    0.00 5027102         generatePawnCaptureMoves(vdt_vector<chessMove>*, chessPosition*) [21]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[53]     0.0    0.00    0.00       1         _GLOBAL__sub_I_UI [53]
 -----------------------------------------------
-                0.06    0.00 10054204/10054204     generateAllCaptureMoves(vdt_vector<chessMove>*, chessPosition*) [11]
-[22]     2.2    0.06    0.00 10054204         generateNonSliderCaptureMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType) [22]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[54]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z10perftNodesP13chessPositiont [54]
 -----------------------------------------------
-                0.05    0.00 10054204/10054204     generateAllCaptureMoves(vdt_vector<chessMove>*, chessPosition*) [11]
-[23]     1.8    0.05    0.00 10054204         generateBishopCaptureMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [23]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[55]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z12makeNullMoveP13chessPosition [55]
 -----------------------------------------------
-                0.04    0.00 2398496/2398496     generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [17]
-[24]     1.4    0.04    0.00 2398496         generateRookMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [24]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[56]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z12testMakeMovev [56]
 -----------------------------------------------
-                0.04    0.00 2398496/2398496     generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [17]
-[25]     1.4    0.04    0.00 2398496         generateBishopMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [25]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[57]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z12undoNullMoveP13chessPosition [57]
 -----------------------------------------------
-                0.04    0.00 2398496/2398496     generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [17]
-[26]     1.4    0.04    0.00 2398496         generateNonSliderMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType) [26]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[58]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z13getRandUint64v [58]
 -----------------------------------------------
-                0.02    0.00 1199248/1199248     generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [17]
-[27]     0.7    0.02    0.00 1199248         generatePawnMoves(vdt_vector<chessMove>*, chessPosition*) [27]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[59]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z13get_timestampv [59]
 -----------------------------------------------
-                0.00    0.01      10/10          playSingleGameSelf(unsigned short, unsigned short, bool) [1]
-[28]     0.4    0.00    0.01      10         stringToChessPosition(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [28]
-                0.00    0.01      10/10          zeroInitPosition(chessPosition*) [30]
-                0.01    0.00      10/20          calcPieceTableValue(chessPosition*) [29]
-                0.00    0.00      10/9521455     calcZobristHash(chessPosition*) [9]
-                0.00    0.00      10/10          calcFigureEvaluation(chessPosition*) [42]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[60]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z13resetqIndicesv [60]
 -----------------------------------------------
-                0.01    0.00      10/20          zeroInitPosition(chessPosition*) [30]
-                0.01    0.00      10/20          stringToChessPosition(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [28]
-[29]     0.4    0.01    0.00      20         calcPieceTableValue(chessPosition*) [29]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[61]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z14passedPawnEvalmm [61]
 -----------------------------------------------
-                0.00    0.01      10/10          stringToChessPosition(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [28]
-[30]     0.2    0.00    0.01      10         zeroInitPosition(chessPosition*) [30]
-                0.01    0.00      10/20          calcPieceTableValue(chessPosition*) [29]
-                0.00    0.00      10/9521455     calcZobristHash(chessPosition*) [9]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[62]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z15debugEvaluationPK13chessPositionP13VDTevaluation [62]
 -----------------------------------------------
-                0.00    0.00 1199248/1199248     generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [17]
-[38]     0.0    0.00    0.00 1199248         generateCastling(vdt_vector<chessMove>*, chessPosition*) [38]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[63]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z15getZeroPositionB5cxx11v [63]
 -----------------------------------------------
-                0.00    0.00     769/769         fillZobristHash() [78]
-[39]     0.0    0.00    0.00     769         getRandUint64() [39]
-                0.00    0.00     769/769         std::mersenne_twister_engine<unsigned long, 64ul, 312ul, 156ul, 31ul, 13043109905998158313ul, 29ul, 6148914691236517205ul, 17ul, 8202884508482404352ul, 37ul, 18444473444759240704ul, 43ul, 6364136223846793005ul>::operator()() [40]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[64]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z15isFieldAttackedPK13chessPosition11playerColort [64]
 -----------------------------------------------
-                0.00    0.00     769/769         getRandUint64() [39]
-[40]     0.0    0.00    0.00     769         std::mersenne_twister_engine<unsigned long, 64ul, 312ul, 156ul, 31ul, 13043109905998158313ul, 29ul, 6148914691236517205ul, 17ul, 8202884508482404352ul, 37ul, 18444473444759240704ul, 43ul, 6364136223846793005ul>::operator()() [40]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[65]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z16selfPlayMakeMoveP13chessPositiontt [65]
 -----------------------------------------------
-                0.00    0.00      20/20          playSingleGameSelf(unsigned short, unsigned short, bool) [1]
-[41]     0.0    0.00    0.00      20         testUndoMove() [41]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[66]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z16zeroInitPositionP13chessPosition [66]
 -----------------------------------------------
-                0.00    0.00      10/10          stringToChessPosition(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [28]
-[42]     0.0    0.00    0.00      10         calcFigureEvaluation(chessPosition*) [42]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[67]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z17generateRookMovesP10vdt_vectorI9chessMoveEP13chessPosition10figureType [67]
 -----------------------------------------------
-                0.00    0.00       6/6           __libc_csu_init [111]
-[43]     0.0    0.00    0.00       6         _GLOBAL__sub_I_moveOrderingHashTable [43]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[68]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z18initialize_networkPKci [68]
 -----------------------------------------------
-                0.00    0.00       2/2           __libc_csu_init [111]
-[44]     0.0    0.00    0.00       2         _GLOBAL__sub_I_enablePawnEval [44]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[69]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z19calcPieceTableValuePK13chessPosition [69]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [111]
-[45]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z10perftNodesP13chessPositiont [45]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[70]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z19debugPassedPawnEvalmm [70]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [111]
-[46]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z12outPutuint64m [46]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[71]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z20calcFigureEvaluationPK13chessPosition [71]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [111]
-[47]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z12resetIndicesv [47]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[72]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z23generateBishopMoveTabletm [72]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [111]
-[48]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z12testMakeMovev [48]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[73]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z24generateRookCaptureMovesP10vdt_vectorI9chessMoveEP13chessPosition10figureType [73]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [111]
-[49]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z13getRandUint64v [49]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[74]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z27generateRookReachableFieldsB5cxx11v [74]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [111]
-[50]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z14passedPawnEvalmm [50]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[75]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z28generateRookMoveTablesStringB5cxx11v [75]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [111]
-[51]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z15getZeroPositionB5cxx11v [51]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[76]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z29generateBishopReachableFieldsB5cxx11v [76]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [111]
-[52]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z15isFieldAttackedP13chessPosition11playerColort [52]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[77]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z6inputsB5cxx11 [77]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [111]
-[53]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z16selfPlayMakeMoveP13chessPositiontt [53]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[78]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z9getCalledv [78]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [111]
-[54]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z17generateRookMovesP10vdt_vectorI9chessMoveEP13chessPosition10figureType [54]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[79]     0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN13ClientHandlerD2Ev [79]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [111]
-[55]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z19calcPieceTableValueP13chessPosition [55]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[80]     0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN20networkUserInterface10initializeEv [80]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [111]
-[56]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z20calcFigureEvaluationP13chessPosition [56]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[81]     0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN6SocketC2EPKci [81]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [111]
-[57]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z20resetQuiescenceNodesv [57]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[82]     0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN9VMPServer11get_messageEj [82]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [111]
-[58]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z21chessPositionToStringB5cxx1113chessPosition [58]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[83]     0.0    0.00    0.00       1         _GLOBAL__sub_I_enablePawnEval [83]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [111]
-[59]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z23generateBishopMoveTabletm [59]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[84]     0.0    0.00    0.00       1         _GLOBAL__sub_I_kingBlockers [84]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [111]
-[60]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z24generateRookCaptureMovesP10vdt_vectorI9chessMoveEP13chessPosition10figureType [60]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[85]     0.0    0.00    0.00       1         _GLOBAL__sub_I_main [85]
 -----------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [111]
-[61]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z27generateRookReachableFieldsB5cxx11v [61]
------------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [111]
-[62]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z28generateRookMoveTablesStringB5cxx11v [62]
------------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [111]
-[63]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z29generateBishopReachableFieldsB5cxx11v [63]
------------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [111]
-[64]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z8makeMoveP9chessMoveP13chessPosition [64]
------------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [111]
-[65]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z8undoMoveP13chessPosition [65]
------------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [111]
-[66]     0.0    0.00    0.00       1         _GLOBAL__sub_I_captureEvals [66]
------------------------------------------------
-                0.00    0.00       1/1           __libc_csu_init [111]
-[67]     0.0    0.00    0.00       1         _GLOBAL__sub_I_numTests [67]
+                0.00    0.00       1/1           __libc_csu_init [262]
+[86]     0.0    0.00    0.00       1         _GLOBAL__sub_I_numTests [86]
 -----------------------------------------------
 
  This table describes the call tree of the program, and was sorted by
@@ -434,23 +520,29 @@ notice and this notice are preserved.
 
 Index by function name
 
-  [45] _GLOBAL__sub_I__Z10perftNodesP13chessPositiont [65] _GLOBAL__sub_I__Z8undoMoveP13chessPosition [5] negamaxQuiescence(chessPosition*, int, int, unsigned short)
-  [46] _GLOBAL__sub_I__Z12outPutuint64m [66] _GLOBAL__sub_I_captureEvals [14] orderCaptureMoves(chessPosition*, vdt_vector<chessMove>*)
-  [47] _GLOBAL__sub_I__Z12resetIndicesv [44] _GLOBAL__sub_I_enablePawnEval [8] orderStandardMoves(chessPosition*, vdt_vector<chessMove>*)
-  [48] _GLOBAL__sub_I__Z12testMakeMovev [43] _GLOBAL__sub_I_moveOrderingHashTable [1] playSingleGameSelf(unsigned short, unsigned short, bool)
-  [49] _GLOBAL__sub_I__Z13getRandUint64v [67] _GLOBAL__sub_I_numTests [13] calcCaptureSortEval(chessPosition*, chessMove*, unsigned short)
-  [50] _GLOBAL__sub_I__Z14passedPawnEvalmm [6] evaluation(chessPosition*) [29] calcPieceTableValue(chessPosition*)
-  [51] _GLOBAL__sub_I__Z15getZeroPositionB5cxx11v [41] testUndoMove() [25] generateBishopMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
-  [52] _GLOBAL__sub_I__Z15isFieldAttackedP13chessPosition11playerColort [39] getRandUint64() [42] calcFigureEvaluation(chessPosition*)
-  [53] _GLOBAL__sub_I__Z16selfPlayMakeMoveP13chessPositiontt [16] passedPawnEval(unsigned long, unsigned long) [28] stringToChessPosition(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >)
-  [54] _GLOBAL__sub_I__Z17generateRookMovesP10vdt_vectorI9chessMoveEP13chessPosition10figureType [7] pawnEvaluation(chessPosition*, unsigned char*) [26] generateNonSliderMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType)
-  [55] _GLOBAL__sub_I__Z19calcPieceTableValueP13chessPosition [10] staticPawnEval(unsigned long, playerColor, unsigned char*) [11] generateAllCaptureMoves(vdt_vector<chessMove>*, chessPosition*)
-  [56] _GLOBAL__sub_I__Z20calcFigureEvaluationP13chessPosition [9] calcZobristHash(chessPosition*) [21] generatePawnCaptureMoves(vdt_vector<chessMove>*, chessPosition*)
-  [57] _GLOBAL__sub_I__Z20resetQuiescenceNodesv [19] isFieldAttacked(chessPosition*, playerColor, unsigned short) [20] generateRookCaptureMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
-  [58] _GLOBAL__sub_I__Z21chessPositionToStringB5cxx1113chessPosition [12] makeAttackTable(chessPosition*, playerColor) [23] generateBishopCaptureMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
-  [59] _GLOBAL__sub_I__Z23generateBishopMoveTabletm [17] generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [22] generateNonSliderCaptureMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType)
-  [60] _GLOBAL__sub_I__Z24generateRookCaptureMovesP10vdt_vectorI9chessMoveEP13chessPosition10figureType [38] generateCastling(vdt_vector<chessMove>*, chessPosition*) [4] negamax(chessPosition*, unsigned short, int, int, chessMove*)
-  [61] _GLOBAL__sub_I__Z27generateRookReachableFieldsB5cxx11v [3] selfPlayMakeMove(chessPosition*, unsigned short, unsigned short) [18] makeMove(chessMove*, chessPosition*)
-  [62] _GLOBAL__sub_I__Z28generateRookMoveTablesStringB5cxx11v [30] zeroInitPosition(chessPosition*) [15] undoMove(chessPosition*)
-  [63] _GLOBAL__sub_I__Z29generateBishopReachableFieldsB5cxx11v [27] generatePawnMoves(vdt_vector<chessMove>*, chessPosition*) [40] std::mersenne_twister_engine<unsigned long, 64ul, 312ul, 156ul, 31ul, 13043109905998158313ul, 29ul, 6148914691236517205ul, 17ul, 8202884508482404352ul, 37ul, 18444473444759240704ul, 43ul, 6364136223846793005ul>::operator()()
-  [64] _GLOBAL__sub_I__Z8makeMoveP9chessMoveP13chessPosition [24] generateRookMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
+  [53] _GLOBAL__sub_I_UI      [79] _GLOBAL__sub_I__ZN13ClientHandlerD2Ev [3] negamaxQuiescence(chessPosition*, int, int, unsigned short)
+  [54] _GLOBAL__sub_I__Z10perftNodesP13chessPositiont [80] _GLOBAL__sub_I__ZN20networkUserInterface10initializeEv [9] orderCaptureMoves(chessPosition*, vdt_vector<chessMove>*)
+  [55] _GLOBAL__sub_I__Z12makeNullMoveP13chessPosition [81] _GLOBAL__sub_I__ZN6SocketC2EPKci [43] getQuiescenceNodes()
+  [56] _GLOBAL__sub_I__Z12testMakeMovev [82] _GLOBAL__sub_I__ZN9VMPServer11get_messageEj [6] orderStandardMoves(chessPosition const*, vdt_vector<chessMove>*, unsigned short)
+  [57] _GLOBAL__sub_I__Z12undoNullMoveP13chessPosition [51] _GLOBAL__sub_I_attacksCloseToKingEvals [33] calcCaptureSortEval(chessPosition*, chessMove*, unsigned short)
+  [58] _GLOBAL__sub_I__Z13getRandUint64v [83] _GLOBAL__sub_I_enablePawnEval [44] calcPieceTableValue(chessPosition const*)
+  [59] _GLOBAL__sub_I__Z13get_timestampv [84] _GLOBAL__sub_I_kingBlockers [27] debugPawnEvaluation(chessPosition const*, unsigned char*, VDTpawnEvaluation*)
+  [60] _GLOBAL__sub_I__Z13resetqIndicesv [85] _GLOBAL__sub_I_main [21] generateBishopMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
+  [61] _GLOBAL__sub_I__Z14passedPawnEvalmm [52] _GLOBAL__sub_I_moveOrderingHashTable [45] calcFigureEvaluation(chessPosition const*)
+  [62] _GLOBAL__sub_I__Z15debugEvaluationPK13chessPositionP13VDTevaluation [86] _GLOBAL__sub_I_numTests [48] resetQuiescenceNodes()
+  [63] _GLOBAL__sub_I__Z15getZeroPositionB5cxx11v [5] evaluation(chessPosition const*, int, int) [25] stringToChessPosition(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >)
+  [64] _GLOBAL__sub_I__Z15isFieldAttackedPK13chessPosition11playerColort [47] resetNodes() [18] generateNonSliderMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType)
+  [65] _GLOBAL__sub_I__Z16selfPlayMakeMoveP13chessPositiontt [29] makeNullMove(chessPosition*) [7] generateAllCaptureMoves(vdt_vector<chessMove>*, chessPosition*)
+  [66] _GLOBAL__sub_I__Z16zeroInitPositionP13chessPosition [32] undoNullMove(chessPosition*) [22] generatePawnCaptureMoves(vdt_vector<chessMove>*, chessPosition*)
+  [67] _GLOBAL__sub_I__Z17generateRookMovesP10vdt_vectorI9chessMoveEP13chessPosition10figureType [49] getRandUint64() [13] generateRookCaptureMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
+  [68] _GLOBAL__sub_I__Z18initialize_networkPKci [10] pawnEvaluation(chessPosition const*, unsigned char*) [46] calcTotalFigureEvaluation(chessPosition const*)
+  [69] _GLOBAL__sub_I__Z19calcPieceTableValuePK13chessPosition [30] staticPawnEval(unsigned long, playerColor, unsigned char*) [26] calcEndGamePieceTableValue(chessPosition const*)
+  [70] _GLOBAL__sub_I__Z19debugPassedPawnEvalmm [34] calcZobristHash(chessPosition const*) [15] generateBishopCaptureMoves(vdt_vector<chessMove>*, chessPosition*, figureType)
+  [71] _GLOBAL__sub_I__Z20calcFigureEvaluationPK13chessPosition [19] isFieldAttacked(chessPosition const*, playerColor, unsigned short) [16] generateNonSliderCaptureMoves(vdt_vector<chessMove>*, chessPosition*, unsigned long const*, figureType)
+  [72] _GLOBAL__sub_I__Z23generateBishopMoveTabletm [8] makeAttackTable(chessPosition const*, playerColor) [31] debug_incremental_calculations(chessPosition const*)
+  [73] _GLOBAL__sub_I__Z24generateRookCaptureMovesP10vdt_vectorI9chessMoveEP13chessPosition10figureType [11] generateAllMoves(vdt_vector<chessMove>*, chessPosition*) [4] negamax(chessPosition*, unsigned short, int, int, chessMove*)
+  [74] _GLOBAL__sub_I__Z27generateRookReachableFieldsB5cxx11v [28] generateCastling(vdt_vector<chessMove>*, chessPosition*) [23] getNodes()
+  [75] _GLOBAL__sub_I__Z28generateRookMoveTablesStringB5cxx11v [24] resetSortqCalled() [12] makeMove(chessMove*, chessPosition*)
+  [76] _GLOBAL__sub_I__Z29generateBishopReachableFieldsB5cxx11v [35] zeroInitPosition(chessPosition*) [14] undoMove(chessPosition*)
+  [77] _GLOBAL__sub_I__Z6inputsB5cxx11 [20] generatePawnMoves(vdt_vector<chessMove>*, chessPosition*) [50] std::mersenne_twister_engine<unsigned long, 64ul, 312ul, 156ul, 31ul, 13043109905998158313ul, 29ul, 6148914691236517205ul, 17ul, 8202884508482404352ul, 37ul, 18444473444759240704ul, 43ul, 6364136223846793005ul>::operator()()
+  [78] _GLOBAL__sub_I__Z9getCalledv [17] generateRookMoves(vdt_vector<chessMove>*, chessPosition*, figureType) [2] <cycle 1>

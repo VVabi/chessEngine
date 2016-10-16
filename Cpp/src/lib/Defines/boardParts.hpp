@@ -7,6 +7,7 @@
 
 #ifndef LIB_DEFINES_BOARDPARTS_HPP_
 #define LIB_DEFINES_BOARDPARTS_HPP_
+#include "chessFields.hpp"
 
 #define FILEA ((1UL << 0) | (1UL << 8) | (1UL << 16) | (1UL << 24) | (1UL << 32) | (1UL << 40) | (1UL << 48) | (1UL << 56))
 #define FILEB ((1UL << 1) | (1UL << 9) | (1UL << 17) | (1UL << 25) | (1UL << 33) | (1UL << 41) | (1UL << 49) | (1UL << 57))
@@ -57,5 +58,8 @@
 #define LOWERPART UINT32_MAX
 #define HIGHERPART ~LOWERPART
 
+#define CENTER (E4 | D4 | E5 | D5)
+
+#define WIDECENTER (C3 | D3 | E3 | C4 | D4 | E4 | C5 | D5 | E5)
 
 #endif /* LIB_DEFINES_BOARDPARTS_HPP_ */

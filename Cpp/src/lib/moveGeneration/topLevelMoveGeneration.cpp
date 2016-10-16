@@ -247,13 +247,13 @@ void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 void generateCastling(vdt_vector<chessMove>* vec, chessPosition* position){
 	playerColor toMove = position->toMove;
 	uint8_t castlingMask = (toMove? 12: 3);
-	if(position->castlingRights & castlingMask){
+	if(position->data.castlingRights & castlingMask){
 		uint64_t occupancy = (position->pieces[white]) | (position->pieces[black]);
 
 
 		uint8_t castlingOffset = (toMove? 2: 0);
 
-		if ((position->castlingRights & (1 << castlingOffset)) && ((occupancy & castlingBlockers[toMove][KINGSIDE]) == 0)){
+		if ((position->data.castlingRights & (1 << castlingOffset)) && ((occupancy & castlingBlockers[toMove][KINGSIDE]) == 0)){
 			chessMove mv;
 			mv.move = (toMove ? BLACKKINGSIDECASTLEMASK: WHITEKINGSIDECASTLEMASK);
 			mv.captureType = none;
@@ -263,7 +263,7 @@ void generateCastling(vdt_vector<chessMove>* vec, chessPosition* position){
 			vec->add(&mv);
 		}
 
-		if ((position->castlingRights & (1 << (castlingOffset+1))) && ((occupancy & castlingBlockers[toMove][QUEENSIDE]) == 0)){
+		if ((position->data.castlingRights & (1 << (castlingOffset+1))) && ((occupancy & castlingBlockers[toMove][QUEENSIDE]) == 0)){
 			chessMove mv;
 			mv.move = (toMove ? BLACKQUEENSIDECASTLEMASK: WHITEQUEENSIDECASTLEMASK);
 			mv.captureType = none;
@@ -277,15 +277,15 @@ void generateCastling(vdt_vector<chessMove>* vec, chessPosition* position){
 
 static void generateEnPassant(vdt_vector<chessMove>* vec, chessPosition* position){
 
-	if(position->enPassantFile > 7){
+	if(position->data.enPassantFile > 7){
 		return;
 	}
 
-	uint64_t mask = (enPassantMoveTable[position->toMove][position->enPassantFile]) & (position->pieceTables[position->toMove][pawn]);
+	uint64_t mask = (enPassantMoveTable[position->toMove][position->data.enPassantFile]) & (position->pieceTables[position->toMove][pawn]);
 
 	while(mask) {
 		uint16_t source = popLSB(mask);
-		uint16_t target = enPassantTargetFields[position->toMove][position->enPassantFile];
+		uint16_t target = enPassantTargetFields[position->toMove][position->data.enPassantFile];
 
 		chessMove mov;
 		mov.sourceField = source;

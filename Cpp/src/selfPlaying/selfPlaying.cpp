@@ -11,9 +11,9 @@
 #include <lib/moveMaking/moveMaking.hpp>
 #include <Search/search.hpp>
 #include <lib/Evaluation/evaluation.hpp>
+#include <userInterface/UIlayer.hpp>
 
-
-extern bool enablePawnEval;
+bool enablePawnEval;
 
 int32_t selfPlayMakeMove(chessPosition* position, uint16_t whitedepth, uint16_t blackdepth) {
 
@@ -88,7 +88,7 @@ int16_t playSingleGameSelf(uint16_t depth1, uint16_t depth2, bool switchColors){
 	if(switchColors){
 		ret = -ret;
 	}
-	position.castlingAndEpStack.free_array();
+	position.dataStack.free_array();
 	position.madeMoves.free_array();
 	std::cout << ret << std::endl;
 	return ret;

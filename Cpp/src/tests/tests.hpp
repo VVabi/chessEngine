@@ -21,7 +21,7 @@ char getRandomPiece(playerColor color);
 uint32_t getRandomField();
 figureType getFigureTypeFromChar(char piece);
 void runTests();
-uint32_t perftNodes(chessPosition* c, uint16_t depth);
+uint64_t perftNodes(chessPosition* c, uint16_t depth);
 
 testResult testMakeMove();
 testResult testUndoMove();

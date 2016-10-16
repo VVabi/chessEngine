@@ -18,12 +18,12 @@ int16_t calcPieceTableValue(const chessPosition* position) {
 		uint64_t whitePieces = position->pieceTables[white][ind];
 		while(whitePieces){
 			uint16_t field = popLSB(whitePieces);
-			val = val+pieceTables[ind][white][field];
+			val = val+pieceTables[ind][white][field]/2;
 		}
 		uint64_t blackPieces = position->pieceTables[black][ind];
 		while(blackPieces){
 			uint16_t field = popLSB(blackPieces);
-			val = val-pieceTables[ind][black][field];
+			val = val-pieceTables[ind][black][field]/2;
 		}
 	}
 	return val;

@@ -38,7 +38,7 @@ int32_t passedPawnEval(uint64_t whitePawns, uint64_t blackPawns) {
 	}
 
 
-	return 15*eval;
+	return 7*eval;
 
 }
 
@@ -68,6 +68,8 @@ int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOcc
 	uint64_t nonIsolatedDoublePawns =  (~isolatedPawns) & doublePawns;
 
 	eval = eval-50*popcount(isolatedDoublePawns)-20*popcount(nonIsolatedDoublePawns);
+
+	eval = eval-10*popcount(isolatedPawns);
 
 	return eval*(1-2*color);
 }

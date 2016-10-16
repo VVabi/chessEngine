@@ -15,15 +15,17 @@
 #include <lib/Attacks/attacks.hpp>
 #include <lib/bitfiddling.h>
 #include <Search/search.hpp>
-
-uint32_t perftNodes(chessPosition* position, uint16_t depth){
+#include <userInterface/UIlayer.hpp>
+#include <algorithm>
+uint64_t perftNodes(chessPosition* position, uint16_t depth){
 	if(depth == 0){
 		return 1;
 	}
-	uint32_t nodes = 0;
+	uint64_t nodes = 0;
 	vdt_vector<chessMove> moves = vdt_vector<chessMove>(150);
 	generateAllMoves(&moves, position);
 	orderStandardMoves(position, &moves, 0);
+	std::sort(moves.data, moves.data+moves.length);
 	bool isMate = true;
 	for(uint16_t ind=0; ind < moves.length; ind++){
 		if(moves[ind].sortEval < -10000){
@@ -53,9 +55,12 @@ uint32_t perftNodes(chessPosition* position, uint16_t depth){
 		} else {
 			isMate = false;
 			additional_nodes = perftNodes(position, depth-1);
+
 			nodes = nodes+additional_nodes;
 		}
+
 		undoMove(position);
+
 		if(!isMate){
 			if(depth == 6) {
 				//std::cout << moveToString(moves[ind], *c) << " : " << additional_nodes << std::endl;
@@ -77,15 +82,20 @@ testResult testPerftTestSuite(){
 
 	std::string position = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwKQkq";
 	chessPosition c = stringToChessPosition(position);
-	/*if(perftNodes(&c,7) != 3195901860) {
+
+	uint64_t nodes = perftNodes(&c,7);
+	if(nodes != 3195901860) {
+		std::cout <<"First position failed" <<std::endl;
+		std::cout << nodes << std::endl;
 		ret.passed = false;
 		return ret;
-	}*/
+	}
 
 	position = "R000K00RPPPBBPPP00N00Q0p0p00P000000PN000bn00pnp0p0ppqpb0r000k00rwKQkq";
 	c = stringToChessPosition(position);
-	int nodes = perftNodes(&c, 5);
+	nodes = perftNodes(&c, 5);
 	if(nodes != 193690690) {
+		std::cout << "2nd position failed" << std::endl;
 		std::cout << nodes << std::endl;
 		ret.passed = false;
 		return ret;
@@ -93,7 +103,10 @@ testResult testPerftTestSuite(){
 
 	position = "000000000000P0P0000000000R000p0kKP00000r000p000000p0000000000000w0000";
 	c = stringToChessPosition(position);
-	if(perftNodes(&c,7) != 178633661) {
+	nodes = perftNodes(&c,7);
+	if(nodes != 178633661) {
+		std::cout << "3rd position failed" <<std::endl;
+		std::cout << nodes << std::endl;
 		ret.passed = false;
 		return ret;
 	}

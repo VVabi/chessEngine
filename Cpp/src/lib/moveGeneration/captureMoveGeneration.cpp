@@ -185,15 +185,15 @@ void generatePawnCaptureMoves(vdt_vector<chessMove>* vec, chessPosition* positio
 
 static void generateCaptureEnPassant(vdt_vector<chessMove>* vec, chessPosition* position){
 
-	if(position->enPassantFile > 7){
+	if(position->data.enPassantFile > 7){
 		return;
 	}
 
-	uint64_t mask = (enPassantMoveTable[position->toMove][position->enPassantFile]) & (position->pieceTables[position->toMove][pawn]);
+	uint64_t mask = (enPassantMoveTable[position->toMove][position->data.enPassantFile]) & (position->pieceTables[position->toMove][pawn]);
 
 	while(mask) {
 		uint16_t source = popLSB(mask);
-		uint16_t target = enPassantTargetFields[position->toMove][position->enPassantFile];
+		uint16_t target = enPassantTargetFields[position->toMove][position->data.enPassantFile];
 
 		chessMove mov;
 		mov.sourceField = source;

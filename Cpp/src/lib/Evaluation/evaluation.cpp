@@ -13,7 +13,7 @@
 #include <stdlib.h>     /* srand, rand */
 #include <lib/Attacks/attacks.hpp>
 #include <lib/bitfiddling.h>
-bool enablePawnEval = true;
+
 
 
 uint16_t taperingValues[81] = {  0,  0,  0,  0,  0,  0,  0,  0,
@@ -84,9 +84,8 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 	eval = eval+3*mobility;
 
 
-	if(enablePawnEval){
-		eval = eval+rookOpenFiles(position, pawnColumnOccupancy);
-	}
+
+	eval = eval+rookOpenFiles(position, pawnColumnOccupancy);
 
 
 	uint64_t numWhiteBishops = popcount(position->pieceTables[white][bishop]);
@@ -109,7 +108,7 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 
 	eval = eval+kingSafetyTapered;*/
 
-	//eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?
+	eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?
 	return (1-2*position->toMove)*eval;
 
 }

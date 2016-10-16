@@ -18,68 +18,83 @@
 #include <algorithm>
 #include <assert.h>
 #include <lib/Evaluation/evaluation.hpp>
+#include <fstream>
+#include <userInterface/UIlayer.hpp>
 
-static uint32_t nodes = 0;
 
 extern uint16_t moveOrderingHashTable[];
 
-static int32_t indices[150] = {0};
 
-static uint32_t called = 0;
-static uint32_t sortCalled = 0;
 
-uint32_t getCalled(){
-	return called;
+static searchDebugData searchCounts;
+
+searchDebugData getSearchData(){
+	return searchCounts;
 }
-
-void resetCalled(){
-	called = 0;
-}
-
-uint32_t getSortCalled(){
-	return sortCalled;
-}
-
-void resetSortCalled(){
-	sortCalled = 0;
-}
-
-
-
-void resetIndices(){
-	memset(indices, 0, 150*sizeof(int32_t));
-}
-
-int32_t* getIndexCounts(){
-	return indices;
-}
-
-void resetNodes(){
-	nodes = 0;
-}
-
-uint32_t getNodes(){
-	return nodes;
+void resetSearchData(){
+	memset(&searchCounts, 0, sizeof(searchCounts));
 }
 
 
 uint16_t killerMoves[20][2];
 
-static chessMove buffer[1500];
+static chessMove buffer[2500];
 
-int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t beta, chessMove* bestMove) {
+uint16_t repetitionData[16384] = {0};
+
+//std::ofstream logger("/home/vabi/log8.txt");
+
+static inline bool backtrack_position_for_repetition(chessPosition* position) {
+	int16_t numMovesToCheck = position->data.fiftyMoveRuleCounter;
+	uint64_t current_hash = position->zobristHash;
+	assert(((int) position->madeMoves.length)-((int) numMovesToCheck) >= 0);
+	assert(position->madeMoves.length == position->dataStack.length);
+	for(int16_t ind = ((int) position->madeMoves.length-1); ind >= ((int) position->madeMoves.length)-numMovesToCheck; ind--){
+		if(position->dataStack[ind].hash == current_hash){
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+int32_t negamax(chessPosition* position, int16_t depth, int32_t alpha, int32_t beta, chessMove* bestMove) {
 
 	assert(alpha < beta);
+	searchCounts.called++;
+
+	if(position->data.fiftyMoveRuleCounter >= 100){
+		return 0;
+	}
+
+	if(repetitionData[position->zobristHash & 16383] > 1){
+		if(backtrack_position_for_repetition(position)){
+			searchCounts.threefold_repetitions++;
+			return 0;
+		} else {
+			searchCounts.fake_3fold_repetitions++;
+		}
+	}
+
+	//remembers the index of best move after sorting
+	//-------------------------------------------
 	int16_t bestIndex = -1;
-	if(depth == 0) {
-		//return (1-2*position->toMove)*(position->figureEval+position->pieceTableEval);
+
+	//go to quiescence on depth 0
+	//---------------------------
+	if(depth <= 0) {
+		searchCounts.wentToQuiescence++;
 		return negamaxQuiescence(position, alpha, beta, 0);
 	}
 
-	//futility
+	//futility pruning
+	//-----------------
 	if(depth == 1){
+		searchCounts.futility_tried++;
 		int32_t base = evaluation(position, alpha-151, beta);
 		if(base+150 < alpha){
+			searchCounts.futility_successful++;
 			//in this case, trying a silent move is pointless.
 			//std::cout << "Successful futility pruning" << std::endl;
 			return  negamaxQuiescence(position, alpha, beta, 0);
@@ -90,13 +105,14 @@ int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t 
 	generateAllMoves(&moves, position);
 	bool isInCheck = orderStandardMoves(position, &moves, depth);
 
-	called++;
+
 	bool legalMovesAvailable = false;
 	bool foundGoodMove = false;
+	searchCounts.wentToSearch++;
 	for(uint16_t ind=0; ind < moves.length; ind++){
 
 		if(ind == 1){
-			sortCalled++;
+			searchCounts.neededSort++;
 			std::sort(moves.data, moves.data+moves.length);
 		}
 
@@ -111,7 +127,7 @@ int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t 
 		if(isFieldAttacked( position,  position->toMove, kingField)){
 
 		} else {
-			nodes++;
+			searchCounts.nodes[depth]++;
 			legalMovesAvailable = true;
 			if((depth > 2)) {
 				//check that the side to move is not in check.
@@ -120,9 +136,9 @@ int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t 
 				if(!isFieldAttacked( position, (playerColor) (1-position->toMove), kingField2)){
 					makeNullMove(position);
 					chessMove mv;
-					int32_t value = negamax(position, depth-1-2, alpha-1, alpha, &mv);
+					int32_t value = negamax(position, depth-1-2, alpha, alpha+1, &mv);
 					undoNullMove(position);
-					if(value < alpha) {
+					if(value < alpha+1) {
 						undoMove(position);
 						//std::cout << "nullmove pruning successful!" << std::endl;
 						continue;
@@ -132,6 +148,16 @@ int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t 
 
 
 			chessMove mv;
+
+			//PVSearch, currently a net LOSS for us
+			//-------------------------------------------------
+			/*if((ind > 2) && (depth > 2)) {
+				int32_t value = -negamax(position, depth-1, -alpha-1, -alpha, &mv);
+				if(value < alpha+1){
+					undoMove(position);
+					continue;
+				}
+			}*/
 			int32_t value = -negamax(position, depth-1, -beta, -alpha, &mv);
 
 			if(value > alpha){
@@ -149,7 +175,7 @@ int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t 
 			moveOrderingHashTable[hashIndex] = (bestMove->sourceField | (bestMove->targetField << 8));
 
 			if(bestIndex != -1){
-				indices[bestIndex]++;
+				searchCounts.bestIndex[depth][bestIndex]++;
 			}
 
 			if(bestMove->captureType == none){
@@ -169,7 +195,7 @@ int32_t negamax(chessPosition* position, uint16_t depth, int32_t alpha, int32_t 
 	}
 
 	if(bestIndex != -1){
-		indices[bestIndex]++;
+		searchCounts.bestIndex[depth][bestIndex]++;
 	}
 	uint32_t hashIndex = position->zobristHash & HASHSIZE;
 	if(foundGoodMove) {

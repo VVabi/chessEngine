@@ -23,8 +23,12 @@ public class UciProcessing {
 
     String engine1;
     String engine2;
+
+    int numGames = 0;
+
     public UciProcessing(String engine1, String engine2, int numGames) throws IOException {
 
+        this.numGames = numGames;
         CountDownLatch cd = new CountDownLatch(1);
         server = new VMPServer(9999, 0, cd);
         server.connect("127.0.0.1", 9876);
@@ -47,7 +51,7 @@ public class UciProcessing {
         int wins = 0;
         int draws = 0;
         int losses = 0;
-        for(int k=0; k < 100; k++) {
+        for(int k=0; k < numGames; k++) {
             //stockFishHandler = new uciEngineHandler("/home/vabi/code/stockfish-7-linux/Linux/stockfish");
             vabiHandler = new uciEngineHandler(engine1);
             stockFishHandler = new uciEngineHandler(engine2);

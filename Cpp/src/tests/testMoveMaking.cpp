@@ -9,7 +9,7 @@
 #include <lib/basics.hpp>
 #include <lib/moveMaking/moveMaking.hpp>
 #include "tests.hpp"
-
+#include <userInterface/UIlayer.hpp>
 #include <iostream>
 
 testResult testMakeMove(){

@@ -10,19 +10,19 @@
 #include <iostream>
 #include <lib/DebugFunctions/debugFunctions.hpp>
 #include <hashTables/hashTables.hpp>
+#include <assert.h>
 
 extern uint64_t zobristHash[7][2][64];
 extern uint64_t movingSideHash[2];
 extern int16_t figureValues[];
 extern int32_t completePieceTables[7][2][64];
-
+extern uint16_t repetitionData[16384];
 
 void undoNullMove(chessPosition* position) {
-	uint16_t flags = position->castlingAndEpStack.pop();
-	position->castlingRights = flags & 0xFF;
-	position->enPassantFile = ((flags >> 8)) & 0xFF;
+	position->data = position->dataStack.pop();
 	position->zobristHash = position->zobristHash^movingSideHash[0];
 	position->toMove = (playerColor) (1-position->toMove);
+	position->madeMoves.pop();
 }
 
 inline static void undoNormalMove(chessPosition* position, chessMove move) {
@@ -113,14 +113,16 @@ void undoMove(chessPosition* position) {
 		return;
 	}
 
-
+	if(repetitionData[position->zobristHash & 16383] == 0){
+		std::cout <<"undoing move we never made??" <<std::endl;
+	}
+	repetitionData[position->zobristHash & 16383]--;
 	chessMove move = position->madeMoves.pop();
-	uint16_t flags = position->castlingAndEpStack.pop();
+	position->data = position->dataStack.pop();
 	position->figureEval     = position->figureEval+(1-2*position->toMove)*figureValues[move.captureType];
 	position->totalFigureEval     = position->totalFigureEval+figureValues[move.captureType];
-	position->castlingRights = flags & 0xFF;
-	position->enPassantFile = ((flags >> 8)) & 0xFF;
 
+	//00000BNR00000PKQ00000NPR00000N0P000000000000000p0qpN0npnN000000kw0000
 
 	switch(move.type){
 		case pawnMove:
@@ -160,6 +162,8 @@ void undoMove(chessPosition* position) {
 	}
 
 	position->zobristHash = position->zobristHash^movingSideHash[0];
+
+	assert(position->zobristHash == position->data.hash);
 
 	#ifdef DEBUG
 

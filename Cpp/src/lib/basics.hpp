@@ -39,6 +39,13 @@ struct chessMove{
 	}
 };
 
+struct pathDependentPositionData{
+	uint8_t castlingRights;
+	uint8_t enPassantFile; //the file of the CAPTURED pawn
+	uint8_t fiftyMoveRuleCounter;
+	uint64_t hash;
+};
+
 struct chessPosition {
 #ifdef DEBUGAAAA
 	vdt_vector<uint64_t> pieces;
@@ -48,24 +55,20 @@ struct chessPosition {
 	uint64_t pieceTables[2][NUM_DIFFERENT_PIECES+1]; //the +1 is a dummy allowing simpler move execution.
 #endif
 	playerColor toMove;
-	uint8_t castlingRights;
-	uint8_t enPassantFile; //the file of the CAPTURED pawn
+	pathDependentPositionData data;
 	int16_t figureEval;
 	uint16_t totalFigureEval;
 	uint32_t pieceTableEval;
 	uint64_t zobristHash;
 	vdt_vector<chessMove> madeMoves;
-	vdt_vector<uint16_t> castlingAndEpStack;
+	vdt_vector<pathDependentPositionData> dataStack;
 };
 
-std::string chessPositionToString(chessPosition position);
-std::string chessPositionToOutputString(chessPosition position);
-chessPosition stringToChessPosition(std::string strposition);
-inline figureType toFigureType(uint16_t num);
-std::string moveToString(chessMove move, chessPosition position);
-uint64_t stringToMove(std::string mv);
+
 uint64_t getRandUint64();
 void debug_incremental_calculations(const chessPosition* position);
 void free_position(chessPosition* position);
-std::string chessPositionToFenString(chessPosition position, bool EPD=false);
+inline figureType toFigureType(uint16_t num);
+void zeroInitPosition(chessPosition* position);
+
 #endif /* LIB_BASICS_HPP_ */

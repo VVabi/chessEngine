@@ -15,7 +15,7 @@
 #include <sstream>
 //input messages
 
-#define UCI 0
+
 #define ISREADY 1
 
 struct inputMessage{
@@ -146,11 +146,9 @@ void uciInterface::sendSearchInfo(uint64_t nodes, uint32_t time, int32_t eval, u
 
 bool uciInterface::receiveMove(std::string& move){
 	return false;
-
 }
 
 bool uciInterface::receiveUndoMove() {
-
 	return false;
 }
 
