@@ -74,8 +74,8 @@ int main() {
 
 	srand (time(NULL));
 	fillZobristHash();
-	/*runPerformanceTests();
-	return 0;*/
+	runPerformanceTests();
+	return 0;
 	UIloop();
 	//00000BNR00000PKQ00000NPR00000N0P000000000000000p0qpN0npnN000000kw0000
 }

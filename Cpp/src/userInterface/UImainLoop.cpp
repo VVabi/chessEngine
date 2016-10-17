@@ -25,6 +25,7 @@ extern uint16_t killerMoves[20][2];
 uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maximal_time, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval, bool doAspiration) {
 	memset(killerMoves,0, 20*2*sizeof(uint16_t));
 	resetSearchData();
+	resetQuiescenceNodes();
 	uint64_t start_ts  = get_timestamp();
 	uint16_t depth = 3;
 	/*uint64_t qnodes = 0;
@@ -46,7 +47,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 			alpha = *eval-50;
 			beta  = *eval+50;
 		}
-		searchDebugData data = getSearchData();
+
 		//std::cout << depth <<std::endl;
 
 		//qnodes = getQuiescenceNodes();
@@ -56,6 +57,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 		std::cout << "Searched " <<  *nodeCount << " positions in " << *mtime << " for " << nps << " nodes per second" << std::endl;*/
 
 #ifndef UCI
+		searchDebugData data = getSearchData();
 		std::cout << "SEARCH DEBUG DATA" << std::endl;
 		std::cout << "negamax called: "  << data.called << std::endl;
 		std::cout << "Went to quiescence: " << data.wentToQuiescence << std::endl;
@@ -63,7 +65,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 		uint64_t totalNodes=0;
 		for(uint16_t ind=0; ind < 25; ind++){
 			std::cout << ind << "  " << data.nodes[ind] << std::endl;
-			std::cout << std::setw(16) << std::endl;
+			std::cout << std::setw(16) << " ";
 			for(int k=0; k < 50; k++){
 				std::cout << std::setw(9) << data.bestIndex[ind][k];
 			}
@@ -76,8 +78,16 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 		std::cout << "Ratio "              << ((float) data.threefold_repetitions)/((float) data.fake_3fold_repetitions+data.threefold_repetitions) << std::endl;
 		std::cout << "Futility tries "     << data.futility_tried <<std::endl;
 		std::cout << "Successful futility " << data.futility_successful << std::endl;
+		std::cout << "Nullmove tries "     << data.nullMovePruningTried <<std::endl;
+		std::cout << "Successful nullmove " << data.nullMovePruningSuccessful << std::endl;
+		std::cout << "Went to search "     << data.wentToSearch <<std::endl;
+		std::cout << "Had to sort " << data.neededSort << std::endl;
 #endif
-		*nodeCount = (totalNodes+getQuiescenceNodes());
+#ifdef UCI
+		*nodeCount = 0;
+#else
+		*nodeCount = (data.totalNodes+getQuiescenceNodes());
+#endif
 		UI->sendSearchInfo(*nodeCount, *mtime, *eval, depth, moveToString(*bestMove, *position));
 		depth++;
 		if(*eval > 90000) {

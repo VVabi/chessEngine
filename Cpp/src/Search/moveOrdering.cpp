@@ -19,7 +19,7 @@
 extern uint16_t moveOrderingHashTable[];
 
 
-
+extern int32_t historyTable[2][64][64];
 extern int16_t figureValues[];
 extern int16_t pieceTables[7][2][64];
 
@@ -127,7 +127,7 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 
 	if(targetAttacked  && (mv->captureType == none)){
 		sortEval = sortEval-100;
-		if(!targetCovered){ //TODO: same problem as above, this never happens
+		if(!targetCovered){ //TODO: same problem as above, this never happens.
 			sortEval = sortEval-100;
 		}
 	}
@@ -161,12 +161,12 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 			sortEval = sortEval+50;
 		}
 	}
-	/*if((position->madeMoves.length > 0) && (mv->captureType != none)){
+	if((position->madeMoves.length > 0) && (mv->captureType != none)){
 		chessMove previousMove = position->madeMoves[position->madeMoves.length-1];
-		if(previousMove.targetField == mv->sourceField) { //recapture is usually good
+		if(previousMove.targetField == mv->targetField) { //recapture is usually good
 			sortEval = sortEval + 200;
 		}
-	}*/
+	}
 
 
 	uint16_t moveHash = (mv->sourceField) | (mv->targetField << 8);
@@ -198,6 +198,21 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 
 	if(mv->type == enpassant){
 		sortEval = 120;
+	}
+
+	if(mv->captureType == none){
+		int32_t historyValue = historyTable[position->toMove][mv->sourceField][mv->targetField];
+		if(historyValue > 20){
+			historyValue = 21+(historyValue/32);
+		}
+
+		if(historyValue < -20){
+			historyValue = -21+(historyValue/32);
+		}
+
+		sortEval = sortEval+historyValue;
+		//std::cout << historyValue << std::endl;
+		//std::cout << (historyTable[position->toMove][mv->sourceField][mv->targetField] >> 6) << std::endl;
 	}
 
 	if( ((mv->sourceField) | (mv->targetField << 8)) == hashedMove) {

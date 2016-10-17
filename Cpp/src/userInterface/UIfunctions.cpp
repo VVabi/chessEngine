@@ -43,7 +43,8 @@ uint64_t runSinglePositionPerformanceTest(std::string position, uint16_t depth, 
 	chessPosition c = stringToChessPosition(position);
 
 	chessMove bestMove;
-
+	resetSearchData();
+	resetQuiescenceNodes();
 	struct timeval start, end;
 	//long mtime, seconds, useconds;
 	gettimeofday(&start, NULL);
@@ -84,9 +85,10 @@ uint64_t runSinglePositionPerformanceTest(std::string position, uint16_t depth, 
 	useconds = end.tv_usec - start.tv_usec;
 
 	mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;*/
-	uint64_t nodeCount = getQuiescenceNodes();
-	*negamaxNodes = 0; //getNodes();
-	*qNodes       = 0; //getQuiescenceNodes();
+	searchDebugData data = getSearchData();
+	uint64_t nodeCount = getQuiescenceNodes()+data.totalNodes;
+	*negamaxNodes = data.totalNodes; //getNodes();
+	*qNodes       = getQuiescenceNodes();
 	//double nps = ((double) nodeCount)/((double) mtime)*1000.0;
 	/*std::cout << "Searched " <<  nodeCount << " positions in " << mtime << " for " << nps << " nodes per second" << std::endl;
 	std::cout << "Forced move " << moveToString(bestMove, c) << std::endl;

@@ -23,7 +23,7 @@
 
 
 extern uint16_t moveOrderingHashTable[];
-
+extern uint32_t historyTable[2][64][64];
 
 
 static searchDebugData searchCounts;
@@ -57,9 +57,37 @@ static inline bool backtrack_position_for_repetition(chessPosition* position) {
 	return false;
 }
 
+static inline bool check_nullmove(chessPosition* position, int16_t depth, int32_t beta){
 
 
-int32_t negamax(chessPosition* position, int16_t depth, int32_t alpha, int32_t beta, chessMove* bestMove) {
+	if(beta > 10000){ //TODO: more dynamic condition here?
+		return false;
+	}
+
+	int32_t eval = evaluation(position, beta-1, beta);
+
+	if(eval < beta){
+		return false; //no point in trying nullmove when the current evaluation is already worse than beta
+	}
+
+	uint16_t kingField = findLSB(position->pieceTables[position->toMove][king]);
+	if(isFieldAttacked( position, (playerColor) (1-position->toMove), kingField)){
+		return false; //we are in check, nullmove is regi-suicide
+	}
+
+	makeNullMove(position);
+	chessMove mv;
+	searchCounts.nullMovePruningTried++;
+	int32_t value = -negamax(position, depth-2, -beta, -beta+1, &mv, false);
+	undoNullMove(position);
+	if(value < beta) {
+		return false; //didnt manage a cutoff :(
+	}
+	searchCounts.nullMovePruningSuccessful++;
+	return true;
+}
+
+int32_t negamax(chessPosition* position, int16_t depth, int32_t alpha, int32_t beta, chessMove* bestMove, bool allowNullMove) {
 
 	assert(alpha < beta);
 	searchCounts.called++;
@@ -77,10 +105,6 @@ int32_t negamax(chessPosition* position, int16_t depth, int32_t alpha, int32_t b
 		}
 	}
 
-	//remembers the index of best move after sorting
-	//-------------------------------------------
-	int16_t bestIndex = -1;
-
 	//go to quiescence on depth 0
 	//---------------------------
 	if(depth <= 0) {
@@ -88,11 +112,22 @@ int32_t negamax(chessPosition* position, int16_t depth, int32_t alpha, int32_t b
 		return negamaxQuiescence(position, alpha, beta, 0);
 	}
 
+	if((depth >= 2) && allowNullMove){
+		if(check_nullmove(position, depth, beta)){
+			return beta;
+		}
+	}
+	//remembers the index of best move after sorting
+	//-------------------------------------------
+	int16_t bestIndex = -1;
+
+
+
 	//futility pruning
 	//-----------------
 	if(depth == 1){
 		searchCounts.futility_tried++;
-		int32_t base = evaluation(position, alpha-151, beta);
+		int32_t base = evaluation(position, alpha-151, alpha);
 		if(base+150 < alpha){
 			searchCounts.futility_successful++;
 			//in this case, trying a silent move is pointless.
@@ -128,36 +163,19 @@ int32_t negamax(chessPosition* position, int16_t depth, int32_t alpha, int32_t b
 
 		} else {
 			searchCounts.nodes[depth]++;
+			searchCounts.totalNodes++;
 			legalMovesAvailable = true;
-			if((depth > 2)) {
-				//check that the side to move is not in check.
-				uint16_t kingField2 = findLSB( position->pieceTables[position->toMove][king]);
-
-				if(!isFieldAttacked( position, (playerColor) (1-position->toMove), kingField2)){
-					makeNullMove(position);
-					chessMove mv;
-					int32_t value = negamax(position, depth-1-2, alpha, alpha+1, &mv);
-					undoNullMove(position);
-					if(value < alpha+1) {
-						undoMove(position);
-						//std::cout << "nullmove pruning successful!" << std::endl;
-						continue;
-					}
-				}
-			}
-
-
 			chessMove mv;
 
-			//PVSearch, currently a net LOSS for us
+			//PVSearch, currently a small gain for us with the > 5
 			//-------------------------------------------------
-			/*if((ind > 2) && (depth > 2)) {
+			if((ind > 5) && (depth > 2)) {
 				int32_t value = -negamax(position, depth-1, -alpha-1, -alpha, &mv);
 				if(value < alpha+1){
 					undoMove(position);
 					continue;
 				}
-			}*/
+			}
 			int32_t value = -negamax(position, depth-1, -beta, -alpha, &mv);
 
 			if(value > alpha){
@@ -169,15 +187,12 @@ int32_t negamax(chessPosition* position, int16_t depth, int32_t alpha, int32_t b
 		}
 		undoMove(position);
 
-
 		if(alpha >= beta) {
 			uint32_t hashIndex = position->zobristHash & HASHSIZE;
 			moveOrderingHashTable[hashIndex] = (bestMove->sourceField | (bestMove->targetField << 8));
-
 			if(bestIndex != -1){
 				searchCounts.bestIndex[depth][bestIndex]++;
 			}
-
 			if(bestMove->captureType == none){
 				uint16_t toRemember = (bestMove->sourceField | (bestMove->targetField << 8));
 
@@ -185,16 +200,27 @@ int32_t negamax(chessPosition* position, int16_t depth, int32_t alpha, int32_t b
 					killerMoves[depth][1] = killerMoves[depth][0];
 					killerMoves[depth][0] = toRemember;
 				}
-
-
 			}
-
 			//moves.free_array();
 			return beta;
 		}
 	}
 
 	if(bestIndex != -1){
+		historyTable[position->toMove][bestMove->sourceField][bestMove->targetField] += 2*depth*depth;
+		if(historyTable[position->toMove][bestMove->sourceField][bestMove->targetField] > HISTORY_CUTOFF){
+			//std::cout << "Rescaling history table " << std::endl;
+			rescaleHistoryTable();
+		}
+		for(uint16_t cnt=0; cnt < bestIndex; cnt++){
+			chessMove mv = moves[cnt];
+			if(mv.captureType == none){
+				historyTable[position->toMove][bestMove->sourceField][bestMove->targetField] -= depth*depth;
+				if(historyTable[position->toMove][bestMove->sourceField][bestMove->targetField] < -HISTORY_CUTOFF){
+					rescaleHistoryTable();
+				}
+			}
+		}
 		searchCounts.bestIndex[depth][bestIndex]++;
 	}
 	uint32_t hashIndex = position->zobristHash & HASHSIZE;
@@ -210,7 +236,4 @@ int32_t negamax(chessPosition* position, int16_t depth, int32_t alpha, int32_t b
 	}
 	//moves.free_array();
 	return alpha;
-
-
-
 }
