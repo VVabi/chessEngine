@@ -16,7 +16,7 @@
 extern uint64_t kingmovetables[64];
 
 int32_t attacksCloseToKingEvals[] = {20, 60, 120, 180, 240, 320, 400, 500, 600, 600};
-static int32_t kingSafetySinglePlayer(chessPosition* position, const uint8_t* pawnColumnOccupancy, playerColor playingSide, const AttackTable* opponentAttackTable) {
+static int32_t kingSafetySinglePlayer(const chessPosition* position, const uint8_t* pawnColumnOccupancy, playerColor playingSide, const AttackTable* opponentAttackTable) {
 
 	int32_t ret = 0;
 	//pawn shield
@@ -75,7 +75,7 @@ static int32_t kingSafetySinglePlayer(chessPosition* position, const uint8_t* pa
 }
 
 
-int32_t kingSafety(chessPosition* position, const uint8_t* pawnColumnOccupancy, const AttackTable* whiteAttackTable, const AttackTable* blackAttackTable) {
+int32_t kingSafety(const chessPosition* position, const uint8_t* pawnColumnOccupancy, const AttackTable* whiteAttackTable, const AttackTable* blackAttackTable) {
 
 	int32_t whiteSafety =  kingSafetySinglePlayer(position, pawnColumnOccupancy, white, blackAttackTable);
 	int32_t blackSafety =  kingSafetySinglePlayer(position, pawnColumnOccupancy, black, whiteAttackTable);

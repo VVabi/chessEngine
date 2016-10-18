@@ -49,7 +49,7 @@ static inline bool backtrack_position_for_repetition(chessPosition* position) {
 	uint64_t current_hash = position->zobristHash;
 	assert(((int) position->madeMoves.length)-((int) numMovesToCheck) >= 0);
 	assert(position->madeMoves.length == position->dataStack.length);
-	for(int16_t ind = ((int) position->madeMoves.length-1); ind >= ((int) position->madeMoves.length)-numMovesToCheck; ind--){
+	for(int16_t ind = ((int) position->madeMoves.length-1); ind >= ((int) position->madeMoves.length)-numMovesToCheck; ind=ind-2){
 		if(position->dataStack[ind].hash == current_hash){
 			return true;
 		}
@@ -78,7 +78,7 @@ static inline bool check_nullmove(chessPosition* position, int16_t depth, int32_
 	makeNullMove(position);
 	chessMove mv;
 	searchCounts.nullMovePruningTried++;
-	int32_t value = -negamax(position, depth-2, -beta, -beta+1, &mv, false);
+	int32_t value = -negamax(position, depth-3, -beta, -beta+1, &mv, false);
 	undoNullMove(position);
 	if(value < beta) {
 		return false; //didnt manage a cutoff :(
@@ -144,6 +144,7 @@ int32_t negamax(chessPosition* position, int16_t depth, int32_t alpha, int32_t b
 	bool legalMovesAvailable = false;
 	bool foundGoodMove = false;
 	searchCounts.wentToSearch++;
+
 	for(uint16_t ind=0; ind < moves.length; ind++){
 
 		if(ind == 1){
@@ -176,7 +177,9 @@ int32_t negamax(chessPosition* position, int16_t depth, int32_t alpha, int32_t b
 					continue;
 				}
 			}
+
 			int32_t value = -negamax(position, depth-1, -beta, -alpha, &mv);
+
 
 			if(value > alpha){
 				foundGoodMove = true;

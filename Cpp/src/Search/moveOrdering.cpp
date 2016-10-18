@@ -203,11 +203,11 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 	if(mv->captureType == none){
 		int32_t historyValue = historyTable[position->toMove][mv->sourceField][mv->targetField];
 		if(historyValue > 20){
-			historyValue = 21+(historyValue/32);
+			historyValue = 21+(historyValue/16);
 		}
 
 		if(historyValue < -20){
-			historyValue = -21+(historyValue/32);
+			historyValue = -21+(historyValue/16);
 		}
 
 		sortEval = sortEval+historyValue;
