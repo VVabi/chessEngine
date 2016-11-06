@@ -16,7 +16,7 @@ import java.util.concurrent.CountDownLatch;
 public class UciProcessing {
 
 
-    VMPServer server;
+    //VMPServer server;
     uciEngineHandler  vabiHandler;
     uciEngineHandler stockFishHandler;
     double res = 0;
@@ -29,14 +29,14 @@ public class UciProcessing {
     public UciProcessing(String engine1, String engine2, int numGames) throws IOException {
 
         this.numGames = numGames;
-        CountDownLatch cd = new CountDownLatch(1);
-        server = new VMPServer(9999, 0, cd);
-        server.connect("127.0.0.1", 9876);
-        try {
+        //CountDownLatch cd = new CountDownLatch(1);
+       /* server = new VMPServer(9999, 0, cd);
+        server.connect("127.0.0.1", 9876);*/
+       /* try {
             cd.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
         this.engine1 = engine1;
         this.engine2 = engine2;
 
@@ -75,7 +75,7 @@ public class UciProcessing {
                 vabiHandler.setPosition(moves);
                 String current = vabiHandler.getCurrentPosition();
                 VMPchessPosition position = new VMPchessPosition(new VDTstring(current.getBytes()));
-                server.send(position, 0);
+                //server.send(position, 0);
                 vabiHandler.startSearch();
 
 
@@ -94,7 +94,7 @@ public class UciProcessing {
                 vabiHandler.setPosition(moves);
                 current = vabiHandler.getCurrentPosition();
                 position = new VMPchessPosition(new VDTstring(current.getBytes()));
-                server.send(position, 0);
+                //server.send(position, 0);
                 //System.out.println(mv[0]);
                 stockFishHandler.setPosition(moves);
                 stockFishHandler.startSearch();
@@ -131,7 +131,7 @@ public class UciProcessing {
 
         System.out.println("Final result: " + total);
         System.out.println("Wins "+wins + " Draws "+draws+" Losses "+losses);
-        double elo_diff = 400*(Math.log10(1-total/100.0)-Math.log10(total/100.0));
+        double elo_diff = 400*(Math.log10(1-total/((double) numGames))-Math.log10(total/(double) numGames));
         System.out.println("Elo difference is " +elo_diff);
         res = total;
         return total;

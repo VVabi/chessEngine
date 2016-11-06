@@ -22,9 +22,9 @@
 #include <userInterface/UIlayer.hpp>
 
 
-extern uint16_t moveOrderingHashTable[];
+extern hashEntry moveOrderingHashTable[];
 extern uint32_t historyTable[2][64][64];
-
+extern uint8_t searchId;
 
 static searchDebugData searchCounts;
 
@@ -49,7 +49,7 @@ static inline bool backtrack_position_for_repetition(chessPosition* position) {
 	uint64_t current_hash = position->zobristHash;
 	assert(((int) position->madeMoves.length)-((int) numMovesToCheck) >= 0);
 	assert(position->madeMoves.length == position->dataStack.length);
-	for(int16_t ind = ((int) position->madeMoves.length-1); ind >= ((int) position->madeMoves.length)-numMovesToCheck; ind=ind-2){
+	for(int16_t ind = ((int) position->madeMoves.length-1); ind >= ((int) position->madeMoves.length)-numMovesToCheck; ind--){
 		if(position->dataStack[ind].hash == current_hash){
 			return true;
 		}
@@ -87,11 +87,12 @@ static inline bool check_nullmove(chessPosition* position, int16_t depth, int32_
 	return true;
 }
 
-int32_t negamax(chessPosition* position, int16_t depth, int32_t alpha, int32_t beta, chessMove* bestMove, bool allowNullMove) {
+int16_t negamax(chessPosition* position, int16_t depth, int16_t alpha, int16_t beta, chessMove* bestMove, bool allowNullMove, bool doHashProbe) {
+
+
 
 	assert(alpha < beta);
 	searchCounts.called++;
-
 	if(position->data.fiftyMoveRuleCounter >= 100){
 		return 0;
 	}
@@ -105,6 +106,36 @@ int32_t negamax(chessPosition* position, int16_t depth, int32_t alpha, int32_t b
 		}
 	}
 
+	uint32_t hashIndex2 = position->zobristHash & HASHSIZE;
+	hashEntry hashVal    = moveOrderingHashTable[hashIndex2];
+	uint32_t zobristHigher = (uint32_t) (position->zobristHash >> 32);
+	uint16_t zobristLower  = (uint16_t) ((position->zobristHash & 0xFFFF) >> 16);
+	if(doHashProbe){
+		if((zobristHigher == hashVal.hashHighBits) && (zobristLower == hashVal.hashLower)) { //TODO: assign bestMove - this can blow up in our face easily TODO: add proper checkmate handling
+			int16_t oldEval  = hashVal.eval;
+			if((depth <= hashVal.depth) && (oldEval > -10000) && (oldEval < 10000)){
+				int16_t oldAlpha = hashVal.alpha;
+				int16_t oldBeta  = hashVal.beta;
+				/*if(oldEval < -10000){ //currently not possible without knowing the original depth
+					//mate against us!
+					oldEval = oldEval+hashVal.depth-depth;
+				}
+				if(oldEval >10000){
+					//mate for us!
+					oldEval = oldEval+hashVal.depth-depth;
+				}*/
+				if((oldAlpha < oldEval) && (oldEval >= beta)){ //oldEval is actually computed (i.e. not fail low) AND we get a beta cutoff
+					return beta;
+				}
+				if((oldAlpha <= alpha) && (oldEval <= oldAlpha)){
+					return alpha; //node will fail low
+				}
+				if((oldEval < oldBeta) && (oldEval > oldAlpha)){ //TODO: this condition can be vastly improved
+					return oldEval;
+				}
+			}
+		}
+	}
 	//go to quiescence on depth 0
 	//---------------------------
 	if(depth <= 0) {
@@ -117,6 +148,8 @@ int32_t negamax(chessPosition* position, int16_t depth, int32_t alpha, int32_t b
 			return beta;
 		}
 	}
+	const int16_t origAlpha = alpha;
+	const int16_t origBeta = beta;
 	//remembers the index of best move after sorting
 	//-------------------------------------------
 	int16_t bestIndex = -1;
@@ -138,7 +171,7 @@ int32_t negamax(chessPosition* position, int16_t depth, int32_t alpha, int32_t b
 
 	vdt_vector<chessMove> moves = vdt_vector<chessMove>(buffer+depth*100,100);
 	generateAllMoves(&moves, position);
-	bool isInCheck = orderStandardMoves(position, &moves, depth);
+	bool isInCheck = orderStandardMoves(position, &moves, depth, hashVal.bestMove);
 
 
 	bool legalMovesAvailable = false;
@@ -180,7 +213,6 @@ int32_t negamax(chessPosition* position, int16_t depth, int32_t alpha, int32_t b
 
 			int32_t value = -negamax(position, depth-1, -beta, -alpha, &mv);
 
-
 			if(value > alpha){
 				foundGoodMove = true;
 				alpha = value;
@@ -191,8 +223,19 @@ int32_t negamax(chessPosition* position, int16_t depth, int32_t alpha, int32_t b
 		undoMove(position);
 
 		if(alpha >= beta) {
-			uint32_t hashIndex = position->zobristHash & HASHSIZE;
-			moveOrderingHashTable[hashIndex] = (bestMove->sourceField | (bestMove->targetField << 8));
+			if((depth >= hashVal.depth) || (searchId != hashVal.searchId)) {
+				uint32_t hashIndex = position->zobristHash & HASHSIZE;
+				hashEntry entry;
+				entry.alpha = origAlpha;
+				entry.beta  = origBeta;
+				entry.eval  = origBeta; //beta cutoff
+				assert(beta == origBeta);
+				entry.depth = depth;
+				entry.bestMove = (bestMove->sourceField | (bestMove->targetField << 8));
+				entry.hashHighBits = (uint32_t) (position->zobristHash >> 32);
+				entry.hashLower    = (uint16_t) ((position->zobristHash & 0xFFFF)>> 16);
+				moveOrderingHashTable[hashIndex] = entry;
+			}
 			if(bestIndex != -1){
 				searchCounts.bestIndex[depth][bestIndex]++;
 			}
@@ -226,17 +269,43 @@ int32_t negamax(chessPosition* position, int16_t depth, int32_t alpha, int32_t b
 		}
 		searchCounts.bestIndex[depth][bestIndex]++;
 	}
-	uint32_t hashIndex = position->zobristHash & HASHSIZE;
-	if(foundGoodMove) {
-		moveOrderingHashTable[hashIndex] = (bestMove->sourceField | (bestMove->targetField << 8));
-	}
+
 	if(!legalMovesAvailable){
 		if(isInCheck){
-			return -99000-depth;
+			alpha = -30000-depth;
 		} else {
-			return 0;
+			alpha = 0;
 		}
 	}
+
+	uint32_t hashIndex = position->zobristHash & HASHSIZE;
+	if(foundGoodMove) {
+		if((depth >= hashVal.depth) || (searchId != hashVal.searchId)) {
+			hashEntry entry;
+			entry.alpha = origAlpha;
+			entry.beta  = origBeta;
+			entry.eval  = alpha;
+			entry.depth = depth;
+			entry.searchId = searchId;
+			entry.bestMove = (bestMove->sourceField | (bestMove->targetField << 8));
+			entry.hashHighBits = (uint32_t) (position->zobristHash >> 32);
+			entry.hashLower    = (uint16_t) ((position->zobristHash & 0xFFFF)>> 16);
+			moveOrderingHashTable[hashIndex] = entry;
+		}
+	} else { //we failed low, remember as well
+		if((depth >= hashVal.depth) || (searchId != hashVal.searchId)) {
+			hashEntry entry;
+			entry.alpha = origAlpha;
+			entry.beta  = origBeta;
+			entry.eval  = alpha;
+			entry.depth = depth;
+			entry.bestMove = 0;
+			entry.hashHighBits = (uint32_t) (position->zobristHash >> 32);
+			entry.hashLower    = (uint16_t) ((position->zobristHash & 0xFFFF)>> 16);
+			moveOrderingHashTable[hashIndex] = entry;
+		}
+	}
+
 	//moves.free_array();
 	return alpha;
 }

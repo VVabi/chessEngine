@@ -93,8 +93,18 @@ public class PlayingController {
             @Override
             public void run() {
                 debugArea.clear();
+                int eval  =e.eval;
+                String evalString = Integer.toString(eval);
+                if(eval < -20000){
+                    int mateIn = (eval+30000+e.depth)/2;
+                    evalString = "Will be mated in "+mateIn;
+                }
+                if(eval > 20000){
+                    int mateIn = (eval-30000+e.depth-1)/2-1;
+                    evalString = "Mate in "+mateIn;
+                }
                 debugArea.appendText("Depth " + e.depth+"\n");
-                debugArea.appendText("Eval  " + e.eval+"\n");
+                debugArea.appendText("Eval  " + evalString+" "+e.eval+"\n");
                 debugArea.appendText("Nodes " + e.nodes + " in " + e.time + " ms"+"\n");
                 debugArea.appendText("NPS " + ((int) (1000.0*((double) e.nodes)/((double) e.time)))+"\n");
                 debugArea.appendText("Best move " + e.move+"\n");

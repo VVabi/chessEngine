@@ -14,6 +14,7 @@
 
 extern uint64_t files[];
 extern uint64_t  passedPawnMasks[2][64];
+extern uint16_t taperingValues[81];
 
 static short const passedPawnEvalValues[2][64] = {{ 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 9, 9, 9, 9, 9, 9, 9, 9, 13, 13, 13, 13, 13, 13, 13, 13,0,0,0,0,0,0,0,0 },
 { 0, 0, 0, 0, 0, 0, 0, 0, 13, 13, 13, 13, 13, 13, 13, 13, 9, 9, 9, 9, 9, 9, 9, 9, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0,0 }};
@@ -74,7 +75,7 @@ int32_t debugStaticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColu
 }
 
 
-int32_t debugPawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupancy, VDTpawnEvaluation* pawnEval) {
+int32_t debugPawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupancy, uint16_t phase, VDTpawnEvaluation* pawnEval) {
 
 	uint32_t eval=0;
 	uint64_t whitePawns = position->pieceTables[white][pawn];
@@ -84,7 +85,7 @@ int32_t debugPawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOc
 	pawnEval->doubledPawns = staticPawn;
 	eval = eval+staticPawn;
 	int32_t passedPawn = debugPassedPawnEval(whitePawns, blackPawns);
-	eval = eval+passedPawn;
+	passedPawn = ((256-taperingValues[phase])*passedPawn)/256;
 	pawnEval->passedPawn = passedPawn;
 	return eval;
 }

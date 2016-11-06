@@ -15,12 +15,16 @@ extern int16_t figureValues[];
 extern int32_t completePieceTables[7][2][64];
 extern uint64_t zobristHash[7][2][64];
 extern uint64_t movingSideHash[2];
+extern uint64_t castlingHash[16];
+extern uint64_t enpassantHash[9];
 extern uint16_t repetitionData[16384];
 
 void makeNullMove(chessPosition* position){
 	position->data.hash = position->zobristHash;
 	position->dataStack.add(&position->data);
+	position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
 	position->data.enPassantFile  = 8;
+	position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
 	position->data.fiftyMoveRuleCounter = 0;
 	position->zobristHash = position->zobristHash^movingSideHash[0];
 	position->toMove = (playerColor) (1-position->toMove);
@@ -125,19 +129,23 @@ void makeMove(chessMove* move, chessPosition* position) {
 	}
 
 	uint8_t castlingRights = position->data.castlingRights;
+	position->zobristHash = position->zobristHash^castlingHash[position->data.castlingRights];
 	castlingRights = (move->move & WHITEKINGSIDECASTLEMASK  ? (castlingRights & 14):castlingRights);
 	castlingRights = (move->move & WHITEQUEENSIDECASTLEMASK ? (castlingRights & 13):castlingRights);
 	castlingRights = (move->move & BLACKKINGSIDECASTLEMASK  ? (castlingRights & 11):castlingRights);
 	castlingRights = (move->move & BLACKQUEENSIDECASTLEMASK ? (castlingRights &  7):castlingRights);
 	position->data.castlingRights = castlingRights;
+	position->zobristHash = position->zobristHash^castlingHash[position->data.castlingRights];
 	position->figureEval     = position->figureEval+(1-2*position->toMove)*figureValues[move->captureType];
 	position->totalFigureEval     = position->totalFigureEval-figureValues[move->captureType];
+	position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
 	position->data.enPassantFile  = 8;
 	switch(move->type){
 		case pawnMove:
 			if(((move->targetField-move->sourceField) & 15) == 0) { //pawn went two ahead
 				position->data.enPassantFile = FILE(move->targetField);
 			}
+
 		case knightMove:
 		case bishopMove:
 		case rookMove:
@@ -173,7 +181,7 @@ void makeMove(chessMove* move, chessPosition* position) {
 		default:
 			break;
 	}
-
+	position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
 	position->madeMoves.add(move);
 	position->toMove = (playerColor) (1-position->toMove);
 	position->zobristHash = position->zobristHash^movingSideHash[0];

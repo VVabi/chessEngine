@@ -63,7 +63,7 @@ void resetSortqCalled(){
 static chessMove buffer[32*50];
 
 
-int32_t negamaxQuiescence(chessPosition* position, int32_t alpha, int32_t beta, uint16_t depth) {
+int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, uint16_t depth) {
 
 	assert(alpha < beta);
 

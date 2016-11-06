@@ -63,7 +63,7 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 	}
 //#endif
 
-	int32_t pieceTableEval = ((256-taperingValues[phase])*bufferEndgame+taperingValues[phase]*bufferMidgame) >> 8; //division by 256
+	int32_t pieceTableEval = ((256-taperingValues[phase])*bufferEndgame+taperingValues[phase]*bufferMidgame)/256; //division by 256
 	eval = eval+pieceTableEval;
 
 
@@ -76,7 +76,7 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 
 
 	uint8_t pawnColumnOccupancy[2];
-	eval = eval+pawnEvaluation(position, pawnColumnOccupancy);
+	eval = eval+pawnEvaluation(position, pawnColumnOccupancy, phase);
 
 	AttackTable whiteAttackTable 		= makeAttackTable(position, white);
 	AttackTable blackAttackTable 		= makeAttackTable(position, black);
@@ -104,11 +104,11 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 
 
 	/*int32_t kingSafetyComplete = kingSafety(position, pawnColumnOccupancy, &whiteAttackTable, &blackAttackTable);;
-	int32_t kingSafetyTapered = (taperingValues[phase]*kingSafetyComplete) >> 8;
+	int32_t kingSafetyTapered = (taperingValues[phase]*kingSafetyComplete)/256;
 
 	eval = eval+kingSafetyTapered;*/
 
-	eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?
+	//eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?
 	return (1-2*position->toMove)*eval;
 
 }

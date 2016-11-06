@@ -25,7 +25,7 @@ static char figureNames[2][6] = {{'P', 'N', 'B', 'R', 'Q', 'K'},
 };
 
 
-
+uint8_t searchId = 0;
 
 uint64_t get_timestamp(){
 	struct timeval start;
@@ -40,6 +40,7 @@ uint64_t get_timestamp(){
 
 
 uint64_t runSinglePositionPerformanceTest(std::string position, uint16_t depth, uint64_t* negamaxNodes, uint64_t* qNodes, bool useAspiration) {
+	searchId++;
 	chessPosition c = stringToChessPosition(position);
 
 	chessMove bestMove;
@@ -49,8 +50,8 @@ uint64_t runSinglePositionPerformanceTest(std::string position, uint16_t depth, 
 	//long mtime, seconds, useconds;
 	gettimeofday(&start, NULL);
 	//int32_t eval = negamax(&c, depth, -100000, 100000, &bestMove);
-	int32_t alpha = -100005;
-	int32_t beta  = 100005;
+	int16_t alpha = -32000;
+	int16_t beta  = 32000;
 	int32_t searchdepth = 3;
 	while(searchdepth <= depth && (searchdepth < 14)) {
 
@@ -499,11 +500,11 @@ std::string chessPositionToFenString(chessPosition position, bool EPD){
 
 }
 
-bool checkMove(chessPosition& position, std::string move){
+bool checkAndMakeMove(chessPosition& position, std::string move){
 	vdt_vector<chessMove> moves = vdt_vector<chessMove>(100);
 		uint64_t mv = stringToMove(move);
 		generateAllMoves(&moves, &position);
-		orderStandardMoves(&position, &moves, 0);
+		orderStandardMoves(&position, &moves, 0, 0);
 		std::sort(moves.data, moves.data+moves.length);
 		bool found = false;
 		chessMove m;

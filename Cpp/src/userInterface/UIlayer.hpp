@@ -17,7 +17,7 @@ chessPosition stringToChessPosition(std::string strposition);
 std::string chessPositionToFenString(chessPosition position, bool EPD=false);
 std::string moveToString(chessMove move, chessPosition position);
 uint64_t stringToMove(std::string mv);
-bool checkMove(chessPosition& position, std::string move);
+bool checkAndMakeMove(chessPosition& position, std::string move);
 void runPerformanceTests();
 uint64_t get_timestamp();
 std::string moveToExtendedString(chessMove move, chessPosition position);

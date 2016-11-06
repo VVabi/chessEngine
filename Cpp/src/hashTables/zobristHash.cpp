@@ -10,11 +10,12 @@
 #include <lib/bitfiddling.h>
 #include "hashTables.hpp"
 
-uint16_t moveOrderingHashTable[HASHSIZE+1];
+hashEntry moveOrderingHashTable[HASHSIZE+1];
 
 uint64_t zobristHash[7][2][64];
 uint64_t movingSideHash[2];
-
+uint64_t castlingHash[16];
+uint64_t enpassantHash[9];
 
 void fillZobristHash(){
 	movingSideHash[0] = getRandUint64();
@@ -29,6 +30,14 @@ void fillZobristHash(){
 			zobristHash[6][cnt][field] = 0;
 		}
 	}
+
+	for(uint16_t ind=0; ind <9; ind++) {
+		enpassantHash[ind]  =getRandUint64();
+	}
+
+	for(uint16_t ind=0; ind <16; ind++) {
+		castlingHash[ind]  =getRandUint64();
+	}
 }
 
 uint64_t calcZobristHash(const chessPosition* position){
@@ -36,20 +45,15 @@ uint64_t calcZobristHash(const chessPosition* position){
 	for(uint16_t movingSide = 0; movingSide < 2; movingSide++){
 		for(uint16_t figureType = 0; figureType < 6; figureType++){
 			uint64_t pieces = position->pieceTables[movingSide][figureType];
-
 			while(pieces){
 				uint16_t field = popLSB(pieces);
 				hash = hash^zobristHash[figureType][movingSide][field];
-
 			}
-
-
 		}
-
-
-
 	}
 
+	hash = hash^enpassantHash[position->data.enPassantFile];
+	hash = hash^castlingHash[position->data.castlingRights];
 	hash = hash^movingSideHash[position->toMove];
 	return hash;
 }

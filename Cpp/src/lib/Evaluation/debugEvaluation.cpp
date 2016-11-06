@@ -42,7 +42,7 @@ int32_t debugEvaluation(const chessPosition* position, VDTevaluation* debugStruc
 	//evaluation from the point of view of WHITE, sign changed in the end if necessary
 	//----------------------------------- ---------------------------------------------------
 	int32_t eval = 0;
-	int32_t bufferMidgame =  calcPieceTableValue(position);
+	int32_t bufferMidgame =  calcPieceTableValue(position)/2;
 	int32_t bufferEndgame =  calcEndGamePieceTableValue(position);
 	uint16_t phase = position->totalFigureEval/100;
 #ifdef DEBUG
@@ -51,7 +51,7 @@ int32_t debugEvaluation(const chessPosition* position, VDTevaluation* debugStruc
 	}
 #endif
 
-	int32_t pieceTableEval = ((256-taperingValues[phase])*bufferEndgame+taperingValues[phase]*bufferMidgame) >> 8; //division by 256
+	int32_t pieceTableEval = ((256-taperingValues[phase])*bufferEndgame+taperingValues[phase]*bufferMidgame)/256; //division by 256
 	debugStruct->PSQ = pieceTableEval;
 
 	int32_t figureEval = calcFigureEvaluation(position);
@@ -64,7 +64,7 @@ int32_t debugEvaluation(const chessPosition* position, VDTevaluation* debugStruc
 
 	VDTpawnEvaluation pawnEval;
 
-	int32_t pawnEvalvalue = debugPawnEvaluation(position, pawnColumnOccupancy, &pawnEval);
+	int32_t pawnEvalvalue = debugPawnEvaluation(position, pawnColumnOccupancy, phase, &pawnEval);
 
 	eval = eval+pawnEvalvalue;
 	pawnEval.total = pawnEvalvalue;

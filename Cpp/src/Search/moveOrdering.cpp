@@ -16,7 +16,7 @@
 #include <hashTables/hashTables.hpp>
 
 
-extern uint16_t moveOrderingHashTable[];
+extern hashEntry moveOrderingHashTable[];
 
 
 extern int32_t historyTable[2][64][64];
@@ -108,7 +108,7 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 
 
 	if(sourceCovered){
-		sortEval = sortEval-20;
+		sortEval = sortEval-30;
 	}
 
 	if(targetCovered) {
@@ -169,7 +169,7 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 	}
 
 
-	uint16_t moveHash = (mv->sourceField) | (mv->targetField << 8);
+	/*uint16_t moveHash = (mv->sourceField) | (mv->targetField << 8);
 
 	if(moveHash == killerA){
 			sortEval = sortEval+120;
@@ -177,7 +177,7 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 
 	if(moveHash == killerB){
 			sortEval = sortEval+119;
-	}
+	}*/
 
 
 
@@ -222,11 +222,10 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 	mv->sortEval = sortEval;
 }
 
-bool orderStandardMoves(chessPosition* position, vdt_vector<chessMove>* moves, uint16_t depth) {
+bool orderStandardMoves(chessPosition* position, vdt_vector<chessMove>* moves, uint16_t depth, uint16_t hashedMove) {
 
 	AttackTable opponentAttackTable = makeAttackTable(position, (playerColor) (1-position->toMove));
 	AttackTable ownAttackTable 		= makeAttackTable(position, position->toMove);
-	uint16_t hashedMove = moveOrderingHashTable[position->zobristHash & HASHSIZE];
 	bool isInCheck      = ((opponentAttackTable.completeAttackTable & position->pieceTables[position->toMove][king]) != 0);
 	int16_t bestEval = INT16_MIN;
 	uint16_t bestIndex = 0;
@@ -256,7 +255,7 @@ void orderCaptureMoves(chessPosition* position, vdt_vector<chessMove>* moves) {
 		return;
 	}
 
-	uint16_t hashedMove = moveOrderingHashTable[position->zobristHash & HASHSIZE] ;
+	uint16_t hashedMove = moveOrderingHashTable[position->zobristHash & HASHSIZE].bestMove;
 	int16_t bestEval = INT16_MIN;
 	uint16_t bestIndex = 0;
 

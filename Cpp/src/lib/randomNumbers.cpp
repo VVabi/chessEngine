@@ -13,11 +13,16 @@
 #include <cmath>
 #include <stdint.h>
 
+
+static std::mt19937_64 e2 = std::mt19937_64(4288670196);
+
+bool isInitialized = false;
+
 uint64_t getRandUint64()
 {
-    std::random_device rd;
-
-    std::mt19937_64 e2(rd());
+   /*std::random_device rd;
+   std::cout << rd() << std::endl;*/
+   //std::mt19937_64 e2(rd());
 
     std::uniform_int_distribution<uint64_t> dist(0, UINT64_MAX);
 

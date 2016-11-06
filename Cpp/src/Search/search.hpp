@@ -11,10 +11,10 @@
 #define HISTORY_CUTOFF (1UL << 12)
 
 void rescaleHistoryTable();
-int32_t negamax(chessPosition* position, int16_t depth, int32_t alpha, int32_t beta, chessMove* bestMove, bool allowNullMove = true);
-int32_t negamaxQuiescence(chessPosition* position, int32_t alpha, int32_t beta, uint16_t depth);
+int16_t negamax(chessPosition* position, int16_t depth, int16_t alpha, int16_t beta, chessMove* bestMove, bool allowNullMove = true,  bool allowHashProbe = true);
+int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, uint16_t depth);
 void resetNodes();
-bool orderStandardMoves(chessPosition* position, vdt_vector<chessMove>* moves, uint16_t depth);
+bool orderStandardMoves(chessPosition* position, vdt_vector<chessMove>* moves, uint16_t depth, uint16_t hashedMove);
 void orderCaptureMoves(chessPosition* position, vdt_vector<chessMove>* moves);
 uint32_t getNodes();
 

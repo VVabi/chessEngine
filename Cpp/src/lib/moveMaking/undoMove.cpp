@@ -17,11 +17,15 @@ extern uint64_t movingSideHash[2];
 extern int16_t figureValues[];
 extern int32_t completePieceTables[7][2][64];
 extern uint16_t repetitionData[16384];
+extern uint64_t castlingHash[16];
+extern uint64_t enpassantHash[9];
 
 void undoNullMove(chessPosition* position) {
+	position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
 	position->data = position->dataStack.pop();
 	position->zobristHash = position->zobristHash^movingSideHash[0];
 	position->toMove = (playerColor) (1-position->toMove);
+	position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
 	position->madeMoves.pop();
 }
 
@@ -118,7 +122,11 @@ void undoMove(chessPosition* position) {
 	}
 	repetitionData[position->zobristHash & 16383]--;
 	chessMove move = position->madeMoves.pop();
+	position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
+	position->zobristHash = position->zobristHash^castlingHash[position->data.castlingRights];
 	position->data = position->dataStack.pop();
+	position->zobristHash = position->zobristHash^castlingHash[position->data.castlingRights];
+	position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
 	position->figureEval     = position->figureEval+(1-2*position->toMove)*figureValues[move.captureType];
 	position->totalFigureEval     = position->totalFigureEval+figureValues[move.captureType];
 

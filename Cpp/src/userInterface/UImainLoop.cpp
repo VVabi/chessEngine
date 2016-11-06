@@ -18,6 +18,7 @@
 #include <iomanip>
 userInterface* UI;
 
+extern uint8_t searchId;
 extern uint16_t killerMoves[20][2];
 //#define UCI
 
@@ -31,17 +32,17 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 	/*uint64_t qnodes = 0;
 	uint64_t nodes = 0;*/
 	*eval = 0;
-	int32_t alpha = -100005;
-	int32_t beta  = 100005;
-
-	while((get_timestamp()-start_ts < maximal_time) && (depth < 21)) {
-
-		*eval = negamax(position, depth, alpha, beta, bestMove);
+	int32_t alpha = -32000;
+	int32_t beta  = 32000;
+	searchId++;
+	//while((get_timestamp()-start_ts < maximal_time) && (depth < 21)) {
+	while(depth < 11){ //hacked to get repeatble results - there is a major bug hiding somewhere
+		*eval = negamax(position, depth, alpha, beta, bestMove, true, false);
 
 		if(doAspiration) {
 			if ((*eval <= alpha) || (*eval >= beta)) {
 				//std::cout << "Aspiration window search failed, researching..." <<std::endl;
-				*eval = negamax(position, depth, -100005, 100005, bestMove);
+				*eval = negamax(position, depth, -32000, 32000, bestMove, true, false);
 			}
 
 			alpha = *eval-50;
@@ -90,7 +91,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 #endif
 		UI->sendSearchInfo(*nodeCount, *mtime, *eval, depth, moveToString(*bestMove, *position));
 		depth++;
-		if(*eval > 90000) {
+		if(*eval > 29000) {
 			break;
 		}
 	}
@@ -154,7 +155,7 @@ void UIloop() {
 			position = stringToChessPosition(positionstr);
 			for(std::string seg: moveList){
 				//std::cout << seg << std::endl;
-				if(!checkMove(position, seg)){
+				if(!checkAndMakeMove(position, seg)){
 					std::cout << "Illegal move detected" << std::endl;
 				}
 			}
@@ -169,15 +170,15 @@ void UIloop() {
 		}
 
 		if(UI->receiveMove(move)){
-			if(checkMove(position, move)){
+			if(checkAndMakeMove(position, move)){
 				sendNewPosition(&position);
-				chessMove bestMove;
+				/*chessMove bestMove;
 				uint32_t nodeCount;
 				uint64_t mtime;
 				int32_t eval = 0;
 				searchMove(&position, &bestMove, 2000, &nodeCount, &mtime, &eval);
 				std::cout << eval << std::endl;
-				makeMove(&bestMove, &position);
+				makeMove(&bestMove, &position);*/
 				sendNewPosition(&position);
 			}
 		}
@@ -193,7 +194,7 @@ void UIloop() {
 			uint32_t nodeCount;
 			uint64_t mtime;
 			int32_t eval = 0;
-			searchMove(&position, &bestMove, 2000, &nodeCount, &mtime, &eval);
+			searchMove(&position, &bestMove, 4000, &nodeCount, &mtime, &eval);
 			makeMove(&bestMove, &position);
 			sendNewPosition(&position);
 		}

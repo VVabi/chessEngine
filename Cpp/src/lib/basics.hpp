@@ -64,6 +64,17 @@ struct chessPosition {
 	vdt_vector<pathDependentPositionData> dataStack;
 };
 
+struct hashEntry{
+	uint32_t hashHighBits;
+	uint16_t hashLower;
+	uint16_t bestMove;
+	uint16_t alpha;
+	uint16_t beta;
+	uint16_t eval;
+	uint8_t depth;
+	uint8_t searchId;
+} __attribute__((packed));
+
 
 uint64_t getRandUint64();
 void debug_incremental_calculations(const chessPosition* position);
