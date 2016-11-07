@@ -45,7 +45,15 @@ static int32_t rookOpenFiles(const chessPosition* position, uint8_t* pawnOccupan
 
 }
 
+extern int16_t endGamepieceTables[7][2][64];
+
 int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
+
+
+	/*uint16_t blackkingField = findLSB(position->pieceTables[black][king]);
+	return endGamepieceTables[king][black][blackkingField];*/ //in nthis way, we actually win endgames vs lone king. But be careful with searchdepth! higher depths may delay the moving of the king
+	//into corner indefinitely
+
 
 	//evaluation from the point of view of WHITE, sign changed in the end if necessary
 	//--------------------------------------------------------------------------------------
@@ -108,7 +116,7 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 
 	eval = eval+kingSafetyTapered;*/
 
-	//eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?
+	eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?
 	return (1-2*position->toMove)*eval;
 
 }

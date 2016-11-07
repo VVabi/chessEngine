@@ -35,8 +35,10 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 	int32_t alpha = -32000;
 	int32_t beta  = 32000;
 	searchId++;
-	//while((get_timestamp()-start_ts < maximal_time) && (depth < 21)) {
-	while(depth < 11){ //hacked to get repeatble results - there is a major bug hiding somewhere
+	uint64_t searchedNodes = 0;
+	uint64_t goalNodes = 1800*maximal_time;
+	while((searchedNodes < goalNodes) && (depth < 21)) {
+	//while(depth < 11){ //hacked to get repeatable results - there is a major bug hiding somewhere
 		*eval = negamax(position, depth, alpha, beta, bestMove, true, false);
 
 		if(doAspiration) {
@@ -56,23 +58,27 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 		*mtime = get_timestamp()-start_ts;
 		/*double nps = ((double) *nodeCount)/((double) *mtime)*1000.0;
 		std::cout << "Searched " <<  *nodeCount << " positions in " << *mtime << " for " << nps << " nodes per second" << std::endl;*/
-
-#ifndef UCI
-		searchDebugData data = getSearchData();
-		std::cout << "SEARCH DEBUG DATA" << std::endl;
-		std::cout << "negamax called: "  << data.called << std::endl;
-		std::cout << "Went to quiescence: " << data.wentToQuiescence << std::endl;
-		std::cout << "By depht:"         << std::endl;
 		uint64_t totalNodes=0;
+		searchDebugData data = getSearchData();
 		for(uint16_t ind=0; ind < 25; ind++){
+#ifndef UCI
 			std::cout << ind << "  " << data.nodes[ind] << std::endl;
 			std::cout << std::setw(16) << " ";
+
 			for(int k=0; k < 50; k++){
 				std::cout << std::setw(9) << data.bestIndex[ind][k];
 			}
 			std::cout << std::endl;
+#endif
 			totalNodes = totalNodes+data.nodes[ind];
 		}
+#ifndef UCI
+
+		std::cout << "SEARCH DEBUG DATA" << std::endl;
+		std::cout << "negamax called: "  << data.called << std::endl;
+		std::cout << "Went to quiescence: " << data.wentToQuiescence << std::endl;
+		std::cout << "By depht:"         << std::endl;
+
 		std::cout << "Total " <<totalNodes << std::endl;
 		std::cout << "Threefold repetition hashhits " << data.fake_3fold_repetitions+data.threefold_repetitions << std::endl;
 		std::cout << "Actual repetitions " << data.threefold_repetitions << std::endl;
@@ -84,13 +90,11 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 		std::cout << "Went to search "     << data.wentToSearch <<std::endl;
 		std::cout << "Had to sort " << data.neededSort << std::endl;
 #endif
-#ifdef UCI
-		*nodeCount = 0;
-#else
+
 		*nodeCount = (data.totalNodes+getQuiescenceNodes());
-#endif
 		UI->sendSearchInfo(*nodeCount, *mtime, *eval, depth, moveToString(*bestMove, *position));
 		depth++;
+		searchedNodes = searchedNodes+*nodeCount;
 		if(*eval > 29000) {
 			break;
 		}

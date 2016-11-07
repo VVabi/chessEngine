@@ -39,13 +39,13 @@ public class Main extends Application {
         }*/
 
 
-         final Core cor = new Core(primaryStage);
-      /* Runnable r = new Runnable() {
+        final Core cor = new Core(primaryStage);
+        /*Runnable r = new Runnable() {
             @Override
             public void run() {
                 UciProcessing matchup = null;
                 try {
-                    matchup = new UciProcessing("/home/vabi/Vabi", "/home/vabi/code/chessEngine/Cpp/uciRelease/Vabi", 1000);
+                    matchup = new UciProcessing("/home/vabi/Vabi", "/home/vabi/code/chessEngine/Cpp/uciRelease/Vabi", 20);
                     double res =  matchup.play();
                 } catch (IOException e) {
                     e.printStackTrace();

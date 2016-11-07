@@ -16,7 +16,7 @@ import java.util.concurrent.CountDownLatch;
 public class UciProcessing {
 
 
-    //VMPServer server;
+    VMPServer server;
     uciEngineHandler  vabiHandler;
     uciEngineHandler stockFishHandler;
     double res = 0;
@@ -29,14 +29,14 @@ public class UciProcessing {
     public UciProcessing(String engine1, String engine2, int numGames) throws IOException {
 
         this.numGames = numGames;
-        //CountDownLatch cd = new CountDownLatch(1);
-       /* server = new VMPServer(9999, 0, cd);
-        server.connect("127.0.0.1", 9876);*/
-       /* try {
+        CountDownLatch cd = new CountDownLatch(1);
+        server = new VMPServer(9999, 0, cd);
+        server.connect("127.0.0.1", 9876);
+         try {
             cd.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }*/
+        }
         this.engine1 = engine1;
         this.engine2 = engine2;
 
@@ -75,37 +75,37 @@ public class UciProcessing {
                 vabiHandler.setPosition(moves);
                 String current = vabiHandler.getCurrentPosition();
                 VMPchessPosition position = new VMPchessPosition(new VDTstring(current.getBytes()));
-                //server.send(position, 0);
+                server.send(position, 0);
                 vabiHandler.startSearch();
 
 
 
                 eval = vabiHandler.readBestmove(mv);
-                if (eval > 90000) {
+                if (eval > 25000) {
                     ret = 1;
                     break;
-                } else if (eval < -90000) {
+                } else if (eval < -25000) {
                     ret = -1;
                     break;
                 }
 
-                //System.out.println(eval);
+               // System.out.println(eval);
                 moves.add(mv[0]);
                 vabiHandler.setPosition(moves);
                 current = vabiHandler.getCurrentPosition();
                 position = new VMPchessPosition(new VDTstring(current.getBytes()));
-                //server.send(position, 0);
-                //System.out.println(mv[0]);
+                server.send(position, 0);
+               // System.out.println(mv[0]);
                 stockFishHandler.setPosition(moves);
                 stockFishHandler.startSearch();
                 eval = stockFishHandler.readBestmove(mv);
-                //System.out.println(eval);
+               // System.out.println(eval);
                 moves.add(mv[0]);
                 if (moves.size() > 240) {
                     ret = 0;
                     break;
                 }
-                //System.out.println(mv[0]);
+              //  System.out.println(mv[0]);
                 if ("(none)".equals(mv[0])) {
                     break;
                 }

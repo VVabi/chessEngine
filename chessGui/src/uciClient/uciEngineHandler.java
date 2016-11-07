@@ -82,7 +82,7 @@ public class uciEngineHandler {
         while(true){
 
             String answer = reader.readLine();
-           // System.out.println(answer);
+            //System.out.println(answer);
             String[] splitted = answer.split(" ");
             if("bestmove".equals(splitted[0])){
                 in[0] = splitted[1];

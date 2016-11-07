@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <lib/bitfiddling.h>
 #include "hashTables.hpp"
+#include <assert.h>
 
 hashEntry moveOrderingHashTable[HASHSIZE+1];
 
@@ -18,6 +19,10 @@ uint64_t castlingHash[16];
 uint64_t enpassantHash[9];
 
 void fillZobristHash(){
+	assert(popcount(HASHSIZE+1)==1); //this needs to be a power of 2!
+
+	memset(moveOrderingHashTable, 0, sizeof(hashEntry)*(HASHSIZE+1));
+
 	movingSideHash[0] = getRandUint64();
 	movingSideHash[1] = 0;
 	for(uint16_t cnt=0; cnt < 2; cnt++){

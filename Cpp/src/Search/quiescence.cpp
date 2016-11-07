@@ -19,7 +19,7 @@
 #include <algorithm>
 #include <assert.h>
 
-extern uint16_t moveOrderingHashTable[];
+extern hashEntry moveOrderingHashTable[];
 static int32_t qindices[150] = {0};
 extern int16_t figureValues[];
 
@@ -130,7 +130,7 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 		undoMove(position);
 		if(alpha >= beta) {
 			uint32_t hashIndex = position->zobristHash & HASHSIZE;
-			moveOrderingHashTable[hashIndex] = (bestMove.sourceField | (bestMove.targetField << 8));
+			moveOrderingHashTable[hashIndex].bestMove = (bestMove.sourceField | (bestMove.targetField << 8));
 			//moves.free_array();
 			if(bestIndex != -1){
 				qindices[bestIndex]++;
@@ -142,7 +142,7 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 	if(bestIndex != -1){
 		qindices[bestIndex]++;
 		uint32_t hashIndex = position->zobristHash & HASHSIZE;
-		moveOrderingHashTable[hashIndex] = (bestMove.sourceField | (bestMove.targetField << 8));
+		moveOrderingHashTable[hashIndex].bestMove = (bestMove.sourceField | (bestMove.targetField << 8));
 	}
 
 	//TODO: write to hash table here as well?

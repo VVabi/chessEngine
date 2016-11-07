@@ -9,7 +9,7 @@
 #define HASHTABLES_HASHTABLES_HPP_
 
 
-#define HASHSIZE 0x2FFFFFF
+#define HASHSIZE 0x3FFFFFF //needs to be a power of 2!
 
 void fillZobristHash();
 uint64_t calcZobristHash(const chessPosition* position);

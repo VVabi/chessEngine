@@ -109,29 +109,21 @@ int16_t negamax(chessPosition* position, int16_t depth, int16_t alpha, int16_t b
 	uint32_t hashIndex2 = position->zobristHash & HASHSIZE;
 	hashEntry hashVal    = moveOrderingHashTable[hashIndex2];
 	uint32_t zobristHigher = (uint32_t) (position->zobristHash >> 32);
-	uint16_t zobristLower  = (uint16_t) ((position->zobristHash & 0xFFFF) >> 16);
+	uint16_t zobristLower  = (uint16_t) (((uint32_t) (position->zobristHash & 0xFFFFFFFF)) >> 16);
 	if(doHashProbe){
 		if((zobristHigher == hashVal.hashHighBits) && (zobristLower == hashVal.hashLower)) { //TODO: assign bestMove - this can blow up in our face easily TODO: add proper checkmate handling
 			int16_t oldEval  = hashVal.eval;
 			if((depth <= hashVal.depth) && (oldEval > -10000) && (oldEval < 10000)){
 				int16_t oldAlpha = hashVal.alpha;
 				int16_t oldBeta  = hashVal.beta;
-				/*if(oldEval < -10000){ //currently not possible without knowing the original depth
-					//mate against us!
-					oldEval = oldEval+hashVal.depth-depth;
-				}
-				if(oldEval >10000){
-					//mate for us!
-					oldEval = oldEval+hashVal.depth-depth;
-				}*/
 				if((oldAlpha < oldEval) && (oldEval >= beta)){ //oldEval is actually computed (i.e. not fail low) AND we get a beta cutoff
 					return beta;
 				}
-				if((oldAlpha <= alpha) && (oldEval <= oldAlpha)){
+				else if((oldAlpha <= alpha) && (oldEval <= oldAlpha)){
 					return alpha; //node will fail low
 				}
-				if((oldEval < oldBeta) && (oldEval > oldAlpha)){ //TODO: this condition can be vastly improved
-					return oldEval;
+				else if((oldEval < oldBeta) && (oldEval > oldAlpha)){ //TODO: this condition can be vastly improved
+					return oldEval; //TODO: we are typically fail-hard, so should be fail-hard here as well - but that cannot cause the bug I'm looking for I believe
 				}
 			}
 		}
@@ -231,9 +223,10 @@ int16_t negamax(chessPosition* position, int16_t depth, int16_t alpha, int16_t b
 				entry.eval  = origBeta; //beta cutoff
 				assert(beta == origBeta);
 				entry.depth = depth;
+				entry.searchId = searchId;
 				entry.bestMove = (bestMove->sourceField | (bestMove->targetField << 8));
 				entry.hashHighBits = (uint32_t) (position->zobristHash >> 32);
-				entry.hashLower    = (uint16_t) ((position->zobristHash & 0xFFFF)>> 16);
+				entry.hashLower    = (uint16_t) (((uint32_t) (position->zobristHash & 0xFFFFFFFF)) >> 16);
 				moveOrderingHashTable[hashIndex] = entry;
 			}
 			if(bestIndex != -1){
@@ -248,6 +241,7 @@ int16_t negamax(chessPosition* position, int16_t depth, int16_t alpha, int16_t b
 				}
 			}
 			//moves.free_array();
+
 			return beta;
 		}
 	}
@@ -289,7 +283,7 @@ int16_t negamax(chessPosition* position, int16_t depth, int16_t alpha, int16_t b
 			entry.searchId = searchId;
 			entry.bestMove = (bestMove->sourceField | (bestMove->targetField << 8));
 			entry.hashHighBits = (uint32_t) (position->zobristHash >> 32);
-			entry.hashLower    = (uint16_t) ((position->zobristHash & 0xFFFF)>> 16);
+			entry.hashLower    = (uint16_t) (((uint32_t) (position->zobristHash & 0xFFFFFFFF)) >> 16);
 			moveOrderingHashTable[hashIndex] = entry;
 		}
 	} else { //we failed low, remember as well
@@ -299,9 +293,11 @@ int16_t negamax(chessPosition* position, int16_t depth, int16_t alpha, int16_t b
 			entry.beta  = origBeta;
 			entry.eval  = alpha;
 			entry.depth = depth;
+			assert(entry.depth == depth);
+			entry.searchId = searchId;
 			entry.bestMove = 0;
 			entry.hashHighBits = (uint32_t) (position->zobristHash >> 32);
-			entry.hashLower    = (uint16_t) ((position->zobristHash & 0xFFFF)>> 16);
+			entry.hashLower    = (uint16_t) (((uint32_t) (position->zobristHash & 0xFFFFFFFF)) >> 16);
 			moveOrderingHashTable[hashIndex] = entry;
 		}
 	}
