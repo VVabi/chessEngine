@@ -16,6 +16,7 @@
 //input messages
 
 
+
 #define ISREADY 1
 
 struct inputMessage{
@@ -167,6 +168,10 @@ bool uciInterface::receiveNewPosition(std::string& position, std::vector<std::st
 
 		position = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwKQkq";
 
+		positionInput.msg = positionInput.msg.substr(13);
+
+		position = positionInput.msg;
+
 		std::stringstream test(positionInput.msg);
 		std::string segment;
 		std::vector<std::string> seglist;
@@ -177,13 +182,15 @@ bool uciInterface::receiveNewPosition(std::string& position, std::vector<std::st
 		}
 
 		if(seglist.size() > 2){
+			bool atMoves = false;
 			for(std::string seg: seglist){
-				if( (seg == "position") || (seg == "startpos") || (seg == "moves")){
+				if((seg == "moves")){
+					atMoves = true;
 					continue;
 				}
-
-				moves.push_back(seg);
-
+				if(atMoves){
+					moves.push_back(seg);
+				}
 			}
 
 		}

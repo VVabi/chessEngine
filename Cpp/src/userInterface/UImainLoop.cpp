@@ -148,15 +148,18 @@ void UIloop() {
 #else
 	UI = new networkUserInterface();
 #endif
-	std::string positionstr = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwKQkq";
-	chessPosition position = stringToChessPosition(positionstr);
+	/*std::string positionstr = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwKQkq";
+	chessPosition position = stringToChessPosition(positionstr);*/
+	std::string positionstr = " ";
+	std::string fen = "r1bqkb1r/pp3ppp/2np1n2/1N2p3/4P3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 7";
+	chessPosition position = FENtoChessPosition(fen);
 	std::string move;
 	while(1){
 		UI->readInput();
 		std::vector<std::string> moveList = std::vector<std::string>();
 		if(UI->receiveNewPosition(positionstr, moveList)){
 			free_position(&position);
-			position = stringToChessPosition(positionstr);
+			position = FENtoChessPosition(positionstr);
 			for(std::string seg: moveList){
 				//std::cout << seg << std::endl;
 				if(!checkAndMakeMove(position, seg)){

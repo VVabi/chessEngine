@@ -14,6 +14,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 std::string chessPositionToString(chessPosition position);
 std::string chessPositionToOutputString(chessPosition position);
 chessPosition stringToChessPosition(std::string strposition);
+chessPosition FENtoChessPosition(std::string fen);
 std::string chessPositionToFenString(chessPosition position, bool EPD=false);
 std::string moveToString(chessMove move, chessPosition position);
 uint64_t stringToMove(std::string mv);

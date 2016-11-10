@@ -214,7 +214,134 @@ std::string chessPositionToOutputString(chessPosition position){
 
 
 }
+
 extern uint16_t repetitionData[16384];
+
+chessPosition FENtoChessPosition(std::string fen){
+	memset(repetitionData, 0, 16384*sizeof(uint16_t));
+	//Not performance-critical
+	//---------------------------
+	chessPosition position;
+	zeroInitPosition(&position);
+
+	//r1bqkb1r/pp3ppp/2np1n2/1N2p3/4P3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 7
+
+	uint16_t ind=0;
+	uint16_t row = 7;
+	uint16_t file = 0;
+	while(fen.at(ind) != ' ') {
+		char current = fen.at(ind);
+
+		if(current == '/'){
+			row--;
+			file = 0;
+			ind++;
+			continue;
+		}
+
+		if((current >= '0') && (current <='8')){
+			uint8_t num = current-'0';
+			file = file+num;
+		} else {
+			uint16_t field = 8*row+file;
+			file++;
+			switch(current){
+				case 'K':
+					position.pieces[white] 					|= (1UL << field);
+					position.pieceTables[white][king] 		|= (1UL << field);
+					break;
+				case 'Q':
+					position.pieceTables[white][queen] 		|= (1UL << field);
+					position.pieces[white] 					|= (1UL << field);
+					break;
+				case 'R':
+					position.pieceTables[white][rook] 		|= (1UL << field);
+					position.pieces[white] 					|= (1UL << field);
+					break;
+				case 'B':
+					position.pieceTables[white][bishop] 	|= (1UL << field);
+					position.pieces[white] 					|= (1UL << field);
+					break;
+				case 'N':
+					position.pieceTables[white][knight] 	|= (1UL << field);
+					position.pieces[white] 					|= (1UL << field);
+					break;
+				case 'P':
+					position.pieceTables[white][pawn] 		|= (1UL << field);
+					position.pieces[white] 					|= (1UL << field);
+					break;
+				case 'k':
+					position.pieceTables[black][king] 		|= (1UL << field);
+					position.pieces[black] 					|= (1UL << field);
+					break;
+				case 'q':
+					position.pieceTables[black][queen]  	|= (1UL << field);
+					position.pieces[black] 					|= (1UL << field);
+					break;
+				case 'r':
+					position.pieceTables[black][rook]  		|= (1UL << field);
+					position.pieces[black] 					|= (1UL << field);
+					break;
+				case 'b':
+					position.pieceTables[black][bishop]  	|= (1UL << field);
+					position.pieces[black] 					|= (1UL << field);
+					break;
+				case 'n':
+					position.pieceTables[black][knight]  	|= (1UL << field);
+					position.pieces[black] 					|= (1UL << field);
+					break;
+				case 'p':
+					position.pieceTables[black][pawn]  		|= (1UL << field);
+					position.pieces[black] 					|= (1UL << field);
+					break;
+				default:
+					std::cout << "invalid fen  position string " << current << std::endl;
+					break;
+
+			}
+
+		}
+		ind++;
+	}
+
+	ind++;
+	if(fen.at(ind) == 'w'){
+		position.toMove = white;
+	} else {
+		position.toMove = black;
+	}
+	ind++; //should be a sapce now
+	position.data.castlingRights = 0;
+	for(uint16_t k=0; k<4; k++) {
+		ind++;
+		if( fen.at(ind) == ' '){
+			break;
+		}
+		if (fen.at(ind) == 'K') {
+			position.data.castlingRights = position.data.castlingRights | 1;
+		}
+		if (fen.at(ind) == 'Q') {
+			position.data.castlingRights = position.data.castlingRights | 2;
+		}
+		if (fen.at(ind) == 'k') {
+			position.data.castlingRights = position.data.castlingRights | 4;
+		}
+		if (fen.at(ind) == 'q') {
+			position.data.castlingRights = position.data.castlingRights | 8;
+		}
+	}
+	position.totalFigureEval   = calcTotalFigureEvaluation(&position);
+	position.figureEval   = calcFigureEvaluation(&position);
+	position.pieceTableEval = ((1 << 15) + position.figureEval+ calcPieceTableValue(&position))
+							+(((1 << 14) + calcEndGamePieceTableValue(&position)+position.figureEval) << 16);
+	position.zobristHash    = calcZobristHash(&position);
+
+	position.data.hash = position.zobristHash;
+	position.data.enPassantFile = 8;
+	position.data.fiftyMoveRuleCounter = 0;
+	return position;
+
+}
 
 chessPosition stringToChessPosition(std::string strposition) {
 
@@ -223,7 +350,7 @@ chessPosition stringToChessPosition(std::string strposition) {
 	//---------------------------
 	chessPosition position;
 	zeroInitPosition(&position);
-
+	//
 	if (strposition.length() != 69) {
 		std::cout << "Invalid chess position string!!" << std::endl;
 		return position;
@@ -398,6 +525,7 @@ uint64_t stringToMove(std::string mv){
 
 	return BIT64(sourceField) | BIT64(targetField);
 }
+
 
 std::string chessPositionToFenString(chessPosition position, bool EPD){
 

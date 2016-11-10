@@ -40,7 +40,7 @@ public class Main extends Application {
 
 
         final Core cor = new Core(primaryStage);
-        Runnable r = new Runnable() {
+       /* Runnable r = new Runnable() {
             @Override
             public void run() {
                 UciProcessing matchup = null;
@@ -54,7 +54,7 @@ public class Main extends Application {
             }
         };
         System.out.println("Starting...");
-        (new Thread(r)).start();
+        (new Thread(r)).start();*/
 
 
 
