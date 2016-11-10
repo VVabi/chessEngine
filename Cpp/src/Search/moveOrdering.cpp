@@ -16,7 +16,7 @@
 #include <hashTables/hashTables.hpp>
 
 
-extern hashEntry moveOrderingHashTable[];
+
 
 
 extern int32_t historyTable[2][64][64];
@@ -255,7 +255,7 @@ void orderCaptureMoves(chessPosition* position, vdt_vector<chessMove>* moves) {
 		return;
 	}
 
-	uint16_t hashedMove = moveOrderingHashTable[position->zobristHash & HASHSIZE].bestMove;
+	uint16_t hashedMove = getHashMove(position->zobristHash);
 	int16_t bestEval = INT16_MIN;
 	uint16_t bestIndex = 0;
 

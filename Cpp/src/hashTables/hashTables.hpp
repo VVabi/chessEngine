@@ -13,6 +13,11 @@
 
 void fillZobristHash();
 uint64_t calcZobristHash(const chessPosition* position);
-
+hashEntry getHashTableEntry(uint64_t zobristKey);
+void setHashEntry(hashEntry entry, uint64_t zobristKey);
+uint16_t getHashMove(uint64_t zobristKey);
+void setHashMove(uint16_t move, uint64_t zobristKey);
+void setHashEntry(hashFlag flag, int16_t eval, uint8_t depth, uint8_t searchId, uint16_t bestMove, uint64_t key);
+void setSearchId(uint8_t searchId, uint64_t key);
 
 #endif /* HASHTABLES_HASHTABLES_HPP_ */

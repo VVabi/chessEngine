@@ -21,8 +21,6 @@
 #include <fstream>
 #include <userInterface/UIlayer.hpp>
 
-
-extern hashEntry moveOrderingHashTable[];
 extern uint32_t historyTable[2][64][64];
 extern uint8_t searchId;
 
@@ -89,8 +87,6 @@ static inline bool check_nullmove(chessPosition* position, int16_t depth, int32_
 
 int16_t negamax(chessPosition* position, int16_t depth, int16_t alpha, int16_t beta, chessMove* bestMove, bool allowNullMove, bool doHashProbe) {
 
-
-
 	assert(alpha < beta);
 	searchCounts.called++;
 	if(position->data.fiftyMoveRuleCounter >= 100){
@@ -106,24 +102,30 @@ int16_t negamax(chessPosition* position, int16_t depth, int16_t alpha, int16_t b
 		}
 	}
 
-	uint32_t hashIndex2 = position->zobristHash & HASHSIZE;
-	hashEntry hashVal    = moveOrderingHashTable[hashIndex2];
+	hashEntry hashVal      = getHashTableEntry(position->zobristHash);
 	uint32_t zobristHigher = (uint32_t) (position->zobristHash >> 32);
 	uint16_t zobristLower  = (uint16_t) (((uint32_t) (position->zobristHash & 0xFFFFFFFF)) >> 16);
 	if(doHashProbe){
 		if((zobristHigher == hashVal.hashHighBits) && (zobristLower == hashVal.hashLower)) { //TODO: assign bestMove - this can blow up in our face easily TODO: add proper checkmate handling
 			int16_t oldEval  = hashVal.eval;
 			if((depth <= hashVal.depth) && (oldEval > -10000) && (oldEval < 10000)){
-				int16_t oldAlpha = hashVal.alpha;
-				int16_t oldBeta  = hashVal.beta;
-				if((oldAlpha < oldEval) && (oldEval >= beta)){ //oldEval is actually computed (i.e. not fail low) AND we get a beta cutoff
+				if( ((hashVal.flag == FAILHIGH) || (hashVal.flag == FULLSEARCH)) && (oldEval >= beta)){
+					//setSearchId(searchId, position->zobristHash);
 					return beta;
 				}
-				else if((oldAlpha <= alpha) && (oldEval <= oldAlpha)){
+				else if( ((hashVal.flag == FAILLOW) || (hashVal.flag == FULLSEARCH)) && (oldEval <= alpha)){
+					//setSearchId(searchId, position->zobristHash);
 					return alpha; //node will fail low
 				}
-				else if((oldEval < oldBeta) && (oldEval > oldAlpha)){ //TODO: this condition can be vastly improved
-					return oldEval; //TODO: we are typically fail-hard, so should be fail-hard here as well - but that cannot cause the bug I'm looking for I believe
+				else if((hashVal.flag == FULLSEARCH)){ //TODO: this condition can be vastly improved
+					//setSearchId(searchId, position->zobristHash);
+					if(oldEval <= alpha){
+						return alpha;
+					}
+					if(oldEval >= beta){
+						return beta;
+					}
+					return oldEval;
 				}
 			}
 		}
@@ -140,8 +142,6 @@ int16_t negamax(chessPosition* position, int16_t depth, int16_t alpha, int16_t b
 			return beta;
 		}
 	}
-	const int16_t origAlpha = alpha;
-	const int16_t origBeta = beta;
 	//remembers the index of best move after sorting
 	//-------------------------------------------
 	int16_t bestIndex = -1;
@@ -216,18 +216,7 @@ int16_t negamax(chessPosition* position, int16_t depth, int16_t alpha, int16_t b
 
 		if(alpha >= beta) {
 			if((depth >= hashVal.depth) || (searchId != hashVal.searchId)) {
-				uint32_t hashIndex = position->zobristHash & HASHSIZE;
-				hashEntry entry;
-				entry.alpha = origAlpha;
-				entry.beta  = origBeta;
-				entry.eval  = origBeta; //beta cutoff
-				assert(beta == origBeta);
-				entry.depth = depth;
-				entry.searchId = searchId;
-				entry.bestMove = (bestMove->sourceField | (bestMove->targetField << 8));
-				entry.hashHighBits = (uint32_t) (position->zobristHash >> 32);
-				entry.hashLower    = (uint16_t) (((uint32_t) (position->zobristHash & 0xFFFFFFFF)) >> 16);
-				moveOrderingHashTable[hashIndex] = entry;
+				setHashEntry(FAILHIGH, beta, depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), position->zobristHash);
 			}
 			if(bestIndex != -1){
 				searchCounts.bestIndex[depth][bestIndex]++;
@@ -272,33 +261,13 @@ int16_t negamax(chessPosition* position, int16_t depth, int16_t alpha, int16_t b
 		}
 	}
 
-	uint32_t hashIndex = position->zobristHash & HASHSIZE;
 	if(foundGoodMove) {
 		if((depth >= hashVal.depth) || (searchId != hashVal.searchId)) {
-			hashEntry entry;
-			entry.alpha = origAlpha;
-			entry.beta  = origBeta;
-			entry.eval  = alpha;
-			entry.depth = depth;
-			entry.searchId = searchId;
-			entry.bestMove = (bestMove->sourceField | (bestMove->targetField << 8));
-			entry.hashHighBits = (uint32_t) (position->zobristHash >> 32);
-			entry.hashLower    = (uint16_t) (((uint32_t) (position->zobristHash & 0xFFFFFFFF)) >> 16);
-			moveOrderingHashTable[hashIndex] = entry;
+			setHashEntry(FULLSEARCH, alpha, depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), position->zobristHash);
 		}
 	} else { //we failed low, remember as well
 		if((depth >= hashVal.depth) || (searchId != hashVal.searchId)) {
-			hashEntry entry;
-			entry.alpha = origAlpha;
-			entry.beta  = origBeta;
-			entry.eval  = alpha;
-			entry.depth = depth;
-			assert(entry.depth == depth);
-			entry.searchId = searchId;
-			entry.bestMove = 0;
-			entry.hashHighBits = (uint32_t) (position->zobristHash >> 32);
-			entry.hashLower    = (uint16_t) (((uint32_t) (position->zobristHash & 0xFFFFFFFF)) >> 16);
-			moveOrderingHashTable[hashIndex] = entry;
+			setHashEntry(FAILLOW, alpha, depth, searchId, 0, position->zobristHash);
 		}
 	}
 

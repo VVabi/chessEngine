@@ -64,12 +64,13 @@ struct chessPosition {
 	vdt_vector<pathDependentPositionData> dataStack;
 };
 
+enum hashFlag: uint16_t {FULLSEARCH=0,FAILLOW=1,FAILHIGH=2};
+
 struct hashEntry{
 	uint32_t hashHighBits;
 	uint16_t hashLower;
 	uint16_t bestMove;
-	uint16_t alpha;
-	uint16_t beta;
+	hashFlag flag;
 	uint16_t eval;
 	uint8_t depth;
 	uint8_t searchId;

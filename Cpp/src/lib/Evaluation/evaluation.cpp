@@ -116,7 +116,7 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 
 	eval = eval+kingSafetyTapered;*/
 
-	eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?
+	//eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?
 	return (1-2*position->toMove)*eval;
 
 }
