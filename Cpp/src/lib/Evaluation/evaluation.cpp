@@ -109,8 +109,6 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 	}
 
 
-
-
 	/*int32_t kingSafetyComplete = kingSafety(position, pawnColumnOccupancy, &whiteAttackTable, &blackAttackTable);;
 	int32_t kingSafetyTapered = (taperingValues[phase]*kingSafetyComplete)/256;
 

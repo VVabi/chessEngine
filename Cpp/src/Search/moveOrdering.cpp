@@ -169,7 +169,7 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 	}
 
 
-	/*uint16_t moveHash = (mv->sourceField) | (mv->targetField << 8);
+	uint16_t moveHash = (mv->sourceField) | (mv->targetField << 8);
 
 	if(moveHash == killerA){
 			sortEval = sortEval+120;
@@ -177,7 +177,7 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 
 	if(moveHash == killerB){
 			sortEval = sortEval+119;
-	}*/
+	}
 
 
 

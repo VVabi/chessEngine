@@ -116,10 +116,7 @@ void undoMove(chessPosition* position) {
 		std::cout << "Nothing to undo" << std::endl;
 		return;
 	}
-
-	if(repetitionData[position->zobristHash & 16383] == 0){
-		std::cout <<"undoing move we never made??" <<std::endl;
-	}
+	assert(repetitionData[position->zobristHash & 16383] != 0);
 	repetitionData[position->zobristHash & 16383]--;
 	chessMove move = position->madeMoves.pop();
 	position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];

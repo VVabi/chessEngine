@@ -55,8 +55,8 @@ public class uciEngineHandler {
     }
 
 
-    public void setPosition(List<String> moveList) throws IOException{
-        String putStr = "position startpos";
+    public void setPosition(String fenPosition, List<String> moveList) throws IOException{
+        String putStr = "position fen "+fenPosition;
 
         if(moveList.size() > 0){
             putStr = putStr+" moves";

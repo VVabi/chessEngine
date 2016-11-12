@@ -36,7 +36,7 @@ void resetSearchData(){
 
 uint16_t killerMoves[20][2];
 
-static chessMove buffer[2500];
+static chessMove buffer[5000];
 
 uint16_t repetitionData[16384] = {0};
 
@@ -105,20 +105,20 @@ int16_t negamax(chessPosition* position, int16_t depth, int16_t alpha, int16_t b
 	hashEntry hashVal      = getHashTableEntry(position->zobristHash);
 	uint32_t zobristHigher = (uint32_t) (position->zobristHash >> 32);
 	uint16_t zobristLower  = (uint16_t) (((uint32_t) (position->zobristHash & 0xFFFFFFFF)) >> 16);
-	if(doHashProbe){
+	if(doHashProbe){ //TODO: we should check whether another move leads to 3fold rep draw!
 		if((zobristHigher == hashVal.hashHighBits) && (zobristLower == hashVal.hashLower)) { //TODO: assign bestMove - this can blow up in our face easily TODO: add proper checkmate handling
 			int16_t oldEval  = hashVal.eval;
-			if((depth <= hashVal.depth) && (oldEval > -10000) && (oldEval < 10000)){
+			if((depth <= hashVal.depth) && (oldEval > -10000) && (oldEval < 10000) && (oldEval != 0)){ //TODO: the != 0 is stupid, but somehwere something goes wrong with 3fold rep scores, so excluded ehre for safety
 				if( ((hashVal.flag == FAILHIGH) || (hashVal.flag == FULLSEARCH)) && (oldEval >= beta)){
-					//setSearchId(searchId, position->zobristHash);
+					setSearchId(searchId, position->zobristHash);
 					return beta;
 				}
 				else if( ((hashVal.flag == FAILLOW) || (hashVal.flag == FULLSEARCH)) && (oldEval <= alpha)){
-					//setSearchId(searchId, position->zobristHash);
+					setSearchId(searchId, position->zobristHash);
 					return alpha; //node will fail low
 				}
 				else if((hashVal.flag == FULLSEARCH)){ //TODO: this condition can be vastly improved
-					//setSearchId(searchId, position->zobristHash);
+					setSearchId(searchId, position->zobristHash);
 					if(oldEval <= alpha){
 						return alpha;
 					}
@@ -188,15 +188,27 @@ int16_t negamax(chessPosition* position, int16_t depth, int16_t alpha, int16_t b
 		if(isFieldAttacked( position,  position->toMove, kingField)){
 
 		} else {
+
 			searchCounts.nodes[depth]++;
 			searchCounts.totalNodes++;
 			legalMovesAvailable = true;
 			chessMove mv;
 
+			uint16_t reduction = 0;
+
+			if((ind > 5) && (moves[ind].captureType == none) && (depth > 2) && !isInCheck) { //LMR
+				uint16_t ownkingField = findLSB( position->pieceTables[position->toMove][king]);
+				bool check = isFieldAttacked(position,  (playerColor) (1-position->toMove), ownkingField);
+				if(!check){
+					reduction = 1;
+				}
+			}
+
+
 			//PVSearch, currently a small gain for us with the > 5
 			//-------------------------------------------------
 			if((ind > 5) && (depth > 2)) {
-				int32_t value = -negamax(position, depth-1, -alpha-1, -alpha, &mv);
+				int32_t value = -negamax(position, depth-1-reduction, -alpha-1, -alpha, &mv);
 				if(value < alpha+1){
 					undoMove(position);
 					continue;

@@ -697,7 +697,7 @@ bool checkAndMakeMove(chessPosition& position, std::string move){
 }
 
 void runPerformanceTests(){
-	for(int depth = 3; depth < 9; depth++){
+	for(int depth = 3; depth < 11; depth++){
 		std::ifstream file;
 		file.open("chesspositionsfixed.txt");
 		std::string line;

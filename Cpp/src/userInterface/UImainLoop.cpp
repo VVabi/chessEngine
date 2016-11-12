@@ -36,9 +36,9 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 	int32_t beta  = 32000;
 	searchId++;
 	uint64_t searchedNodes = 0;
-	uint64_t goalNodes = 1800*maximal_time;
-	while((searchedNodes < goalNodes) && (depth < 21)) {
-	//while(depth < 11){ //hacked to get repeatable results - there is a major bug hiding somewhere
+	/*uint64_t goalNodes = 1800*maximal_time;
+	while((searchedNodes < goalNodes) && (depth < 31)) {*/
+	while(depth < 7){ //hacked to get repeatable results - there is a major bug hiding somewhere
 		*eval = negamax(position, depth, alpha, beta, bestMove, true, false);
 
 		if(doAspiration) {
@@ -159,7 +159,11 @@ void UIloop() {
 		std::vector<std::string> moveList = std::vector<std::string>();
 		if(UI->receiveNewPosition(positionstr, moveList)){
 			free_position(&position);
+#ifdef UCI
 			position = FENtoChessPosition(positionstr);
+#else
+			position = stringToChessPosition(positionstr);
+#endif
 			for(std::string seg: moveList){
 				//std::cout << seg << std::endl;
 				if(!checkAndMakeMove(position, seg)){

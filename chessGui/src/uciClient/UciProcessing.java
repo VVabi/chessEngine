@@ -5,6 +5,8 @@ import communication.VMPServer.VMPServer;
 import communication.messages.VMPchessPosition;
 import core.events.NewPositionEvent;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,22 +27,39 @@ public class UciProcessing {
     String engine2;
 
     int numGames = 0;
+    ArrayList<String> openingPositions;
 
     public UciProcessing(String engine1, String engine2, int numGames) throws IOException {
 
         this.numGames = numGames;
         CountDownLatch cd = new CountDownLatch(1);
-        server = new VMPServer(9999, 0, cd);
+        /*server = new VMPServer(9999, 0, cd);
         server.connect("127.0.0.1", 9876);
          try {
             cd.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
         this.engine1 = engine1;
         this.engine2 = engine2;
+        openingPositions = new ArrayList<>();
+        readOpeningPositions();
 
 
+    }
+
+
+    private void readOpeningPositions() throws IOException {
+        FileReader fileReader = new FileReader("openingPositions.txt");
+        BufferedReader bufferedReader = new BufferedReader(fileReader);
+        String line = null;
+        while ((line = bufferedReader.readLine()) != null) {
+            if(line.charAt(0) != '%') {
+                System.out.println(line);
+                openingPositions.add(line);
+            }
+        }
+        bufferedReader.close();
 
     }
 
@@ -51,10 +70,20 @@ public class UciProcessing {
         int wins = 0;
         int draws = 0;
         int losses = 0;
+        int index = 0;
+        String startPos = " ";
         for(int k=0; k < numGames; k++) {
             //stockFishHandler = new uciEngineHandler("/home/vabi/code/stockfish-7-linux/Linux/stockfish");
             vabiHandler = new uciEngineHandler(engine1);
             stockFishHandler = new uciEngineHandler(engine2);
+
+            if((k %2  == 0)){
+                startPos = openingPositions.get(index);
+                index++;
+                if(index >= openingPositions.size()){
+                    index = 0;
+                }
+            }
 
             System.out.println("Started engines");
             List<String> moves = new ArrayList<>();
@@ -63,7 +92,7 @@ public class UciProcessing {
             String mv[] = new String[1];
 
             if((k % 2) == 1){
-                stockFishHandler.setPosition(moves);
+                stockFishHandler.setPosition(startPos, moves);
                 stockFishHandler.startSearch();
                 eval = stockFishHandler.readBestmove(mv);
                 //System.out.println(eval);
@@ -72,10 +101,10 @@ public class UciProcessing {
             while (true) {
 
 
-                vabiHandler.setPosition(moves);
+                vabiHandler.setPosition(startPos, moves);
                 String current = vabiHandler.getCurrentPosition();
                 VMPchessPosition position = new VMPchessPosition(new VDTstring(current.getBytes()));
-                server.send(position, 0);
+                //server.send(position, 0);
                 vabiHandler.startSearch();
 
 
@@ -91,12 +120,12 @@ public class UciProcessing {
 
                // System.out.println(eval);
                 moves.add(mv[0]);
-                vabiHandler.setPosition(moves);
+                vabiHandler.setPosition(startPos, moves);
                 current = vabiHandler.getCurrentPosition();
                 position = new VMPchessPosition(new VDTstring(current.getBytes()));
-                server.send(position, 0);
+               // server.send(position, 0);
                // System.out.println(mv[0]);
-                stockFishHandler.setPosition(moves);
+                stockFishHandler.setPosition(startPos, moves);
                 stockFishHandler.startSearch();
                 eval = stockFishHandler.readBestmove(mv);
                // System.out.println(eval);

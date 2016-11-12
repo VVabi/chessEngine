@@ -168,9 +168,14 @@ bool uciInterface::receiveNewPosition(std::string& position, std::vector<std::st
 
 		position = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwKQkq";
 
-		positionInput.msg = positionInput.msg.substr(13);
+		std::string sub = positionInput.msg.substr(9,8);
+		if(sub == "startpos"){
+			position = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+		} else {
+			positionInput.msg = positionInput.msg.substr(13);
+			position = positionInput.msg;
+		}
 
-		position = positionInput.msg;
 
 		std::stringstream test(positionInput.msg);
 		std::string segment;
