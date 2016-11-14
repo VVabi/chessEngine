@@ -14,7 +14,7 @@
 #include <algorithm>
 #include <lib/Attacks/attacks.hpp>
 #include <hashTables/hashTables.hpp>
-
+#include <lib/moveMaking/moveMaking.hpp>
 
 
 
@@ -44,17 +44,21 @@ int16_t captureEvals[6][7] = {
 
 void calcCaptureSortEval(chessPosition* position, chessMove* mv, uint16_t hashedMove) {
 
-	int16_t sortEval = 0;
+	makeMove(mv, position);
+	int16_t sortEval = SEE(position, mv);
+	undoMove(position);
+
+	/*int16_t sortEval = 0;
 	if( ((uint16_t) mv->type) < 6) {
 		sortEval = sortEval+captureEvals[mv->type][mv->captureType];
-	}
+	}*/
 
-	if(position->madeMoves.length > 0){
+	/*if(position->madeMoves.length > 0){
 		chessMove previousMove = position->madeMoves[position->madeMoves.length-1];
 		if(previousMove.targetField == mv->sourceField) { //recapture is usually good
 			sortEval = sortEval + 200;
 		}
-	}
+	}*/
 
 
 	if( ((mv->sourceField) | (mv->targetField << 8)) == hashedMove) {
@@ -222,15 +226,15 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 	mv->sortEval = sortEval;
 }
 
-bool orderStandardMoves(chessPosition* position, vdt_vector<chessMove>* moves, uint16_t depth, uint16_t hashedMove) {
+bool orderStandardMoves(chessPosition* position, vdt_vector<chessMove>* moves, uint16_t ply, uint16_t hashedMove) {
 
 	AttackTable opponentAttackTable = makeAttackTable(position, (playerColor) (1-position->toMove));
 	AttackTable ownAttackTable 		= makeAttackTable(position, position->toMove);
 	bool isInCheck      = ((opponentAttackTable.completeAttackTable & position->pieceTables[position->toMove][king]) != 0);
 	int16_t bestEval = INT16_MIN;
 	uint16_t bestIndex = 0;
-	uint16_t killerMoveA = killerMoves[depth][0];
-	uint16_t killerMoveB = killerMoves[depth][1];
+	uint16_t killerMoveA = killerMoves[ply][0];
+	uint16_t killerMoveB = killerMoves[ply][1];
 	for (uint16_t ind=0; ind < moves->length; ind++) {
 		calcSortEval(position, &(*moves)[ind], &opponentAttackTable, &ownAttackTable, hashedMove, killerMoveA, killerMoveB);
 		if((*moves)[ind].sortEval > bestEval){

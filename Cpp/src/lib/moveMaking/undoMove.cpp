@@ -11,7 +11,7 @@
 #include <lib/DebugFunctions/debugFunctions.hpp>
 #include <hashTables/hashTables.hpp>
 #include <assert.h>
-
+#include <userInterface/UIlayer.hpp>
 extern uint64_t zobristHash[7][2][64];
 extern uint64_t movingSideHash[2];
 extern int16_t figureValues[];
@@ -167,6 +167,11 @@ void undoMove(chessPosition* position) {
 	}
 
 	position->zobristHash = position->zobristHash^movingSideHash[0];
+
+	if(position->zobristHash != position->data.hash){
+		std::cout << chessPositionToOutputString(*position) << std::endl;
+		std::cout << "WTF???" << std::endl;
+	}
 
 	assert(position->zobristHash == position->data.hash);
 

@@ -39,12 +39,12 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 	/*uint64_t goalNodes = 1800*maximal_time;
 	while((searchedNodes < goalNodes) && (depth < 31)) {*/
 	while(depth < 7){ //hacked to get repeatable results - there is a major bug hiding somewhere
-		*eval = negamax(position, depth, alpha, beta, bestMove, true, false);
+		*eval = negamax(position, 0, depth+3, depth, alpha, beta, bestMove, true, false);
 
 		if(doAspiration) {
 			if ((*eval <= alpha) || (*eval >= beta)) {
 				//std::cout << "Aspiration window search failed, researching..." <<std::endl;
-				*eval = negamax(position, depth, -32000, 32000, bestMove, true, false);
+				*eval = negamax(position, 0, depth+3, depth, -32000, 32000, bestMove, true, false);
 			}
 
 			alpha = *eval-50;
@@ -96,6 +96,10 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 		depth++;
 		searchedNodes = searchedNodes+*nodeCount;
 		if(*eval > 29000) {
+			break;
+		}
+
+		if((*eval > 500) && (depth > 14)) {
 			break;
 		}
 	}
@@ -151,8 +155,24 @@ void UIloop() {
 	/*std::string positionstr = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwKQkq";
 	chessPosition position = stringToChessPosition(positionstr);*/
 	std::string positionstr = " ";
-	std::string fen = "r1bqkb1r/pp3ppp/2np1n2/1N2p3/4P3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 7";
+	std::string fen = "4k3/2bp4/8/8/5q2/1B2R3/7P/NR5K b - - 0 1";
 	chessPosition position = FENtoChessPosition(fen);
+
+	chessMove mv;
+	mv.sourceField = 29;
+	mv.targetField = 15;
+	mv.move = BIT64(29) | BIT64(15);
+	mv.type = queenMove;
+	mv.captureType = pawn;
+	makeMove(&mv, &position);
+	std::cout << SEE(&position, &mv) << std::endl;
+	undoMove(&position);
+
+
+
+
+
+
 	std::string move;
 	while(1){
 		UI->readInput();

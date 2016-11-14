@@ -56,7 +56,7 @@ uint64_t runSinglePositionPerformanceTest(std::string position, uint16_t depth, 
 	while(searchdepth <= depth && (searchdepth < 14)) {
 
 		bool succeeded = false;
-		int32_t eval = negamax(&c, searchdepth, alpha, beta, &bestMove);
+		int32_t eval = negamax(&c, 0, depth+3, searchdepth, alpha, beta, &bestMove);
 
 		if(useAspiration) {
 			if ((eval <= alpha)) {
@@ -310,7 +310,7 @@ chessPosition FENtoChessPosition(std::string fen){
 	} else {
 		position.toMove = black;
 	}
-	ind++; //should be a sapce now
+	ind++; //should be a space now
 	position.data.castlingRights = 0;
 	for(uint16_t k=0; k<4; k++) {
 		ind++;
@@ -554,7 +554,7 @@ std::string chessPositionToFenString(chessPosition position, bool EPD){
 			FEN = FEN+std::to_string(empty);
 		}
 		if(row > 0) {
-			FEN.push_back('\\');
+			FEN.push_back('/');
 		}
 	}
 
@@ -697,7 +697,7 @@ bool checkAndMakeMove(chessPosition& position, std::string move){
 }
 
 void runPerformanceTests(){
-	for(int depth = 3; depth < 11; depth++){
+	for(int depth = 3; depth < 12; depth++){
 		std::ifstream file;
 		file.open("chesspositionsfixed.txt");
 		std::string line;

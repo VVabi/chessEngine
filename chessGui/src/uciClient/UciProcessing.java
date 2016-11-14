@@ -110,10 +110,10 @@ public class UciProcessing {
 
 
                 eval = vabiHandler.readBestmove(mv);
-                if (eval > 25000) {
+                if (eval > 300) {
                     ret = 1;
                     break;
-                } else if (eval < -25000) {
+                } else if (eval < -300) {
                     ret = -1;
                     break;
                 }

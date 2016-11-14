@@ -26,7 +26,7 @@ int32_t selfPlayMakeMove(chessPosition* position, uint16_t whitedepth, uint16_t 
 		depth = blackdepth;
 	}
 	chessMove bestMove;
-	int32_t eval = negamax(position, depth, -32000, 32000, &bestMove);
+	int32_t eval = negamax(position, 0, depth+3, depth, -32000, 32000, &bestMove);
 	if(position->toMove == black) {
 		eval = -eval;
 	}

@@ -49,6 +49,15 @@ extern int16_t endGamepieceTables[7][2][64];
 
 int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 
+	/*if( (position->pieceTables[white][pawn] == 0) &&
+		(position->pieceTables[black][pawn] == 0) &&
+		position->totalFigureEval < 400) {
+		return 0; //insufficent material
+	}*/
+
+
+
+
 
 	/*uint16_t blackkingField = findLSB(position->pieceTables[black][king]);
 	return endGamepieceTables[king][black][blackkingField];*/ //in nthis way, we actually win endgames vs lone king. But be careful with searchdepth! higher depths may delay the moving of the king
@@ -114,7 +123,7 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 
 	eval = eval+kingSafetyTapered;*/
 
-	//eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?
+	eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?
 	return (1-2*position->toMove)*eval;
 
 }

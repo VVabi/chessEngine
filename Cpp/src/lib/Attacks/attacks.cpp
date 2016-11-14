@@ -9,6 +9,7 @@
 #include <lib/basics.hpp>
 #include <lib/bitfiddling.h>
 #include <lib/Defines/boardParts.hpp>
+#include <lib/moveMaking/moveMaking.hpp>
 #include "attacks.hpp"
 
 extern uint64_t knightmovetables[];
@@ -21,7 +22,7 @@ extern uint64_t rookMagicNumbers[];
 extern uint64_t bishopFieldTable[];
 extern uint64_t bishopMoveTables[64][512];
 extern uint64_t bishopMagicNumbers[];
-
+extern int16_t figureValues[];
 
 
 bool isFieldAttacked(const chessPosition* position, playerColor attackingSide, uint16_t field){
@@ -167,4 +168,161 @@ AttackTable makeAttackTable(const chessPosition* position, playerColor attacking
 	return retTable;
 }
 
+
+bool getNextCapture(chessMove* nextCapture, const chessPosition* position, uint16_t field, figureType occ){
+
+	playerColor attackingSide = position->toMove;
+	//pawns
+	uint64_t potentialTakes;
+	if(attackingSide == white){
+		potentialTakes = ((BIT64(field) >> 9) & NOTFILEH)| ((BIT64(field) >> 7) & NOTFILEA);
+	} else {
+		potentialTakes = ((BIT64(field) << 9) & NOTFILEA) | ((BIT64(field) << 7) & NOTFILEH);
+	}
+
+	if(potentialTakes & position->pieceTables[attackingSide][pawn]){
+		uint16_t source = findLSB(potentialTakes & position->pieceTables[attackingSide][pawn]);
+		nextCapture->captureType = occ;
+		nextCapture->move		= BIT64(source) | BIT64(field);
+		nextCapture->sourceField = source;
+		nextCapture->targetField = field;
+		nextCapture->type        = pawnMove;
+		return true;
+	}
+
+
+	//knights
+	uint64_t knights = position->pieceTables[attackingSide][knight];
+	if(knightmovetables[field] & knights) {
+		uint16_t source = findLSB(knightmovetables[field] & knights);
+		nextCapture->captureType = occ;
+		nextCapture->move		= BIT64(source) | BIT64(field);
+		nextCapture->sourceField = source;
+		nextCapture->targetField = field;
+		nextCapture->type        = knightMove;
+		return true;
+	}
+	uint64_t occupancy = (position->pieces[white]) | (position->pieces[black]);
+
+	//bishops
+	uint64_t magicNumber = bishopMagicNumbers[field];
+	uint64_t blocker = occupancy & bishopFieldTable[field];
+	uint16_t hashValue = (blocker*magicNumber) >> 55;
+	uint64_t potentialMoves = bishopMoveTables[field][hashValue];
+
+	if(potentialMoves & position->pieceTables[attackingSide][bishop]) {
+		uint16_t source = findLSB(potentialMoves & (position->pieceTables[attackingSide][bishop]));
+		nextCapture->captureType = occ;
+		nextCapture->move		= BIT64(source) | BIT64(field);
+		nextCapture->sourceField = source;
+		nextCapture->targetField = field;
+		nextCapture->type        = bishopMove;
+		return true;
+	}
+
+
+	//rooks
+	magicNumber = rookMagicNumbers[field];
+	blocker = occupancy & rookFieldTable[field];
+	hashValue = (blocker*magicNumber) >> 52;
+	potentialMoves = rookMoveTables[field][hashValue];
+
+	if( potentialMoves & (position->pieceTables[attackingSide][rook])) {
+		uint16_t source = findLSB(potentialMoves & (position->pieceTables[attackingSide][rook]));
+		nextCapture->captureType = occ;
+		nextCapture->move		 = BIT64(source) | BIT64(field);
+		nextCapture->sourceField = source;
+		nextCapture->targetField = field;
+		nextCapture->type        = rookMove;
+		return true;
+	}
+
+
+
+	//queens
+	magicNumber = rookMagicNumbers[field];
+	blocker = occupancy & rookFieldTable[field];
+	hashValue = (blocker*magicNumber) >> 52;
+	potentialMoves = rookMoveTables[field][hashValue];
+
+	if( potentialMoves & (position->pieceTables[attackingSide][queen])) {
+		uint16_t source = findLSB(potentialMoves & (position->pieceTables[attackingSide][queen]));
+		nextCapture->captureType = occ;
+		nextCapture->move		 = BIT64(source) | BIT64(field);
+		nextCapture->sourceField = source;
+		nextCapture->targetField = field;
+		nextCapture->type        = queenMove;
+		return true;
+	}
+
+	magicNumber = bishopMagicNumbers[field];
+	blocker = occupancy & bishopFieldTable[field];
+	hashValue = (blocker*magicNumber) >> 55;
+	potentialMoves = bishopMoveTables[field][hashValue];
+
+	if(potentialMoves & position->pieceTables[attackingSide][queen]) {
+		uint16_t source = findLSB(potentialMoves & (position->pieceTables[attackingSide][queen]));
+		nextCapture->captureType = occ;
+		nextCapture->move		= BIT64(source) | BIT64(field);
+		nextCapture->sourceField = source;
+		nextCapture->targetField = field;
+		nextCapture->type        = queenMove;
+		return true;
+	}
+	//kings
+	uint64_t kings = position->pieceTables[attackingSide][king];
+	if(kingmovetables[field] & kings) {
+		uint16_t source = findLSB(kingmovetables[field] & kings);
+		nextCapture->captureType = occ;
+		nextCapture->move		= BIT64(source) | BIT64(field);
+		nextCapture->sourceField = source;
+		nextCapture->targetField = field;
+		nextCapture->type        = kingMove;
+		return true;
+	}
+
+	return false;
+
+}
+
+
+int16_t see_internal(int16_t previous, chessPosition* position, uint16_t field, figureType lastCapturingPiece){
+	chessMove mv;
+	if(!getNextCapture(&mv, position, field, lastCapturingPiece)){
+		//no more captures available
+		//std::cout << "no further captures found, returning " << -previous << std::endl;
+		return -previous; //from POV of player currently moving
+	}
+
+	if(mv.captureType == king){ //best-case scenario for us
+		return 10000;
+	}
+
+	int16_t standPat = -previous;
+	makeMove(&mv, position);
+
+	int16_t seeVal = -see_internal(-previous+figureValues[mv.captureType], position, field, (figureType) mv.type);
+	undoMove(position);
+	/*std::cout << position->madeMoves.length;
+	std::cout << "Capturing with " << mv.type << " from " << mv.sourceField << std::endl;
+	std::cout << "Standpat score was " << standPat << std::endl;
+	std::cout << "see score is " 		<< seeVal << std::endl;*/
+
+	if(seeVal > standPat){
+		return seeVal;
+	}
+	return standPat;
+}
+
+
+int16_t SEE(chessPosition* position, chessMove* mv){
+
+	//TODO: SEE currently cannot handle promotions!!!!
+	if(mv->type > 5){
+		return 0;
+	}
+	uint16_t val = figureValues[mv->captureType];
+	int16_t ret = -see_internal(val, position, mv->targetField, (figureType) mv->type);
+	return ret;
+}
 

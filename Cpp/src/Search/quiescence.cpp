@@ -18,6 +18,7 @@
 #include <lib/Evaluation/evaluation.hpp>
 #include <algorithm>
 #include <assert.h>
+#include <userInterface/UIlayer.hpp>
 
 static int32_t qindices[150] = {0};
 extern int16_t figureValues[];
@@ -99,6 +100,10 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 
 	int16_t bestIndex = -1;
 	for(uint16_t ind=0; ind < moves.length; ind++){
+
+		if(moves[ind].sortEval < 0){
+			break; //SEE pruning
+		}
 		if(ind == 1){
 			sortqCalled++;
 			std::sort(moves.data, moves.data+moves.length);
@@ -124,6 +129,12 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 				alpha = value;
 				bestMove = moves[ind];
 				bestIndex = ind;
+				/*if(moves[ind].sortEval < -200){
+					std::cout << "WTF?? SEE seems to be wrong!" << std::endl;
+					std::cout << chessPositionToOutputString(*position) << std::endl;
+					std::cout << chessPositionToFenString(*position, false) << std::endl;
+					std::cout << moves[ind].sourceField << " " << moves[ind].targetField << std::endl;
+				}*/
 			}
 		}
 		undoMove(position);
@@ -142,7 +153,6 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 		setHashMove(bestMove.sourceField | (bestMove.targetField << 8), position->zobristHash);
 	}
 
-	//TODO: write to hash table here as well?
 	//moves.free_array();
 	return alpha;
 

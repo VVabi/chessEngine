@@ -34,7 +34,7 @@ void resetSearchData(){
 }
 
 
-uint16_t killerMoves[20][2];
+uint16_t killerMoves[40][2];
 
 static chessMove buffer[5000];
 
@@ -55,13 +55,16 @@ static inline bool backtrack_position_for_repetition(chessPosition* position) {
 	return false;
 }
 
-static inline bool check_nullmove(chessPosition* position, int16_t depth, int32_t beta){
+static inline bool check_nullmove(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t depth, int32_t beta){
 
 
 	if(beta > 10000){ //TODO: more dynamic condition here?
 		return false;
 	}
 
+	/*if(ply > max_ply-2){
+		return false;
+	}*/
 	int32_t eval = evaluation(position, beta-1, beta);
 
 	if(eval < beta){
@@ -76,7 +79,7 @@ static inline bool check_nullmove(chessPosition* position, int16_t depth, int32_
 	makeNullMove(position);
 	chessMove mv;
 	searchCounts.nullMovePruningTried++;
-	int32_t value = -negamax(position, depth-3, -beta, -beta+1, &mv, false);
+	int32_t value = -negamax(position, ply+1, max_ply, depth-3, -beta, -beta+1, &mv, false);
 	undoNullMove(position);
 	if(value < beta) {
 		return false; //didnt manage a cutoff :(
@@ -85,9 +88,10 @@ static inline bool check_nullmove(chessPosition* position, int16_t depth, int32_
 	return true;
 }
 
-int16_t negamax(chessPosition* position, int16_t depth, int16_t alpha, int16_t beta, chessMove* bestMove, bool allowNullMove, bool doHashProbe) {
+int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t depth, int16_t alpha, int16_t beta, chessMove* bestMove, bool allowNullMove, bool doHashProbe) {
 
 	assert(alpha < beta);
+	assert(ply+depth <= max_ply);
 	searchCounts.called++;
 	if(position->data.fiftyMoveRuleCounter >= 100){
 		return 0;
@@ -138,7 +142,7 @@ int16_t negamax(chessPosition* position, int16_t depth, int16_t alpha, int16_t b
 	}
 
 	if((depth >= 2) && allowNullMove){
-		if(check_nullmove(position, depth, beta)){
+		if(check_nullmove(position, ply, max_ply, depth, beta)){
 			return beta;
 		}
 	}
@@ -161,9 +165,9 @@ int16_t negamax(chessPosition* position, int16_t depth, int16_t alpha, int16_t b
 		}
 	}
 
-	vdt_vector<chessMove> moves = vdt_vector<chessMove>(buffer+depth*100,100);
+	vdt_vector<chessMove> moves = vdt_vector<chessMove>(buffer+ply*150,150);
 	generateAllMoves(&moves, position);
-	bool isInCheck = orderStandardMoves(position, &moves, depth, hashVal.bestMove);
+	bool isInCheck = orderStandardMoves(position, &moves, ply, hashVal.bestMove);
 
 
 	bool legalMovesAvailable = false;
@@ -193,29 +197,35 @@ int16_t negamax(chessPosition* position, int16_t depth, int16_t alpha, int16_t b
 			searchCounts.totalNodes++;
 			legalMovesAvailable = true;
 			chessMove mv;
-
+			uint16_t ownkingField = findLSB( position->pieceTables[position->toMove][king]);
+			bool check = isFieldAttacked(position,  (playerColor) (1-position->toMove), ownkingField); //the last move gave check!
 			uint16_t reduction = 0;
-
-			if((ind > 5) && (moves[ind].captureType == none) && (depth > 2) && !isInCheck) { //LMR
-				uint16_t ownkingField = findLSB( position->pieceTables[position->toMove][king]);
-				bool check = isFieldAttacked(position,  (playerColor) (1-position->toMove), ownkingField);
+			uint16_t extension = 0;
+			if((ind > 3) && (moves[ind].captureType == none) && (depth > 2) && !isInCheck) { //LMR
 				if(!check){
 					reduction = 1;
+					if(ind > 15) {
+						reduction = 2;
+					}
 				}
 			}
 
+			if(check && 		( (ply+depth < max_ply-1) || ((depth == 1) && (ply+depth < max_ply)) )){
+				extension = 1;
+				reduction = 0;
+			}
 
-			//PVSearch, currently a small gain for us with the > 5
+			//PVSearch, currently a small gain for us with the > 3
 			//-------------------------------------------------
-			if((ind > 5) && (depth > 2)) {
-				int32_t value = -negamax(position, depth-1-reduction, -alpha-1, -alpha, &mv);
+			if((ind > 3) && (depth > 2)) {
+				int32_t value = -negamax(position, ply+1, max_ply, depth-1-reduction+extension, -alpha-1, -alpha, &mv);
 				if(value < alpha+1){
 					undoMove(position);
 					continue;
 				}
 			}
 
-			int32_t value = -negamax(position, depth-1, -beta, -alpha, &mv);
+			int32_t value = -negamax(position, ply+1, max_ply, depth-1+extension, -beta, -alpha, &mv);
 
 			if(value > alpha){
 				foundGoodMove = true;
@@ -236,9 +246,9 @@ int16_t negamax(chessPosition* position, int16_t depth, int16_t alpha, int16_t b
 			if(bestMove->captureType == none){
 				uint16_t toRemember = (bestMove->sourceField | (bestMove->targetField << 8));
 
-				if ( (killerMoves[depth][0] != toRemember)) {
-					killerMoves[depth][1] = killerMoves[depth][0];
-					killerMoves[depth][0] = toRemember;
+				if ( (killerMoves[ply][0] != toRemember)) {
+					killerMoves[ply][1] = killerMoves[ply][0];
+					killerMoves[ply][0] = toRemember;
 				}
 			}
 			//moves.free_array();
@@ -248,10 +258,12 @@ int16_t negamax(chessPosition* position, int16_t depth, int16_t alpha, int16_t b
 	}
 
 	if(bestIndex != -1){
-		historyTable[position->toMove][bestMove->sourceField][bestMove->targetField] += 2*depth*depth;
-		if(historyTable[position->toMove][bestMove->sourceField][bestMove->targetField] > HISTORY_CUTOFF){
-			//std::cout << "Rescaling history table " << std::endl;
-			rescaleHistoryTable();
+		if(bestMove->captureType == none){
+			historyTable[position->toMove][bestMove->sourceField][bestMove->targetField] += 2*depth*depth;
+			if(historyTable[position->toMove][bestMove->sourceField][bestMove->targetField] > HISTORY_CUTOFF){
+				//std::cout << "Rescaling history table " << std::endl;
+				rescaleHistoryTable();
+			}
 		}
 		for(uint16_t cnt=0; cnt < bestIndex; cnt++){
 			chessMove mv = moves[cnt];
