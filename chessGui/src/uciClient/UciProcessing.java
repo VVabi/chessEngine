@@ -124,7 +124,7 @@ public class UciProcessing {
                 current = vabiHandler.getCurrentPosition();
                 position = new VMPchessPosition(new VDTstring(current.getBytes()));
                // server.send(position, 0);
-               // System.out.println(mv[0]);
+                //System.out.println(mv[0]);
                 stockFishHandler.setPosition(startPos, moves);
                 stockFishHandler.startSearch();
                 eval = stockFishHandler.readBestmove(mv);
@@ -134,7 +134,7 @@ public class UciProcessing {
                     ret = 0;
                     break;
                 }
-              //  System.out.println(mv[0]);
+                //System.out.println(mv[0]);
                 if ("(none)".equals(mv[0])) {
                     break;
                 }
@@ -155,7 +155,8 @@ public class UciProcessing {
             stockFishHandler.close();
             vabiHandler.close();
             System.out.println("Wins "+wins + " Draws "+draws+" Losses "+losses);
-
+            double elo_diff = 400*(Math.log10(1-total/((double) (k+1)))-Math.log10(total/(double) (k+1)));
+            System.out.println("Elo difference is " +elo_diff);
         }
 
         System.out.println("Final result: " + total);

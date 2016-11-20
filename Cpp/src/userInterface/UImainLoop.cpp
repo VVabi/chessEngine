@@ -36,9 +36,13 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 	int32_t beta  = 32000;
 	searchId++;
 	uint64_t searchedNodes = 0;
-	/*uint64_t goalNodes = 1800*maximal_time;
-	while((searchedNodes < goalNodes) && (depth < 31)) {*/
-	while(depth < 7){ //hacked to get repeatable results - there is a major bug hiding somewhere
+#ifdef FIXEDDEPTH
+	uint16_t maxdepth = 7;
+	while(depth < maxdepth){ //hacked to get repeatable results - there is a major bug hiding somewhere
+#else
+	uint64_t goalNodes = 1800*maximal_time;
+	while((searchedNodes < goalNodes) && (depth < 31)) {
+#endif
 		*eval = negamax(position, 0, depth+3, depth, alpha, beta, bestMove, true, false);
 
 		if(doAspiration) {
