@@ -11,6 +11,7 @@
 #include <lib/Defines/boardParts.hpp>
 #include <lib/moveMaking/moveMaking.hpp>
 #include "attacks.hpp"
+#include <assert.h>
 
 extern uint64_t knightmovetables[];
 extern uint64_t kingmovetables[];
@@ -167,6 +168,112 @@ AttackTable makeAttackTable(const chessPosition* position, playerColor attacking
 	retTable.completeAttackTable = retTable.attackTables[king] | retTable.attackTables[pawn] | retTable.attackTables[knight] | retTable.attackTables[bishop] | retTable.attackTables[rook] | retTable.attackTables[queen];
 	return retTable;
 }
+
+
+int16_t bishopMobility[14]   = {-50,-40,-35,-25,-10,0,5,10,15,20,22,23,24,25};
+int16_t rookMobility[15]     = {-50,-40,-35,-30,-20,-15,-5,0,5,10,15,18,21,22,23};
+int16_t knightMobility[9]   = {-30,-25,-15,0,5,10,15,18,20};
+
+AttackTable makeAttackTableWithMobility(const chessPosition* position, playerColor attackingSide, int16_t* mobilityScore) {
+
+
+
+	*mobilityScore = 0;
+	uint64_t ownPieces = position->pieces[attackingSide];
+	AttackTable retTable;
+	//pawns
+	uint64_t pawns = position->pieceTables[attackingSide][pawn];
+
+	uint64_t takesRight = (attackingSide ? pawns >> 7 : pawns << 9) & NOTFILEA;
+	uint64_t takesLeft = (attackingSide ? pawns >> 9 : pawns << 7) & NOTFILEH;
+	retTable.attackTables[pawn] = takesLeft | takesRight;
+
+	//knights
+	uint64_t knights = position->pieceTables[attackingSide][knight];
+	uint64_t knightAttackTable = 0;
+	while(knights){
+		uint16_t nextKnight = popLSB(knights);
+		knightAttackTable = knightAttackTable | knightmovetables[nextKnight];
+		uint16_t legalMoves = popcount(knightmovetables[nextKnight] & ~ownPieces);
+		assert(legalMoves < 9);
+		*mobilityScore = *mobilityScore+knightMobility[legalMoves];
+	}
+	retTable.attackTables[knight] = knightAttackTable;
+
+	//bishops
+	uint64_t occupancy  = position->pieces[white] | position->pieces[black];
+
+	uint64_t bishops = position->pieceTables[attackingSide][bishop];
+	uint64_t bishopAttackTable = 0;
+	while (bishops != 0) {
+		uint16_t nextPieceField = popLSB(bishops);
+		uint64_t magicNumber = bishopMagicNumbers[nextPieceField];
+		uint64_t blocker = occupancy & bishopFieldTable[nextPieceField];
+		uint16_t hashValue = (blocker*magicNumber) >> 55;
+		uint64_t potentialMoves = bishopMoveTables[nextPieceField][hashValue];
+		bishopAttackTable = bishopAttackTable | potentialMoves;
+		uint16_t legalMoves = popcount(potentialMoves & ~ownPieces);
+		assert(legalMoves < 14);
+		*mobilityScore = *mobilityScore+bishopMobility[legalMoves];
+	}
+	retTable.attackTables[bishop] = bishopAttackTable;
+	//rooks
+
+	uint64_t rooks = position->pieceTables[attackingSide][rook];
+	uint64_t rookAttackTable = 0;
+	while (rooks != 0) {
+		uint16_t nextPieceField = popLSB(rooks);
+		uint64_t magicNumber = rookMagicNumbers[nextPieceField];
+		uint64_t blocker = occupancy & rookFieldTable[nextPieceField];
+		uint16_t hashValue = (blocker*magicNumber) >> 52;
+		uint64_t potentialMoves = rookMoveTables[nextPieceField][hashValue];
+		uint16_t legalMoves = popcount(potentialMoves & ~ownPieces);
+		assert(legalMoves < 15);
+		*mobilityScore = *mobilityScore+rookMobility[legalMoves];
+		rookAttackTable = rookAttackTable | potentialMoves;
+	}
+	retTable.attackTables[rook] = rookAttackTable;
+
+	//queens
+
+
+	uint64_t queens = position->pieceTables[attackingSide][queen];
+	uint64_t queenAttackTable = 0;
+	while (queens != 0) {
+		uint16_t nextPieceField = popLSB(queens);
+		uint64_t magicNumber = rookMagicNumbers[nextPieceField];
+		uint64_t blocker = occupancy & rookFieldTable[nextPieceField];
+		uint16_t hashValue = (blocker*magicNumber) >> 52;
+		uint64_t potentialMoves = rookMoveTables[nextPieceField][hashValue];
+		queenAttackTable = queenAttackTable | potentialMoves;
+		*mobilityScore = *mobilityScore+popcount(queenAttackTable & ~ownPieces);
+	}
+
+	//TODO: this could be optimized by merging with the rook table and doing both at once
+	queens = position->pieceTables[attackingSide][queen];
+	while (queens != 0) {
+		uint16_t nextPieceField = popLSB(queens);
+		uint64_t magicNumber = bishopMagicNumbers[nextPieceField];
+		uint64_t blocker = occupancy & bishopFieldTable[nextPieceField];
+		uint16_t hashValue = (blocker*magicNumber) >> 55;
+		uint64_t potentialMoves = bishopMoveTables[nextPieceField][hashValue];
+		queenAttackTable = queenAttackTable | potentialMoves;
+	}
+	retTable.attackTables[queen] = queenAttackTable;
+
+
+	//kings
+	uint64_t kingField = position->pieceTables[attackingSide][king];
+	uint64_t kingAttackTable = 0;
+	while(kingField){
+		uint16_t nextKing = popLSB(kingField);
+		kingAttackTable = kingAttackTable | kingmovetables[nextKing];
+	}
+	retTable.attackTables[king] = kingAttackTable;
+	retTable.completeAttackTable = retTable.attackTables[king] | retTable.attackTables[pawn] | retTable.attackTables[knight] | retTable.attackTables[bishop] | retTable.attackTables[rook] | retTable.attackTables[queen];
+	return retTable;
+}
+
 
 
 bool getNextCapture(chessMove* nextCapture, const chessPosition* position, uint16_t field, figureType occ){
