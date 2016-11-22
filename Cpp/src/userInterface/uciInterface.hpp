@@ -25,7 +25,7 @@ class uciInterface: public userInterface {
 		bool receiveNewPosition(std::string& position, std::vector<std::string>& moves);
 		void readInput();
 		void sendBestMove(std::string position);
-		bool receiveAnalyze(std::string& position);
+		bool receiveAnalyze(std::string& position, searchParameters& params);
 		bool positionRequested();
 		void sendDebugEval(VDTevaluation eval, int32_t valid) { return; };
 };

@@ -13,6 +13,7 @@
 #include <communication/gen/VDT.h>
 #include <communication/gen/VDT.h>
 #include <vector>
+#include "interfaceStructs.hpp"
 class networkUserInterface: public userInterface {
 	public:
 		networkUserInterface(){
@@ -27,7 +28,7 @@ class networkUserInterface: public userInterface {
 		bool receiveNewPosition(std::string& position, std::vector<std::string>& moves);
 		void readInput() {};
 		void sendBestMove(std::string position) {};
-		bool receiveAnalyze(std::string& position) { return false; }
+		bool receiveAnalyze(std::string& position, searchParameters& params) { return false; }
 		bool positionRequested() { return false;}
 		void sendDebugEval(VDTevaluation eval, int32_t valid);
 };

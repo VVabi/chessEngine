@@ -9,8 +9,9 @@
 #define USERINTERFACE_UILAYER_HPP_
 #include <lib/basics.hpp>
 #include <string>
+#include <userInterface/interfaceStructs.hpp>
 void UIloop();
-uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maximal_time, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval, bool doAspiration = true);
+uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maximal_time, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval, bool doAspiration, searchParameters params);
 std::string chessPositionToString(chessPosition position);
 std::string chessPositionToOutputString(chessPosition position);
 chessPosition stringToChessPosition(std::string strposition);

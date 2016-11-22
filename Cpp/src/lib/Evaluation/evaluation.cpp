@@ -94,19 +94,21 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 
 	uint8_t pawnColumnOccupancy[2];
 	eval = eval+pawnEvaluation(position, pawnColumnOccupancy, phase);
-//#ifdef EXPERIMENTAL
+#ifdef EXPERIMENTAL
+	int16_t mobilityScore = 0;
+	AttackTable whiteAttackTable 		= makeAttackTableWithMobility(position, white, &mobilityScore);
+	eval = eval+mobilityScore/2;
+	mobilityScore = 0;
+	AttackTable blackAttackTable 		= makeAttackTableWithMobility(position, black, &mobilityScore);
+	eval = eval-mobilityScore/2;
+#else
 	int16_t mobilityScore = 0;
 	AttackTable whiteAttackTable 		= makeAttackTableWithMobility(position, white, &mobilityScore);
 	eval = eval+mobilityScore;
 	mobilityScore = 0;
 	AttackTable blackAttackTable 		= makeAttackTableWithMobility(position, black, &mobilityScore);
 	eval = eval-mobilityScore;
-/*#else
-	AttackTable whiteAttackTable 		= makeAttackTable(position, white);
-	AttackTable blackAttackTable 		= makeAttackTable(position, black);
-	int16_t mobility = popcount(whiteAttackTable.completeAttackTable & ~(position->pieces[white]))-popcount(blackAttackTable.completeAttackTable & ~(position->pieces[black]));
-	eval = eval+3*mobility;
-#endif*/
+#endif
 
 
 	eval = eval+rookOpenFiles(position, pawnColumnOccupancy);

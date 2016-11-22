@@ -16,6 +16,7 @@
 #include "UIlayer.hpp"
 #include <Search/search.hpp>
 #include <iomanip>
+#include <userInterface/interfaceStructs.hpp>
 userInterface* UI;
 
 extern uint8_t searchId;
@@ -23,7 +24,52 @@ extern uint16_t killerMoves[20][2];
 //#define UCI
 
 
-uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maximal_time, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval, bool doAspiration) {
+bool decideSearchFurther(searchParameters params, uint64_t start_ts, uint64_t searchedNodes, uint16_t depth, playerColor toMove, uint16_t numMadeMoves) {
+
+	if(depth < 7){
+		return true;
+	} else {
+		return false;
+	}
+	if(params.totalTime[toMove] > 0) {
+		uint32_t total = params.totalTime[toMove];
+		uint32_t increment = params.increment[toMove];
+
+		//estimate remaining moves
+		uint16_t totalExpectedMoves = 1/2*numMadeMoves+60;
+		int16_t remainingMoves = totalExpectedMoves-numMadeMoves;
+
+		if(remainingMoves < 20){
+			remainingMoves = 20;
+		}
+
+		uint32_t completeExpectedTime = total+remainingMoves*increment;
+		std::cout << remainingMoves << std::endl;
+		std::cout << completeExpectedTime << std::endl;
+		float timeAllotted = completeExpectedTime/(2.0*remainingMoves);
+
+		if(timeAllotted > total/20.0){
+			timeAllotted = total/20.0;
+		}
+		std::cout << timeAllotted << std::endl;
+		uint64_t now = get_timestamp();
+
+		if(now-start_ts < timeAllotted) {
+			return true;
+		}
+
+		return false;
+
+	}
+
+
+	return false;
+
+
+}
+
+
+uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maximal_time, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval, bool doAspiration, searchParameters params) {
 	memset(killerMoves,0, 20*2*sizeof(uint16_t));
 	resetSearchData();
 	resetQuiescenceNodes();
@@ -40,8 +86,8 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 	uint16_t maxdepth = 7;
 	while(depth < maxdepth){ //hacked to get repeatable results - there is a major bug hiding somewhere
 #else
-	uint64_t goalNodes = 1800*maximal_time;
-	while((searchedNodes < goalNodes) && (depth < 31)) {
+	//uint64_t goalNodes = 1800*maximal_time;
+	while(decideSearchFurther(params, start_ts, searchedNodes, depth, position->toMove, position->madeMoves.length)) {
 #endif
 		*eval = negamax(position, 0, depth+3, depth, alpha, beta, bestMove, true, false);
 
@@ -156,9 +202,9 @@ void UIloop() {
 #else
 	UI = new networkUserInterface();
 #endif
-	/*std::string positionstr = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwKQkq";
-	chessPosition position = stringToChessPosition(positionstr);*/
-	std::string positionstr = " ";
+	std::string positionstr = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwKQkq";
+	chessPosition position = stringToChessPosition(positionstr);
+	/*std::string positionstr = " ";
 	std::string fen = "4k3/2bp4/8/8/5q2/1B2R3/7P/NR5K b - - 0 1";
 	chessPosition position = FENtoChessPosition(fen);
 
@@ -170,7 +216,7 @@ void UIloop() {
 	mv.captureType = pawn;
 	makeMove(&mv, &position);
 	std::cout << SEE(&position, &mv) << std::endl;
-	undoMove(&position);
+	undoMove(&position);*/
 
 
 
@@ -229,18 +275,24 @@ void UIloop() {
 			uint32_t nodeCount;
 			uint64_t mtime;
 			int32_t eval = 0;
-			searchMove(&position, &bestMove, 4000, &nodeCount, &mtime, &eval);
+			searchParameters params;
+			searchMove(&position, &bestMove, 4000, &nodeCount, &mtime, &eval, true, params);
 			makeMove(&bestMove, &position);
 			sendNewPosition(&position);
 		}
 
 		std::string newPosition;
-		if(UI->receiveAnalyze(newPosition)){
+		searchParameters params;
+		if(UI->receiveAnalyze(newPosition, params)){
+			std::cout << params.increment[0] << std::endl;
+			std::cout << params.increment[1] << std::endl;
+			std::cout << params.totalTime[0] << std::endl;
+			std::cout << params.totalTime[1] << std::endl;
 			chessMove bestMove;
 			uint32_t nodeCount;
 			uint64_t mtime;
 			int32_t eval = 0;
-			searchMove(&position, &bestMove, 4000, &nodeCount, &mtime, &eval);
+			searchMove(&position, &bestMove, 4000, &nodeCount, &mtime, &eval, true, params);
 			UI->sendBestMove(moveToString(bestMove, position));
 		}
 	}

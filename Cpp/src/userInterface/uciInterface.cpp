@@ -13,11 +13,28 @@
 #include <stdint.h>
 #include <fstream>
 #include <sstream>
+#include <vector>
 //input messages
 
 
 
 #define ISREADY 1
+
+void split(const std::string &s, char delim, std::vector<std::string> &elems) {
+    std::stringstream ss;
+    ss.str(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+}
+
+
+std::vector<std::string> split(const std::string &s, char delim) {
+    std::vector<std::string> elems;
+    split(s, delim, elems);
+    return elems;
+}
 
 struct inputMessage{
 	std::string msg;
@@ -30,6 +47,14 @@ std::string readLine(){
 	std::string response;
 	std::getline(std::cin, response);
 	return response;
+}
+
+template <typename T>
+T StringToNumber ( const std::string &Text )//Text not by const reference so that the function can be used with a
+{                               //character array as argument
+	std::stringstream ss(Text);
+	T result;
+	return ss >> result ? result : 0;
 }
 
 std::ofstream debugLog;
@@ -118,11 +143,46 @@ void uciInterface::sendNewPosition(std::string position) {
 
 }
 
-bool uciInterface::receiveAnalyze(std::string& position){
+bool uciInterface::receiveAnalyze(std::string& position, searchParameters& params){
 
 
 	if(goInput.valid){
+		std::vector<std::string> splitted =  split(goInput.msg, ' ');
+		params.maxDepth 	= -1;
+		params.increment[0] = 0;
+		params.increment[1] = 0;
+		params.maxTime 		= 0;
+		params.totalTime[0] = 0;
+		params.totalTime[1] = 0;
+		uint16_t index = 0;
+		while(index < splitted.size()) {
+			std::string current = splitted[index];
 
+			if(current == "wtime"){
+				index++;
+				std::string whiteTime = splitted[index];
+				params.totalTime[0] = StringToNumber<int32_t>(whiteTime);
+			}
+
+			if(current == "btime"){
+				index++;
+				std::string blackTime = splitted[index];
+				params.totalTime[1] = StringToNumber<int32_t>(blackTime);
+			}
+
+			if(current == "winc"){
+				index++;
+				std::string whiteinc = splitted[index];
+				params.increment[0] = StringToNumber<int32_t>(whiteinc);
+			}
+
+			if(current == "binc"){
+				index++;
+				std::string blackinc = splitted[index];
+				params.increment[1] = StringToNumber<int32_t>(blackinc);
+			}
+			index++;
+		}
 		goInput.valid = false;
 		return true;
 	}
