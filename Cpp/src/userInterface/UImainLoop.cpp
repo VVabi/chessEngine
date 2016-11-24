@@ -17,6 +17,7 @@
 #include <Search/search.hpp>
 #include <iomanip>
 #include <userInterface/interfaceStructs.hpp>
+#include <lib/moveGeneration/moveGeneration.hpp>
 userInterface* UI;
 
 extern uint8_t searchId;
@@ -26,11 +27,11 @@ extern uint16_t killerMoves[20][2];
 
 bool decideSearchFurther(searchParameters params, uint64_t start_ts, uint64_t searchedNodes, uint16_t depth, playerColor toMove, uint16_t numMadeMoves) {
 
-	if(depth < 7){
+	/*if(depth < 7){
 		return true;
 	} else {
 		return false;
-	}
+	}*/
 	if(params.totalTime[toMove] > 0) {
 		uint32_t total = params.totalTime[toMove];
 		uint32_t increment = params.increment[toMove];
@@ -203,12 +204,12 @@ void UIloop() {
 	UI = new networkUserInterface();
 #endif
 	std::string positionstr = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwKQkq";
-	chessPosition position = stringToChessPosition(positionstr);
-	/*std::string positionstr = " ";
-	std::string fen = "4k3/2bp4/8/8/5q2/1B2R3/7P/NR5K b - - 0 1";
+	//chessPosition position = stringToChessPosition(positionstr);
+	/*std::string positionstr = " ";*/
+	std::string fen = "7k/p7/1p5p/3p4/3P4/P5np/1P2R1rK/8 w - - 0";
 	chessPosition position = FENtoChessPosition(fen);
 
-	chessMove mv;
+	/*chessMove mv;
 	mv.sourceField = 29;
 	mv.targetField = 15;
 	mv.move = BIT64(29) | BIT64(15);
@@ -219,8 +220,9 @@ void UIloop() {
 	undoMove(&position);*/
 
 
-
-
+	/*vdt_vector<chessMove> mvVec = vdt_vector<chessMove>(150);
+	generateAllMoves(&mvVec, &position);
+	orderStandardMoves(&position, &mvVec, 0, 0);*/
 
 
 	std::string move;

@@ -67,6 +67,7 @@ void calcCaptureSortEval(chessPosition* position, chessMove* mv, uint16_t hashed
 	mv->sortEval = sortEval;
 }
 
+#define ILLEGAL -20000
 
 static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackTable* opponentAttackTable, AttackTable* ownAttackTable, uint16_t hashedMove, uint16_t killerA, uint16_t killerB) {
 
@@ -75,6 +76,12 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 	if( ((uint16_t) mv->type) < 6) {
 		sortEval = sortEval+captureEvals[mv->type][mv->captureType];
 	}
+
+	/*if(mv->captureType != none){
+		makeMove(mv, position);
+		sortEval = SEE(position, mv);
+		undoMove(position);
+	}*/
 
 	if (((uint16_t) mv->type) < 6) {
 		sortEval = sortEval+pieceTables[mv->type][position->toMove][mv->targetField]-pieceTables[mv->type][position->toMove][mv->sourceField];
@@ -105,6 +112,8 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 	if(BIT64(mv->targetField) & opponentAttackTable->completeAttackTable) {
 		targetAttacked = true;
 	}
+
+
 
 	if( (mv->captureType == none) && (mv->type > pawnMove) && (BIT64(mv->targetField) & opponentAttackTable->attackTables[pawn])) {
 		sortEval = sortEval-100;
@@ -137,7 +146,7 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 	}
 
 	if(targetAttacked && mv->type == kingMove) {
-		sortEval = INT16_MIN;
+		sortEval = ILLEGAL;
 	}
 
 	if( (mv->captureType != none) && ((BIT64(mv->targetField) & opponentAttackTable->completeAttackTable) == 0)) {
@@ -189,14 +198,14 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 		sortEval  = 110;
 
 		if(kingBlockers[position->toMove] & opponentAttackTable->completeAttackTable) {
-			sortEval = INT16_MIN;
+			sortEval = ILLEGAL;
 		}
 
 
 	} else if(mv->type == castlingQueenside) {
 		sortEval  = 70;
 		if(queenBlockers[position->toMove] & opponentAttackTable->completeAttackTable) {
-			sortEval = INT16_MIN;
+			sortEval = ILLEGAL;
 		}
 	}
 
@@ -228,7 +237,7 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 
 bool orderStandardMoves(chessPosition* position, vdt_vector<chessMove>* moves, uint16_t ply, uint16_t hashedMove) {
 
-	AttackTable opponentAttackTable = makeAttackTable(position, (playerColor) (1-position->toMove));
+	AttackTable opponentAttackTable = makeAttackTable(position, (playerColor) (1-position->toMove), position->pieceTables[position->toMove][king]);
 	AttackTable ownAttackTable 		= makeAttackTable(position, position->toMove);
 	bool isInCheck      = ((opponentAttackTable.completeAttackTable & position->pieceTables[position->toMove][king]) != 0);
 	int16_t bestEval = INT16_MIN;

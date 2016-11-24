@@ -60,12 +60,22 @@ void resetSortqCalled(){
 	sortqCalled = 0;
 }
 
-static chessMove buffer[32*50];
+static moveStack mvStack;
 
 
 int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, uint16_t depth) {
 
 	assert(alpha < beta);
+//#ifdef EXPERIMENTAL
+	uint64_t ownKing = position->pieceTables[position->toMove][king]; //TODO: need to fix move stack first!!
+
+	if(isFieldAttacked(position, (playerColor) (1-position->toMove), findLSB(ownKing))) {
+		chessMove mv;
+		return negamax(position, 30,31, 1, alpha, beta, &mv, false, false);
+	}
+//#endif
+
+
 
 	int32_t baseEval = evaluation(position, alpha, beta);
 
@@ -89,7 +99,8 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 	chessMove bestMove;
 	bestMove.sourceField = 0;
 	bestMove.targetField = 0;
-	vdt_vector<chessMove> moves = vdt_vector<chessMove>(buffer+depth*50, 50);
+	uint16_t stackCounter = mvStack.getCounter();
+	vdt_vector<chessMove> moves = mvStack.getNext();
 	generateAllCaptureMoves(&moves, position);
 	orderCaptureMoves(position, &moves);
 	if(moves.length > 0){
@@ -101,7 +112,7 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 	int16_t bestIndex = -1;
 	for(uint16_t ind=0; ind < moves.length; ind++){
 
-		if(moves[ind].sortEval < 0){ //TODO: This means we prune bishopxKnight! This is not intended
+		if(moves[ind].sortEval < -50){ //TODO: This means we prune bishopxKnight! This is not intended
 			break; //SEE pruning
 		}
 		if(ind == 1){
@@ -140,7 +151,8 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 		undoMove(position);
 		if(alpha >= beta) {
 			setHashMove(bestMove.sourceField | (bestMove.targetField << 8), position->zobristHash);
-			//moves.free_array();
+			mvStack.release();
+			assert(stackCounter == mvStack.getCounter());
 			if(bestIndex != -1){
 				qindices[bestIndex]++;
 			}
@@ -153,7 +165,8 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 		setHashMove(bestMove.sourceField | (bestMove.targetField << 8), position->zobristHash);
 	}
 
-	//moves.free_array();
+	mvStack.release();
+	assert(stackCounter == mvStack.getCounter());
 	return alpha;
 
 

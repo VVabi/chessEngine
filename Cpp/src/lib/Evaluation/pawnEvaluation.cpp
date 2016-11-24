@@ -9,7 +9,7 @@
 #include <lib/basics.hpp>
 #include "evaluation.hpp"
 #include <lib/bitfiddling.h>
-
+#include <lib/Defines/boardParts.hpp>
 
 extern uint64_t files[];
 extern uint64_t  passedPawnMasks[2][64];
@@ -71,7 +71,6 @@ int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOcc
 	eval = eval-50*popcount(isolatedDoublePawns)-20*popcount(nonIsolatedDoublePawns);
 
 	eval = eval-10*popcount(isolatedPawns);
-
 	return eval*(1-2*color);
 }
 
@@ -87,5 +86,43 @@ int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupan
 	int32_t passedPawns = passedPawnEval(whitePawns, blackPawns);
 	passedPawns = ((256-taperingValues[phase])*passedPawns)/256;
 	eval = eval+passedPawns;
+
+/*#ifdef EXPERIMENTAL  looks like very small gain (~ 5-6 elo), but I was hoping for more...
+	//backwards pawn
+	//int64_t wpawns = position->pieceTables[white][pawn];
+
+	//uint64_t wtakesRight =  wpawns << 9 & NOTFILEA;
+	//uint64_t wtakesLeft =   wpawns << 7 & NOTFILEH;
+	//uint64_t wtakes     = wtakesLeft | wtakesRight;
+
+	//uint64_t bpawns = position->pieceTables[black][pawn];
+
+	//uint64_t btakesRight =  bpawns >> 7  & NOTFILEA;
+	//uint64_t btakesLeft  =  bpawns >> 9  & NOTFILEH;
+	//uint64_t btakes      =  btakesLeft | btakesRight;
+
+	uint64_t buffer = position->pieceTables[white][pawn];
+	while(buffer){
+		uint16_t n = popLSB(buffer)+8;
+		if(!(passedPawnMasks[black][n] & (position->pieceTables[white][pawn] & ~(1UL << (n-8)))) && !(position->pieceTables[black][pawn] & files[FILE(n)])){
+			eval = eval-15;
+
+			//if(btakes & BIT64(n)){
+			//	eval = eval-10;
+			//}
+		}
+	}
+
+	buffer = position->pieceTables[black][pawn];
+	while(buffer){
+		uint16_t n = popLSB(buffer)-8;
+		if(!(passedPawnMasks[white][n] & (position->pieceTables[black][pawn] & ~(1UL << (n+8)))) && !(position->pieceTables[black][pawn] & files[FILE(n)])){
+			eval = eval+15;
+			//if(wtakes & BIT64(n)){
+			//	eval = eval+10;
+			//}
+		}
+	}
+#endif*/
 	return eval;
 }

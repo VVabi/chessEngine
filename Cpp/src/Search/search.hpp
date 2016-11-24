@@ -7,7 +7,7 @@
 
 #ifndef SEARCH_SEARCH_HPP_
 #define SEARCH_SEARCH_HPP_
-
+#include <assert.h>
 #define HISTORY_CUTOFF (1UL << 12)
 
 void rescaleHistoryTable();
@@ -51,6 +51,31 @@ struct searchDebugData{
 	uint64_t neededSort;
 	uint64_t nullMovePruningTried;
 	uint64_t nullMovePruningSuccessful;
+
+};
+
+
+class moveStack {
+	chessMove moveArray[5000];
+	uint16_t counter = 0;
+
+public:
+	vdt_vector<chessMove> getNext(){
+		counter++;
+		//std::cout << counter << std::endl;
+		return vdt_vector<chessMove>(moveArray+(counter-1)*150,150);
+	}
+
+	void release(){
+		assert(counter > 0);
+		counter--;
+	}
+
+	uint16_t getCounter(){
+		return counter;
+	}
+
+
 
 };
 

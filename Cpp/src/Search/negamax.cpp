@@ -36,7 +36,9 @@ void resetSearchData(){
 
 uint16_t killerMoves[40][2];
 
-static chessMove buffer[5000];
+//static chessMove buffer[5000];
+
+static moveStack qmvStack;
 
 uint16_t repetitionData[16384] = {0};
 
@@ -55,6 +57,13 @@ static inline bool backtrack_position_for_repetition(chessPosition* position) {
 	return false;
 }
 
+static uint8_t nullmoveReductions[40] = {0,1,2,2,2,2,2,3,
+										 3,3,3,3,3,3,3,3,
+										 3,3,3,3,3,3,3,3,
+										 3,3,3,3,3,3,3,3,
+										 3,3,3,3,3,3,3,3,
+};
+
 static inline bool check_nullmove(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t depth, int32_t beta){
 
 
@@ -71,15 +80,11 @@ static inline bool check_nullmove(chessPosition* position, uint16_t ply, uint16_
 		return false; //no point in trying nullmove when the current evaluation is already worse than beta
 	}
 
-	uint16_t kingField = findLSB(position->pieceTables[position->toMove][king]);
-	if(isFieldAttacked( position, (playerColor) (1-position->toMove), kingField)){
-		return false; //we are in check, nullmove is regi-suicide
-	}
 
 	makeNullMove(position);
 	chessMove mv;
 	searchCounts.nullMovePruningTried++;
-	int32_t value = -negamax(position, ply+1, max_ply, depth-3, -beta, -beta+1, &mv, false);
+	int32_t value = -negamax(position, ply+1, max_ply, depth-1-nullmoveReductions[depth], -beta, -beta+1, &mv, false);
 	undoNullMove(position);
 	if(value < beta) {
 		return false; //didnt manage a cutoff :(
@@ -140,8 +145,10 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 		searchCounts.wentToQuiescence++;
 		return negamaxQuiescence(position, alpha, beta, 0);
 	}
+	uint64_t ownKing = position->pieceTables[position->toMove][king];
+	bool movingSideInCheck = isFieldAttacked(position, (playerColor) (1-position->toMove), findLSB(ownKing));
 
-	if((depth >= 2) && allowNullMove){
+	if(allowNullMove && !movingSideInCheck){
 		if(check_nullmove(position, ply, max_ply, depth, beta)){
 			return beta;
 		}
@@ -150,22 +157,29 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 	//-------------------------------------------
 	int16_t bestIndex = -1;
 
-
-
 	//futility pruning
 	//-----------------
 	if(depth == 1){
-		searchCounts.futility_tried++;
-		int32_t base = evaluation(position, alpha-151, alpha);
-		if(base+150 < alpha){
-			searchCounts.futility_successful++;
-			//in this case, trying a silent move is pointless.
-			//std::cout << "Successful futility pruning" << std::endl;
-			return  negamaxQuiescence(position, alpha, beta, 0);
-		}
-	}
 
-	vdt_vector<chessMove> moves = vdt_vector<chessMove>(buffer+ply*150,150);
+//#ifdef EXPERIMENTAL
+		 //TODO: need to fix move stack first!!
+		if(!movingSideInCheck) {
+//#endif
+			searchCounts.futility_tried++;
+			int32_t base = evaluation(position, alpha-151, alpha);
+			if(base+150 < alpha){
+				searchCounts.futility_successful++;
+				//in this case, trying a silent move is pointless.
+				//std::cout << "Successful futility pruning" << std::endl;
+				return  negamaxQuiescence(position, alpha, beta, 0);
+			}
+		}
+//#ifdef EXPERIMENTAL
+	}
+//#endif
+
+	uint16_t stackCounter = qmvStack.getCounter();
+	vdt_vector<chessMove> moves = qmvStack.getNext();
 	generateAllMoves(&moves, position);
 	bool isInCheck = orderStandardMoves(position, &moves, ply, hashVal.bestMove);
 
@@ -190,7 +204,20 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 		uint16_t kingField = findLSB( position->pieceTables[1- position->toMove][king]);
 
 		if(isFieldAttacked( position,  position->toMove, kingField)){
+			if(ind > 0){
+				if(moves[ind].type == kingMove) {
+					std::cout << chessPositionToFenString(*position) << std::endl;
+					std::cout << chessPositionToOutputString(*position);
+					std::cout << position->toMove << std::endl;
+					std::cout << moves[ind].sourceField << " " << moves[ind].targetField << std::endl;
+					std::cout << "Epic fail" << std::endl;
+					std::cout << kingField << std::endl;
+					std::cout << isFieldAttacked( position,  position->toMove, kingField) << std::endl;
+					std::cout << moves[ind].sortEval << std::endl;
+				}
 
+				assert(moves[ind].type != kingMove); //all king moves moving into check should be found by move ordering!
+			}
 		} else {
 
 			searchCounts.nodes[depth]++;
@@ -206,6 +233,9 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 					reduction = 1;
 					if(ind > 15) {
 						reduction = 2;
+					}
+					if((depth > 8) && (ind > 6)) {
+						reduction = depth/3;
 					}
 				}
 			}
@@ -251,8 +281,9 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 					killerMoves[ply][0] = toRemember;
 				}
 			}
-			//moves.free_array();
 
+			qmvStack.release();
+			assert(stackCounter == qmvStack.getCounter());
 			return beta;
 		}
 	}
@@ -279,7 +310,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 
 	if(!legalMovesAvailable){
 		if(isInCheck){
-			alpha = -30000-depth;
+			alpha = -30000+ply;
 		} else {
 			alpha = 0;
 		}
@@ -295,6 +326,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 		}
 	}
 
-	//moves.free_array();
+	qmvStack.release();
+	assert(stackCounter == qmvStack.getCounter());
 	return alpha;
 }

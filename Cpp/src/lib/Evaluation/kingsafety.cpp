@@ -13,9 +13,9 @@
 #include <lib/Defines/boardParts.hpp>
 #include <lib/Attacks/attacks.hpp>
 
-//extern uint64_t kingmovetables[64];
+extern uint64_t kingmovetables[64];
 
-int32_t attacksCloseToKingEvals[] = {20, 60, 120, 180, 240, 320, 400, 500, 600, 600};
+int32_t attacksCloseToKingEvals[] = {10, 20, 40, 80, 150, 230, 350, 400, 500, 600};
 static int32_t kingSafetySinglePlayer(const chessPosition* position, const uint8_t* pawnColumnOccupancy, playerColor playingSide, const AttackTable* opponentAttackTable) {
 
 	int32_t ret = 0;
@@ -56,20 +56,18 @@ static int32_t kingSafetySinglePlayer(const chessPosition* position, const uint8
 
 	if(kingFile < 7) {
 		relevant_files = relevant_files | files[FILE(kingField+1)];
-	}
+	}*/
 
 
-
-	uint64_t opponentPieces = position->pieces[1-playingSide];
-	uint64_t opponentQueens = position->pieceTables[1-playingSide][queen];
+	/*uint64_t opponentPieces = position->pieces[1-playingSide];
+	uint64_t opponentQueens = position->pieceTables[1-playingSide][queen];*/
 
 	uint64_t kingmoves = kingmovetables[kingField];
 	kingmoves = kingmoves | BIT64(kingField);
 
 	uint64_t attacks = opponentAttackTable->completeAttackTable & kingmoves;
 
-	ret = ret-attacksCloseToKingEvals[popcount(attacks)];*/
-
+	ret = ret-attacksCloseToKingEvals[popcount(attacks)];
 	return (1-2*playingSide)*ret;
 
 }

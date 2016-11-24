@@ -40,12 +40,6 @@ uint64_t perftNodes(chessPosition* position, uint16_t depth){
 			}
 		}
 
-
-
-
-
-
-
 		makeMove(&moves[ind], position);
 		uint16_t kingField = findLSB(position->pieceTables[1-position->toMove][king]);
 		uint32_t additional_nodes = 0;
@@ -90,7 +84,7 @@ testResult testPerftTestSuite(){
 		ret.passed = false;
 		return ret;
 	}
-
+	std::cout << nodes << std::endl;
 	position = "R000K00RPPPBBPPP00N00Q0p0p00P000000PN000bn00pnp0p0ppqpb0r000k00rwKQkq";
 	c = stringToChessPosition(position);
 	nodes = perftNodes(&c, 5);
@@ -100,7 +94,7 @@ testResult testPerftTestSuite(){
 		ret.passed = false;
 		return ret;
 	}
-
+	std::cout << nodes << std::endl;
 	position = "000000000000P0P0000000000R000p0kKP00000r000p000000p0000000000000w0000";
 	c = stringToChessPosition(position);
 	nodes = perftNodes(&c,7);
@@ -110,7 +104,7 @@ testResult testPerftTestSuite(){
 		ret.passed = false;
 		return ret;
 	}
-
+	std::cout << nodes << std::endl;
 
 
 

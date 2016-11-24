@@ -83,7 +83,7 @@ bool isFieldAttacked(const chessPosition* position, playerColor attackingSide, u
 }
 
 
-AttackTable makeAttackTable(const chessPosition* position, playerColor attackingSide) {
+AttackTable makeAttackTable(const chessPosition* position, playerColor attackingSide, uint64_t ignoreMask) {
 
 	AttackTable retTable;
 	//pawns
@@ -104,7 +104,7 @@ AttackTable makeAttackTable(const chessPosition* position, playerColor attacking
 
 	//bishops
 	uint64_t occupancy  = position->pieces[white] | position->pieces[black];
-
+	occupancy = occupancy &(~ignoreMask);
 	uint64_t bishops = position->pieceTables[attackingSide][bishop];
 	uint64_t bishopAttackTable = 0;
 	while (bishops != 0) {
@@ -170,9 +170,9 @@ AttackTable makeAttackTable(const chessPosition* position, playerColor attacking
 }
 
 
-int16_t bishopMobility[14]   = {-50,-40,-35,-25,-10,0,5,10,15,20,22,23,24,25};
-int16_t rookMobility[15]     = {-50,-40,-35,-30,-20,-15,-5,0,5,10,15,18,21,22,23};
-int16_t knightMobility[9]   = {-30,-25,-15,0,5,10,15,18,20};
+int16_t bishopMobility[14]   = {-25,-20,-18,-13,-5,0,3,5,8,10,11,12,12,13};
+int16_t rookMobility[15]     = {-25,-20,-18,-15,-10,-8,-3,0,3,5,8,9,10,11,12};
+int16_t knightMobility[9]   = {-15,-13,-8,0,3,5,8,9,10};
 
 AttackTable makeAttackTableWithMobility(const chessPosition* position, playerColor attackingSide, int16_t* mobilityScore) {
 

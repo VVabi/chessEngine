@@ -94,21 +94,12 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 
 	uint8_t pawnColumnOccupancy[2];
 	eval = eval+pawnEvaluation(position, pawnColumnOccupancy, phase);
-#ifdef EXPERIMENTAL
-	int16_t mobilityScore = 0;
-	AttackTable whiteAttackTable 		= makeAttackTableWithMobility(position, white, &mobilityScore);
-	eval = eval+mobilityScore/2;
-	mobilityScore = 0;
-	AttackTable blackAttackTable 		= makeAttackTableWithMobility(position, black, &mobilityScore);
-	eval = eval-mobilityScore/2;
-#else
 	int16_t mobilityScore = 0;
 	AttackTable whiteAttackTable 		= makeAttackTableWithMobility(position, white, &mobilityScore);
 	eval = eval+mobilityScore;
 	mobilityScore = 0;
 	AttackTable blackAttackTable 		= makeAttackTableWithMobility(position, black, &mobilityScore);
 	eval = eval-mobilityScore;
-#endif
 
 
 	eval = eval+rookOpenFiles(position, pawnColumnOccupancy);
@@ -126,11 +117,10 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 		eval = eval-50;
 	}
 
-//#ifdef EXPERIMENTAL
 	int32_t kingSafetyComplete = kingSafety(position, pawnColumnOccupancy, &whiteAttackTable, &blackAttackTable);;
 	int32_t kingSafetyTapered = (taperingValues[phase]*kingSafetyComplete)/256;
 	eval = eval+kingSafetyTapered;
-//#endif
+
 
 #ifdef RANDOMEVAL
 	eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?
