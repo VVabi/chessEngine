@@ -34,12 +34,12 @@ uint64_t kingBlockers[] = {WHITEKINGCASTLECHESSFIELDS, BLACKKINGCASTLECHESSFIELD
 uint64_t queenBlockers[] = {WHITEQUEENCASTLECHESSFIELDS, BLACKQUEENCASTLECHESSFIELDS};
 
 int16_t captureEvals[6][7] = {
-		{20, 250, 260, 490, 900, 10000,0},
-		{0, 20, 20, 290, 700, 10000,0},
-		{0, 20, 20, 290, 700, 10000,0},
-		{-20, 0, 0, 40, 400, 10000,0},
-		{-70, -20, -20, 40, 100, 10000,0},
-		{100, 200, 200, 300, 400, 10000,0},
+		{20, 	130, 	130, 	390, 	900, 	10000,	0},
+		{0, 	50, 	50, 	220, 	700, 	10000,	0},
+		{0, 	50, 	50, 	220, 	700, 	10000,	0},
+		{-20, 	40, 	40, 	210, 	400, 	10000,	0},
+		{-70, 	30, 	30, 	160, 	400, 	10000,	0},
+		{100, 	200, 	200, 	300, 	400, 	10000,	0},
 };
 
 void calcCaptureSortEval(chessPosition* position, chessMove* mv, uint16_t hashedMove) {
