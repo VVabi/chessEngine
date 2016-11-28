@@ -29,8 +29,17 @@ static searchDebugData searchCounts;
 searchDebugData getSearchData(){
 	return searchCounts;
 }
+
 void resetSearchData(){
 	memset(&searchCounts, 0, sizeof(searchCounts));
+}
+
+static uint32_t totalTime;
+static uint64_t start_ts;
+
+void setTotalTime(uint32_t tTime, uint64_t start){
+	totalTime = tTime;
+	start_ts = start;
 }
 
 
@@ -57,14 +66,14 @@ static inline bool backtrack_position_for_repetition(chessPosition* position) {
 	return false;
 }
 
-static uint8_t nullmoveReductions[40] = {0,1,2,2,2,2,2,3,
-										 3,3,3,3,3,3,3,3,
+static uint8_t nullmoveReductions[40] = {0,1,2,2,2,2,2,2,
+										 2,2,2,2,2,2,2,2,
 										 3,3,3,3,3,3,3,3,
 										 3,3,3,3,3,3,3,3,
 										 3,3,3,3,3,3,3,3,
 };
 
-static inline bool check_nullmove(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t depth, int32_t beta){
+static inline bool check_nullmove(chessPosition* position, uint16_t* refutationMoveTarget, uint16_t ply, uint16_t max_ply, int16_t depth, int32_t beta){
 
 
 	if(beta > 10000){ //TODO: more dynamic condition here?
@@ -75,11 +84,9 @@ static inline bool check_nullmove(chessPosition* position, uint16_t ply, uint16_
 		return false;
 	}*/
 	int32_t eval = evaluation(position, beta-1, beta);
-
 	if(eval < beta){
 		return false; //no point in trying nullmove when the current evaluation is already worse than beta
 	}
-
 
 	makeNullMove(position);
 	chessMove mv;
@@ -87,16 +94,24 @@ static inline bool check_nullmove(chessPosition* position, uint16_t ply, uint16_
 	int32_t value = -negamax(position, ply+1, max_ply, depth-1-nullmoveReductions[depth], -beta, -beta+1, &mv, false);
 	undoNullMove(position);
 	if(value < beta) {
+		*refutationMoveTarget = mv.targetField;
 		return false; //didnt manage a cutoff :(
 	}
 	searchCounts.nullMovePruningSuccessful++;
 	return true;
 }
 
-int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t depth, int16_t alpha, int16_t beta, chessMove* bestMove, bool allowNullMove, bool doHashProbe) {
+int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t depth, int16_t alpha, int16_t beta, chessMove* bestMove, bool allowNullMove, bool doHashProbe){
 
+	if(depth >= 3) { //TODO: be careful here - we may have to reset the stack in quiescence search as well!
+		if(get_timestamp()-start_ts >= totalTime){ //TODO: how is this performance wise?
+			qmvStack.reset();
+			throw timeoutException();
+		}
+	}
 	assert(alpha < beta);
 	assert(ply+depth <= max_ply);
+
 	searchCounts.called++;
 	if(position->data.fiftyMoveRuleCounter >= 100){
 		return 0;
@@ -148,8 +163,9 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 	uint64_t ownKing = position->pieceTables[position->toMove][king];
 	bool movingSideInCheck = isFieldAttacked(position, (playerColor) (1-position->toMove), findLSB(ownKing));
 
-	if(allowNullMove && !movingSideInCheck){
-		if(check_nullmove(position, ply, max_ply, depth, beta)){
+	uint16_t refutationTarget = NO_REFUTATION; //invalid
+	if(allowNullMove && !movingSideInCheck && (depth >= 2)){
+		if(check_nullmove(position, &refutationTarget, ply, max_ply, depth, beta)){
 			return beta;
 		}
 	}
@@ -160,11 +176,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 	//futility pruning
 	//-----------------
 	if(depth == 1){
-
-//#ifdef EXPERIMENTAL
-		 //TODO: need to fix move stack first!!
 		if(!movingSideInCheck) {
-//#endif
 			searchCounts.futility_tried++;
 			int32_t base = evaluation(position, alpha-151, alpha);
 			if(base+150 < alpha){
@@ -174,14 +186,13 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 				return  negamaxQuiescence(position, alpha, beta, 0);
 			}
 		}
-//#ifdef EXPERIMENTAL
 	}
-//#endif
+
 
 	uint16_t stackCounter = qmvStack.getCounter();
 	vdt_vector<chessMove> moves = qmvStack.getNext();
 	generateAllMoves(&moves, position);
-	bool isInCheck = orderStandardMoves(position, &moves, ply, hashVal.bestMove);
+	bool isInCheck = orderStandardMoves(position, &moves, ply, hashVal.bestMove, refutationTarget);
 
 
 	bool legalMovesAvailable = false;
@@ -231,12 +242,11 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 			if((ind > 3) && (moves[ind].captureType == none) && (depth > 2) && !isInCheck) { //LMR
 				if(!check){
 					reduction = 1;
+//#ifdef EXPERIMENTAL
 					if(ind > 15) {
 						reduction = 2;
 					}
-					if((depth > 8) && (ind > 6)) {
-						reduction = depth/3;
-					}
+//#endif
 				}
 			}
 
@@ -266,7 +276,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 		}
 		undoMove(position);
 
-		if(alpha >= beta) {
+		if((alpha >= beta)) {
 			if((depth >= hashVal.depth) || (searchId != hashVal.searchId)) {
 				setHashEntry(FAILHIGH, beta, depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), position->zobristHash);
 			}
@@ -315,6 +325,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 			alpha = 0;
 		}
 	}
+
 
 	if(foundGoodMove) {
 		if((depth >= hashVal.depth) || (searchId != hashVal.searchId)) {

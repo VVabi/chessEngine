@@ -112,7 +112,7 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 	int16_t bestIndex = -1;
 	for(uint16_t ind=0; ind < moves.length; ind++){
 
-		if(moves[ind].sortEval < -50){ //TODO: This means we prune bishopxKnight! This is not intended
+		if(moves[ind].sortEval < -50){
 			break; //SEE pruning
 		}
 		if(ind == 1){

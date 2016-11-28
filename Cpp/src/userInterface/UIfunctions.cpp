@@ -53,6 +53,8 @@ uint64_t runSinglePositionPerformanceTest(std::string position, uint16_t depth, 
 	int16_t alpha = -32000;
 	int16_t beta  = 32000;
 	int32_t searchdepth = 3;
+	uint64_t start_ts = get_timestamp();
+	setTotalTime(100000000, start_ts);
 	while(searchdepth <= depth && (searchdepth < 14)) {
 
 		bool succeeded = false;
@@ -632,7 +634,7 @@ bool checkAndMakeMove(chessPosition& position, std::string move){
 	vdt_vector<chessMove> moves = vdt_vector<chessMove>(100);
 		uint64_t mv = stringToMove(move);
 		generateAllMoves(&moves, &position);
-		orderStandardMoves(&position, &moves, 0, 0);
+		orderStandardMoves(&position, &moves, 0, 0, NO_REFUTATION);
 		std::sort(moves.data, moves.data+moves.length);
 		bool found = false;
 		chessMove m;

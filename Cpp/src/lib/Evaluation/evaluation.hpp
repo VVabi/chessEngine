@@ -18,4 +18,14 @@ int32_t kingSafety(const chessPosition* position, const uint8_t* pawnColumnOccup
 int32_t debugPawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupancy, uint16_t phase, VDTpawnEvaluation* pawnEval);
 int32_t debugEvaluation(const chessPosition* position, VDTevaluation* debugStruct);
 
+struct evaluationResult {
+	int16_t PSQ;
+	int16_t staticPawn;
+	int16_t passedPawn;
+	int16_t kingSafety;
+	int16_t bishoppair;
+	int16_t mobility;
+	int16_t rookOpenFiles;
+};
+evaluationResult getEvaluationResult();
 #endif /* EVALUATION_EVALUATION_HPP_ */

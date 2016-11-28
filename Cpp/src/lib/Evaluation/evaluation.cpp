@@ -14,7 +14,11 @@
 #include <lib/Attacks/attacks.hpp>
 #include <lib/bitfiddling.h>
 
+evaluationResult result;
 
+evaluationResult getEvaluationResult(){
+	return result;
+}
 
 uint16_t taperingValues[81] = {  0,  0,  0,  0,  0,  0,  0,  0,
 						       	 0,  0,  0,  0,  0,  0,  0,  5,
@@ -37,7 +41,7 @@ static int32_t rookOpenFiles(const chessPosition* position, uint8_t* pawnOccupan
 			uint16_t field = popLSB(rooks);
 			uint16_t file = FILE(field);
 			if((pawnOccupancy[color] & (1 << file)) == 0){
-				ret = ret+(1-2*color)*30;
+				ret = ret+(1-2*color)*15;
 			}
 		}
 	}
@@ -49,15 +53,12 @@ extern int16_t endGamepieceTables[7][2][64];
 
 int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 
+
 	if( (position->pieceTables[white][pawn] == 0) &&
 		(position->pieceTables[black][pawn] == 0) &&
 		position->totalFigureEval < 400) {
 		return 0; //insufficent material
 	}
-
-
-
-
 
 	/*uint16_t blackkingField = findLSB(position->pieceTables[black][king]);
 	return endGamepieceTables[king][black][blackkingField];*/ //in nthis way, we actually win endgames vs lone king. But be careful with searchdepth! higher depths may delay the moving of the king
@@ -82,7 +83,7 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 
 	int32_t pieceTableEval = ((256-taperingValues[phase])*bufferEndgame+taperingValues[phase]*bufferMidgame)/256; //division by 256
 	eval = eval+pieceTableEval;
-
+	result.PSQ = pieceTableEval;
 
 	int32_t evalsigned = (1-2*position->toMove)*eval;
 
@@ -97,31 +98,43 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 	int16_t mobilityScore = 0;
 	AttackTable whiteAttackTable 		= makeAttackTableWithMobility(position, white, &mobilityScore);
 	eval = eval+mobilityScore;
+	result.mobility = mobilityScore;
 	mobilityScore = 0;
 	AttackTable blackAttackTable 		= makeAttackTableWithMobility(position, black, &mobilityScore);
 	eval = eval-mobilityScore;
+	result.mobility = result.mobility-mobilityScore;
 
 
-	eval = eval+rookOpenFiles(position, pawnColumnOccupancy);
+	int16_t rookFiles = rookOpenFiles(position, pawnColumnOccupancy);
+	eval = eval+rookFiles;
+	result.rookOpenFiles = rookFiles;
 
 
 	uint64_t numWhiteBishops = popcount(position->pieceTables[white][bishop]);
 
 	if(numWhiteBishops > 1){
 		eval = eval+50;
+		result.bishoppair = 50;
 	}
 
 	uint64_t numblackBishops = popcount(position->pieceTables[black][bishop]);
 
 	if(numblackBishops > 1){
 		eval = eval-50;
+		result.bishoppair = result.bishoppair-50;
 	}
 
 	int32_t kingSafetyComplete = kingSafety(position, pawnColumnOccupancy, &whiteAttackTable, &blackAttackTable);;
 	int32_t kingSafetyTapered = (taperingValues[phase]*kingSafetyComplete)/256;
 	eval = eval+kingSafetyTapered;
-
-
+	result.kingSafety = kingSafetyTapered;
+/*#ifdef EXPERIMENTAL
+	if(position->toMove == white) {
+		eval = eval+10;
+	} else {
+		eval = eval-10;
+	}
+#endif*/
 #ifdef RANDOMEVAL
 	eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?
 #endif

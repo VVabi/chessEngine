@@ -39,7 +39,7 @@ int16_t captureEvals[6][7] = {
 		{0, 	50, 	50, 	220, 	700, 	10000,	0},
 		{-20, 	40, 	40, 	210, 	400, 	10000,	0},
 		{-70, 	30, 	30, 	160, 	400, 	10000,	0},
-		{100, 	200, 	200, 	300, 	400, 	10000,	0},
+		{0, 	200, 	200, 	300, 	700, 	10000,	0},
 };
 
 void calcCaptureSortEval(chessPosition* position, chessMove* mv, uint16_t hashedMove) {
@@ -69,7 +69,7 @@ void calcCaptureSortEval(chessPosition* position, chessMove* mv, uint16_t hashed
 
 #define ILLEGAL -20000
 
-static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackTable* opponentAttackTable, AttackTable* ownAttackTable, uint16_t hashedMove, uint16_t killerA, uint16_t killerB) {
+static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackTable* opponentAttackTable, AttackTable* ownAttackTable, uint16_t hashedMove, uint16_t killerA, uint16_t killerB, uint16_t refutationTarget) {
 
 	int16_t sortEval = 0;
 
@@ -84,7 +84,7 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 	}*/
 
 	if (((uint16_t) mv->type) < 6) {
-		sortEval = sortEval+pieceTables[mv->type][position->toMove][mv->targetField]-pieceTables[mv->type][position->toMove][mv->sourceField];
+		sortEval = sortEval+(pieceTables[mv->type][position->toMove][mv->targetField]-pieceTables[mv->type][position->toMove][mv->sourceField])/4;
 	}
 
 	if(mv->type == promotionQueen) {
@@ -158,21 +158,25 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 
 		uint16_t targetFile = FILE(mv->targetField);
 		uint64_t pawns      = position->pieceTables[position->toMove][pawn];
-
+		uint64_t opppawns      = position->pieceTables[1-position->toMove][pawn];
 		if((targetFile & pawns) == 0) {
-			sortEval = sortEval+30;
+			sortEval = sortEval+10;
+			if((targetFile & opppawns) == 0){
+				sortEval = sortEval+30;
+			}
 		}
 
 	}
 
 
 	if((mv->type == pawnMove)) {
-
 		if(BIT64(mv->targetField) & CENTER){
 			sortEval = sortEval+80;
 		} else if(BIT64(mv->targetField) & WIDECENTER){
 			sortEval = sortEval+50;
-		}
+		} /*else {
+			sortEval = sortEval+30;
+		}*/
 	}
 	if((position->madeMoves.length > 0) && (mv->captureType != none)){
 		chessMove previousMove = position->madeMoves[position->madeMoves.length-1];
@@ -196,12 +200,9 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 
 	if(mv->type == castlingKingside) {
 		sortEval  = 110;
-
 		if(kingBlockers[position->toMove] & opponentAttackTable->completeAttackTable) {
 			sortEval = ILLEGAL;
 		}
-
-
 	} else if(mv->type == castlingQueenside) {
 		sortEval  = 70;
 		if(queenBlockers[position->toMove] & opponentAttackTable->completeAttackTable) {
@@ -216,16 +217,20 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 	if(mv->captureType == none){
 		int32_t historyValue = historyTable[position->toMove][mv->sourceField][mv->targetField];
 		if(historyValue > 20){
-			historyValue = 21+(historyValue/16);
+			historyValue = 21+(historyValue/4);
 		}
 
 		if(historyValue < -20){
-			historyValue = -21+(historyValue/16);
+			historyValue = -21+(historyValue/4);
 		}
 
 		sortEval = sortEval+historyValue;
 		//std::cout << historyValue << std::endl;
 		//std::cout << (historyTable[position->toMove][mv->sourceField][mv->targetField] >> 6) << std::endl;
+	}
+
+	if( mv->sourceField == refutationTarget) {
+		sortEval = sortEval+100;
 	}
 
 	if( ((mv->sourceField) | (mv->targetField << 8)) == hashedMove) {
@@ -235,7 +240,7 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 	mv->sortEval = sortEval;
 }
 
-bool orderStandardMoves(chessPosition* position, vdt_vector<chessMove>* moves, uint16_t ply, uint16_t hashedMove) {
+bool orderStandardMoves(chessPosition* position, vdt_vector<chessMove>* moves, uint16_t ply, uint16_t hashedMove, uint16_t refutationTarget) {
 
 	AttackTable opponentAttackTable = makeAttackTable(position, (playerColor) (1-position->toMove), position->pieceTables[position->toMove][king]);
 	AttackTable ownAttackTable 		= makeAttackTable(position, position->toMove);
@@ -245,7 +250,7 @@ bool orderStandardMoves(chessPosition* position, vdt_vector<chessMove>* moves, u
 	uint16_t killerMoveA = killerMoves[ply][0];
 	uint16_t killerMoveB = killerMoves[ply][1];
 	for (uint16_t ind=0; ind < moves->length; ind++) {
-		calcSortEval(position, &(*moves)[ind], &opponentAttackTable, &ownAttackTable, hashedMove, killerMoveA, killerMoveB);
+		calcSortEval(position, &(*moves)[ind], &opponentAttackTable, &ownAttackTable, hashedMove, killerMoveA, killerMoveB, refutationTarget);
 		if((*moves)[ind].sortEval > bestEval){
 			bestEval = (*moves)[ind].sortEval;
 			bestIndex = ind;

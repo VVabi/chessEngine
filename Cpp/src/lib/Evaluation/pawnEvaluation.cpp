@@ -71,9 +71,20 @@ int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOcc
 	eval = eval-50*popcount(isolatedDoublePawns)-20*popcount(nonIsolatedDoublePawns);
 
 	eval = eval-10*popcount(isolatedPawns);
+
+/*#ifdef EXPERIMENTAL
+	//reward pawns covered by other pawns
+	//---------------------------------------
+	uint64_t takesRight = (color ? pawns >> 7 : pawns << 9) & NOTFILEA;
+	uint64_t takesLeft = (color ? pawns >> 9 : pawns << 7) & NOTFILEH;
+	uint64_t takes = takesLeft | takesRight;
+	eval = eval+3*popcount(takes & pawns);
+#endif*/
+
 	return eval*(1-2*color);
 }
 
+extern evaluationResult result;
 
 int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupancy, uint16_t phase) {
 
@@ -81,11 +92,14 @@ int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupan
 	uint64_t whitePawns = position->pieceTables[white][pawn];
 	uint64_t blackPawns = position->pieceTables[black][pawn];
 
-
-	eval = eval+staticPawnEval(whitePawns, white, pawnColumnOccupancy)+staticPawnEval(blackPawns, black,  pawnColumnOccupancy+1);
+	int16_t staticPawn = staticPawnEval(whitePawns, white, pawnColumnOccupancy)+staticPawnEval(blackPawns, black,  pawnColumnOccupancy+1);
+	eval = eval+staticPawn;
+	result.staticPawn = staticPawn;
 	int32_t passedPawns = passedPawnEval(whitePawns, blackPawns);
 	passedPawns = ((256-taperingValues[phase])*passedPawns)/256;
 	eval = eval+passedPawns;
+	result.passedPawn = passedPawns;
+
 
 /*#ifdef EXPERIMENTAL  looks like very small gain (~ 5-6 elo), but I was hoping for more...
 	//backwards pawn

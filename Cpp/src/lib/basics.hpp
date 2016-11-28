@@ -76,6 +76,15 @@ struct hashEntry{
 	uint8_t searchId;
 } __attribute__((packed));
 
+class timeoutException: public std::exception
+{
+  virtual const char* what() const throw()
+  {
+    return "Timeout";
+  }
+};
+
+
 
 uint64_t getRandUint64();
 void debug_incremental_calculations(const chessPosition* position);

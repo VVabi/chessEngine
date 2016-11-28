@@ -65,6 +65,17 @@ inputMessage positionInput;
 inputMessage goInput;
 inputMessage positionRequest;
 
+bool handleReady() {
+	if(readyInput.valid ){
+		readyInput.valid = false;
+		std::cout << "readyok" << std::endl;
+		return true;
+	}
+
+	return false;
+
+}
+
 void uciInterface::readInput(){
 	std::string next = readLine();
 	uint16_t pos=next.find(' ',0);
@@ -95,18 +106,17 @@ void uciInterface::readInput(){
 		positionRequest.valid = true;
 	}
 
-}
-
-bool handleReady() {
-	if(readyInput.valid ){
-		readyInput.valid = false;
-		std::cout << "readyok" << std::endl;
-		return true;
+	handleReady();
+	if(uciInput.valid){
+		std::cout << "id name vabi" << std::endl;
+		std::cout << "id author Fabian" << std::endl;
+		std::cout << "uciok" << std::endl;
+		uciInput.valid = false;
 	}
 
-	return false;
-
 }
+
+
 
 void uciInterface::initialize(){
 	debugLog.open("/home/vabi/debug.txt");
@@ -115,7 +125,7 @@ void uciInterface::initialize(){
 	positionInput.valid = false;
 	goInput.valid = false;
 
-	while(1){
+	/*while(1){
 		readInput();
 
 		if(uciInput.valid){
@@ -128,7 +138,7 @@ void uciInterface::initialize(){
 		if(handleReady()){
 			break;
 		}
-	}
+	}*/
 
 }
 

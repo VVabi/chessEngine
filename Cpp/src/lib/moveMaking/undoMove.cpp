@@ -116,6 +116,17 @@ void undoMove(chessPosition* position) {
 		std::cout << "Nothing to undo" << std::endl;
 		return;
 	}
+
+	/*if(repetitionData[position->zobristHash & 16383] == 0){
+		std::cout << position->madeMoves.length << std::endl;
+		std::cout << chessPositionToOutputString(*position) << std::endl;
+		std::cout << chessPositionToFenString(*position, false) << std::endl;
+		for(uint16_t ind=0; ind < position->madeMoves.length; ind++) {
+			std::cout << position->madeMoves[ind].sourceField << " " << position->madeMoves[ind].targetField << std::endl;
+		}
+		std::cout << "WTF" << std::endl;
+	}*/
+
 	assert(repetitionData[position->zobristHash & 16383] != 0);
 	repetitionData[position->zobristHash & 16383]--;
 	chessMove move = position->madeMoves.pop();

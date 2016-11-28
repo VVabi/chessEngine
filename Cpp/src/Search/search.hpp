@@ -9,12 +9,12 @@
 #define SEARCH_SEARCH_HPP_
 #include <assert.h>
 #define HISTORY_CUTOFF (1UL << 12)
-
+#define NO_REFUTATION 64
 void rescaleHistoryTable();
 int16_t negamax(chessPosition* position,  uint16_t ply, uint16_t max_ply, int16_t depth, int16_t alpha, int16_t beta, chessMove* bestMove, bool allowNullMove = true,  bool allowHashProbe = true);
 int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, uint16_t depth);
 void resetNodes();
-bool orderStandardMoves(chessPosition* position, vdt_vector<chessMove>* moves, uint16_t ply, uint16_t hashedMove);
+bool orderStandardMoves(chessPosition* position, vdt_vector<chessMove>* moves, uint16_t ply, uint16_t hashedMove, uint16_t refutationTarget);
 void orderCaptureMoves(chessPosition* position, vdt_vector<chessMove>* moves);
 uint32_t getNodes();
 
@@ -61,6 +61,7 @@ class moveStack {
 
 public:
 	vdt_vector<chessMove> getNext(){
+		assert(counter < 33);
 		counter++;
 		//std::cout << counter << std::endl;
 		return vdt_vector<chessMove>(moveArray+(counter-1)*150,150);
@@ -75,11 +76,17 @@ public:
 		return counter;
 	}
 
+	void reset(){
+		counter = 0;
+	}
+
 
 
 };
 
 searchDebugData getSearchData();
 void resetSearchData();
+bool isSearchValid();
+void setTotalTime(uint32_t tTime, uint64_t start);
 
 #endif /* SEARCH_SEARCH_HPP_ */

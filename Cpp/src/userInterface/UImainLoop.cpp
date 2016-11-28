@@ -25,7 +25,7 @@ extern uint16_t killerMoves[20][2];
 //#define UCI
 
 
-bool decideSearchFurther(searchParameters params, uint64_t start_ts, uint64_t searchedNodes, uint16_t depth, playerColor toMove, uint16_t numMadeMoves) {
+uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t numMadeMoves, uint32_t* worst_case_time) {
 
 	/*if(depth < 7){
 		return true;
@@ -49,24 +49,14 @@ bool decideSearchFurther(searchParameters params, uint64_t start_ts, uint64_t se
 		std::cout << completeExpectedTime << std::endl;
 		float timeAllotted = completeExpectedTime/(2.0*remainingMoves);
 
-		if(timeAllotted > total/20.0){
-			timeAllotted = total/20.0;
+		if(timeAllotted > total/10.0){
+			timeAllotted = total/10.0;
 		}
-		std::cout << timeAllotted << std::endl;
-		uint64_t now = get_timestamp();
-
-		if(now-start_ts < timeAllotted) {
-			return true;
-		}
-
-		return false;
-
+		*worst_case_time = total/10.0;
+		return timeAllotted;
 	}
 
-
-	return false;
-
-
+	return 100; //some default
 }
 
 
@@ -85,21 +75,35 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 	uint64_t searchedNodes = 0;
 #ifdef FIXEDDEPTH
 	uint16_t maxdepth = 7;
-	while(depth < maxdepth){ //hacked to get repeatable results - there is a major bug hiding somewhere
+	setTotalTime(100000000, start_ts);
+	while(depth < maxdepth){
 #else
-	//uint64_t goalNodes = 1800*maximal_time;
-	while(decideSearchFurther(params, start_ts, searchedNodes, depth, position->toMove, position->madeMoves.length)) {
-#endif
-		*eval = negamax(position, 0, depth+3, depth, alpha, beta, bestMove, true, false);
+	uint32_t worst_case_search_time = 0;
+	uint32_t totalTime = calcSearchTime(params, position->toMove, position->madeMoves.length, &worst_case_search_time);
+	setTotalTime(worst_case_search_time, start_ts);
+	uint16_t madeMoves = position->madeMoves.length;
 
-		if(doAspiration) {
-			if ((*eval <= alpha) || (*eval >= beta)) {
-				//std::cout << "Aspiration window search failed, researching..." <<std::endl;
-				*eval = negamax(position, 0, depth+3, depth, -32000, 32000, bestMove, true, false);
+	//uint64_t goalNodes = 1800*maximal_time;
+	while(get_timestamp()-start_ts <= totalTime) {
+#endif
+		try{
+			chessMove localBestMove;
+			*eval = negamax(position, 0, depth+3, depth, alpha, beta, &localBestMove, true, false);
+
+			if(doAspiration) {
+				if ((*eval <= alpha) || (*eval >= beta)) {
+					//std::cout << "Aspiration window search failed, researching..." <<std::endl;
+					*eval = negamax(position, 0, depth+3, depth, -32000, 32000, &localBestMove, true, false);
+				}
+
+				alpha = *eval-50;
+				beta  = *eval+50;
 			}
 
-			alpha = *eval-50;
-			beta  = *eval+50;
+			*bestMove = localBestMove;
+		} catch(timeoutException e) {
+			std::cout << "Search timed out" << std::endl;
+			break;
 		}
 
 		//std::cout << depth <<std::endl;
@@ -158,7 +162,20 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 	//std::cout << "Depth searched " << depth << std::endl;
 	*mtime = get_timestamp()-start_ts;
 
+	//undo moves until we are back to start
 
+
+#ifndef FIXEDDEPTH
+	while(position->madeMoves.length > madeMoves){
+		chessMove current = position->madeMoves[position->madeMoves.length-1];
+
+		if(current.move == 0) {
+			undoNullMove(position);
+		} else {
+			undoMove(position);
+		}
+	}
+#endif
 	/*std::cout << "Qnodes " <<  qnodes << " normal nodes " << nodes <<std::endl;
 	std::cout << "Forced move " << moveToString(*bestMove, *position) << std::endl;
 	std::cout << "Evaluation "  << eval << std::endl;
@@ -204,10 +221,10 @@ void UIloop() {
 	UI = new networkUserInterface();
 #endif
 	std::string positionstr = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwKQkq";
-	//chessPosition position = stringToChessPosition(positionstr);
+	chessPosition position = stringToChessPosition(positionstr);
 	/*std::string positionstr = " ";*/
-	std::string fen = "7k/p7/1p5p/3p4/3P4/P5np/1P2R1rK/8 w - - 0";
-	chessPosition position = FENtoChessPosition(fen);
+	/*std::string fen = "7k/p7/1p5p/3p4/3P4/P5np/1P2R1rK/8 w - - 0";
+	chessPosition position = FENtoChessPosition(fen);*/
 
 	/*chessMove mv;
 	mv.sourceField = 29;
@@ -295,7 +312,21 @@ void UIloop() {
 			uint64_t mtime;
 			int32_t eval = 0;
 			searchMove(&position, &bestMove, 4000, &nodeCount, &mtime, &eval, true, params);
+			std::cout << "Found move " << moveToString(bestMove, position) << std::endl;
 			UI->sendBestMove(moveToString(bestMove, position));
+			makeMove(&bestMove, &position);
+			int16_t e  = evaluation(&position, -32000, 32000);
+			evaluationResult res = getEvaluationResult();
+			std::cout << "Eval " << e << std::endl;
+			std::cout << "PSQ " << res.PSQ << std::endl;
+			std::cout << "mobility " << res.mobility << std::endl;
+			std::cout << "static pawn " << res.staticPawn << std::endl;
+			std::cout << "passed pawn " << res.passedPawn << std::endl;
+			std::cout << "rook files "  << res.rookOpenFiles << std::endl;
+			std::cout << "king safety " << res.kingSafety << std::endl;
+			std::cout << "bishop pair" << res.bishoppair << std::endl;
+			undoMove(&position);
+
 		}
 	}
 }
