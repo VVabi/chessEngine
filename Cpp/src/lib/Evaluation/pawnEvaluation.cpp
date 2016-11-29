@@ -15,9 +15,8 @@ extern uint64_t files[];
 extern uint64_t  passedPawnMasks[2][64];
 extern uint16_t taperingValues[81];
 
-static short const passedPawnEvalValues[2][64] = {{ 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 9, 9, 9, 9, 9, 9, 9, 9, 13, 13, 13, 13, 13, 13, 13, 13,0,0,0,0,0,0,0,0 },
+static int16_t const passedPawnEvalValues[2][64] = {{ 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 9, 9, 9, 9, 9, 9, 9, 9, 13, 13, 13, 13, 13, 13, 13, 13,0,0,0,0,0,0,0,0 },
 { 0, 0, 0, 0, 0, 0, 0, 0, 13, 13, 13, 13, 13, 13, 13, 13, 9, 9, 9, 9, 9, 9, 9, 9, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0,0 }};
-
 
 
 int32_t passedPawnEval(uint64_t whitePawns, uint64_t blackPawns) {
@@ -61,15 +60,21 @@ int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOcc
 		}
 	}
 
-
-	uint8_t isolatedPawns = ~((*pawnColumnOccupancy << 1) | (*pawnColumnOccupancy >> 1));
+#ifdef EXPERIMENTAL
+	uint8_t isolatedPawns = ~((*pawnColumnOccupancy << 1) | (*pawnColumnOccupancy >> 1))  & *pawnColumnOccupancy;
+#else
+	uint8_t isolatedPawns = ~((*pawnColumnOccupancy << 1) | (*pawnColumnOccupancy >> 1)); //quite a horrible bug...
+#endif
 
 	uint64_t isolatedDoublePawns = isolatedPawns & doublePawns;
 
 	uint64_t nonIsolatedDoublePawns =  (~isolatedPawns) & doublePawns;
 
-	eval = eval-50*popcount(isolatedDoublePawns)-20*popcount(nonIsolatedDoublePawns);
-
+#ifdef EXPERIMENTAL
+	eval = eval-40*popcount(isolatedDoublePawns)-20*popcount(nonIsolatedDoublePawns);
+#else
+	eval = eval-50*popcount(isolatedDoublePawns)-20*popcount(nonIsolatedDoublePawns); //bug-we already
+#endif
 	eval = eval-10*popcount(isolatedPawns);
 
 /*#ifdef EXPERIMENTAL

@@ -19,10 +19,50 @@
 #include <lib/moveMaking/moveMaking.hpp>
 #include <lib/moveGeneration/moveGeneration.hpp>
 #include <algorithm>
-
+#include <lib/Evaluation/evaluation.hpp>
 static char figureNames[2][6] = {{'P', 'N', 'B', 'R', 'Q', 'K'},
 		{'p', 'n', 'b', 'r', 'q', 'k'},
 };
+
+void putTableLine(std::ostream& out, int16_t value, std::string name) {
+	out << name << " & " << value << "\\\\ \\hline" << std::endl;
+}
+
+void latexOutput(const chessPosition* pos, std::ostream& out, evaluationResult ev, int16_t eval) {
+
+	int16_t figureVal = calcFigureEvaluation(pos);
+	out << "\\begin{figure}" << std::endl;
+	out << "\\newgame" << std::endl;
+	out << "\\fenboard{"+chessPositionToFenString(*pos, false)+"}" << std::endl;
+
+	out << "\\begin{tabular}{ll}" << std::endl;
+	out << "\\raisebox{-.5\\height}{\\showboard}&   \\begin{tabular}{ l | c  }" << std::endl;
+
+	putTableLine(out, eval, "Total");
+	putTableLine(out, figureVal, "Material");
+	putTableLine(out, ev.PSQ-figureVal, "Piece Square Tables");
+	putTableLine(out, ev.mobility, "Mobility");
+	putTableLine(out, ev.kingSafety, "King Safety");
+	putTableLine(out, ev.bishoppair, "Bishop pair");
+	putTableLine(out, ev.staticPawn, "Pawn structure");
+	putTableLine(out, ev.passedPawn, "Passed pawns");
+	putTableLine(out, ev.rookOpenFiles, "Rooks on open files");
+	out << "\\end{tabular}" << std::endl;
+	out << "\\end{tabular}" << std::endl;
+	out << "\\end{figure}" << std::endl;
+
+
+
+
+
+}
+
+void latexOutput(std::string FEN, std::ostream& out) {
+	chessPosition pos = FENtoChessPosition(FEN);
+	int16_t eval = evaluation(&pos, -32000, 32000);
+	evaluationResult ev = getEvaluationResult();
+	latexOutput(&pos, out,  ev, eval);
+}
 
 
 uint8_t searchId = 0;
@@ -125,7 +165,7 @@ void outputTestResults() { //TODO: integrate properly so that we do not need the
 
 }
 
-std::string chessPositionToString(chessPosition position) {
+std::string chessPositionToString(const chessPosition position) {
 	//Not performance-critical
 	//---------------------------
 	std::string ret = "";
@@ -185,7 +225,7 @@ std::string chessPositionToString(chessPosition position) {
 	return ret;
 }
 
-std::string chessPositionToOutputString(chessPosition position){
+std::string chessPositionToOutputString(const chessPosition position){
 	//Not performance-critical
 	//---------------------------
 	std::string ret = "";
@@ -529,7 +569,7 @@ uint64_t stringToMove(std::string mv){
 }
 
 
-std::string chessPositionToFenString(chessPosition position, bool EPD){
+std::string chessPositionToFenString(const chessPosition position, bool EPD){
 
 	std::string str = chessPositionToString(position);
 	std::string FEN = "";

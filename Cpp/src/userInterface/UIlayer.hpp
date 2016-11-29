@@ -10,10 +10,11 @@
 #include <lib/basics.hpp>
 #include <string>
 #include <userInterface/interfaceStructs.hpp>
+#include <lib/Evaluation/evaluation.hpp>
 void UIloop();
 uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maximal_time, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval, bool doAspiration, searchParameters params);
-std::string chessPositionToString(chessPosition position);
-std::string chessPositionToOutputString(chessPosition position);
+std::string chessPositionToString(const chessPosition position);
+std::string chessPositionToOutputString(const chessPosition position);
 chessPosition stringToChessPosition(std::string strposition);
 chessPosition FENtoChessPosition(std::string fen);
 std::string chessPositionToFenString(chessPosition position, bool EPD=false);
@@ -22,5 +23,7 @@ uint64_t stringToMove(std::string mv);
 bool checkAndMakeMove(chessPosition& position, std::string move);
 void runPerformanceTests();
 uint64_t get_timestamp();
+void latexOutput(std::string FEN, std::ostream& out);
+void latexOutput(const chessPosition* pos, std::ostream& out, evaluationResult ev, int16_t eval);
 std::string moveToExtendedString(chessMove move, chessPosition position);
 #endif /* USERINTERFACE_UILAYER_HPP_ */

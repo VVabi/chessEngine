@@ -74,10 +74,20 @@ int main() {
 
 	srand (time(NULL));
 	fillZobristHash();
+	/*std::ofstream out("/home/vabi/TeX/Chess/positions.tex");
+	std::ifstream in("/home/vabi/code/chessEngine/chessGui/openingPositions.txt");
+	std::string line;
+	while(getline(in, line)){
+		if(line.at(0) == '%'){
+			continue;
+		}
+		latexOutput(line, out);
+	}*/
+
 	/*runPerformanceTests();
 	return 0;*/
-	std::cout << testPerftTestSuite().passed << std::endl;
-	return 0;
+	/*std::cout << testPerftTestSuite().passed << std::endl;
+	return 0;*/
 	UIloop();
 	//00000BNR00000PKQ00000NPR00000N0P000000000000000p0qpN0npnN000000kw0000
 }

@@ -246,7 +246,7 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
 		uint16_t hashValue = (blocker*magicNumber) >> 52;
 		uint64_t potentialMoves = rookMoveTables[nextPieceField][hashValue];
 		queenAttackTable = queenAttackTable | potentialMoves;
-		*mobilityScore = *mobilityScore+popcount(queenAttackTable & ~ownPieces);
+		*mobilityScore = *mobilityScore+popcount(potentialMoves & ~ownPieces);
 	}
 
 	//TODO: this could be optimized by merging with the rook table and doing both at once
@@ -258,6 +258,7 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
 		uint16_t hashValue = (blocker*magicNumber) >> 55;
 		uint64_t potentialMoves = bishopMoveTables[nextPieceField][hashValue];
 		queenAttackTable = queenAttackTable | potentialMoves;
+		*mobilityScore = *mobilityScore+popcount(potentialMoves & ~ownPieces);
 	}
 	retTable.attackTables[queen] = queenAttackTable;
 

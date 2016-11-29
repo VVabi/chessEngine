@@ -103,8 +103,8 @@ public class UciProcessing {
 
                 vabiHandler.setPosition(startPos, moves);
                 String current = vabiHandler.getCurrentPosition();
-                VMPchessPosition position = new VMPchessPosition(new VDTstring(current.getBytes()));
-                //server.send(position, 0);
+               /* VMPchessPosition position = new VMPchessPosition(new VDTstring(current.getBytes()));
+                server.send(position, 0);*/
                 vabiHandler.startSearch();
 
 
@@ -122,8 +122,8 @@ public class UciProcessing {
                 moves.add(mv[0]);
                 vabiHandler.setPosition(startPos, moves);
                 current = vabiHandler.getCurrentPosition();
-                position = new VMPchessPosition(new VDTstring(current.getBytes()));
-               // server.send(position, 0);
+                /*position = new VMPchessPosition(new VDTstring(current.getBytes()));
+                server.send(position, 0);*/
                 //System.out.println(mv[0]);
                 stockFishHandler.setPosition(startPos, moves);
                 stockFishHandler.startSearch();

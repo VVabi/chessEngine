@@ -13,21 +13,25 @@
 #include <stdlib.h>     /* srand, rand */
 #include <lib/Attacks/attacks.hpp>
 #include <lib/bitfiddling.h>
-
+#include <userInterface/UIlayer.hpp>
+#include <iostream>
+#include <fstream>
 evaluationResult result;
 
 evaluationResult getEvaluationResult(){
 	return result;
 }
 
+std::ofstream out("/home/vabi/TeX/Chess/positions.tex");
+
 uint16_t taperingValues[81] = {  0,  0,  0,  0,  0,  0,  0,  0,
-						       	 0,  0,  0,  0,  0,  0,  0,  5,
-								10, 15, 20, 25, 30, 35, 40, 45,
-								50, 55, 60, 65, 70, 75, 80, 85,
-								90, 95,100,105,110,115,120,125,
-							   130,135,140,145,150,155,160,165,
-							   170,175,180,185,190,195,200,206,
-							   212,218,224,230,236,242,248,254,
+						       	 0,  0,  0,  0,  0,  0,  0,  0,
+								0, 2, 7, 11, 14, 19, 24, 29,
+								33, 37, 41, 48, 54, 60, 65, 70,
+								75, 80,86,92,97,102,108,112,
+							   118,124,129,134,140,145,150,155,
+							   161,166,173,178,183,189,194,20,
+							   206,212,221,230,236,242,248,254,
 							   256,256,256,256,256,256,256,256,
 							   256,256,256,256,256,256,256,256,256
 };
@@ -50,6 +54,8 @@ static int32_t rookOpenFiles(const chessPosition* position, uint8_t* pawnOccupan
 }
 
 extern int16_t endGamepieceTables[7][2][64];
+
+static uint32_t counter = 0;
 
 int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 
@@ -112,6 +118,7 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 
 	uint64_t numWhiteBishops = popcount(position->pieceTables[white][bishop]);
 
+	result.bishoppair = 0;
 	if(numWhiteBishops > 1){
 		eval = eval+50;
 		result.bishoppair = 50;
@@ -138,6 +145,12 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 #ifdef RANDOMEVAL
 	eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?
 #endif
+	counter++;
+	if(counter > 500000){
+		counter = 0;
+		latexOutput(position, out, result, eval);
+	}
+
 	return (1-2*position->toMove)*eval;
 
 }

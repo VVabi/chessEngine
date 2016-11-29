@@ -15,7 +15,11 @@
 
 extern uint64_t kingmovetables[64];
 
+#ifdef EXPERIMENTAL
+int32_t attacksCloseToKingEvals[] = {0, 10, 20, 40, 80, 150, 230, 350, 400, 500, 600};
+#else
 int32_t attacksCloseToKingEvals[] = {10, 20, 40, 80, 150, 230, 350, 400, 500, 600};
+#endif
 static int32_t kingSafetySinglePlayer(const chessPosition* position, const uint8_t* pawnColumnOccupancy, playerColor playingSide, const AttackTable* opponentAttackTable) {
 
 	int32_t ret = 0;

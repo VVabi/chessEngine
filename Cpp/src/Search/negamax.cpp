@@ -127,6 +127,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 	}
 
 	hashEntry hashVal      = getHashTableEntry(position->zobristHash);
+
 	uint32_t zobristHigher = (uint32_t) (position->zobristHash >> 32);
 	uint16_t zobristLower  = (uint16_t) (((uint32_t) (position->zobristHash & 0xFFFFFFFF)) >> 16);
 	if(doHashProbe){ //TODO: we should check whether another move leads to 3fold rep draw!
@@ -154,6 +155,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 			}
 		}
 	}
+
 	//go to quiescence on depth 0
 	//---------------------------
 	if(depth <= 0) {

@@ -10,6 +10,7 @@
 #include <iostream>
 #include <lib/DebugFunctions/debugFunctions.hpp>
 #include <hashTables/hashTables.hpp>
+#include <assert.h>
 
 extern int16_t figureValues[];
 extern int32_t completePieceTables[7][2][64];
@@ -29,6 +30,11 @@ void makeNullMove(chessPosition* position){
 	position->zobristHash = position->zobristHash^movingSideHash[0];
 	position->toMove = (playerColor) (1-position->toMove);
 	chessMove move;
+	move.move = 0;
+
+	if(position->madeMoves.length > 0) {
+		assert(position->madeMoves[position->madeMoves.length-1].move != 0);
+	}
 	position->madeMoves.add(&move);
 }
 

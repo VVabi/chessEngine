@@ -67,8 +67,7 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 
 	assert(alpha < beta);
 //#ifdef EXPERIMENTAL
-	uint64_t ownKing = position->pieceTables[position->toMove][king]; //TODO: need to fix move stack first!!
-
+	uint64_t ownKing = position->pieceTables[position->toMove][king];
 	if(isFieldAttacked(position, (playerColor) (1-position->toMove), findLSB(ownKing))) {
 		chessMove mv;
 		return negamax(position, 30,31, 1, alpha, beta, &mv, false, false);
