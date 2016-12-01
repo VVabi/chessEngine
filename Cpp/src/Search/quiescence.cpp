@@ -22,7 +22,7 @@
 
 static int32_t qindices[150] = {0};
 extern int16_t figureValues[];
-
+extern uint8_t searchId;
 void resetqIndices(){
 	memset(qindices, 0, 150*sizeof(int32_t));
 }
@@ -139,17 +139,11 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 				alpha = value;
 				bestMove = moves[ind];
 				bestIndex = ind;
-				/*if(moves[ind].sortEval < -200){
-					std::cout << "WTF?? SEE seems to be wrong!" << std::endl;
-					std::cout << chessPositionToOutputString(*position) << std::endl;
-					std::cout << chessPositionToFenString(*position, false) << std::endl;
-					std::cout << moves[ind].sourceField << " " << moves[ind].targetField << std::endl;
-				}*/
 			}
 		}
 		undoMove(position);
 		if(alpha >= beta) {
-			setHashMove(bestMove.sourceField | (bestMove.targetField << 8), position->zobristHash);
+			setHashMove(bestMove.sourceField | (bestMove.targetField << 8), position->zobristHash, searchId);
 			mvStack.release();
 			assert(stackCounter == mvStack.getCounter());
 			if(bestIndex != -1){
@@ -161,15 +155,11 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 
 	if(bestIndex != -1){
 		qindices[bestIndex]++;
-		setHashMove(bestMove.sourceField | (bestMove.targetField << 8), position->zobristHash);
+		setHashMove(bestMove.sourceField | (bestMove.targetField << 8), position->zobristHash, searchId);
 	}
-
 	mvStack.release();
 	assert(stackCounter == mvStack.getCounter());
 	return alpha;
-
-
-
 }
 
 

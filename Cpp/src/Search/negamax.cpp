@@ -91,7 +91,7 @@ static inline bool check_nullmove(chessPosition* position, uint16_t* refutationM
 	makeNullMove(position);
 	chessMove mv;
 	searchCounts.nullMovePruningTried++;
-	int32_t value = -negamax(position, ply+1, max_ply, depth-1-nullmoveReductions[depth], -beta, -beta+1, &mv, false);
+	int32_t value = -negamax(position, ply+1, max_ply-nullmoveReductions[depth], depth-1-nullmoveReductions[depth], -beta, -beta+1, &mv, false);
 	undoNullMove(position);
 	if(value < beta) {
 		*refutationMoveTarget = mv.targetField;
@@ -196,7 +196,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 	generateAllMoves(&moves, position);
 	bool isInCheck = orderStandardMoves(position, &moves, ply, hashVal.bestMove, refutationTarget);
 
-
+	assert(isInCheck == movingSideInCheck);
 	bool legalMovesAvailable = false;
 	bool foundGoodMove = false;
 	searchCounts.wentToSearch++;
@@ -218,17 +218,6 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 
 		if(isFieldAttacked( position,  position->toMove, kingField)){
 			if(ind > 0){
-				if(moves[ind].type == kingMove) {
-					std::cout << chessPositionToFenString(*position) << std::endl;
-					std::cout << chessPositionToOutputString(*position);
-					std::cout << position->toMove << std::endl;
-					std::cout << moves[ind].sourceField << " " << moves[ind].targetField << std::endl;
-					std::cout << "Epic fail" << std::endl;
-					std::cout << kingField << std::endl;
-					std::cout << isFieldAttacked( position,  position->toMove, kingField) << std::endl;
-					std::cout << moves[ind].sortEval << std::endl;
-				}
-
 				assert(moves[ind].type != kingMove); //all king moves moving into check should be found by move ordering!
 			}
 		} else {
@@ -244,15 +233,13 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 			if((ind > 3) && (moves[ind].captureType == none) && (depth > 2) && !isInCheck) { //LMR
 				if(!check){
 					reduction = 1;
-//#ifdef EXPERIMENTAL
 					if(ind > 15) {
 						reduction = 2;
 					}
-//#endif
 				}
 			}
 
-			if(check && 		( (ply+depth < max_ply-1) || ((depth == 1) && (ply+depth < max_ply)) )){
+			if(check && ((ply+depth < max_ply-1) || ((depth == 1) && (ply+depth < max_ply)) )){
 				extension = 1;
 				reduction = 0;
 			}

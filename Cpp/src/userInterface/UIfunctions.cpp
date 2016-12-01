@@ -28,10 +28,12 @@ void putTableLine(std::ostream& out, int16_t value, std::string name) {
 	out << name << " & " << value << "\\\\ \\hline" << std::endl;
 }
 
+static int clearPageCounter = 0;
+
 void latexOutput(const chessPosition* pos, std::ostream& out, evaluationResult ev, int16_t eval) {
 
 	int16_t figureVal = calcFigureEvaluation(pos);
-	out << "\\begin{figure}" << std::endl;
+	out << "\\begin{figure}[!htbp] " << std::endl;
 	out << "\\newgame" << std::endl;
 	out << "\\fenboard{"+chessPositionToFenString(*pos, false)+"}" << std::endl;
 
@@ -50,11 +52,11 @@ void latexOutput(const chessPosition* pos, std::ostream& out, evaluationResult e
 	out << "\\end{tabular}" << std::endl;
 	out << "\\end{tabular}" << std::endl;
 	out << "\\end{figure}" << std::endl;
-
-
-
-
-
+	clearPageCounter++;
+	if(clearPageCounter == 3) {
+		out << "\\clearpage" << std::endl;
+		clearPageCounter = 0;
+	}
 }
 
 void latexOutput(std::string FEN, std::ostream& out) {
@@ -260,7 +262,7 @@ std::string chessPositionToOutputString(const chessPosition position){
 extern uint16_t repetitionData[16384];
 
 chessPosition FENtoChessPosition(std::string fen){
-	memset(repetitionData, 0, 16384*sizeof(uint16_t));
+	memset(repetitionData, 0, 16384*sizeof(uint16_t)); //TODO: this is a hack
 	//Not performance-critical
 	//---------------------------
 	chessPosition position;

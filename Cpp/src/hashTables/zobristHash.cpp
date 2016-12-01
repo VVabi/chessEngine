@@ -50,8 +50,11 @@ uint16_t getHashMove(uint64_t zobristKey){
 	return moveOrderingHashTable[zobristKey & HASHSIZE].bestMove;
 }
 
-void setHashMove(uint16_t move, uint64_t zobristKey) {
-	moveOrderingHashTable[zobristKey & HASHSIZE].bestMove = move;
+void setHashMove(uint16_t move, uint64_t zobristKey, uint8_t searchId) {
+	if(moveOrderingHashTable[zobristKey & HASHSIZE].searchId != searchId) {
+		moveOrderingHashTable[zobristKey & HASHSIZE].bestMove = move;
+		moveOrderingHashTable[zobristKey & HASHSIZE].depth    = 0;
+	}
 }
 
 

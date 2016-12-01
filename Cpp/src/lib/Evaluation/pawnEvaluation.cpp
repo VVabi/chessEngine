@@ -19,14 +19,42 @@ static int16_t const passedPawnEvalValues[2][64] = {{ 0, 0, 0, 0, 0, 0, 0, 0, 1,
 { 0, 0, 0, 0, 0, 0, 0, 0, 13, 13, 13, 13, 13, 13, 13, 13, 9, 9, 9, 9, 9, 9, 9, 9, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0,0 }};
 
 
-int32_t passedPawnEval(uint64_t whitePawns, uint64_t blackPawns) {
+static int16_t kingToPromotionFieldDistance[7][7] = {  // [dist to promotion][king distance from promotion field
+		{0,0,0,0,0,0,0 }, //never happens
+		{0,0,-10,-20,-30,-45,-60},
+		{0,0,-5,-10,-15,-25,-40 },
+		{0,0,0,-5,-10,-15,-25 },
+		{0,0,0,0,-5,-10,-15 },
+		{0,0,0,0,-5,-5,-10 },
+		{0,0,0,0,-5,-5,-10 },
+};
 
+static uint16_t distBetweenFields(uint16_t a, uint16_t b) {
+	uint16_t fileA = FILE(a);
+	uint16_t rowA  = ROW(a);
+	uint16_t fileB = FILE(b);
+	uint16_t rowB  = ROW(b);
+
+	uint16_t rowDiff = (rowA > rowB? rowA-rowB: rowB-rowA);
+
+	uint16_t fileDiff = (fileA > fileB? fileA-fileB : fileB-fileA);
+
+	return std::max(rowDiff, fileDiff);
+}
+
+
+static int32_t passedPawnEval(uint64_t whitePawns, uint64_t blackPawns, uint16_t blackKing, uint16_t whiteKing) {
+	//TODO: remove code duplication
 	int32_t eval = 0;
 	uint64_t whitePawnBuffer = whitePawns;
 	while(whitePawnBuffer){
 		uint16_t field = popLSB(whitePawnBuffer);
 		if((passedPawnMasks[white][field] & blackPawns) == 0) {
 			eval = eval+passedPawnEvalValues[white][field];
+			uint16_t promotionField = FILE(field)+56;
+			uint16_t distToPromotion = 7-ROW(field);
+			uint16_t kingDist        = distBetweenFields(promotionField, blackKing);
+			eval  = eval-kingToPromotionFieldDistance[distToPromotion][kingDist];
 		}
 	}
 	uint64_t blackPawnBuffer = blackPawns;
@@ -34,6 +62,11 @@ int32_t passedPawnEval(uint64_t whitePawns, uint64_t blackPawns) {
 		uint16_t field = popLSB(blackPawnBuffer);
 		if((passedPawnMasks[black][field] & whitePawns) == 0) {
 			eval = eval-passedPawnEvalValues[black][field];
+			uint16_t promotionField = FILE(field);
+			uint16_t distToPromotion = ROW(field);
+			uint16_t kingDist        = distBetweenFields(promotionField, whiteKing);
+			eval  = eval+kingToPromotionFieldDistance[distToPromotion][kingDist];
+
 		}
 	}
 
@@ -60,21 +93,15 @@ int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOcc
 		}
 	}
 
-#ifdef EXPERIMENTAL
 	uint8_t isolatedPawns = ~((*pawnColumnOccupancy << 1) | (*pawnColumnOccupancy >> 1))  & *pawnColumnOccupancy;
-#else
-	uint8_t isolatedPawns = ~((*pawnColumnOccupancy << 1) | (*pawnColumnOccupancy >> 1)); //quite a horrible bug...
-#endif
+
 
 	uint64_t isolatedDoublePawns = isolatedPawns & doublePawns;
 
 	uint64_t nonIsolatedDoublePawns =  (~isolatedPawns) & doublePawns;
 
-#ifdef EXPERIMENTAL
 	eval = eval-40*popcount(isolatedDoublePawns)-20*popcount(nonIsolatedDoublePawns);
-#else
-	eval = eval-50*popcount(isolatedDoublePawns)-20*popcount(nonIsolatedDoublePawns); //bug-we already
-#endif
+
 	eval = eval-10*popcount(isolatedPawns);
 
 /*#ifdef EXPERIMENTAL
@@ -100,7 +127,7 @@ int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupan
 	int16_t staticPawn = staticPawnEval(whitePawns, white, pawnColumnOccupancy)+staticPawnEval(blackPawns, black,  pawnColumnOccupancy+1);
 	eval = eval+staticPawn;
 	result.staticPawn = staticPawn;
-	int32_t passedPawns = passedPawnEval(whitePawns, blackPawns);
+	int32_t passedPawns = passedPawnEval(whitePawns, blackPawns, findLSB(position->pieceTables[black][king]), findLSB(position->pieceTables[white][king]));
 	passedPawns = ((256-taperingValues[phase])*passedPawns)/256;
 	eval = eval+passedPawns;
 	result.passedPawn = passedPawns;

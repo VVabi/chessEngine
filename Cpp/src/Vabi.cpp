@@ -26,8 +26,10 @@ extern int32_t completePieceTables[7][2][64];
 extern int16_t pieceTables[7][2][64];
 extern int16_t endGamepieceTables[7][2][64];
 extern int16_t figureValues[];
-int main() {
 
+
+
+int main() {
 
 	/*uint64_t typeArr[13] = {0};
 	uint64_t captureArr[7] = {0};

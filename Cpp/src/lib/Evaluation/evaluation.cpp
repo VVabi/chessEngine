@@ -22,7 +22,7 @@ evaluationResult getEvaluationResult(){
 	return result;
 }
 
-std::ofstream out("/home/vabi/TeX/Chess/positions.tex");
+//std::ofstream out("/home/vabi/TeX/Chess/positions.tex");
 
 uint16_t taperingValues[81] = {  0,  0,  0,  0,  0,  0,  0,  0,
 						       	 0,  0,  0,  0,  0,  0,  0,  0,
@@ -80,12 +80,15 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 	bufferEndgame  = bufferEndgame-(1 << 14);
 	uint16_t phase = position->totalFigureEval/100;
 
-//#ifdef DEBUG
+	if(position->pieceTables[white][queen] | position->pieceTables[black][queen]){
+		phase = phase+5;
+	}
+
+
 	if(phase > 80){
-		//std::cout << "Index out of bounds during tapering eval" << std::endl
 		phase = 80;
 	}
-//#endif
+
 
 	int32_t pieceTableEval = ((256-taperingValues[phase])*bufferEndgame+taperingValues[phase]*bufferMidgame)/256; //division by 256
 	eval = eval+pieceTableEval;
@@ -146,9 +149,10 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 	eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?
 #endif
 	counter++;
-	if(counter > 500000){
+
+	if((counter > 100000) && (std::abs(eval-position->figureEval) > 100)){
 		counter = 0;
-		latexOutput(position, out, result, eval);
+		//latexOutput(position, out, result, eval);
 	}
 
 	return (1-2*position->toMove)*eval;

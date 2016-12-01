@@ -123,6 +123,8 @@ inline static void makePromotion(chessMove* move, chessPosition* position, figur
 
 void makeMove(chessMove* move, chessPosition* position) {
 
+
+	assert(move->captureType != king);
 	position->data.hash = position->zobristHash;
 	position->dataStack.add(&position->data);
 	position->data.fiftyMoveRuleCounter = position->data.fiftyMoveRuleCounter+1;
