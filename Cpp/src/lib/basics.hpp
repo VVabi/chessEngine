@@ -66,6 +66,8 @@ struct chessPosition {
 
 enum hashFlag: uint16_t {FULLSEARCH=0,FAILLOW=1,FAILHIGH=2};
 
+
+
 struct hashEntry{
 	uint32_t hashHighBits;
 	uint16_t hashLower;
@@ -74,7 +76,12 @@ struct hashEntry{
 	uint16_t eval;
 	uint8_t depth;
 	uint8_t searchId;
+	uint16_t index;
 } __attribute__((packed));
+
+struct hashBucket{
+	hashEntry hashData[4];
+};
 
 class timeoutException: public std::exception
 {

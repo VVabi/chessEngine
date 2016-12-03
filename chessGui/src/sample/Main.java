@@ -45,7 +45,7 @@ public class Main extends Application {
             public void run() {
                 UciProcessing matchup = null;
                 try {
-                    matchup = new UciProcessing("/home/vabi/code/chessEngine/Cpp/uciChallengeRelease/Vabi", "/home/vabi/code/chessEngine/Cpp/uciDefenderRelease/Vabi", 10000);
+                    matchup = new UciProcessing("/home/vabi/code/chessEngine/Cpp/uciChallengeRelease/Vabi", "/home/vabi/code/chessEngine/Cpp/uciDefenderRelease/Vabi", 20000);
                     double res =  matchup.play();
                 } catch (IOException e) {
                     e.printStackTrace();

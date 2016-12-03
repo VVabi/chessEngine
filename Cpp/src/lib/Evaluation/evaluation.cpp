@@ -22,7 +22,7 @@ evaluationResult getEvaluationResult(){
 	return result;
 }
 
-//std::ofstream out("/home/vabi/TeX/Chess/positions.tex");
+
 
 uint16_t taperingValues[81] = {  0,  0,  0,  0,  0,  0,  0,  0,
 						       	 0,  0,  0,  0,  0,  0,  0,  0,
@@ -138,13 +138,13 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 	int32_t kingSafetyTapered = (taperingValues[phase]*kingSafetyComplete)/256;
 	eval = eval+kingSafetyTapered;
 	result.kingSafety = kingSafetyTapered;
-/*#ifdef EXPERIMENTAL
+
 	if(position->toMove == white) {
 		eval = eval+10;
 	} else {
 		eval = eval-10;
 	}
-#endif*/
+
 #ifdef RANDOMEVAL
 	eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?
 #endif

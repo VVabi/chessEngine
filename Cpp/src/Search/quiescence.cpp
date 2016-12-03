@@ -74,6 +74,37 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 	}
 //#endif
 
+	/*hashEntry hashVal      = getHashTableEntry(position->zobristHash);
+
+	uint32_t zobristHigher = (uint32_t) (position->zobristHash >> 32);
+	uint16_t zobristLower  = (uint16_t) (((uint32_t) (position->zobristHash & 0xFFFFFFFF)) >> 16);
+
+	if((zobristHigher == hashVal.hashHighBits) && (zobristLower == hashVal.hashLower)) { //TODO: assign bestMove - this can blow up in our face easily TODO: add proper checkmate handling
+		int16_t oldEval  = hashVal.eval;
+		if( (oldEval > -10000) && (oldEval < 10000) && (oldEval != 0)){ //TODO: the != 0 is stupid, but somehwere something goes wrong with 3fold rep scores, so excluded ehre for safety
+			if( ((hashVal.flag == FAILHIGH) || (hashVal.flag == FULLSEARCH)) && (oldEval >= beta)){
+				setSearchId(searchId, position->zobristHash, hashVal.index);
+				return beta;
+			}
+			else if( ((hashVal.flag == FAILLOW) || (hashVal.flag == FULLSEARCH)) && (oldEval <= alpha)){
+				setSearchId(searchId, position->zobristHash, hashVal.index);
+				return alpha; //node will fail low
+			}
+			else if((hashVal.flag == FULLSEARCH)){ //TODO: this condition can be vastly improved
+				setSearchId(searchId, position->zobristHash, hashVal.index);
+				if(oldEval <= alpha){
+					return alpha;
+				}
+				if(oldEval >= beta){
+					return beta;
+				}
+				return oldEval;
+			}
+		}
+	}*/
+
+
+
 
 
 	int32_t baseEval = evaluation(position, alpha, beta);
@@ -82,6 +113,7 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 		alpha = baseEval;
 	}
 	if(alpha >= beta) {
+		setHashEntry(FAILHIGH, alpha, 0, searchId, 0, position->zobristHash);
 		return beta;
 	}
 	//delta pruning preparations
@@ -143,7 +175,7 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 		}
 		undoMove(position);
 		if(alpha >= beta) {
-			setHashMove(bestMove.sourceField | (bestMove.targetField << 8), position->zobristHash, searchId);
+			setHashEntry(FAILHIGH, alpha, 0, searchId, (bestMove.sourceField | (bestMove.targetField << 8)), position->zobristHash);
 			mvStack.release();
 			assert(stackCounter == mvStack.getCounter());
 			if(bestIndex != -1){
@@ -155,7 +187,9 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 
 	if(bestIndex != -1){
 		qindices[bestIndex]++;
-		setHashMove(bestMove.sourceField | (bestMove.targetField << 8), position->zobristHash, searchId);
+		setHashEntry(FULLSEARCH, alpha, 0, searchId, (bestMove.sourceField | (bestMove.targetField << 8)), position->zobristHash);
+	} else {
+		setHashEntry(FAILLOW, alpha, 0, searchId, 0, position->zobristHash);
 	}
 	mvStack.release();
 	assert(stackCounter == mvStack.getCounter());

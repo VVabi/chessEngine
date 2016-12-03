@@ -135,15 +135,15 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 			int16_t oldEval  = hashVal.eval;
 			if((depth <= hashVal.depth) && (oldEval > -10000) && (oldEval < 10000) && (oldEval != 0)){ //TODO: the != 0 is stupid, but somehwere something goes wrong with 3fold rep scores, so excluded ehre for safety
 				if( ((hashVal.flag == FAILHIGH) || (hashVal.flag == FULLSEARCH)) && (oldEval >= beta)){
-					setSearchId(searchId, position->zobristHash);
+					setSearchId(searchId, position->zobristHash, hashVal.index);
 					return beta;
 				}
 				else if( ((hashVal.flag == FAILLOW) || (hashVal.flag == FULLSEARCH)) && (oldEval <= alpha)){
-					setSearchId(searchId, position->zobristHash);
+					setSearchId(searchId, position->zobristHash, hashVal.index);
 					return alpha; //node will fail low
 				}
 				else if((hashVal.flag == FULLSEARCH)){ //TODO: this condition can be vastly improved
-					setSearchId(searchId, position->zobristHash);
+					setSearchId(searchId, position->zobristHash, hashVal.index);
 					if(oldEval <= alpha){
 						return alpha;
 					}
@@ -266,9 +266,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 		undoMove(position);
 
 		if((alpha >= beta)) {
-			if((depth >= hashVal.depth) || (searchId != hashVal.searchId)) {
-				setHashEntry(FAILHIGH, beta, depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), position->zobristHash);
-			}
+			setHashEntry(FAILHIGH, beta, depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), position->zobristHash);
 			if(bestIndex != -1){
 				searchCounts.bestIndex[depth][bestIndex]++;
 			}
@@ -317,13 +315,9 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 
 
 	if(foundGoodMove) {
-		if((depth >= hashVal.depth) || (searchId != hashVal.searchId)) {
-			setHashEntry(FULLSEARCH, alpha, depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), position->zobristHash);
-		}
+		setHashEntry(FULLSEARCH, alpha, depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), position->zobristHash);
 	} else { //we failed low, remember as well
-		if((depth >= hashVal.depth) || (searchId != hashVal.searchId)) {
 			setHashEntry(FAILLOW, alpha, depth, searchId, 0, position->zobristHash);
-		}
 	}
 
 	qmvStack.release();

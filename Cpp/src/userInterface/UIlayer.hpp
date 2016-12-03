@@ -23,7 +23,6 @@ uint64_t stringToMove(std::string mv);
 bool checkAndMakeMove(chessPosition& position, std::string move);
 void runPerformanceTests();
 uint64_t get_timestamp();
-void latexOutput(std::string FEN, std::ostream& out);
-void latexOutput(const chessPosition* pos, std::ostream& out, evaluationResult ev, int16_t eval);
+
 std::string moveToExtendedString(chessMove move, chessPosition position);
 #endif /* USERINTERFACE_UILAYER_HPP_ */

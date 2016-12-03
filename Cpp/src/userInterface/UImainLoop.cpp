@@ -18,6 +18,7 @@
 #include <iomanip>
 #include <userInterface/interfaceStructs.hpp>
 #include <lib/moveGeneration/moveGeneration.hpp>
+#include <logging/logger.hpp>
 userInterface* UI;
 
 extern uint8_t searchId;
@@ -85,6 +86,8 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 
 	//uint64_t goalNodes = 1800*maximal_time;
 	while(get_timestamp()-start_ts <= totalTime) {
+		/*setTotalTime(100000000, start_ts);
+		while(depth < 14) {*/
 #endif
 		try{
 			chessMove localBestMove;
@@ -148,6 +151,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 
 		*nodeCount = (data.totalNodes+getQuiescenceNodes());
 		UI->sendSearchInfo(*nodeCount, *mtime, *eval, depth, moveToString(*bestMove, *position));
+		logSearch(*nodeCount, *mtime, *eval, depth, moveToString(*bestMove, *position));
 		depth++;
 		searchedNodes = searchedNodes+*nodeCount;
 		if(*eval > 29000) {
@@ -192,6 +196,8 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 		std::cout << qindices[k] << " ";
 	}
 	std::cout << std::endl;*/
+	int16_t neval = evaluation(position, -32000, 32000);
+	latexOutput(position,  getEvaluationResult(), neval);
 	return depth;
 }
 
