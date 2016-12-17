@@ -92,7 +92,6 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 		try{
 			chessMove localBestMove;
 			*eval = negamax(position, 0, depth+3, depth, alpha, beta, &localBestMove, true, false);
-
 			if(doAspiration) {
 				if ((*eval <= alpha) || (*eval >= beta)) {
 					//std::cout << "Aspiration window search failed, researching..." <<std::endl;

@@ -53,8 +53,6 @@ static int32_t rookOpenFiles(const chessPosition* position, uint8_t* pawnOccupan
 
 }
 
-extern int16_t endGamepieceTables[7][2][64];
-
 static uint32_t counter = 0;
 
 int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
@@ -101,7 +99,6 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 		return evalsigned;
 	}
 
-
 	uint8_t pawnColumnOccupancy[2];
 	eval = eval+pawnEvaluation(position, pawnColumnOccupancy, phase);
 	int16_t mobilityScore = 0;
@@ -144,6 +141,23 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 	} else {
 		eval = eval-10;
 	}
+
+/*#ifdef EXPERIMENTAL
+	//connected Rooks
+	//-----------------
+	uint64_t whiteRookAttack = whiteAttackTable.attackTables[rook];
+	uint64_t whiteRooks      = position->pieceTables[white][rook];
+	if(whiteRookAttack & whiteRooks) {
+		eval = eval+10;
+	}
+	uint64_t blackRookAttack = blackAttackTable.attackTables[rook];
+	uint64_t blackRooks      = position->pieceTables[black][rook];
+	if(blackRookAttack & blackRooks) {
+		eval = eval-10;
+	}
+
+#endif*/
+
 
 #ifdef RANDOMEVAL
 	eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?

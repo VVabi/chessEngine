@@ -190,7 +190,6 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 		}
 	}
 
-
 	uint16_t stackCounter = qmvStack.getCounter();
 	vdt_vector<chessMove> moves = qmvStack.getNext();
 	generateAllMoves(&moves, position);
@@ -222,6 +221,8 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 			}
 		} else {
 
+
+
 			searchCounts.nodes[depth]++;
 			searchCounts.totalNodes++;
 			legalMovesAvailable = true;
@@ -230,14 +231,24 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 			bool check = isFieldAttacked(position,  (playerColor) (1-position->toMove), ownkingField); //the last move gave check!
 			uint16_t reduction = 0;
 			uint16_t extension = 0;
-			if((ind > 3) && (moves[ind].captureType == none) && (depth > 2) && !isInCheck) { //LMR
-				if(!check){
+			if(!check && !isInCheck && (moves[ind].captureType == none) && (depth > 2)){
+				if((ind > 3) || foundGoodMove){
 					reduction = 1;
 					if(ind > 15) {
 						reduction = 2;
 					}
 				}
 			}
+
+			/*if(reduction != fake_reduction){
+				std::cout << "Different reductions found " << reduction << " " << fake_reduction <<std::endl;
+			}*/
+
+			/*if((ind > 3) &&  && (depth > 2) && !isInCheck) { //LMR
+				if(!check){
+
+				}
+			}*/
 
 			if(check && ((ply+depth < max_ply-1) || ((depth == 1) && (ply+depth < max_ply)) )){
 				extension = 1;
@@ -246,7 +257,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 
 			//PVSearch, currently a small gain for us with the > 3
 			//-------------------------------------------------
-			if((ind > 3) && (depth > 2)) {
+			if(((ind > 3) || foundGoodMove )&& (depth > 2)) {
 				int32_t value = -negamax(position, ply+1, max_ply, depth-1-reduction+extension, -alpha-1, -alpha, &mv);
 				if(value < alpha+1){
 					undoMove(position);
@@ -317,7 +328,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 	if(foundGoodMove) {
 		setHashEntry(FULLSEARCH, alpha, depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), position->zobristHash);
 	} else { //we failed low, remember as well
-			setHashEntry(FAILLOW, alpha, depth, searchId, 0, position->zobristHash);
+		setHashEntry(FAILLOW, alpha, depth, searchId, 0, position->zobristHash);
 	}
 
 	qmvStack.release();

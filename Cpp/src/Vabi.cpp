@@ -87,8 +87,8 @@ int main() {
 		latexOutput(line, out);
 	}*/
 
-	/*runPerformanceTests();
-	return 0;*/
+	runPerformanceTests();
+	return 0;
 	/*std::cout << testPerftTestSuite().passed << std::endl;
 	return 0;*/
 	UIloop();

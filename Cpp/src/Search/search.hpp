@@ -56,12 +56,12 @@ struct searchDebugData{
 
 
 class moveStack {
-	chessMove moveArray[5000];
+	chessMove moveArray[6000];
 	uint16_t counter = 0;
 
 public:
 	vdt_vector<chessMove> getNext(){
-		assert(counter < 33);
+		assert(counter < 35);
 		counter++;
 		//std::cout << counter << std::endl;
 		return vdt_vector<chessMove>(moveArray+(counter-1)*150,150);
