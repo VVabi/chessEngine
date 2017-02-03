@@ -1,0 +1,5 @@
+queenvalue 975
+pawnvalue  100
+rookvalue  500
+knightvalue 320
+bishopvalue 330

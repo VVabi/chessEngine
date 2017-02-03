@@ -10,6 +10,7 @@
 #include "evaluation.hpp"
 #include <lib/bitfiddling.h>
 #include <lib/Defines/boardParts.hpp>
+#include <parameters/parameters.hpp>
 
 extern uint64_t files[];
 extern uint64_t  passedPawnMasks[2][64];
@@ -75,9 +76,7 @@ static int32_t passedPawnEval(uint64_t whitePawns, uint64_t blackPawns, uint16_t
 
 }
 
-int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOccupancy) { //all stuff depending only on own pawn structure, not the opponents
-
-
+int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOccupancy, const staticPawnEvalParameters* staticPawnParameters) { //all stuff depending only on own pawn structure, not the opponents
 	int32_t eval = 0;
 	*pawnColumnOccupancy = 0;
 	uint8_t doublePawns         = 0; //TODO: extend to triple pawns
@@ -100,9 +99,9 @@ int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOcc
 
 	uint64_t nonIsolatedDoublePawns =  (~isolatedPawns) & doublePawns;
 
-	eval = eval-40*popcount(isolatedDoublePawns)-20*popcount(nonIsolatedDoublePawns);
+	eval = eval+staticPawnParameters->isolatedDoublePawn*popcount(isolatedDoublePawns)+staticPawnParameters->nonIsolatedDoublePawn*popcount(nonIsolatedDoublePawns);
 
-	eval = eval-10*popcount(isolatedPawns);
+	eval = eval+staticPawnParameters->isolatedPawn*popcount(isolatedPawns & (~isolatedDoublePawns));
 
 /*#ifdef EXPERIMENTAL
 	//reward pawns covered by other pawns
@@ -118,13 +117,13 @@ int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOcc
 
 extern evaluationResult result;
 
-int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupancy, uint16_t phase) {
+int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupancy, uint16_t phase, const evalParameters* evalPars) {
 
 	uint32_t eval=0;
 	uint64_t whitePawns = position->pieceTables[white][pawn];
 	uint64_t blackPawns = position->pieceTables[black][pawn];
 
-	int16_t staticPawn = staticPawnEval(whitePawns, white, pawnColumnOccupancy)+staticPawnEval(blackPawns, black,  pawnColumnOccupancy+1);
+	int16_t staticPawn = staticPawnEval(whitePawns, white, pawnColumnOccupancy,&evalPars->staticPawnParameters)+staticPawnEval(blackPawns, black,  pawnColumnOccupancy+1,&evalPars->staticPawnParameters);
 	eval = eval+staticPawn;
 	result.staticPawn = staticPawn;
 	int32_t passedPawns = passedPawnEval(whitePawns, blackPawns, findLSB(position->pieceTables[black][king]), findLSB(position->pieceTables[white][king]));

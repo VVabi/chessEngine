@@ -15,12 +15,11 @@
 #include <lib/Attacks/attacks.hpp>
 #include <hashTables/hashTables.hpp>
 #include <lib/moveMaking/moveMaking.hpp>
-
+#include <parameters/parameters.hpp>
 
 
 
 extern int32_t historyTable[2][64][64];
-extern int16_t figureValues[];
 extern int16_t pieceTables[7][2][64];
 
 extern uint16_t killerMoves[20][2];
@@ -70,7 +69,7 @@ void calcCaptureSortEval(chessPosition* position, chessMove* mv, uint16_t hashed
 #define ILLEGAL -20000
 
 static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackTable* opponentAttackTable, AttackTable* ownAttackTable, uint16_t hashedMove, uint16_t killerA, uint16_t killerB, uint16_t refutationTarget) {
-
+	const evalParameters* evalPars 						= getEvalParameters(); //TODO: move outside
 	int16_t sortEval = 0;
 
 	if( ((uint16_t) mv->type) < 6) {
@@ -150,7 +149,7 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 	}
 
 	if( (mv->captureType != none) && ((BIT64(mv->targetField) & opponentAttackTable->completeAttackTable) == 0)) {
-		sortEval = sortEval+figureValues[mv->captureType];
+		sortEval = sortEval+evalPars->figureValues[mv->captureType];
 	}
 
 

@@ -195,8 +195,8 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 		std::cout << qindices[k] << " ";
 	}
 	std::cout << std::endl;*/
-	int16_t neval = evaluation(position, -32000, 32000);
-	latexOutput(position,  getEvaluationResult(), neval);
+	//int16_t neval = evaluation(position, -32000, 32000);
+	//latexOutput(position,  getEvaluationResult(), neval);
 	return depth;
 }
 

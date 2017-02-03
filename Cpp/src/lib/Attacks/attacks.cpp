@@ -12,6 +12,7 @@
 #include <lib/moveMaking/moveMaking.hpp>
 #include "attacks.hpp"
 #include <assert.h>
+#include <parameters/parameters.hpp>
 
 extern uint64_t knightmovetables[];
 extern uint64_t kingmovetables[];
@@ -23,8 +24,6 @@ extern uint64_t rookMagicNumbers[];
 extern uint64_t bishopFieldTable[];
 extern uint64_t bishopMoveTables[64][512];
 extern uint64_t bishopMagicNumbers[];
-extern int16_t figureValues[];
-
 
 bool isFieldAttacked(const chessPosition* position, playerColor attackingSide, uint16_t field){
 
@@ -40,9 +39,6 @@ bool isFieldAttacked(const chessPosition* position, playerColor attackingSide, u
 		return true;
 	}
 
-
-
-
 	uint64_t occupancy = (position->pieces[white]) | (position->pieces[black]);
 	//rooks+queens
 	uint64_t magicNumber = rookMagicNumbers[field];
@@ -53,8 +49,6 @@ bool isFieldAttacked(const chessPosition* position, playerColor attackingSide, u
 	if( potentialMoves & (position->pieceTables[attackingSide][rook] | position->pieceTables[attackingSide][queen])) {
 		return true;
 	}
-
-
 
 	//bishops+queens
 	magicNumber = bishopMagicNumbers[field];
@@ -394,7 +388,7 @@ bool getNextCapture(chessMove* nextCapture, const chessPosition* position, uint1
 }
 
 
-int16_t see_internal(int16_t previous, chessPosition* position, uint16_t field, figureType lastCapturingPiece){
+int16_t see_internal(int16_t previous, chessPosition* position, uint16_t field, figureType lastCapturingPiece, const evalParameters* evalPars){
 	chessMove mv;
 	if(!getNextCapture(&mv, position, field, lastCapturingPiece)){
 		//no more captures available
@@ -409,7 +403,7 @@ int16_t see_internal(int16_t previous, chessPosition* position, uint16_t field, 
 	int16_t standPat = -previous;
 	makeMove(&mv, position);
 
-	int16_t seeVal = -see_internal(-previous+figureValues[mv.captureType], position, field, (figureType) mv.type);
+	int16_t seeVal = -see_internal(-previous+evalPars->figureValues[mv.captureType], position, field, (figureType) mv.type, evalPars);
 	undoMove(position);
 	/*std::cout << position->madeMoves.length;
 	std::cout << "Capturing with " << mv.type << " from " << mv.sourceField << std::endl;
@@ -429,8 +423,9 @@ int16_t SEE(chessPosition* position, chessMove* mv){
 	if(mv->type > 5){
 		return 0;
 	}
-	uint16_t val = figureValues[mv->captureType];
-	int16_t ret = -see_internal(val, position, mv->targetField, (figureType) mv->type);
+	const evalParameters* evalPars 						= getEvalParameters();
+	uint16_t val = evalPars->figureValues[mv->captureType];
+	int16_t ret = -see_internal(val, position, mv->targetField, (figureType) mv->type, evalPars);
 	return ret;
 }
 

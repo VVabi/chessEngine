@@ -19,9 +19,9 @@
 #include <algorithm>
 #include <assert.h>
 #include <userInterface/UIlayer.hpp>
+#include <parameters/parameters.hpp>
 
 static int32_t qindices[150] = {0};
-extern int16_t figureValues[];
 extern uint8_t searchId;
 void resetqIndices(){
 	memset(qindices, 0, 150*sizeof(int32_t));
@@ -66,6 +66,7 @@ static moveStack mvStack;
 int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, uint16_t depth) {
 
 	assert(alpha < beta);
+	const evalParameters* evalPars 						= getEvalParameters();
 //#ifdef EXPERIMENTAL
 	uint64_t ownKing = position->pieceTables[position->toMove][king];
 	if(isFieldAttacked(position, (playerColor) (1-position->toMove), findLSB(ownKing))) {
@@ -153,7 +154,7 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 
 		//delta pruning. TODO: make define
 		//----------------------------------------------------
-		int32_t gainValue = figureValues[moves[ind].captureType];
+		int32_t gainValue = evalPars->figureValues[moves[ind].captureType];
 		if(gainValue < marginDifference-200){
 			continue;
 		}

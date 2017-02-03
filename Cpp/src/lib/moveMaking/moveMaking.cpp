@@ -11,8 +11,8 @@
 #include <lib/DebugFunctions/debugFunctions.hpp>
 #include <hashTables/hashTables.hpp>
 #include <assert.h>
+#include <parameters/parameters.hpp>
 
-extern int16_t figureValues[];
 extern int32_t completePieceTables[7][2][64];
 extern uint64_t zobristHash[7][2][64];
 extern uint64_t movingSideHash[2];
@@ -117,8 +117,9 @@ inline static void makePromotion(chessMove* move, chessPosition* position, figur
 	position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*(completePieceTables[promotedFigure][toMove][move->targetField]-completePieceTables[pawn][toMove][move->sourceField]);
 	position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*completePieceTables[move->captureType][1-toMove][move->targetField];
 	position->zobristHash = position->zobristHash^zobristHash[promotedFigure][toMove][move->targetField]^zobristHash[pawn][toMove][move->sourceField]^zobristHash[move->captureType][1-toMove][move->targetField];
-	position->figureEval     = position->figureEval+(1-2*toMove)*(figureValues[promotedFigure]-figureValues[pawn]);
-	position->totalFigureEval     = position->totalFigureEval+(figureValues[promotedFigure]-figureValues[pawn]);
+	const evalParameters* evalPars = getEvalParameters();
+	position->figureEval     = position->figureEval+(1-2*toMove)*(evalPars->figureValues[promotedFigure]-evalPars->figureValues[pawn]);
+	position->totalFigureEval     = position->totalFigureEval+(evalPars->figureValues[promotedFigure]-evalPars->figureValues[pawn]);
 }
 
 void makeMove(chessMove* move, chessPosition* position) {
@@ -144,8 +145,9 @@ void makeMove(chessMove* move, chessPosition* position) {
 	castlingRights = (move->move & BLACKQUEENSIDECASTLEMASK ? (castlingRights &  7):castlingRights);
 	position->data.castlingRights = castlingRights;
 	position->zobristHash = position->zobristHash^castlingHash[position->data.castlingRights];
-	position->figureEval     = position->figureEval+(1-2*position->toMove)*figureValues[move->captureType];
-	position->totalFigureEval     = position->totalFigureEval-figureValues[move->captureType];
+	const evalParameters* evalPars = getEvalParameters();
+	position->figureEval     = position->figureEval+(1-2*position->toMove)*evalPars->figureValues[move->captureType];
+	position->totalFigureEval     = position->totalFigureEval-evalPars->figureValues[move->captureType];
 	position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
 	position->data.enPassantFile  = 8;
 	switch(move->type){

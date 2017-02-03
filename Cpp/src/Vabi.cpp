@@ -22,14 +22,17 @@ using namespace std;
 #include <userInterface/UIlayer.hpp>
 #include <sstream>
 #include <tests/tests.hpp>
+#include <parameters/parameters.hpp>
+
 extern int32_t completePieceTables[7][2][64];
 extern int16_t pieceTables[7][2][64];
 extern int16_t endGamepieceTables[7][2][64];
-extern int16_t figureValues[];
 
 
 
 int main() {
+
+	initializeParameters();
 
 	/*uint64_t typeArr[13] = {0};
 	uint64_t captureArr[7] = {0};
@@ -66,10 +69,23 @@ int main() {
 	}
 	std::cout << std::endl;
 	return 0;*/
+
+
+	const evalParameters* evalPars =  getEvalParameters();
+
+	for(uint16_t i=0; i < 7; i++) {
+		std::cout << evalPars->figureValues[i] << std::endl;
+	}
+	std::cout << evalPars->bishoppair << std::endl;
+	std::cout << evalPars->rookOnOpenFile << std::endl;
+	std::cout << evalPars->staticPawnParameters.isolatedPawn << std::endl;
+	std::cout << evalPars->staticPawnParameters.isolatedDoublePawn << std::endl;
+	std::cout << evalPars->staticPawnParameters.nonIsolatedDoublePawn << std::endl;
+
 	for(uint32_t index=0; index < 7; index++) {
 		for(uint32_t t=0; t < 2; t++) {
 			for(uint32_t k=0; k < 64; k++) {
-				completePieceTables[index][t][k] = ((uint16_t) (pieceTables[index][t][k]/2+figureValues[index])) |  ( ((uint16_t) (endGamepieceTables[index][t][k]/2+figureValues[index])) << 16);
+				completePieceTables[index][t][k] = ((uint16_t) (pieceTables[index][t][k]/2+evalPars->figureValues[index])) |  ( ((uint16_t) (endGamepieceTables[index][t][k]/2+evalPars->figureValues[index])) << 16);
 
 			}
 		}
@@ -87,8 +103,8 @@ int main() {
 		latexOutput(line, out);
 	}*/
 
-	runPerformanceTests();
-	return 0;
+	/*runPerformanceTests();
+	return 0;*/
 	/*std::cout << testPerftTestSuite().passed << std::endl;
 	return 0;*/
 	UIloop();

@@ -12,9 +12,10 @@
 #include <hashTables/hashTables.hpp>
 #include <assert.h>
 #include <userInterface/UIlayer.hpp>
+#include <parameters/parameters.hpp>
+
 extern uint64_t zobristHash[7][2][64];
 extern uint64_t movingSideHash[2];
-extern int16_t figureValues[];
 extern int32_t completePieceTables[7][2][64];
 extern uint16_t repetitionData[16384];
 extern uint64_t castlingHash[16];
@@ -104,8 +105,9 @@ inline static void undoPromotion(chessPosition* position, chessMove move, figure
 	position->pieceTables[1-toMove][move.captureType] 	= (position->pieceTables[1-toMove][move.captureType] | (isCapture & move.move)) & (~position->pieces[toMove]);
 	position->pieceTableEval 							= position->pieceTableEval-(1-2*toMove)*(completePieceTables[promotedFigure][toMove][move.targetField]-completePieceTables[pawn][toMove][move.sourceField]);
 	position->pieceTableEval 							= position->pieceTableEval-(1-2*toMove)*completePieceTables[move.captureType][1-toMove][move.targetField];
-	position->figureEval     							= position->figureEval-(1-2*toMove)*(figureValues[promotedFigure]-figureValues[pawn]);
-	position->totalFigureEval     						= position->totalFigureEval-(figureValues[promotedFigure]-figureValues[pawn]);
+	const evalParameters* evalPars 						= getEvalParameters();
+	position->figureEval     							= position->figureEval-(1-2*toMove)*(evalPars->figureValues[promotedFigure]-evalPars->figureValues[pawn]);
+	position->totalFigureEval     						= position->totalFigureEval-(evalPars->figureValues[promotedFigure]-evalPars->figureValues[pawn]);
 	position->zobristHash = position->zobristHash^zobristHash[promotedFigure][toMove][move.targetField]^zobristHash[pawn][toMove][move.sourceField]^zobristHash[move.captureType][1-toMove][move.targetField];
 }
 
@@ -129,14 +131,15 @@ void undoMove(chessPosition* position) {
 
 	assert(repetitionData[position->zobristHash & 16383] != 0);
 	repetitionData[position->zobristHash & 16383]--;
-	chessMove move = position->madeMoves.pop();
-	position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
-	position->zobristHash = position->zobristHash^castlingHash[position->data.castlingRights];
-	position->data = position->dataStack.pop();
-	position->zobristHash = position->zobristHash^castlingHash[position->data.castlingRights];
-	position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
-	position->figureEval     = position->figureEval+(1-2*position->toMove)*figureValues[move.captureType];
-	position->totalFigureEval     = position->totalFigureEval+figureValues[move.captureType];
+	chessMove move 						= position->madeMoves.pop();
+	position->zobristHash 				= position->zobristHash^enpassantHash[position->data.enPassantFile];
+	position->zobristHash 				= position->zobristHash^castlingHash[position->data.castlingRights];
+	position->data 						= position->dataStack.pop();
+	position->zobristHash 				= position->zobristHash^castlingHash[position->data.castlingRights];
+	position->zobristHash 				= position->zobristHash^enpassantHash[position->data.enPassantFile];
+	const evalParameters* evalPars 		= getEvalParameters();
+	position->figureEval     			= position->figureEval+(1-2*position->toMove)*evalPars->figureValues[move.captureType];
+	position->totalFigureEval     		= position->totalFigureEval+evalPars->figureValues[move.captureType];
 
 	//00000BNR00000PKQ00000NPR00000N0P000000000000000p0qpN0npnN000000kw0000
 

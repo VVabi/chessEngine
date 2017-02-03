@@ -24,12 +24,14 @@ public class UciProcessing {
     double res = 0;
 
     String engine1;
+    String params1;
     String engine2;
+    String params2;
 
     int numGames = 0;
     ArrayList<String> openingPositions;
 
-    public UciProcessing(String engine1, String engine2, int numGames) throws IOException {
+    public UciProcessing(String engine1, String params1, String engine2, String params2, int numGames) throws IOException {
 
         this.numGames = numGames;
         CountDownLatch cd = new CountDownLatch(1);
@@ -41,7 +43,9 @@ public class UciProcessing {
             e.printStackTrace();
         }*/
         this.engine1 = engine1;
+        this.params1 = params1;
         this.engine2 = engine2;
+        this.params2 = params2;
         openingPositions = new ArrayList<>();
         readOpeningPositions();
 
@@ -74,9 +78,8 @@ public class UciProcessing {
         String startPos = " ";
         for(int k=0; k < numGames; k++) {
             //stockFishHandler = new uciEngineHandler("/home/vabi/code/stockfish-7-linux/Linux/stockfish");
-            vabiHandler = new uciEngineHandler(engine1);
-            stockFishHandler = new uciEngineHandler(engine2);
-
+            vabiHandler = new uciEngineHandler(engine1, params1);
+            stockFishHandler = new uciEngineHandler(engine2, params2);
             if((k %2  == 0)){
                 startPos = openingPositions.get(index);
                 index++;
@@ -110,10 +113,10 @@ public class UciProcessing {
 
 
                 eval = vabiHandler.readBestmove(mv);
-                if (eval > 300) {
+                if (eval > 10000) {
                     ret = 1;
                     break;
-                } else if (eval < -300) {
+                } else if (eval < -10000) {
                     ret = -1;
                     break;
                 }
@@ -139,6 +142,7 @@ public class UciProcessing {
                     break;
                 }
             }
+
 
             if (ret == 0) {
                 System.out.println("Draw");

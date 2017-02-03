@@ -16,6 +16,9 @@
 #include <userInterface/UIlayer.hpp>
 #include <iostream>
 #include <fstream>
+#include <parameters/parameters.hpp>
+#include <logging/logger.hpp>
+
 evaluationResult result;
 
 evaluationResult getEvaluationResult(){
@@ -36,7 +39,7 @@ uint16_t taperingValues[81] = {  0,  0,  0,  0,  0,  0,  0,  0,
 							   256,256,256,256,256,256,256,256,256
 };
 
-static int32_t rookOpenFiles(const chessPosition* position, uint8_t* pawnOccupancy) {
+static int32_t rookOpenFiles(const chessPosition* position, uint8_t* pawnOccupancy, const evalParameters* evalParams) {
 	int32_t ret = 0;
 
 	for(uint8_t color=0; color<2; color++){
@@ -63,6 +66,8 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 		position->totalFigureEval < 400) {
 		return 0; //insufficent material
 	}
+
+	const evalParameters* evalPars = getEvalParameters();
 
 	/*uint16_t blackkingField = findLSB(position->pieceTables[black][king]);
 	return endGamepieceTables[king][black][blackkingField];*/ //in nthis way, we actually win endgames vs lone king. But be careful with searchdepth! higher depths may delay the moving of the king
@@ -100,18 +105,18 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 	}
 
 	uint8_t pawnColumnOccupancy[2];
-	eval = eval+pawnEvaluation(position, pawnColumnOccupancy, phase);
+	eval = eval+pawnEvaluation(position, pawnColumnOccupancy, phase, evalPars);
 	int16_t mobilityScore = 0;
-	AttackTable whiteAttackTable 		= makeAttackTableWithMobility(position, white, &mobilityScore);
+	AttackTable whiteAttackTable = makeAttackTableWithMobility(position, white, &mobilityScore);
 	eval = eval+mobilityScore;
 	result.mobility = mobilityScore;
 	mobilityScore = 0;
-	AttackTable blackAttackTable 		= makeAttackTableWithMobility(position, black, &mobilityScore);
+	AttackTable blackAttackTable = makeAttackTableWithMobility(position, black, &mobilityScore);
 	eval = eval-mobilityScore;
 	result.mobility = result.mobility-mobilityScore;
 
 
-	int16_t rookFiles = rookOpenFiles(position, pawnColumnOccupancy);
+	int16_t rookFiles = rookOpenFiles(position, pawnColumnOccupancy, evalPars);
 	eval = eval+rookFiles;
 	result.rookOpenFiles = rookFiles;
 
@@ -120,15 +125,15 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 
 	result.bishoppair = 0;
 	if(numWhiteBishops > 1){
-		eval = eval+50;
-		result.bishoppair = 50;
+		eval = eval+evalPars->bishoppair;
+		result.bishoppair = evalPars->bishoppair;
 	}
 
 	uint64_t numblackBishops = popcount(position->pieceTables[black][bishop]);
 
 	if(numblackBishops > 1){
-		eval = eval-50;
-		result.bishoppair = result.bishoppair-50;
+		eval = eval-evalPars->bishoppair;
+		result.bishoppair = result.bishoppair-evalPars->bishoppair;
 	}
 
 	int32_t kingSafetyComplete = kingSafety(position, pawnColumnOccupancy, &whiteAttackTable, &blackAttackTable);;
@@ -166,7 +171,7 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 
 	if((counter > 100000) && (std::abs(eval-position->figureEval) > 100)){
 		counter = 0;
-		//latexOutput(position, out, result, eval);
+		//latexOutput(position, result, eval);
 	}
 
 	return (1-2*position->toMove)*eval;

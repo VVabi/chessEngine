@@ -11,7 +11,10 @@ import PlayingGUI.PlayingGUI;
 import uciClient.UciProcessing;
 import uciClient.uciEngineHandler;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +40,21 @@ public class Main extends Application {
                 break;
             }
         }*/
+       /* Runtime runtime = Runtime.getRuntime();
+        Process process;
+        BufferedReader reader;
+        File pathToExecutable = new File("");
+        ProcessBuilder pb = new ProcessBuilder("/home/vabi/code/chessEngine/Cpp/uciRelease/Vabi");
+        pb.directory(pathToExecutable.getAbsoluteFile());
+        process = pb.start();
+        reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        while(true){
+            String st = reader.readLine();
+            if(st == null){
+                break;
+            }
+            System.out.println(st);
+        }*/
 
 
         final Core cor = new Core(primaryStage);
@@ -45,7 +63,7 @@ public class Main extends Application {
             public void run() {
                 UciProcessing matchup = null;
                 try {
-                    matchup = new UciProcessing("/home/vabi/code/chessEngine/Cpp/uciChallengeRelease/Vabi", "/home/vabi/code/chessEngine/Cpp/uciDefenderRelease/Vabi", 20000);
+                    matchup = new UciProcessing("/home/vabi/code/chessEngine/Cpp/uciDefenderRelease/Vabi", "params1", "/home/vabi/code/chessEngine/Cpp/uciDefenderRelease/Vabi", "params2", 20000);
                     double res =  matchup.play();
                 } catch (IOException e) {
                     e.printStackTrace();

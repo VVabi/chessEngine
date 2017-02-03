@@ -21,9 +21,12 @@ public class uciEngineHandler {
         writer.flush();
 
     }
-    public uciEngineHandler(String path) throws IOException{
+    public uciEngineHandler(String path, String workingDirectory) throws IOException{
 
-        process = runtime.exec(path);
+        File pathToExecutable = new File(workingDirectory);
+        ProcessBuilder pb = new ProcessBuilder(path);
+        pb.directory(pathToExecutable.getAbsoluteFile());
+        process = pb.start();
         reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
         OutputStreamWriter output = new OutputStreamWriter(process.getOutputStream());
         writer = new BufferedWriter(output);
@@ -33,6 +36,7 @@ public class uciEngineHandler {
         while(true){
 
             String answer = reader.readLine();
+
             if("uciok".equals(answer)){
                 break;
             }

@@ -8,6 +8,6 @@
 #include "figureValues.hpp"
 #include <stdint.h>
 
-int16_t figureValues[] = {PAWNVALUE, KNIGHTVALUE, BISHOPVALUE, ROOKVALUE, QUEENVALUE, 10000, 0};
+//int16_t figureValues[] = {PAWNVALUE, KNIGHTVALUE, BISHOPVALUE, ROOKVALUE, QUEENVALUE, 10000, 0};
 
 
