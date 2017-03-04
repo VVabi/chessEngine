@@ -8,3 +8,7 @@ rookonopenfile 			15
 isolateddoublepawns 	-50
 nonisolateddoublepawns 	-20
 isolatedpawns   		-10
+selfopenfiletoking       -30
+selfopenfilenexttoking    -20
+opponentopenfiletoking 	  -20
+opponentopenfilenexttoking  -10

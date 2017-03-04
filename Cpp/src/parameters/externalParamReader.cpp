@@ -25,6 +25,10 @@ parameterReader::parameterReader() {
 	parameterFields.insert(std::make_pair("isolateddoublepawns", 7));
 	parameterFields.insert(std::make_pair("nonisolateddoublepawns", 8));
 	parameterFields.insert(std::make_pair("isolatedpawns", 9));
+	parameterFields.insert(std::make_pair("selfopenfiletoking", 10));
+	parameterFields.insert(std::make_pair("selfopenfilenexttoking", 11));
+	parameterFields.insert(std::make_pair("opponentopenfiletoking", 12));
+	parameterFields.insert(std::make_pair("opponentopenfilenexttoking", 13));
 }
 
 

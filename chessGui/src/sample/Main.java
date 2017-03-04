@@ -56,23 +56,58 @@ public class Main extends Application {
             System.out.println(st);
         }*/
 
+       UciProcessing processesList[] = new UciProcessing[3];
 
-        final Core cor = new Core(primaryStage);
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                UciProcessing matchup = null;
-                try {
-                    matchup = new UciProcessing("/home/vabi/code/chessEngine/Cpp/uciDefenderRelease/Vabi", "params1", "/home/vabi/code/chessEngine/Cpp/uciDefenderRelease/Vabi", "params2", 20000);
-                    double res =  matchup.play();
-                } catch (IOException e) {
-                    e.printStackTrace();
+        for(int ind=0; ind < 3; ind++) {
+            processesList[ind] = new UciProcessing("/home/vabi/code/chessEngine/Cpp/uciChallengeRelease/Vabi", "params1", "/home/vabi/code/chessEngine/Cpp/uciDefenderRelease/Vabi", "params2", 10000);
+            //final Core cor = new Core(primaryStage);
+            final int index = ind;
+            Thread.sleep(1523);
+            Runnable r = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        double res =  processesList[index].play();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
                 }
+            };
 
+            (new Thread(r)).start();
+
+        }
+
+        int wins = 0;
+        int draws = 0;
+        int losses = 0;
+
+        while(wins+draws+losses < 30000) {
+
+            wins = 0;
+            draws = 0;
+            losses = 0;
+
+            for(int ind=0; ind < 3; ind++) {
+                int[] res = processesList[ind].getCurrentResult();
+                wins = wins+res[0];
+                draws = draws+res[1];
+                losses = losses+res[2];
             }
-        };
-        System.out.println("Starting...");
-        (new Thread(r)).start();
+
+            double numGames = wins+draws+losses;
+            double total = wins+0.5*((double) draws);
+            double elo_diff = 400*(Math.log10(1-total/((double) numGames))-Math.log10(total/(double) numGames));
+            System.out.println(" ");
+            System.out.println("Total games "+numGames);
+            System.out.println("Wins "+wins+ " Draws "+draws+ " Losses "+losses);
+            System.out.println("Elo difference is " +elo_diff);
+            System.out.println(" ");
+
+
+            Thread.sleep(10000);
+        }
 
 
 

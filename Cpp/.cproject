@@ -443,6 +443,11 @@
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="uciRelease"/>
+		<configuration configurationName="uciDefenderRelease"/>
+		<configuration configurationName="TestRelease"/>
+		<configuration configurationName="uciDebug"/>
+		<configuration configurationName="uciChallengeRelease"/>
 		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/Vabi"/>
 		</configuration>
@@ -450,4 +455,5 @@
 			<resource resourceType="PROJECT" workspacePath="/Vabi"/>
 		</configuration>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>

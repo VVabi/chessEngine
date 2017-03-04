@@ -162,10 +162,10 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 		searchCounts.wentToQuiescence++;
 		return negamaxQuiescence(position, alpha, beta, 0);
 	}
-	uint64_t ownKing = position->pieceTables[position->toMove][king];
-	bool movingSideInCheck = isFieldAttacked(position, (playerColor) (1-position->toMove), findLSB(ownKing));
 
 	uint16_t refutationTarget = NO_REFUTATION; //invalid
+	uint64_t ownKing = position->pieceTables[position->toMove][king];
+	bool movingSideInCheck = isFieldAttacked(position, (playerColor) (1-position->toMove), findLSB(ownKing));
 	if(allowNullMove && !movingSideInCheck && (depth >= 2)){
 		if(check_nullmove(position, &refutationTarget, ply, max_ply, depth, beta)){
 			return beta;
@@ -177,7 +177,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 
 	//futility pruning
 	//-----------------
-	if(depth == 1){
+	if(depth == 1) {
 		if(!movingSideInCheck) {
 			searchCounts.futility_tried++;
 			int32_t base = evaluation(position, alpha-151, alpha);
@@ -189,6 +189,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 			}
 		}
 	}
+
 
 	uint16_t stackCounter = qmvStack.getCounter();
 	vdt_vector<chessMove> moves = qmvStack.getNext();
@@ -220,9 +221,6 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 				assert(moves[ind].type != kingMove); //all king moves moving into check should be found by move ordering!
 			}
 		} else {
-
-
-
 			searchCounts.nodes[depth]++;
 			searchCounts.totalNodes++;
 			legalMovesAvailable = true;
@@ -231,12 +229,9 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 			bool check = isFieldAttacked(position,  (playerColor) (1-position->toMove), ownkingField); //the last move gave check!
 			uint16_t reduction = 0;
 			uint16_t extension = 0;
-			if(!check && !isInCheck && (moves[ind].captureType == none) && (depth > 2)){
-				if((ind > 3) || foundGoodMove){
+			if(!check && !isInCheck && (moves[ind].captureType == none) && (depth > 2) && (ply > 0)){
+				if((ind > 3)){
 					reduction = 1;
-					if(ind > 15) {
-						reduction = 2;
-					}
 				}
 			}
 
@@ -252,6 +247,14 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 
 			if(check && ((ply+depth < max_ply-1) || ((depth == 1) && (ply+depth < max_ply)) )){
 				extension = 1;
+				reduction = 0;
+			}
+
+
+			bool closeToPromotion = (moves[ind].type == pawnMove) && ( (moves[ind].targetField > 48) || (moves[ind].targetField < 16));
+
+			if( (closeToPromotion || (moves[ind].type == promotionQueen)) && (ply+depth+extension < max_ply-1)) {
+				extension++;
 				reduction = 0;
 			}
 

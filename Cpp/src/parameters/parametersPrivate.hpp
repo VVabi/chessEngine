@@ -20,6 +20,10 @@ struct preParameters{
 	int64_t isolateddoublepawns;
 	int64_t nonisolateddoublepawns;
 	int64_t isolatedpawns;
+	int64_t selfopenfiletoking;
+	int64_t selfopenfilenexttoking;
+	int64_t opponentopenfiletoking;
+	int64_t opponentopenfilenexttoking;
 };
 
 

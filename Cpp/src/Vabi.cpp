@@ -86,7 +86,6 @@ int main() {
 		for(uint32_t t=0; t < 2; t++) {
 			for(uint32_t k=0; k < 64; k++) {
 				completePieceTables[index][t][k] = ((uint16_t) (pieceTables[index][t][k]/2+evalPars->figureValues[index])) |  ( ((uint16_t) (endGamepieceTables[index][t][k]/2+evalPars->figureValues[index])) << 16);
-
 			}
 		}
 	}

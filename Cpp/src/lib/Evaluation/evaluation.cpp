@@ -18,6 +18,7 @@
 #include <fstream>
 #include <parameters/parameters.hpp>
 #include <logging/logger.hpp>
+#include <parameters/parameters.hpp>
 
 evaluationResult result;
 
@@ -25,8 +26,18 @@ evaluationResult getEvaluationResult(){
 	return result;
 }
 
-
-
+uint16_t taperingValues[81] = {  0,  0,  0,  0,  0,  0,  0,  0,
+						       	 0,  0,  0,  0,  0,  0,  0,  0,
+								0, 2, 7, 12, 17, 22, 27, 33,
+								39, 45, 51, 57, 64, 71, 78, 85,
+								92, 99, 106, 113, 120, 127,134,141,
+							   148,155,162,168,174,180,186,192,
+							   197,202,206,210,214,218,222,226,
+							   229,232,235,238,241,244,247,256,
+							   256,256,256,256,256,256,256,256,
+							   256,256,256,256,256,256,256,256,256
+};
+/*
 uint16_t taperingValues[81] = {  0,  0,  0,  0,  0,  0,  0,  0,
 						       	 0,  0,  0,  0,  0,  0,  0,  0,
 								0, 2, 7, 11, 14, 19, 24, 29,
@@ -38,7 +49,7 @@ uint16_t taperingValues[81] = {  0,  0,  0,  0,  0,  0,  0,  0,
 							   256,256,256,256,256,256,256,256,
 							   256,256,256,256,256,256,256,256,256
 };
-
+*/
 static int32_t rookOpenFiles(const chessPosition* position, uint8_t* pawnOccupancy, const evalParameters* evalParams) {
 	int32_t ret = 0;
 
@@ -104,8 +115,7 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 		return evalsigned;
 	}
 
-	uint8_t pawnColumnOccupancy[2];
-	eval = eval+pawnEvaluation(position, pawnColumnOccupancy, phase, evalPars);
+
 	int16_t mobilityScore = 0;
 	AttackTable whiteAttackTable = makeAttackTableWithMobility(position, white, &mobilityScore);
 	eval = eval+mobilityScore;
@@ -115,6 +125,8 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 	eval = eval-mobilityScore;
 	result.mobility = result.mobility-mobilityScore;
 
+	uint8_t pawnColumnOccupancy[2];
+	eval = eval+pawnEvaluation(position, pawnColumnOccupancy, phase, evalPars, &whiteAttackTable, &blackAttackTable);
 
 	int16_t rookFiles = rookOpenFiles(position, pawnColumnOccupancy, evalPars);
 	eval = eval+rookFiles;
@@ -136,7 +148,7 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 		result.bishoppair = result.bishoppair-evalPars->bishoppair;
 	}
 
-	int32_t kingSafetyComplete = kingSafety(position, pawnColumnOccupancy, &whiteAttackTable, &blackAttackTable);;
+	int32_t kingSafetyComplete = kingSafety(position, pawnColumnOccupancy, &whiteAttackTable, &blackAttackTable, &evalPars->kingSafetyParameters);
 	int32_t kingSafetyTapered = (taperingValues[phase]*kingSafetyComplete)/256;
 	eval = eval+kingSafetyTapered;
 	result.kingSafety = kingSafetyTapered;

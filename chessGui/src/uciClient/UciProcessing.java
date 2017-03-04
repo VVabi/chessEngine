@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by vabi on 02.10.16.
@@ -27,6 +28,11 @@ public class UciProcessing {
     String params1;
     String engine2;
     String params2;
+
+    AtomicInteger wins = new AtomicInteger(0);
+    AtomicInteger draws = new AtomicInteger(0);
+    AtomicInteger losses = new AtomicInteger(0);
+
 
     int numGames = 0;
     ArrayList<String> openingPositions;
@@ -52,6 +58,14 @@ public class UciProcessing {
 
     }
 
+    public int[] getCurrentResult() {
+        int[] ret = new int[3];
+        ret[0] = wins.get();
+        ret[1] = draws.get();
+        ret[2] = losses.get();
+        return ret;
+    }
+
 
     private void readOpeningPositions() throws IOException {
         FileReader fileReader = new FileReader("openingPositions.txt");
@@ -71,9 +85,7 @@ public class UciProcessing {
 
         double total = 0;
 
-        int wins = 0;
-        int draws = 0;
-        int losses = 0;
+
         int index = 0;
         String startPos = " ";
         for(int k=0; k < numGames; k++) {
@@ -88,7 +100,7 @@ public class UciProcessing {
                 }
             }
 
-            System.out.println("Started engines");
+            //System.out.println("Started engines");
             List<String> moves = new ArrayList<>();
             int ret = 0;
             int eval = 0;
@@ -145,28 +157,26 @@ public class UciProcessing {
 
 
             if (ret == 0) {
-                System.out.println("Draw");
-                total = total+0.5;
-                draws++;
+                /*System.out.println("Draw");
+                total = total+0.5;*/
+                draws.incrementAndGet();
             } else if (ret == 1) {
-                System.out.println("Vabi won");
-                total = total+1;
-                wins++;
+               /* System.out.println("Vabi won");
+                total = total+1;*/
+                wins.incrementAndGet();
             } else {
-                System.out.println("Vabi lost");
-                losses++;
+                //System.out.println("Vabi lost");
+                losses.incrementAndGet();
             }
             stockFishHandler.close();
             vabiHandler.close();
-            System.out.println("Wins "+wins + " Draws "+draws+" Losses "+losses);
-            double elo_diff = 400*(Math.log10(1-total/((double) (k+1)))-Math.log10(total/(double) (k+1)));
-            System.out.println("Elo difference is " +elo_diff);
+
         }
 
-        System.out.println("Final result: " + total);
+        /*ystem.out.println("Final result: " + total);
         System.out.println("Wins "+wins + " Draws "+draws+" Losses "+losses);
         double elo_diff = 400*(Math.log10(1-total/((double) numGames))-Math.log10(total/(double) numGames));
-        System.out.println("Elo difference is " +elo_diff);
+        System.out.println("Elo difference is " +elo_diff);*/
         res = total;
         return total;
 

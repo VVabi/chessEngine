@@ -69,6 +69,7 @@ void calcCaptureSortEval(chessPosition* position, chessMove* mv, uint16_t hashed
 #define ILLEGAL -20000
 
 static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackTable* opponentAttackTable, AttackTable* ownAttackTable, uint16_t hashedMove, uint16_t killerA, uint16_t killerB, uint16_t refutationTarget) {
+	//TODO: add bonus for pawn pushes to 6th/7th row!
 	const evalParameters* evalPars 						= getEvalParameters(); //TODO: move outside
 	int16_t sortEval = 0;
 
@@ -176,6 +177,7 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 		} /*else {
 			sortEval = sortEval+30;
 		}*/
+
 	}
 	if((position->madeMoves.length > 0) && (mv->captureType != none)){
 		chessMove previousMove = position->madeMoves[position->madeMoves.length-1];

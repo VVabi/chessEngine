@@ -27,6 +27,10 @@ void paramDefaultInit(preParameters* par) {
 	par->isolatedpawns  = ISOLATEDPAWN;
 	par->isolateddoublepawns = ISOLATEDDOUBLEPAWN;
 	par->nonisolateddoublepawns = NONISOLATEDDOUBLEPAWN;
+	par->opponentopenfilenexttoking = OPPONENTOPENFILENEXTTOKING;
+	par->opponentopenfiletoking     = OPPONENTOPENFILETOKING;
+	par->selfopenfilenexttoking   	= SELFOPENFILENEXTTOKING;
+	par->selfopenfiletoking     	= SELFOPENFILETOKING;
 }
 
 staticPawnEvalParameters  initializeStaticPawnParameters(const preParameters par) {
@@ -37,6 +41,15 @@ staticPawnEvalParameters  initializeStaticPawnParameters(const preParameters par
 	return ret_par;
 }
 
+
+kingSafetyEvalParameters initializeKingSafetyParameters(const preParameters par) {
+	kingSafetyEvalParameters ret;
+	ret.opponentopenfilenexttoking = par.opponentopenfilenexttoking;
+	ret.opponentopenfiletoking     = par.opponentopenfiletoking;
+	ret.selfopenfilenexttoking     = par.selfopenfilenexttoking;
+	ret.selfopenfiletoking         = par.selfopenfiletoking;
+	return ret;
+}
 
 void initializeDependentParameters(preParameters par) {
 	evaluationParameters.figureValues[pawn] 		= par.pawnValue;
@@ -49,6 +62,7 @@ void initializeDependentParameters(preParameters par) {
 	evaluationParameters.bishoppair                 = par.bishoppair;
 	evaluationParameters.rookOnOpenFile				= par.rookonopenfile;
 	evaluationParameters.staticPawnParameters       = initializeStaticPawnParameters(par);
+	evaluationParameters.kingSafetyParameters       = initializeKingSafetyParameters(par);
 }
 
 void initializeParameters() {
