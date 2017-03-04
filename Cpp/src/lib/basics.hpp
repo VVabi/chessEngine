@@ -14,7 +14,7 @@
 
 #define NUM_DIFFERENT_PIECES 6
 
-#define BIT64(x) (1UL << x)
+#define BIT64(x) (1ULL << x)
 
 #define PIECETABLE(a)  			((a & 0xFFFF)-(1 << 15)-64*500)
 #define ENDGAMEPIECETABLE(a)  	((a >> 16)-(1 << 15)-64*500)

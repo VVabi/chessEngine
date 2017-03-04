@@ -8,7 +8,7 @@
 #ifndef SEARCH_SEARCH_HPP_
 #define SEARCH_SEARCH_HPP_
 #include <assert.h>
-#define HISTORY_CUTOFF (1UL << 12)
+#define HISTORY_CUTOFF (1ULL << 12)
 #define NO_REFUTATION 64
 void rescaleHistoryTable();
 int16_t negamax(chessPosition* position,  uint16_t ply, uint16_t max_ply, int16_t depth, int16_t alpha, int16_t beta, chessMove* bestMove, bool allowNullMove = true,  bool allowHashProbe = true);
