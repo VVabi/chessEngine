@@ -202,7 +202,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 
 int32_t createDebugEvaluation(const chessPosition* position, VDTevaluation* evalDebug){
 	int32_t eval = evaluation(position, -110000, 110000);
-	int32_t debugEval = debugEvaluation(position, evalDebug);
+	int32_t debugEval = 0;
 	std::cout << "Eval " << eval << std::endl;
 	std::cout << "DebugEval " << debugEval << std::endl;
 	if(eval != debugEval){
