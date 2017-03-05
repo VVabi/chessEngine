@@ -89,10 +89,10 @@ uint64_t generateBishopMoveTable(uint16_t field, uint64_t blocker){
 				uint64_t blocker = 0;
 				uint16_t cnt = 0;
 				for(uint16_t i=0; i < 64; i++){
-					if(bishopFieldTable[field] & (1UL << i)) {
+					if(bishopFieldTable[field] & (1ULL << i)) {
 
 						if(ind & (1 << cnt)){
-							blocker = blocker | (1UL << i);
+							blocker = blocker | (1ULL << i);
 						}
 						cnt++;
 					}
@@ -156,10 +156,10 @@ uint64_t generateBishopMagicNumber(uint16_t fieldIndex) {
 		uint64_t blocker = 0;
 		uint16_t cnt = 0;
 		for(uint16_t i=0; i < 64; i++){
-			if(bishopFieldTable[fieldIndex] & (1UL << i)) {
+			if(bishopFieldTable[fieldIndex] & (1ULL << i)) {
 
 				if(ind & (1 << cnt)){
-					blocker = blocker | (1UL << i);
+					blocker = blocker | (1ULL << i);
 				}
 				cnt++;
 			}

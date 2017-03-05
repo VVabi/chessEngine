@@ -117,7 +117,8 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 		return 0;
 	}
 
-	if(repetitionData[position->zobristHash & 16383] > 1){
+	//don't check repetition in root to avoid stupid losses. TODO: this is a quickfix and may have unintended consequences!
+	if((ply > 0) && (repetitionData[position->zobristHash & 16383] > 1)){
 		if(backtrack_position_for_repetition(position)){
 			searchCounts.threefold_repetitions++;
 			return 0;
@@ -177,7 +178,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 
 	//futility pruning
 	//-----------------
-	if(depth == 1) {
+	if((depth == 1) && (alpha > -2000)) {
 		if(!movingSideInCheck) {
 			searchCounts.futility_tried++;
 			int32_t base = evaluation(position, alpha-151, alpha);

@@ -136,7 +136,7 @@ std::string chessPositionToString(const chessPosition position) {
 	std::string ret = "";
 
 	for (uint8_t ind=0; ind < 64; ind++) {
-		uint64_t num = (1UL << ind);
+		uint64_t num = (1ULL << ind);
 		bool found = false;
 		for	(uint8_t color=0; color < 2; color++) {
 			for	(uint8_t figureCnt = 0; figureCnt < 6; figureCnt++) {
@@ -197,7 +197,7 @@ std::string chessPositionToOutputString(const chessPosition position){
 
 	for (int8_t row=7; row >=0; row--) {
 		for (int8_t column=0; column < 8; column++) {
-		uint64_t num = (1UL << (8*row+column));
+		uint64_t num = (1ULL << (8*row+column));
 		bool found = false;
 		for	(uint8_t color=0; color < 2; color++) {
 			for	(uint8_t figureCnt = 0; figureCnt < 6; figureCnt++) {
@@ -254,52 +254,52 @@ chessPosition FENtoChessPosition(std::string fen){
 			file++;
 			switch(current){
 				case 'K':
-					position.pieces[white] 					|= (1UL << field);
-					position.pieceTables[white][king] 		|= (1UL << field);
+					position.pieces[white] 					|= (1ULL << field);
+					position.pieceTables[white][king] 		|= (1ULL << field);
 					break;
 				case 'Q':
-					position.pieceTables[white][queen] 		|= (1UL << field);
-					position.pieces[white] 					|= (1UL << field);
+					position.pieceTables[white][queen] 		|= (1ULL << field);
+					position.pieces[white] 					|= (1ULL << field);
 					break;
 				case 'R':
-					position.pieceTables[white][rook] 		|= (1UL << field);
-					position.pieces[white] 					|= (1UL << field);
+					position.pieceTables[white][rook] 		|= (1ULL << field);
+					position.pieces[white] 					|= (1ULL << field);
 					break;
 				case 'B':
-					position.pieceTables[white][bishop] 	|= (1UL << field);
-					position.pieces[white] 					|= (1UL << field);
+					position.pieceTables[white][bishop] 	|= (1ULL << field);
+					position.pieces[white] 					|= (1ULL << field);
 					break;
 				case 'N':
-					position.pieceTables[white][knight] 	|= (1UL << field);
-					position.pieces[white] 					|= (1UL << field);
+					position.pieceTables[white][knight] 	|= (1ULL << field);
+					position.pieces[white] 					|= (1ULL << field);
 					break;
 				case 'P':
-					position.pieceTables[white][pawn] 		|= (1UL << field);
-					position.pieces[white] 					|= (1UL << field);
+					position.pieceTables[white][pawn] 		|= (1ULL << field);
+					position.pieces[white] 					|= (1ULL << field);
 					break;
 				case 'k':
-					position.pieceTables[black][king] 		|= (1UL << field);
-					position.pieces[black] 					|= (1UL << field);
+					position.pieceTables[black][king] 		|= (1ULL << field);
+					position.pieces[black] 					|= (1ULL << field);
 					break;
 				case 'q':
-					position.pieceTables[black][queen]  	|= (1UL << field);
-					position.pieces[black] 					|= (1UL << field);
+					position.pieceTables[black][queen]  	|= (1ULL << field);
+					position.pieces[black] 					|= (1ULL << field);
 					break;
 				case 'r':
-					position.pieceTables[black][rook]  		|= (1UL << field);
-					position.pieces[black] 					|= (1UL << field);
+					position.pieceTables[black][rook]  		|= (1ULL << field);
+					position.pieces[black] 					|= (1ULL << field);
 					break;
 				case 'b':
-					position.pieceTables[black][bishop]  	|= (1UL << field);
-					position.pieces[black] 					|= (1UL << field);
+					position.pieceTables[black][bishop]  	|= (1ULL << field);
+					position.pieces[black] 					|= (1ULL << field);
 					break;
 				case 'n':
-					position.pieceTables[black][knight]  	|= (1UL << field);
-					position.pieces[black] 					|= (1UL << field);
+					position.pieceTables[black][knight]  	|= (1ULL << field);
+					position.pieces[black] 					|= (1ULL << field);
 					break;
 				case 'p':
-					position.pieceTables[black][pawn]  		|= (1UL << field);
-					position.pieces[black] 					|= (1UL << field);
+					position.pieceTables[black][pawn]  		|= (1ULL << field);
+					position.pieces[black] 					|= (1ULL << field);
 					break;
 				default:
 					std::cout << "invalid fen  position string " << current << std::endl;
@@ -367,52 +367,52 @@ chessPosition stringToChessPosition(std::string strposition) {
 		char c = strposition.at(ind);
 			switch(c){
 				case 'K':
-					position.pieces[white] 					|= (1UL << ind);
-					position.pieceTables[white][king] 		|= (1UL << ind);
+					position.pieces[white] 					|= (1ULL << ind);
+					position.pieceTables[white][king] 		|= (1ULL << ind);
 					break;
 				case 'Q':
-					position.pieceTables[white][queen] 		|= (1UL << ind);
-					position.pieces[white] 					|= (1UL << ind);
+					position.pieceTables[white][queen] 		|= (1ULL << ind);
+					position.pieces[white] 					|= (1ULL << ind);
 					break;
 				case 'R':
-					position.pieceTables[white][rook] 		|= (1UL << ind);
-					position.pieces[white] 					|= (1UL << ind);
+					position.pieceTables[white][rook] 		|= (1ULL << ind);
+					position.pieces[white] 					|= (1ULL << ind);
 					break;
 				case 'B':
-					position.pieceTables[white][bishop] 	|= (1UL << ind);
-					position.pieces[white] 					|= (1UL << ind);
+					position.pieceTables[white][bishop] 	|= (1ULL << ind);
+					position.pieces[white] 					|= (1ULL << ind);
 					break;
 				case 'N':
-					position.pieceTables[white][knight] 	|= (1UL << ind);
-					position.pieces[white] 					|= (1UL << ind);
+					position.pieceTables[white][knight] 	|= (1ULL << ind);
+					position.pieces[white] 					|= (1ULL << ind);
 					break;
 				case 'P':
-					position.pieceTables[white][pawn] 		|= (1UL << ind);
-					position.pieces[white] 					|= (1UL << ind);
+					position.pieceTables[white][pawn] 		|= (1ULL << ind);
+					position.pieces[white] 					|= (1ULL << ind);
 					break;
 				case 'k':
-					position.pieceTables[black][king] 		|= (1UL << ind);
-					position.pieces[black] 					|= (1UL << ind);
+					position.pieceTables[black][king] 		|= (1ULL << ind);
+					position.pieces[black] 					|= (1ULL << ind);
 					break;
 				case 'q':
-					position.pieceTables[black][queen]  	|= (1UL << ind);
-					position.pieces[black] 					|= (1UL << ind);
+					position.pieceTables[black][queen]  	|= (1ULL << ind);
+					position.pieces[black] 					|= (1ULL << ind);
 					break;
 				case 'r':
-					position.pieceTables[black][rook]  		|= (1UL << ind);
-					position.pieces[black] 					|= (1UL << ind);
+					position.pieceTables[black][rook]  		|= (1ULL << ind);
+					position.pieces[black] 					|= (1ULL << ind);
 					break;
 				case 'b':
-					position.pieceTables[black][bishop]  	|= (1UL << ind);
-					position.pieces[black] 					|= (1UL << ind);
+					position.pieceTables[black][bishop]  	|= (1ULL << ind);
+					position.pieces[black] 					|= (1ULL << ind);
 					break;
 				case 'n':
-					position.pieceTables[black][knight]  	|= (1UL << ind);
-					position.pieces[black] 					|= (1UL << ind);
+					position.pieceTables[black][knight]  	|= (1ULL << ind);
+					position.pieces[black] 					|= (1ULL << ind);
 					break;
 				case 'p':
-					position.pieceTables[black][pawn]  		|= (1UL << ind);
-					position.pieces[black] 					|= (1UL << ind);
+					position.pieceTables[black][pawn]  		|= (1ULL << ind);
+					position.pieces[black] 					|= (1ULL << ind);
 					break;
 				case '0':
 					break;

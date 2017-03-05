@@ -70,10 +70,10 @@ void initializeParameters() {
 	preParameters par;
 	paramDefaultInit(&par);
 	reader.readParameters(&par, "params.txt");
-	std::cout << par.pawnValue << std::endl;
+	/*std::cout << par.pawnValue << std::endl;
 	std::cout << par.knightValue << std::endl;
 	std::cout << par.bishopValue << std::endl;
 	std::cout << par.rookValue << std::endl;
-	std::cout << par.queenValue << std::endl;
+	std::cout << par.queenValue << std::endl;*/
 	initializeDependentParameters(par);
 }

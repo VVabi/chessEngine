@@ -67,7 +67,7 @@ static int32_t rookOpenFiles(const chessPosition* position, uint8_t* pawnOccupan
 
 }
 
-static uint32_t counter = 0;
+//static uint32_t counter = 0;
 
 int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 
@@ -179,12 +179,12 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 #ifdef RANDOMEVAL
 	eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?
 #endif
-	counter++;
+	/*counter++;
 
 	if((counter > 100000) && (std::abs(eval-position->figureEval) > 100)){
 		counter = 0;
-		//latexOutput(position, result, eval);
-	}
+		latexOutput(position, result, eval);
+	}*/
 
 	return (1-2*position->toMove)*eval;
 

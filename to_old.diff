@@ -287,7 +287,7 @@ index f4647cf..fa070e6 100644
 @@ -9,12 +9,12 @@
  #define SEARCH_SEARCH_HPP_
  #include <assert.h>
- #define HISTORY_CUTOFF (1UL << 12)
+ #define HISTORY_CUTOFF (1ULL << 12)
 -
 +#define NO_REFUTATION 64
  void rescaleHistoryTable();
@@ -1401,7 +1401,7 @@ index 3ff35b0..30be9ec 100644
 ----- a/Cpp/src/Search/search.hpp
 --+++ b/Cpp/src/Search/search.hpp
 --@@ -11,10 +11,10 @@
--- #define HISTORY_CUTOFF (1UL << 12)
+-- #define HISTORY_CUTOFF (1ULL << 12)
 -- 
 -- void rescaleHistoryTable();
 ---int16_t negamax(chessPosition* position, int16_t depth, int16_t alpha, int16_t beta, chessMove* bestMove, bool allowNullMove = true,  bool allowHashProbe = true);

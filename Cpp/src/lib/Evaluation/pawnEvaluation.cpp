@@ -218,7 +218,7 @@ int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupan
 	uint64_t buffer = position->pieceTables[white][pawn];
 	while(buffer){
 		uint16_t n = popLSB(buffer)+8;
-		if(!(passedPawnMasks[black][n] & (position->pieceTables[white][pawn] & ~(1UL << (n-8)))) && !(position->pieceTables[black][pawn] & files[FILE(n)])){
+		if(!(passedPawnMasks[black][n] & (position->pieceTables[white][pawn] & ~(1ULL << (n-8)))) && !(position->pieceTables[black][pawn] & files[FILE(n)])){
 			eval = eval-15;
 
 			/*if(btakes & BIT64(n)){
@@ -230,7 +230,7 @@ int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupan
 	buffer = position->pieceTables[black][pawn];
 	while(buffer){
 		uint16_t n = popLSB(buffer)-8;
-		if(!(passedPawnMasks[white][n] & (position->pieceTables[black][pawn] & ~(1UL << (n+8)))) && !(position->pieceTables[white][pawn] & files[FILE(n)])){
+		if(!(passedPawnMasks[white][n] & (position->pieceTables[black][pawn] & ~(1ULL << (n+8)))) && !(position->pieceTables[white][pawn] & files[FILE(n)])){
 			eval = eval+15;
 			/*if(wtakes & BIT64(n)){
 				eval = eval+10;

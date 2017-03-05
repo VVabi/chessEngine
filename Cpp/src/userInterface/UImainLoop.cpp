@@ -8,7 +8,6 @@
 
 #include <lib/basics.hpp>
 #include <userInterface/userInterface.hpp>
-#include <userInterface/networkUserInterface.hpp>
 #include <userInterface/uciInterface.hpp>
 #include <fstream>
 #include <lib/moveMaking/moveMaking.hpp>
@@ -118,7 +117,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 		uint64_t totalNodes=0;
 		searchDebugData data = getSearchData();
 		for(uint16_t ind=0; ind < 25; ind++){
-#ifndef UCI
+/*#ifndef UCI
 			std::cout << ind << "  " << data.nodes[ind] << std::endl;
 			std::cout << std::setw(16) << " ";
 
@@ -126,10 +125,10 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 				std::cout << std::setw(9) << data.bestIndex[ind][k];
 			}
 			std::cout << std::endl;
-#endif
+#endif*/
 			totalNodes = totalNodes+data.nodes[ind];
 		}
-#ifndef UCI
+/*#ifndef UCI
 
 		std::cout << "SEARCH DEBUG DATA" << std::endl;
 		std::cout << "negamax called: "  << data.called << std::endl;
@@ -146,7 +145,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 		std::cout << "Successful nullmove " << data.nullMovePruningSuccessful << std::endl;
 		std::cout << "Went to search "     << data.wentToSearch <<std::endl;
 		std::cout << "Had to sort " << data.neededSort << std::endl;
-#endif
+#endif*/
 
 		*nodeCount = (data.totalNodes+getQuiescenceNodes());
 		UI->sendSearchInfo(*nodeCount, *mtime, *eval, depth, moveToString(*bestMove, *position));
@@ -200,31 +199,16 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
 	return depth;
 }
 
-int32_t createDebugEvaluation(const chessPosition* position, VDTevaluation* evalDebug){
-	int32_t eval = evaluation(position, -110000, 110000);
-	int32_t debugEval = 0;
-	std::cout << "Eval " << eval << std::endl;
-	std::cout << "DebugEval " << debugEval << std::endl;
-	if(eval != debugEval){
-		return 0;
-	}
-	return 1;
-}
+
 
 void sendNewPosition(chessPosition* position) {
-	VDTevaluation evalDebug;
-	int32_t valid = createDebugEvaluation(position, &evalDebug);
 	std::string newPosition = chessPositionToString(*position);
 	UI->sendNewPosition(newPosition);
-	UI->sendDebugEval(evalDebug, valid);
+
 }
 
 void UIloop() {
-#ifdef UCI
 	UI = new uciInterface();
-#else
-	UI = new networkUserInterface();
-#endif
 	std::string positionstr = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwKQkq";
 	chessPosition position = stringToChessPosition(positionstr);
 	/*std::string positionstr = " ";*/
@@ -253,21 +237,13 @@ void UIloop() {
 		std::vector<std::string> moveList = std::vector<std::string>();
 		if(UI->receiveNewPosition(positionstr, moveList)){
 			free_position(&position);
-#ifdef UCI
 			position = FENtoChessPosition(positionstr);
-#else
-			position = stringToChessPosition(positionstr);
-#endif
 			for(std::string seg: moveList){
 				//std::cout << seg << std::endl;
 				if(!checkAndMakeMove(position, seg)){
 					std::cout << "Illegal move detected" << std::endl;
 				}
 			}
-			//TODO: change the network interface such that this works without the define
-			#ifndef UCI
-			sendNewPosition(&position);
-			#endif
 		}
 
 		if(UI->positionRequested()){

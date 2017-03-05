@@ -10,7 +10,6 @@
 using namespace std;
 #include <lib/basics.hpp>
 #include <fstream>
-#include <DataTypes/threadSafeQueue.hpp>
 #include <tr1/memory>
 #include <lib/Attacks/attacks.hpp>
 #include <lib/bitfiddling.h>
@@ -72,16 +71,6 @@ int main() {
 
 
 	const evalParameters* evalPars =  getEvalParameters();
-
-	for(uint16_t i=0; i < 7; i++) {
-		std::cout << evalPars->figureValues[i] << std::endl;
-	}
-	std::cout << evalPars->bishoppair << std::endl;
-	std::cout << evalPars->rookOnOpenFile << std::endl;
-	std::cout << evalPars->staticPawnParameters.isolatedPawn << std::endl;
-	std::cout << evalPars->staticPawnParameters.isolatedDoublePawn << std::endl;
-	std::cout << evalPars->staticPawnParameters.nonIsolatedDoublePawn << std::endl;
-
 	for(uint32_t index=0; index < 7; index++) {
 		for(uint32_t t=0; t < 2; t++) {
 			for(uint32_t k=0; k < 64; k++) {
