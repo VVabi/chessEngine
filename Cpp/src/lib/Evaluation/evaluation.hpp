@@ -14,7 +14,7 @@
 
 
 int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta);
-int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupancy, uint16_t phase, const evalParameters* evalPars, const AttackTable* whiteAttackTable, const AttackTable* blackAttackTable);
+int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupancy, uint16_t phase, const evalParameters* evalPars);
 int32_t staticPawnEval(uint64_t pawns, playerColor color, const staticPawnEvalParameters* evalPars);
 int32_t kingSafety(const chessPosition* position, const uint8_t* pawnColumnOccupancy, const AttackTable* whiteAttackTable, const AttackTable* blackAttackTable, const kingSafetyEvalParameters* par);
 

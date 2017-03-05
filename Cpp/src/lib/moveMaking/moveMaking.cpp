@@ -53,7 +53,7 @@ inline static void makeNormalMove(chessMove* move, chessPosition* position) {
 
 
 //TODO: get rid of the ifs
-inline static void makeKingSideCastle(chessMove* move, chessPosition* position) {
+inline static void makeKingSideCastle(chessPosition* position) {
 	playerColor toMove = position->toMove;
 
 	if(toMove == white){
@@ -73,7 +73,7 @@ inline static void makeKingSideCastle(chessMove* move, chessPosition* position) 
 }
 
 
-inline static void makeQueenSideCastle(chessMove* move, chessPosition* position) {
+inline static void makeQueenSideCastle(chessPosition* position) {
 	playerColor toMove = position->toMove;
 	if(toMove == white){
 		position->pieces[toMove] 		     = position->pieces[toMove]^(WHITEQUEENSIDECASTLEOCCUPANCYCHANGE);
@@ -167,12 +167,12 @@ void makeMove(chessMove* move, chessPosition* position) {
 		}
 		case castlingKingside:
 		{
-			makeKingSideCastle(move, position);
+			makeKingSideCastle(position);
 			break;
 		}
 		case castlingQueenside:
 		{
-			makeQueenSideCastle(move, position);
+			makeQueenSideCastle(position);
 			break;
 		}
 		case enpassant:

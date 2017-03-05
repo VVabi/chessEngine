@@ -216,14 +216,23 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 	}
 
 	if(mv->captureType == none){
-		int32_t historyValue = historyTable[position->toMove][mv->sourceField][mv->targetField];
-		if(historyValue > 20){
-			historyValue = 21+(historyValue/4);
+		int32_t historyValue = historyTable[position->toMove][mv->sourceField][mv->targetField]/4;
+		/*if(historyValue > 20){
+			historyValue = 21+(historyValue/8);
 		}
 
 		if(historyValue < -20){
-			historyValue = -21+(historyValue/4);
+			historyValue = -21+(historyValue/8);
+		}*/
+
+		if(historyValue > 100) {
+			historyValue = 100;
 		}
+
+		/*if(historyValue < -100) {
+			historyValue = -100;
+		}*/
+
 
 		sortEval = sortEval+historyValue;
 		//std::cout << historyValue << std::endl;

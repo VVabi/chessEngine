@@ -44,7 +44,7 @@ static uint16_t distBetweenFields(uint16_t a, uint16_t b) {
 }
 
 
-static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint64_t blackPawns, uint16_t blackKing, uint16_t whiteKing, const evalParameters* evalPars, const AttackTable* whiteAttackTable, const AttackTable* blackAttackTable) {
+static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint64_t blackPawns, uint16_t blackKing, uint16_t whiteKing) {
 	//TODO: remove code duplication. Generally this code sucks - too many white/black diffs...
 	int32_t eval = 0;
 	uint64_t whitePawnBuffer = whitePawns;
@@ -179,8 +179,7 @@ int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOcc
 
 extern evaluationResult result;
 
-int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupancy, uint16_t phase, const evalParameters* evalPars, const AttackTable* whiteAttackTable, const AttackTable* blackAttackTable) {
-
+int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupancy, uint16_t phase, const evalParameters* evalPars) {
 	uint32_t eval=0;
 	uint64_t whitePawns = position->pieceTables[white][pawn];
 	uint64_t blackPawns = position->pieceTables[black][pawn];
@@ -189,7 +188,7 @@ int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupan
 	eval = eval+staticPawn;
 	result.staticPawn = staticPawn;
 	int32_t untapered = 0;
-	int32_t passedPawns = passedPawnEval(&untapered, whitePawns, blackPawns, findLSB(position->pieceTables[black][king]), findLSB(position->pieceTables[white][king]), evalPars, whiteAttackTable, blackAttackTable);
+	int32_t passedPawns = passedPawnEval(&untapered, whitePawns, blackPawns, findLSB(position->pieceTables[black][king]), findLSB(position->pieceTables[white][king]));
 /*#ifdef EXPERIMENTAL
 	int16_t passedPawnPhase = std::max(phase-10, 0);
 #else*/

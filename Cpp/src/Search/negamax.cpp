@@ -21,7 +21,7 @@
 #include <fstream>
 #include <userInterface/UIlayer.hpp>
 
-extern uint32_t historyTable[2][64][64];
+extern int32_t historyTable[2][64][64];
 extern uint8_t searchId;
 
 static searchDebugData searchCounts;
@@ -303,7 +303,8 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 	if(bestIndex != -1){
 		if(bestMove->captureType == none){
 			historyTable[position->toMove][bestMove->sourceField][bestMove->targetField] += 2*depth*depth;
-			if(historyTable[position->toMove][bestMove->sourceField][bestMove->targetField] > HISTORY_CUTOFF){
+			int32_t cutoff = HISTORY_CUTOFF;
+			if(historyTable[position->toMove][bestMove->sourceField][bestMove->targetField] > cutoff){
 				//std::cout << "Rescaling history table " << std::endl;
 				rescaleHistoryTable();
 			}
@@ -311,8 +312,9 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 		for(uint16_t cnt=0; cnt < bestIndex; cnt++){
 			chessMove mv = moves[cnt];
 			if(mv.captureType == none){
-				historyTable[position->toMove][bestMove->sourceField][bestMove->targetField] -= depth*depth;
-				if(historyTable[position->toMove][bestMove->sourceField][bestMove->targetField] < -HISTORY_CUTOFF){
+				int32_t cutoff = HISTORY_CUTOFF;
+				historyTable[position->toMove][mv.sourceField][mv.targetField] -= depth*depth;
+				if(historyTable[position->toMove][mv.sourceField][mv.targetField] < (-cutoff)){
 					rescaleHistoryTable();
 				}
 			}

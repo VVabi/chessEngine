@@ -59,7 +59,7 @@ static int32_t rookOpenFiles(const chessPosition* position, uint8_t* pawnOccupan
 			uint16_t field = popLSB(rooks);
 			uint16_t file = FILE(field);
 			if((pawnOccupancy[color] & (1 << file)) == 0){
-				ret = ret+(1-2*color)*15;
+				ret = ret+(1-2*color)*evalParams->rookOnOpenFile;
 			}
 		}
 	}
@@ -126,7 +126,7 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 	result.mobility = result.mobility-mobilityScore;
 
 	uint8_t pawnColumnOccupancy[2];
-	eval = eval+pawnEvaluation(position, pawnColumnOccupancy, phase, evalPars, &whiteAttackTable, &blackAttackTable);
+	eval = eval+pawnEvaluation(position, pawnColumnOccupancy, phase, evalPars);
 
 	int16_t rookFiles = rookOpenFiles(position, pawnColumnOccupancy, evalPars);
 	eval = eval+rookFiles;
@@ -137,8 +137,8 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 
 	result.bishoppair = 0;
 	if(numWhiteBishops > 1){
-		eval = eval+evalPars->bishoppair;
-		result.bishoppair = evalPars->bishoppair;
+		eval 					= eval+evalPars->bishoppair;
+		result.bishoppair	 	= evalPars->bishoppair;
 	}
 
 	uint64_t numblackBishops = popcount(position->pieceTables[black][bishop]);

@@ -43,7 +43,7 @@ inline static void undoNormalMove(chessPosition* position, chessMove move) {
 	position->zobristHash    = position->zobristHash^zobristHash[move.type][toMove][move.targetField]^zobristHash[move.type][toMove][move.sourceField]^zobristHash[move.captureType][1-toMove][move.targetField];
 }
 
-inline static void undoKingSideCastling(chessPosition* position, chessMove move) {
+inline static void undoKingSideCastling(chessPosition* position) {
 	//TODO: remove the ifs
 	position->toMove = (playerColor) (1-position->toMove);
 	playerColor toMove = position->toMove;
@@ -63,7 +63,7 @@ inline static void undoKingSideCastling(chessPosition* position, chessMove move)
 	}
 }
 
-inline static void undoQueenSideCastling(chessPosition* position, chessMove move) {
+inline static void undoQueenSideCastling(chessPosition* position) {
 	position->toMove = (playerColor) (1-position->toMove);
 	playerColor toMove = position->toMove;
 	if(toMove == white){
@@ -156,12 +156,12 @@ void undoMove(chessPosition* position) {
 				}
 		case castlingKingside:
 			{
-				undoKingSideCastling(position, move);
+				undoKingSideCastling(position);
 				break;
 			}
 			case castlingQueenside:
 			{
-				undoQueenSideCastling(position, move);
+				undoQueenSideCastling(position);
 				break;
 			}
 			case enpassant: {

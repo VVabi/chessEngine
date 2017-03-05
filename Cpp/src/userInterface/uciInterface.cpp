@@ -153,9 +153,11 @@ void uciInterface::sendNewPosition(std::string position) {
 
 }
 
-bool uciInterface::receiveAnalyze(std::string& position, searchParameters& params){
+bool uciInterface::receiveAnalyze(std::string& position, searchParameters& params){ //TODO: refactor
 
-
+	if(position == "WTF") {
+			return false;
+	}
 	if(goInput.valid){
 		std::vector<std::string> splitted =  split(goInput.msg, ' ');
 		params.maxDepth 	= -1;
@@ -215,7 +217,11 @@ void uciInterface::sendSearchInfo(uint64_t nodes, uint32_t time, int32_t eval, u
 	std::cout << "info depth " << depth << " score cp " << eval << " nps " << npsInt << " pv " << bestMove << std::endl;
 }
 
-bool uciInterface::receiveMove(std::string& move){
+bool uciInterface::receiveMove(std::string& move){ //TODO: remove
+	if(move == "WTF") {
+		return true;
+	}
+
 	return false;
 }
 

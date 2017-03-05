@@ -60,7 +60,7 @@ uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t n
 }
 
 
-uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maximal_time, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval, bool doAspiration, searchParameters params) {
+uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval, bool doAspiration, searchParameters params) {
 	memset(killerMoves,0, 20*2*sizeof(uint16_t));
 	resetSearchData();
 	resetQuiescenceNodes();
@@ -276,7 +276,7 @@ void UIloop() {
 			uint64_t mtime;
 			int32_t eval = 0;
 			searchParameters params;
-			searchMove(&position, &bestMove, 4000, &nodeCount, &mtime, &eval, true, params);
+			searchMove(&position, &bestMove, &nodeCount, &mtime, &eval, true, params);
 			makeMove(&bestMove, &position);
 			sendNewPosition(&position);
 		}
@@ -292,7 +292,7 @@ void UIloop() {
 			uint32_t nodeCount;
 			uint64_t mtime;
 			int32_t eval = 0;
-			searchMove(&position, &bestMove, 4000, &nodeCount, &mtime, &eval, true, params);
+			searchMove(&position, &bestMove, &nodeCount, &mtime, &eval, true, params);
 			std::cout << "Found move " << moveToString(bestMove, position) << std::endl;
 			UI->sendBestMove(moveToString(bestMove, position));
 			makeMove(&bestMove, &position);
