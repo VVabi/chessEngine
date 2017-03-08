@@ -75,6 +75,9 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 	uint64_t searchedNodes = 0;
 #ifdef FIXEDDEPTH
 	uint16_t maxdepth = 7;
+#ifdef EXPERIMENTAL
+	maxdepth = 8;
+#endif
 	setTotalTime(100000000, start_ts);
 	while(depth < maxdepth){
 #else

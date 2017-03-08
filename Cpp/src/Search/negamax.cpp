@@ -233,6 +233,11 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 			if(!check && !isInCheck && (moves[ind].captureType == none) && (depth > 2) && (ply > 0)){
 				if((ind > 3)){
 					reduction = 1;
+//#ifdef EXPERIMENTAL
+					if(moves[ind].sortEval < -50) {
+						reduction = 2;
+					}
+//#endif
 				}
 			}
 

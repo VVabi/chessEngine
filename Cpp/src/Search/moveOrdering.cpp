@@ -16,7 +16,7 @@
 #include <hashTables/hashTables.hpp>
 #include <lib/moveMaking/moveMaking.hpp>
 #include <parameters/parameters.hpp>
-
+#include <cmath>
 
 
 extern int32_t historyTable[2][64][64];
