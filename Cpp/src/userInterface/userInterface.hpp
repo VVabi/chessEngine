@@ -12,6 +12,7 @@
 #include <vector>
 #include "interfaceStructs.hpp"
 
+
 class userInterface {
 	public:
 		virtual void initialize()=0;

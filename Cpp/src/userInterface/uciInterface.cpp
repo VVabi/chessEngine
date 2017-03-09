@@ -4,7 +4,7 @@
  *  Created on: Oct 1, 2016
  *      Author: vabi
  */
-
+#ifdef NDEF
 
 #include <iostream>
 #include "uciInterface.hpp"
@@ -282,3 +282,4 @@ bool uciInterface::receiveNewPosition(std::string& position, std::vector<std::st
 
 	return false;
 }
+#endif

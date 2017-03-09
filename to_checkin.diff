@@ -1,782 +1,1361 @@
-diff --git a/Cpp/src/Search/negamax.cpp b/Cpp/src/Search/negamax.cpp
-index f60c727..12e53ab 100644
---- a/Cpp/src/Search/negamax.cpp
-+++ b/Cpp/src/Search/negamax.cpp
-@@ -135,15 +135,15 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
- 			int16_t oldEval  = hashVal.eval;
- 			if((depth <= hashVal.depth) && (oldEval > -10000) && (oldEval < 10000) && (oldEval != 0)){ //TODO: the != 0 is stupid, but somehwere something goes wrong with 3fold rep scores, so excluded ehre for safety
- 				if( ((hashVal.flag == FAILHIGH) || (hashVal.flag == FULLSEARCH)) && (oldEval >= beta)){
--					setSearchId(searchId, position->zobristHash);
-+					setSearchId(searchId, position->zobristHash, hashVal.index);
- 					return beta;
- 				}
- 				else if( ((hashVal.flag == FAILLOW) || (hashVal.flag == FULLSEARCH)) && (oldEval <= alpha)){
--					setSearchId(searchId, position->zobristHash);
-+					setSearchId(searchId, position->zobristHash, hashVal.index);
- 					return alpha; //node will fail low
- 				}
- 				else if((hashVal.flag == FULLSEARCH)){ //TODO: this condition can be vastly improved
--					setSearchId(searchId, position->zobristHash);
-+					setSearchId(searchId, position->zobristHash, hashVal.index);
- 					if(oldEval <= alpha){
- 						return alpha;
- 					}
-@@ -266,9 +266,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
- 		undoMove(position);
- 
- 		if((alpha >= beta)) {
--			if((depth >= hashVal.depth) || (searchId != hashVal.searchId)) {
--				setHashEntry(FAILHIGH, beta, depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), position->zobristHash);
--			}
-+			setHashEntry(FAILHIGH, beta, depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), position->zobristHash);
- 			if(bestIndex != -1){
- 				searchCounts.bestIndex[depth][bestIndex]++;
- 			}
-@@ -317,13 +315,9 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
- 
- 
- 	if(foundGoodMove) {
--		if((depth >= hashVal.depth) || (searchId != hashVal.searchId)) {
--			setHashEntry(FULLSEARCH, alpha, depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), position->zobristHash);
--		}
-+		setHashEntry(FULLSEARCH, alpha, depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), position->zobristHash);
- 	} else { //we failed low, remember as well
--		if((depth >= hashVal.depth) || (searchId != hashVal.searchId)) {
- 			setHashEntry(FAILLOW, alpha, depth, searchId, 0, position->zobristHash);
--		}
- 	}
- 
- 	qmvStack.release();
-diff --git a/Cpp/src/Vabi.cpp b/Cpp/src/Vabi.cpp
-index 5d9bd3d..4456608 100644
---- a/Cpp/src/Vabi.cpp
-+++ b/Cpp/src/Vabi.cpp
-@@ -69,7 +69,11 @@ int main() {
- 	for(uint32_t index=0; index < 7; index++) {
- 		for(uint32_t t=0; t < 2; t++) {
- 			for(uint32_t k=0; k < 64; k++) {
-+#ifdef EXPERIMENTAL
-+					completePieceTables[index][t][k] = ((uint16_t) (pieceTables[index][t][k]/2+figureValues[index])) |  ( ((uint16_t) (endGamepieceTables[index][t][k]/2+figureValues[index])) << 16);
-+#else
- 					completePieceTables[index][t][k] = ((uint16_t) (pieceTables[index][t][k]/2+figureValues[index])) |  ( ((uint16_t) (endGamepieceTables[index][t][k]+figureValues[index])) << 16);
-+#endif
- 			}
- 		}
- 	}
-@@ -86,8 +90,8 @@ int main() {
- 		latexOutput(line, out);
- 	}*/
- 
--	/*runPerformanceTests();
--	return 0;*/
-+	runPerformanceTests();
-+	return 0;
- 	/*std::cout << testPerftTestSuite().passed << std::endl;
- 	return 0;*/
- 	UIloop();
-diff --git a/Cpp/src/hashTables/hashTables.hpp b/Cpp/src/hashTables/hashTables.hpp
-index aded8bc..feea41b 100644
---- a/Cpp/src/hashTables/hashTables.hpp
-+++ b/Cpp/src/hashTables/hashTables.hpp
-@@ -9,7 +9,7 @@
- #define HASHTABLES_HASHTABLES_HPP_
- 
- 
--#define HASHSIZE 0x3FFFFFF //needs to be a power of 2!
-+#define HASHSIZE 0xFFFFFF //needs to be a power of 2!
- 
- void fillZobristHash();
- uint64_t calcZobristHash(const chessPosition* position);
-@@ -18,6 +18,6 @@ void setHashEntry(hashEntry entry, uint64_t zobristKey);
- uint16_t getHashMove(uint64_t zobristKey);
- void setHashMove(uint16_t move, uint64_t zobristKey, uint8_t searchId);
- void setHashEntry(hashFlag flag, int16_t eval, uint8_t depth, uint8_t searchId, uint16_t bestMove, uint64_t key);
--void setSearchId(uint8_t searchId, uint64_t key);
-+void setSearchId(uint8_t searchId, uint64_t key, uint16_t index);
- 
- #endif /* HASHTABLES_HASHTABLES_HPP_ */
-diff --git a/Cpp/src/hashTables/zobristHash.cpp b/Cpp/src/hashTables/zobristHash.cpp
-index 1406c4b..b5b240c 100644
---- a/Cpp/src/hashTables/zobristHash.cpp
-+++ b/Cpp/src/hashTables/zobristHash.cpp
-@@ -12,54 +12,99 @@
- #include <assert.h>
- #include <iostream>
- 
--static hashEntry moveOrderingHashTable[HASHSIZE+1];
-+static hashBucket moveOrderingHashTable[HASHSIZE+1];
- 
- uint64_t zobristHash[7][2][64];
- uint64_t movingSideHash[2];
- uint64_t castlingHash[16];
- uint64_t enpassantHash[9];
- 
-+
-+static uint16_t permutationIndex = 0;
-+
-+
-+static uint16_t permutations[4][4] = {{0,1,2,3}, {1,2,3,0}, {2,3,0,1}, {3,0,1,2}};
-+
-+
-+
-+
- //TODO: somehow force-inline these functions everywhere
- 
- hashEntry getHashTableEntry(uint64_t zobristKey) {
--	return moveOrderingHashTable[zobristKey & HASHSIZE];
--}
-+	hashBucket current = moveOrderingHashTable[zobristKey & HASHSIZE];
- 
--void setHashEntry(hashEntry entry, uint64_t zobristKey){
--	moveOrderingHashTable[zobristKey & HASHSIZE] = entry;
--}
-+	hashEntry ret = current.hashData[0];
- 
--void setSearchId(uint8_t searchId, uint64_t key) {
--	moveOrderingHashTable[key & HASHSIZE].searchId = searchId;
-+	uint32_t zobristHigher = (uint32_t) (zobristKey  >> 32);
-+	uint16_t zobristLower  = (uint16_t) (((uint32_t) (zobristKey  & 0xFFFFFFFF)) >> 16);
- 
-+	for(uint8_t ind=1; ind < 4; ind++){
-+		hashEntry entry = current.hashData[ind];
-+		if((entry.hashHighBits == zobristHigher) && (entry.hashLower == zobristLower)){
-+			ret = entry;
-+		}
-+	}
-+	return ret;
-+}
-+
-+void setSearchId(uint8_t searchId, uint64_t key, uint16_t index) {
-+	moveOrderingHashTable[key & HASHSIZE].hashData[index].searchId = searchId;
- }
- 
- void setHashEntry(hashFlag flag, int16_t eval, uint8_t depth, uint8_t searchId, uint16_t bestMove, uint64_t key){
--	hashEntry entry;
--	entry.flag = flag;
--	entry.eval  = eval;
--	entry.depth = depth;
--	entry.searchId = searchId;
--	entry.bestMove = bestMove;
--	entry.hashHighBits = (uint32_t) (key >> 32);
--	entry.hashLower    = (uint16_t) (((uint32_t) (key & 0xFFFFFFFF)) >> 16);
--	moveOrderingHashTable[key & HASHSIZE] = entry;
-+	hashBucket* current = &moveOrderingHashTable[key & HASHSIZE];
-+
-+	for(uint8_t ind=0; ind < 4; ind++){
-+		hashEntry* entry = &current->hashData[permutations[permutationIndex][ind]];
-+		if((entry->depth <= depth) || (entry->searchId != searchId)) {
-+			entry->flag = flag;
-+			entry->eval  = eval;
-+			entry->depth = depth;
-+			entry->searchId = searchId;
-+			entry->bestMove = bestMove;
-+			entry->hashHighBits = (uint32_t) (key >> 32);
-+			entry->hashLower    = (uint16_t) (((uint32_t) (key & 0xFFFFFFFF)) >> 16);
-+			entry->index        = permutations[permutationIndex][ind];
-+			break;
-+		}
-+	}
-+	permutationIndex = (permutationIndex+1) & 3;
- }
- 
- uint16_t getHashMove(uint64_t zobristKey){
--	return moveOrderingHashTable[zobristKey & HASHSIZE].bestMove;
-+	hashBucket* current = &moveOrderingHashTable[zobristKey & HASHSIZE];
-+	uint32_t zobristHigher = (uint32_t) (zobristKey  >> 32);
-+	uint16_t zobristLower  = (uint16_t) (((uint32_t) (zobristKey  & 0xFFFFFFFF)) >> 16);
-+	for(uint8_t ind=0; ind < 4; ind++){
-+		hashEntry* entry = &current->hashData[ind];
-+		if ((entry->hashHighBits == zobristHigher) && (entry->hashLower == zobristLower)) {
-+			return entry->bestMove;
-+		}
-+	}
-+	return 0;
-+
- }
- 
- void setHashMove(uint16_t move, uint64_t zobristKey, uint8_t searchId) {
--	if(moveOrderingHashTable[zobristKey & HASHSIZE].searchId != searchId) {
--		moveOrderingHashTable[zobristKey & HASHSIZE].bestMove = move;
--		moveOrderingHashTable[zobristKey & HASHSIZE].depth    = 0;
-+	hashBucket* current = &moveOrderingHashTable[zobristKey & HASHSIZE];
-+	uint32_t zobristHigher = (uint32_t) (zobristKey  >> 32);
-+	uint16_t zobristLower  = (uint16_t) (((uint32_t) (zobristKey  & 0xFFFFFFFF)) >> 16);
-+	for(uint8_t ind=0; ind < 4; ind++){
-+		hashEntry* entry = &current->hashData[permutations[permutationIndex][ind]];
-+		if ((entry->searchId != searchId)){
-+			entry->searchId = searchId;
-+			entry->depth    = 0;
-+			entry->bestMove = move;
-+			entry->hashHighBits = zobristHigher;
-+			entry->hashLower    = zobristLower;
-+		}
- 	}
-+	permutationIndex = (permutationIndex+1) & 3;
- }
- 
- 
- void clearHashTables() {
--	memset(moveOrderingHashTable, 0, sizeof(hashEntry)*(HASHSIZE+1));
-+	memset(moveOrderingHashTable, 0, sizeof(hashBucket)*(HASHSIZE+1));
- }
- 
- void fillZobristHash(){
-diff --git a/Cpp/src/lib/Defines/pieceTables.cpp b/Cpp/src/lib/Defines/pieceTables.cpp
-index 276a2a6..68809d1 100644
---- a/Cpp/src/lib/Defines/pieceTables.cpp
-+++ b/Cpp/src/lib/Defines/pieceTables.cpp
-@@ -7,7 +7,7 @@
- 
- #include <stdint.h>
- 
--
-+//TODO: We are actually using 1/2 these values - change all values here instead!
- 
- int16_t pieceTables[7][2][64] = {
- 		{
-@@ -254,12 +254,12 @@ int16_t endGamepieceTables[7][2][64] = {
- 						-15,-5,0,0,0,0,-5,-15,
- 						-10,-5,0,0,0,0,-5,-10,
- 						-15,-5,0,0,0,0,-5,15,
--						30,30,40,40,40,40,30,30,
-+						10,20,20,20,20,20,20,10,
- 						10,20,20,20,20,20,20,10
- 				},
- 				{ //black rooks
- 						10,20,20,20,20,20,20,10,
--						30,30,40,40,40,40,30,30,
-+						10,20,20,20,20,20,20,10,
- 						0,0,0,0,0,0,0,0,
- 						0,0,0,0,0,0,0,0,
- 						-15,-5,0,0,0,0,-5,-15,
-@@ -276,13 +276,13 @@ int16_t endGamepieceTables[7][2][64] = {
- 						-15,-5,10,30,30,10,-5,-15,
- 						-10,-5,5,20,20,5,-5,-10,
- 						-15,-5,10,15,15,10,-5,15,
--						30,30,40,40,40,40,30,30,
-+						-20,-10,10,15,15,10,-10,-20,
- 						0,10,20,20,20,20,10,0
- 
- 				},
- 				{ //black queens
- 						0,10,20,20,20,20,10,0,
--						30,30,40,40,40,40,30,30,
-+						-20,-10,10,15,15,10,-10,-20,
- 						-15,-5,10,15,15,10,-5,15,
- 						-10,-5,5,20,20,5,-5,-10,
- 						-15,-5,10,30,30,10,-5,-15,
-@@ -293,27 +293,25 @@ int16_t endGamepieceTables[7][2][64] = {
- 		},
- 		{
- 				{ //white kings
--						-100,-70,-40,-25,-25,-40,-70,-100,
--						-70,-50,-30,-10,-10,-30,-50,-70,
--						-40,-30,-10, 10, 10,-10,-30,-40,
--						-25,-10, 10, 30, 30, 10,-10,-25,
--						-25,-10, 10, 30, 30, 10,-10,-25,
--						-40,-30,-10, 10, 10,-10,-30,-40,
--						-70,-50,-30,-10,-10,-30,-50,-70,
--						-100,-70,-40,-25,-25,-40,-70,-100,
-+						-200,-140,-80,-50,-50,-80,-140,-200,
-+						-140,-100,-60,-20,-20,-60,-100,-140,
-+						-80,-60,-20, 20, 20,-20,-60,-80,
-+						-50,-20, 20, 60, 60, 20,-20,-50,
-+						-50,-20, 20, 60, 60, 20,-20,-50,
-+						-80,-60,-20, 20, 20,-20,-60,-80,
-+						-140,-100,-60,-20,-20,-60,-100,-140,
-+						-200,-140,-80,-50,-50,-80,-140,-200,
- 				},
- 				{ //black kings
--						-100,-70,-40,-25,-25,-40,-70,-100,
--						-70,-50,-30,-10,-10,-30,-50,-70,
--						-40,-30,-10, 10, 10,-10,-30,-40,
--						-25,-10, 10, 30, 30, 10,-10,-25,
--						-25,-10, 10, 30, 30, 10,-10,-25,
--						-40,-30,-10, 10, 10,-10,-30,-40,
--						-70,-50,-30,-10,-10,-30,-50,-70,
--						-100,-70,-40,-25,-25,-40,-70,-100,
-+						200,-140,-80,-50,-50,-80,-140,-200,
-+						-140,-100,-60,-20,-20,-60,-100,-140,
-+						-80,-60,-20, 20, 20,-20,-60,-80,
-+						-50,-20, 20, 60, 60, 20,-20,-50,
-+						-50,-20, 20, 60, 60, 20,-20,-50,
-+						-80,-60,-20, 20, 20,-20,-60,-80,
-+						-140,-100,-60,-20,-20,-60,-100,-140,
-+						-200,-140,-80,-50,-50,-80,-140,-200,
- 				}
--
--
- 		},
- 		{			//non-captures
- 					{
-@@ -336,10 +334,7 @@ int16_t endGamepieceTables[7][2][64] = {
- 							0,0,0,0,0,0,0,0,
- 							0,0,0,0,0,0,0,0
- 					}
--
- 			}
--
--
- };
- 
- int32_t completePieceTables[7][2][64];
-diff --git a/Cpp/src/lib/Evaluation/evaluation.cpp b/Cpp/src/lib/Evaluation/evaluation.cpp
-index 64cf5d8..0d33e3d 100644
---- a/Cpp/src/lib/Evaluation/evaluation.cpp
-+++ b/Cpp/src/lib/Evaluation/evaluation.cpp
-@@ -22,7 +22,7 @@ evaluationResult getEvaluationResult(){
- 	return result;
- }
- 
--//std::ofstream out("/home/vabi/TeX/Chess/positions.tex");
-+
- 
- uint16_t taperingValues[81] = {  0,  0,  0,  0,  0,  0,  0,  0,
- 						       	 0,  0,  0,  0,  0,  0,  0,  0,
-diff --git a/Cpp/src/lib/basics.hpp b/Cpp/src/lib/basics.hpp
-index fd2cb6f..2bd8e39 100644
---- a/Cpp/src/lib/basics.hpp
-+++ b/Cpp/src/lib/basics.hpp
-@@ -66,6 +66,8 @@ struct chessPosition {
- 
- enum hashFlag: uint16_t {FULLSEARCH=0,FAILLOW=1,FAILHIGH=2};
- 
-+
-+
- struct hashEntry{
- 	uint32_t hashHighBits;
- 	uint16_t hashLower;
-@@ -74,8 +76,13 @@ struct hashEntry{
- 	uint16_t eval;
- 	uint8_t depth;
- 	uint8_t searchId;
-+	uint16_t index;
- } __attribute__((packed));
- 
-+struct hashBucket{
-+	hashEntry hashData[4];
-+};
-+
- class timeoutException: public std::exception
- {
-   virtual const char* what() const throw()
-diff --git a/Cpp/src/userInterface/UIfunctions.cpp b/Cpp/src/userInterface/UIfunctions.cpp
-index 91392c7..e331694 100644
---- a/Cpp/src/userInterface/UIfunctions.cpp
-+++ b/Cpp/src/userInterface/UIfunctions.cpp
-@@ -24,47 +24,10 @@ static char figureNames[2][6] = {{'P', 'N', 'B', 'R', 'Q', 'K'},
- 		{'p', 'n', 'b', 'r', 'q', 'k'},
- };
- 
--void putTableLine(std::ostream& out, int16_t value, std::string name) {
--	out << name << " & " << value << "\\\\ \\hline" << std::endl;
--}
- 
--static int clearPageCounter = 0;
--
--void latexOutput(const chessPosition* pos, std::ostream& out, evaluationResult ev, int16_t eval) {
--
--	int16_t figureVal = calcFigureEvaluation(pos);
--	out << "\\begin{figure}[!htbp] " << std::endl;
--	out << "\\newgame" << std::endl;
--	out << "\\fenboard{"+chessPositionToFenString(*pos, false)+"}" << std::endl;
--
--	out << "\\begin{tabular}{ll}" << std::endl;
--	out << "\\raisebox{-.5\\height}{\\showboard}&   \\begin{tabular}{ l | c  }" << std::endl;
--
--	putTableLine(out, eval, "Total");
--	putTableLine(out, figureVal, "Material");
--	putTableLine(out, ev.PSQ-figureVal, "Piece Square Tables");
--	putTableLine(out, ev.mobility, "Mobility");
--	putTableLine(out, ev.kingSafety, "King Safety");
--	putTableLine(out, ev.bishoppair, "Bishop pair");
--	putTableLine(out, ev.staticPawn, "Pawn structure");
--	putTableLine(out, ev.passedPawn, "Passed pawns");
--	putTableLine(out, ev.rookOpenFiles, "Rooks on open files");
--	out << "\\end{tabular}" << std::endl;
--	out << "\\end{tabular}" << std::endl;
--	out << "\\end{figure}" << std::endl;
--	clearPageCounter++;
--	if(clearPageCounter == 3) {
--		out << "\\clearpage" << std::endl;
--		clearPageCounter = 0;
--	}
--}
- 
--void latexOutput(std::string FEN, std::ostream& out) {
--	chessPosition pos = FENtoChessPosition(FEN);
--	int16_t eval = evaluation(&pos, -32000, 32000);
--	evaluationResult ev = getEvaluationResult();
--	latexOutput(&pos, out,  ev, eval);
--}
-+
-+
- 
- 
- uint8_t searchId = 0;
-diff --git a/Cpp/src/userInterface/UIlayer.hpp b/Cpp/src/userInterface/UIlayer.hpp
-index 8022c27..5f5d2d0 100644
---- a/Cpp/src/userInterface/UIlayer.hpp
-+++ b/Cpp/src/userInterface/UIlayer.hpp
-@@ -23,7 +23,6 @@ uint64_t stringToMove(std::string mv);
- bool checkAndMakeMove(chessPosition& position, std::string move);
- void runPerformanceTests();
- uint64_t get_timestamp();
--void latexOutput(std::string FEN, std::ostream& out);
--void latexOutput(const chessPosition* pos, std::ostream& out, evaluationResult ev, int16_t eval);
-+
- std::string moveToExtendedString(chessMove move, chessPosition position);
- #endif /* USERINTERFACE_UILAYER_HPP_ */
+diff --git a/Cpp/.cproject b/Cpp/.cproject
+index 2efc1dd..c4592e1 100644
+--- a/Cpp/.cproject
++++ b/Cpp/.cproject
+@@ -41,6 +41,9 @@
+ 							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.169184492" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
+ 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.404430608" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
+ 								<option id="gnu.cpp.link.option.debugging.gprof.1616037315" name="Generate gprof information (-pg)" superClass="gnu.cpp.link.option.debugging.gprof" useByScannerDiscovery="false" value="true" valueType="boolean"/>
++								<option id="gnu.cpp.link.option.libs.1848616475" superClass="gnu.cpp.link.option.libs" useByScannerDiscovery="false" valueType="libs">
++									<listOptionValue builtIn="false" value="pthread"/>
++								</option>
+ 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.624604855" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
+ 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+ 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+@@ -88,7 +91,7 @@
+ 								<option id="gnu.cpp.compiler.option.warnings.toerrors.1369119801" name="Warnings as errors (-Werror)" superClass="gnu.cpp.compiler.option.warnings.toerrors" useByScannerDiscovery="false" value="true" valueType="boolean"/>
+ 								<option id="gnu.cpp.compiler.option.other.other.1052557102" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0" valueType="string"/>
+ 								<option id="gnu.cpp.compiler.option.optimization.flags.1382838263" name="Other optimization flags" superClass="gnu.cpp.compiler.option.optimization.flags" useByScannerDiscovery="false" value="-funroll-loops" valueType="string"/>
+-								<option id="gnu.cpp.compiler.option.warnings.extrawarn.1780748801" superClass="gnu.cpp.compiler.option.warnings.extrawarn" useByScannerDiscovery="false" value="true" valueType="boolean"/>
++								<option id="gnu.cpp.compiler.option.warnings.extrawarn.1780748801" name="Extra warnings (-Wextra)" superClass="gnu.cpp.compiler.option.warnings.extrawarn" useByScannerDiscovery="false" value="true" valueType="boolean"/>
+ 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1496015459" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+ 							</tool>
+ 							<tool command="gcc" id="cdt.managedbuild.tool.gnu.c.compiler.exe.release.1303530301" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.release">
 diff --git a/Cpp/src/userInterface/UImainLoop.cpp b/Cpp/src/userInterface/UImainLoop.cpp
-index 153d6b8..a7b750c 100644
+index d2406d5..b93c9c7 100644
 --- a/Cpp/src/userInterface/UImainLoop.cpp
 +++ b/Cpp/src/userInterface/UImainLoop.cpp
-@@ -18,6 +18,7 @@
- #include <iomanip>
+@@ -18,301 +18,277 @@
  #include <userInterface/interfaceStructs.hpp>
  #include <lib/moveGeneration/moveGeneration.hpp>
-+#include <logging/logger.hpp>
- userInterface* UI;
+ #include <logging/logger.hpp>
+-userInterface* UI;
++#include <iostream>
++#include "userEvents.hpp"
++#include <sstream>
++#include <vector>
++#include <list>
++#include <map>
++#include <atomic>
++#include <thread>
++
++void handleUciInput(std::ostream& stream) {
++	stream << "id name Vabi" << std::endl;
++	stream << "id author Fabian Lenhardt" << std::endl;
++	stream << "uciok" << std::endl;
++}
  
- extern uint8_t searchId;
-@@ -85,6 +86,8 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
+-extern uint8_t searchId;
+-extern uint16_t killerMoves[20][2];
+-//#define UCI
++void handleIsReady(std::ostream& stream) {
++	stream << "readyok" <<std::endl;
++}
  
- 	//uint64_t goalNodes = 1800*maximal_time;
- 	while(get_timestamp()-start_ts <= totalTime) {
-+		/*setTotalTime(100000000, start_ts);
-+		while(depth < 14) {*/
- #endif
- 		try{
- 			chessMove localBestMove;
-@@ -148,6 +151,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
++template <typename T>
++T StringToNumber ( const std::string &Text )//Text not by const reference so that the function can be used with a
++{                               //character array as argument
++	std::stringstream ss(Text);
++	T result;
++	return ss >> result ? result : 0;
++}
  
- 		*nodeCount = (data.totalNodes+getQuiescenceNodes());
- 		UI->sendSearchInfo(*nodeCount, *mtime, *eval, depth, moveToString(*bestMove, *position));
-+		logSearch(*nodeCount, *mtime, *eval, depth, moveToString(*bestMove, *position));
- 		depth++;
- 		searchedNodes = searchedNodes+*nodeCount;
- 		if(*eval > 29000) {
-@@ -192,6 +196,8 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
- 		std::cout << qindices[k] << " ";
- 	}
- 	std::cout << std::endl;*/
-+	int16_t neval = evaluation(position, -32000, 32000);
-+	latexOutput(position,  getEvaluationResult(), neval);
- 	return depth;
+-uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t numMadeMoves, uint32_t* worst_case_time) {
++enum searchType {unknown, fixed_time, time_until_move, fixed_depth, infinite};
+ 
+-	/*if(depth < 7){
+-		return true;
+-	} else {
+-		return false;
+-	}*/
+-	if(params.totalTime[toMove] > 0) {
+-		uint32_t total = params.totalTime[toMove];
+-		uint32_t increment = params.increment[toMove];
+-
+-		//estimate remaining moves
+-		uint16_t totalExpectedMoves = 1/2*numMadeMoves+60;
+-		int16_t remainingMoves = totalExpectedMoves-numMadeMoves;
+-
+-		if(remainingMoves < 20){
+-			remainingMoves = 20;
+-		}
++struct searchParameters {
++	searchType type;
++	int16_t depth;
++	int32_t fixedTime;
++	int32_t totalTime[2];
++	int32_t increment[2];
++	uint16_t movesToGo;
++};
+ 
+-		uint32_t completeExpectedTime = total+remainingMoves*increment;
+-		std::cout << remainingMoves << std::endl;
+-		std::cout << completeExpectedTime << std::endl;
+-		float timeAllotted = completeExpectedTime/(2.0*remainingMoves);
++searchParameters paramsToUse;
++std::atomic<bool> continueSearch;
++chessPosition cposition;
+ 
+-		if(timeAllotted > total/10.0){
+-			timeAllotted = total/10.0;
+-		}
+-		*worst_case_time = total/10.0;
+-		return timeAllotted;
+-	}
++void setSearchParams(searchParameters params) {
++	paramsToUse = params;
++}
++
++std::thread engineThread;
+ 
+-	return 100; //some default
++void search(chessPosition p, searchParameters params){
++	std::cout << "Thread started" <<std::endl;
++	while(continueSearch);
++	std::cout << "Leaving thread" <<std::endl;
  }
  
-diff --git a/chessGui/.idea/workspace.xml b/chessGui/.idea/workspace.xml
-index fa98113..2908af8 100644
---- a/chessGui/.idea/workspace.xml
-+++ b/chessGui/.idea/workspace.xml
-@@ -67,11 +67,7 @@
-           <provider selected="true" editor-type-id="text-editor">
-             <state relative-caret-position="1035">
-               <caret line="82" column="35" selection-start-line="82" selection-start-column="35" selection-end-line="82" selection-end-column="35" />
--              <folding>
--                <element signature="imports" expanded="false" />
--                <element signature="e#1121#1122#0" expanded="false" />
--                <element signature="e#1168#1169#0" expanded="false" />
--              </folding>
-+              <folding />
-             </state>
-           </provider>
-         </entry>
-@@ -81,21 +77,7 @@
-           <provider selected="true" editor-type-id="text-editor">
-             <state relative-caret-position="1290">
-               <caret line="106" column="54" selection-start-line="106" selection-start-column="54" selection-end-line="106" selection-end-column="54" />
--              <folding>
--                <element signature="imports" expanded="false" />
--                <element signature="e#1047#1048#0" expanded="false" />
--                <element signature="e#1117#1118#0" expanded="false" />
--                <element signature="e#1165#1166#0" expanded="false" />
--                <element signature="e#1229#1230#0" expanded="false" />
--                <element signature="e#1540#1541#0" expanded="false" />
--                <element signature="e#1607#1608#0" expanded="false" />
--                <element signature="e#3451#3452#0" expanded="false" />
--                <element signature="e#3517#3518#0" expanded="false" />
--                <element signature="e#6836#6837#0" expanded="false" />
--                <element signature="e#6888#6889#0" expanded="false" />
--                <element signature="e#7967#7968#0" expanded="false" />
--                <element signature="e#8015#8016#0" expanded="false" />
--              </folding>
-+              <folding />
-             </state>
-           </provider>
-         </entry>
-@@ -113,8 +95,8 @@
-       <file leaf-file-name="Main.java" pinned="false" current-in-tab="true">
-         <entry file="file://$PROJECT_DIR$/src/sample/Main.java">
-           <provider selected="true" editor-type-id="text-editor">
--            <state relative-caret-position="225">
--              <caret line="28" column="26" selection-start-line="28" selection-start-column="26" selection-end-line="28" selection-end-column="26" />
-+            <state relative-caret-position="585">
-+              <caret line="52" column="0" selection-start-line="52" selection-start-column="0" selection-end-line="52" selection-end-column="0" />
-               <folding />
-             </state>
-           </provider>
-@@ -125,11 +107,7 @@
-           <provider selected="true" editor-type-id="text-editor">
-             <state relative-caret-position="1845">
-               <caret line="133" column="28" selection-start-line="133" selection-start-column="28" selection-end-line="133" selection-end-column="28" />
--              <folding>
--                <element signature="imports" expanded="false" />
--                <element signature="e#5464#5465#0" expanded="false" />
--                <element signature="e#5490#5491#0" expanded="false" />
--              </folding>
-+              <folding />
-             </state>
-           </provider>
-         </entry>
-@@ -139,11 +117,7 @@
-           <provider selected="true" editor-type-id="text-editor">
-             <state relative-caret-position="855">
-               <caret line="58" column="51" selection-start-line="58" selection-start-column="51" selection-end-line="58" selection-end-column="51" />
--              <folding>
--                <element signature="imports" expanded="false" />
--                <element signature="e#2569#2570#0" expanded="false" />
--                <element signature="e#2602#2603#0" expanded="false" />
--              </folding>
-+              <folding />
-             </state>
-           </provider>
-         </entry>
-@@ -163,9 +137,7 @@
-           <provider selected="true" editor-type-id="text-editor">
-             <state relative-caret-position="240">
-               <caret line="17" column="0" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
--              <folding>
--                <element signature="imports" expanded="false" />
--              </folding>
-+              <folding />
-             </state>
-           </provider>
-         </entry>
-@@ -185,16 +157,7 @@
-           <provider selected="true" editor-type-id="text-editor">
-             <state relative-caret-position="180">
-               <caret line="12" column="4" selection-start-line="12" selection-start-column="4" selection-end-line="12" selection-end-column="4" />
--              <folding>
--                <element signature="e#492#493#0" expanded="false" />
--                <element signature="e#531#532#0" expanded="false" />
--                <element signature="e#575#576#0" expanded="false" />
--                <element signature="e#618#619#0" expanded="false" />
--                <element signature="e#677#678#0" expanded="false" />
--                <element signature="e#713#714#0" expanded="false" />
--                <element signature="e#773#774#0" expanded="false" />
--                <element signature="e#819#820#0" expanded="false" />
--              </folding>
-+              <folding />
-             </state>
-           </provider>
-         </entry>
-@@ -307,8 +270,6 @@
-     </navigator>
-     <panes>
-       <pane id="Scope" />
--      <pane id="Scratches" />
--      <pane id="PackagesPane" />
-       <pane id="ProjectPane">
-         <subPane>
-           <PATH>
-@@ -361,6 +322,8 @@
-           </PATH>
-         </subPane>
-       </pane>
-+      <pane id="PackagesPane" />
-+      <pane id="Scratches" />
-     </panes>
-   </component>
-   <component name="PropertiesComponent">
-@@ -642,21 +605,17 @@
-     <layout>
-       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
--      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.34994912" sideWeight="0.5" order="14" side_tool="false" content_ui="tabs" />
-       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32960325" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
--      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3926755" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="13" side_tool="false" content_ui="tabs" />
-       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
--      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15364583" sideWeight="0.6703755" order="0" side_tool="false" content_ui="combo" />
--      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32960325" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15364583" sideWeight="0.6703755" order="0" side_tool="false" content_ui="combo" />
-       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
--      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.26754832" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-@@ -664,10 +623,14 @@
-       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
-       <window_info id="Profiler" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.26754832" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.34994912" sideWeight="0.5" order="14" side_tool="false" content_ui="tabs" />
-       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3926755" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-       <window_info id="JetGradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-       <window_info id="Problems" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
-+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32960325" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-     </layout>
-   </component>
-   <component name="Vcs.Log.UiProperties">
-@@ -914,14 +877,14 @@
-       </provider>
-     </entry>
-     <entry file="file://$PROJECT_DIR$/src/EditorGUI/editorgui.fxml">
-+      <provider editor-type-id="JavaFX-Scene-Builder">
-+        <state />
-+      </provider>
-       <provider selected="true" editor-type-id="text-editor">
-         <state relative-caret-position="270">
-           <caret line="18" column="28" selection-start-line="18" selection-start-column="28" selection-end-line="18" selection-end-column="28" />
-         </state>
-       </provider>
--      <provider editor-type-id="JavaFX-Scene-Builder">
--        <state />
--      </provider>
-     </entry>
-     <entry file="file://$PROJECT_DIR$/src/EditorGUI/EditorGUI.java">
-       <provider selected="true" editor-type-id="text-editor">
-@@ -966,34 +929,20 @@
-       </provider>
-     </entry>
-     <entry file="file://$PROJECT_DIR$/src/PlayingGUI/playinggui.fxml">
-+      <provider editor-type-id="JavaFX-Scene-Builder">
-+        <state />
-+      </provider>
-       <provider selected="true" editor-type-id="text-editor">
-         <state relative-caret-position="679">
-           <caret line="59" column="90" selection-start-line="59" selection-start-column="90" selection-end-line="59" selection-end-column="90" />
-         </state>
-       </provider>
--      <provider editor-type-id="JavaFX-Scene-Builder">
--        <state />
--      </provider>
-     </entry>
-     <entry file="file://$PROJECT_DIR$/src/PlayingGUI/PlayingController.java">
-       <provider selected="true" editor-type-id="text-editor">
-         <state relative-caret-position="1290">
-           <caret line="106" column="54" selection-start-line="106" selection-start-column="54" selection-end-line="106" selection-end-column="54" />
--          <folding>
--            <element signature="imports" expanded="false" />
--            <element signature="e#1047#1048#0" expanded="false" />
--            <element signature="e#1117#1118#0" expanded="false" />
--            <element signature="e#1165#1166#0" expanded="false" />
--            <element signature="e#1229#1230#0" expanded="false" />
--            <element signature="e#1540#1541#0" expanded="false" />
--            <element signature="e#1607#1608#0" expanded="false" />
--            <element signature="e#3451#3452#0" expanded="false" />
--            <element signature="e#3517#3518#0" expanded="false" />
--            <element signature="e#6836#6837#0" expanded="false" />
--            <element signature="e#6888#6889#0" expanded="false" />
--            <element signature="e#7967#7968#0" expanded="false" />
--            <element signature="e#8015#8016#0" expanded="false" />
--          </folding>
-+          <folding />
-         </state>
-       </provider>
-     </entry>
-@@ -1001,11 +950,7 @@
-       <provider selected="true" editor-type-id="text-editor">
-         <state relative-caret-position="1035">
-           <caret line="82" column="35" selection-start-line="82" selection-start-column="35" selection-end-line="82" selection-end-column="35" />
--          <folding>
--            <element signature="imports" expanded="false" />
--            <element signature="e#1121#1122#0" expanded="false" />
--            <element signature="e#1168#1169#0" expanded="false" />
--          </folding>
-+          <folding />
-         </state>
-       </provider>
-     </entry>
-@@ -1017,15 +962,27 @@
-         </state>
-       </provider>
-     </entry>
-+    <entry file="file://$PROJECT_DIR$/src/sample/Main.java">
-+      <provider selected="true" editor-type-id="text-editor">
-+        <state relative-caret-position="585">
-+          <caret line="52" column="0" selection-start-line="52" selection-start-column="0" selection-end-line="52" selection-end-column="0" />
-+          <folding />
-+        </state>
-+      </provider>
-+    </entry>
-+    <entry file="file://$PROJECT_DIR$/src/uciClient/UciProcessing.java">
-+      <provider selected="true" editor-type-id="text-editor">
-+        <state relative-caret-position="1845">
-+          <caret line="133" column="28" selection-start-line="133" selection-start-column="28" selection-end-line="133" selection-end-column="28" />
-+          <folding />
-+        </state>
-+      </provider>
-+    </entry>
-     <entry file="file://$PROJECT_DIR$/src/uciClient/uciEngineHandler.java">
-       <provider selected="true" editor-type-id="text-editor">
-         <state relative-caret-position="855">
-           <caret line="58" column="51" selection-start-line="58" selection-start-column="51" selection-end-line="58" selection-end-column="51" />
--          <folding>
--            <element signature="imports" expanded="false" />
--            <element signature="e#2569#2570#0" expanded="false" />
--            <element signature="e#2602#2603#0" expanded="false" />
--          </folding>
-+          <folding />
-         </state>
-       </provider>
-     </entry>
-@@ -1041,9 +998,7 @@
-       <provider selected="true" editor-type-id="text-editor">
-         <state relative-caret-position="240">
-           <caret line="17" column="0" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
--          <folding>
--            <element signature="imports" expanded="false" />
--          </folding>
-+          <folding />
-         </state>
-       </provider>
-     </entry>
-@@ -1059,35 +1014,6 @@
-       <provider selected="true" editor-type-id="text-editor">
-         <state relative-caret-position="180">
-           <caret line="12" column="4" selection-start-line="12" selection-start-column="4" selection-end-line="12" selection-end-column="4" />
--          <folding>
--            <element signature="e#492#493#0" expanded="false" />
--            <element signature="e#531#532#0" expanded="false" />
--            <element signature="e#575#576#0" expanded="false" />
--            <element signature="e#618#619#0" expanded="false" />
--            <element signature="e#677#678#0" expanded="false" />
--            <element signature="e#713#714#0" expanded="false" />
--            <element signature="e#773#774#0" expanded="false" />
--            <element signature="e#819#820#0" expanded="false" />
--          </folding>
--        </state>
--      </provider>
--    </entry>
--    <entry file="file://$PROJECT_DIR$/src/uciClient/UciProcessing.java">
--      <provider selected="true" editor-type-id="text-editor">
--        <state relative-caret-position="1845">
--          <caret line="133" column="28" selection-start-line="133" selection-start-column="28" selection-end-line="133" selection-end-column="28" />
--          <folding>
--            <element signature="imports" expanded="false" />
--            <element signature="e#5464#5465#0" expanded="false" />
--            <element signature="e#5490#5491#0" expanded="false" />
--          </folding>
--        </state>
--      </provider>
--    </entry>
--    <entry file="file://$PROJECT_DIR$/src/sample/Main.java">
--      <provider selected="true" editor-type-id="text-editor">
--        <state relative-caret-position="225">
--          <caret line="28" column="26" selection-start-line="28" selection-start-column="26" selection-end-line="28" selection-end-column="26" />
-           <folding />
-         </state>
-       </provider>
++void launchSearch() {
++	continueSearch = true;
++	engineThread = std::thread(search);
++	std::cout << "Launched thread" <<std::endl;
++}
+ 
+-uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval, bool doAspiration, searchParameters params) {
+-	memset(killerMoves,0, 20*2*sizeof(uint16_t));
+-	resetSearchData();
+-	resetQuiescenceNodes();
+-	uint64_t start_ts  = get_timestamp();
+-	uint16_t depth = 3;
+-	/*uint64_t qnodes = 0;
+-	uint64_t nodes = 0;*/
+-	*eval = 0;
+-	int32_t alpha = -32000;
+-	int32_t beta  = 32000;
+-	searchId++;
+-	uint64_t searchedNodes = 0;
+-#ifdef FIXEDDEPTH
+-	uint16_t maxdepth = 7;
+-#ifdef EXPERIMENTAL
+-	maxdepth = 8;
+-#endif
+-	setTotalTime(100000000, start_ts);
+-	while(depth < maxdepth){
+-#else
+-	uint32_t worst_case_search_time = 0;
+-	uint32_t totalTime = calcSearchTime(params, position->toMove, position->madeMoves.length, &worst_case_search_time);
+-	setTotalTime(worst_case_search_time, start_ts);
+-	uint16_t madeMoves = position->madeMoves.length;
+-
+-	//uint64_t goalNodes = 1800*maximal_time;
+-	while(get_timestamp()-start_ts <= totalTime) {
+-		/*setTotalTime(100000000, start_ts);
+-		while(depth < 14) {*/
+-#endif
+-		try{
+-			chessMove localBestMove;
+-			*eval = negamax(position, 0, depth+3, depth, alpha, beta, &localBestMove, true, false);
+-			if(doAspiration) {
+-				if ((*eval <= alpha) || (*eval >= beta)) {
+-					//std::cout << "Aspiration window search failed, researching..." <<std::endl;
+-					*eval = negamax(position, 0, depth+3, depth, -32000, 32000, &localBestMove, true, false);
+-				}
+-
+-				alpha = *eval-50;
+-				beta  = *eval+50;
+-			}
+ 
+-			*bestMove = localBestMove;
+-		} catch(timeoutException e) {
+-			std::cout << "Search timed out" << std::endl;
+-			break;
+-		}
+ 
+-		//std::cout << depth <<std::endl;
+-
+-		//qnodes = getQuiescenceNodes();
+-		//nodes  = getNodes();
+-		*mtime = get_timestamp()-start_ts;
+-		/*double nps = ((double) *nodeCount)/((double) *mtime)*1000.0;
+-		std::cout << "Searched " <<  *nodeCount << " positions in " << *mtime << " for " << nps << " nodes per second" << std::endl;*/
+-		uint64_t totalNodes=0;
+-		searchDebugData data = getSearchData();
+-		for(uint16_t ind=0; ind < 25; ind++){
+-/*#ifndef UCI
+-			std::cout << ind << "  " << data.nodes[ind] << std::endl;
+-			std::cout << std::setw(16) << " ";
+-
+-			for(int k=0; k < 50; k++){
+-				std::cout << std::setw(9) << data.bestIndex[ind][k];
++void handleStop() {
++	continueSearch = false;
++	engineThread.join();
++	std::cout << "Joined engine thread" << std::endl;
++}
++
++void handleGo(std::list<std::string> input) {
++
++	searchParameters params;
++	params.type = unknown;
++	params.depth = 0;
++	params.fixedTime = 0;
++	params.totalTime[0] = 0;
++	params.totalTime[1] = 0;
++	params.increment[0] = 0;
++	params.increment[1] = 0;
++	params.movesToGo = UINT16_MAX;
++
++
++	for(auto iterator = input.begin(), end = input.end(); iterator != end; ++iterator) {
++		std::string current = *iterator;
++		if("wtime" == current) {
++			iterator++;
++			if(iterator == input.end()) {
++				std::cout << "Missing parameter for " << current << std::endl;
++				params.type = unknown;
++				break;
++			}
++			std::string time = *iterator;
++			params.totalTime[0] = StringToNumber<int32_t>(time);
++			params.type = time_until_move;
++		}
++		if("btime" == current) {
++			iterator++;
++			if(iterator == input.end()) {
++				std::cout << "Missing parameter for " << current << std::endl;
++				params.type = unknown;
++				break;
+ 			}
+-			std::cout << std::endl;
+-#endif*/
+-			totalNodes = totalNodes+data.nodes[ind];
++			std::string time = *iterator;
++			params.totalTime[1] = StringToNumber<int32_t>(time);
++			params.type = time_until_move;
+ 		}
+-/*#ifndef UCI
+-
+-		std::cout << "SEARCH DEBUG DATA" << std::endl;
+-		std::cout << "negamax called: "  << data.called << std::endl;
+-		std::cout << "Went to quiescence: " << data.wentToQuiescence << std::endl;
+-		std::cout << "By depht:"         << std::endl;
+-
+-		std::cout << "Total " <<totalNodes << std::endl;
+-		std::cout << "Threefold repetition hashhits " << data.fake_3fold_repetitions+data.threefold_repetitions << std::endl;
+-		std::cout << "Actual repetitions " << data.threefold_repetitions << std::endl;
+-		std::cout << "Ratio "              << ((float) data.threefold_repetitions)/((float) data.fake_3fold_repetitions+data.threefold_repetitions) << std::endl;
+-		std::cout << "Futility tries "     << data.futility_tried <<std::endl;
+-		std::cout << "Successful futility " << data.futility_successful << std::endl;
+-		std::cout << "Nullmove tries "     << data.nullMovePruningTried <<std::endl;
+-		std::cout << "Successful nullmove " << data.nullMovePruningSuccessful << std::endl;
+-		std::cout << "Went to search "     << data.wentToSearch <<std::endl;
+-		std::cout << "Had to sort " << data.neededSort << std::endl;
+-#endif*/
+-
+-		*nodeCount = (data.totalNodes+getQuiescenceNodes());
+-		UI->sendSearchInfo(*nodeCount, *mtime, *eval, depth, moveToString(*bestMove, *position));
+-		logSearch(*nodeCount, *mtime, *eval, depth, moveToString(*bestMove, *position));
+-		depth++;
+-		searchedNodes = searchedNodes+*nodeCount;
+-		if(*eval > 29000) {
+-			break;
++		if("winc" == current) {
++			iterator++;
++			if(iterator == input.end()) {
++				std::cout << "Missing parameter for " << current << std::endl;
++				params.type = unknown;
++				break;
++			}
++			std::string time = *iterator;
++			params.increment[0] = StringToNumber<int32_t>(time);
++			params.type = time_until_move;
++		}
++		if("binc" == current) {
++			iterator++;
++			if(iterator == input.end()) {
++				std::cout << "Missing parameter for " << current << std::endl;
++				params.type = unknown;
++				break;
++			}
++			std::string time = *iterator;
++			params.increment[1] = StringToNumber<int32_t>(time);
++			params.type = time_until_move;
+ 		}
+ 
+-		if((*eval > 500) && (depth > 14)) {
+-			break;
++		if("infinite" == current) {
++			params.type = infinite;
+ 		}
+-	}
+-	depth--;
+-	//std::cout << "Depth searched " << depth << std::endl;
+-	*mtime = get_timestamp()-start_ts;
+ 
+-	//undo moves until we are back to start
++		if("movetime" == current) {
++			iterator++;
++			if(iterator == input.end()) {
++				std::cout << "Missing parameter for " << current << std::endl;
++				params.type = unknown;
++				break;
++			}
++			std::string time = *iterator;
++			params.fixedTime = StringToNumber<int32_t>(time);
++			params.type = fixed_time;
++		}
+ 
++		if("depth" == current) {
++			iterator++;
++			if(iterator == input.end()) {
++				std::cout << "Missing parameter for " << current << std::endl;
++				params.type = unknown;
++				break;
++			}
++			std::string d =  *iterator;
++			params.depth = StringToNumber<int32_t>(d);
++			params.type = fixed_depth;
++		}
+ 
+-#ifndef FIXEDDEPTH
+-	while(position->madeMoves.length > madeMoves){
+-		chessMove current = position->madeMoves[position->madeMoves.length-1];
+ 
+-		if(current.move == 0) {
+-			undoNullMove(position);
+-		} else {
+-			undoMove(position);
++		if("movestogo" == current) {
++			iterator++;
++			if(iterator == input.end()) {
++				std::cout << "Missing parameter for " << current << std::endl;
++				params.type = unknown;
++				break;
++			}
++			std::string togo =*iterator;
++			params.movesToGo = StringToNumber<int32_t>(togo);
++			params.type = time_until_move;
+ 		}
++
+ 	}
+-#endif
+-	/*std::cout << "Qnodes " <<  qnodes << " normal nodes " << nodes <<std::endl;
+-	std::cout << "Forced move " << moveToString(*bestMove, *position) << std::endl;
+-	std::cout << "Evaluation "  << eval << std::endl;
+-	std::cout << "Negamax called " << getCalled() << " with depth >0; sort called " << getSortCalled() << " times for ratio " << ((double) getSortCalled())/((double) getCalled()) << std::endl;
+-	std::cout << "Quiescence called " << getqCalled() << " with depth >0; sort called " << getSortqCalled() << " times for ratio " << ((double) getSortqCalled())/((double) getqCalled()) << std::endl;
+-
+-	int32_t* indices = getIndexCounts();
+-	for(uint16_t k=0; k < 50; k++){
+-		std::cout << indices[k] << " ";
+-	}
+-	std::cout << std::endl;
+-	int32_t* qindices = getqIndexCounts();
+-	for(uint16_t k=0; k < 50; k++){
+-		std::cout << qindices[k] << " ";
++
++
++	std::cout << params.type << std::endl;
++
++	if(params.type == time_until_move) {
++		std::cout << "White time "      << params.totalTime[0] << std::endl;
++		std::cout << "Black time "      << params.totalTime[1] << std::endl;
++		std::cout << "White increment " << params.increment[0] << std::endl;
++		std::cout << "Black increment " << params.increment[1] << std::endl;
++		std::cout << "Moves to go "     << params.movesToGo    << std::endl;
+ 	}
+-	std::cout << std::endl;*/
+-	//int16_t neval = evaluation(position, -32000, 32000);
+-	//latexOutput(position,  getEvaluationResult(), neval);
+-	return depth;
+-}
+ 
++	if(params.type != unknown) {
++		setSearchParams(params);
+ 
+ 
+-void sendNewPosition(chessPosition* position) {
+-	std::string newPosition = chessPositionToString(*position);
+-	UI->sendNewPosition(newPosition);
++		launchSearch();
++	}
+ 
+ }
+ 
+-void UIloop() {
+-	UI = new uciInterface();
+-	std::string positionstr = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwKQkq";
+-	chessPosition position = stringToChessPosition(positionstr);
+-	/*std::string positionstr = " ";*/
+-	/*std::string fen = "7k/p7/1p5p/3p4/3P4/P5np/1P2R1rK/8 w - - 0";
+-	chessPosition position = FENtoChessPosition(fen);*/
+-
+-	/*chessMove mv;
+-	mv.sourceField = 29;
+-	mv.targetField = 15;
+-	mv.move = BIT64(29) | BIT64(15);
+-	mv.type = queenMove;
+-	mv.captureType = pawn;
+-	makeMove(&mv, &position);
+-	std::cout << SEE(&position, &mv) << std::endl;
+-	undoMove(&position);*/
+-
+-
+-	/*vdt_vector<chessMove> mvVec = vdt_vector<chessMove>(150);
+-	generateAllMoves(&mvVec, &position);
+-	orderStandardMoves(&position, &mvVec, 0, 0);*/
+-
+-
+-	std::string move;
+-	while(1){
+-		UI->readInput();
+-		std::vector<std::string> moveList = std::vector<std::string>();
+-		if(UI->receiveNewPosition(positionstr, moveList)){
+-			free_position(&position);
+-			position = FENtoChessPosition(positionstr);
+-			for(std::string seg: moveList){
+-				//std::cout << seg << std::endl;
+-				if(!checkAndMakeMove(position, seg)){
+-					std::cout << "Illegal move detected" << std::endl;
+-				}
+-			}
+-		}
+ 
+-		if(UI->positionRequested()){
+-			sendNewPosition(&position);
+-		}
++void handlePosition(std::list<std::string> input) {
+ 
+-		if(UI->receiveMove(move)){
+-			if(checkAndMakeMove(position, move)){
+-				sendNewPosition(&position);
+-				/*chessMove bestMove;
+-				uint32_t nodeCount;
+-				uint64_t mtime;
+-				int32_t eval = 0;
+-				searchMove(&position, &bestMove, 2000, &nodeCount, &mtime, &eval);
+-				std::cout << eval << std::endl;
+-				makeMove(&bestMove, &position);*/
+-				sendNewPosition(&position);
+-			}
++	std::string fen = "";
++
++	if(input.empty()) {
++		std::cout << "Invalid position request" << std::endl;
++		return;
++	}
++	auto iterator = input.begin();
++	if("startpos" == *iterator){
++		fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
++		iterator++;
++	} else {
++		fen = *iterator;
++		iterator++;
++		while((iterator != input.end()) && ("moves" != *iterator)) {
++			fen = fen+" "+*iterator;
++			iterator++;
+ 		}
+ 
+-		if (UI->receiveUndoMove()) {
+-			std::cout << "Got undo event!" << std::endl;
+-			undoMove(&position);
+-			sendNewPosition(&position);
++	}
++
++
++
++	std::vector<std::string> moveList;
++	while(iterator != input.end()) {
++		if("moves" !=*iterator) {
++			moveList.push_back(*iterator);
+ 		}
++		iterator++;
++	}
++
++	std::cout << fen << std::endl;
++
++	for(auto iterator = moveList.begin(); iterator != moveList.end(); iterator++) {
++		std::cout << *iterator << std::endl;
++	}
+ 
+-		if(UI->receiveForceMove()) {
+-			chessMove bestMove;
+-			uint32_t nodeCount;
+-			uint64_t mtime;
+-			int32_t eval = 0;
+-			searchParameters params;
+-			searchMove(&position, &bestMove, &nodeCount, &mtime, &eval, true, params);
+-			makeMove(&bestMove, &position);
+-			sendNewPosition(&position);
++	free_position(&cposition);
++	cposition = FENtoChessPosition(fen);
++	for(std::string seg: moveList){
++		//std::cout << seg << std::endl;
++		if(!checkAndMakeMove(cposition, seg)){
++			std::cout << "Illegal move detected" << std::endl;
+ 		}
++	}
+ 
+-		std::string newPosition;
+-		searchParameters params;
+-		if(UI->receiveAnalyze(newPosition, params)){
+-			std::cout << params.increment[0] << std::endl;
+-			std::cout << params.increment[1] << std::endl;
+-			std::cout << params.totalTime[0] << std::endl;
+-			std::cout << params.totalTime[1] << std::endl;
+-			chessMove bestMove;
+-			uint32_t nodeCount;
+-			uint64_t mtime;
+-			int32_t eval = 0;
+-			searchMove(&position, &bestMove, &nodeCount, &mtime, &eval, true, params);
+-			std::cout << "Found move " << moveToString(bestMove, position) << std::endl;
+-			UI->sendBestMove(moveToString(bestMove, position));
+-			makeMove(&bestMove, &position);
+-			int16_t e  = evaluation(&position, -32000, 32000);
+-			evaluationResult res = getEvaluationResult();
+-			std::cout << "Eval " << e << std::endl;
+-			std::cout << "PSQ " << res.PSQ << std::endl;
+-			std::cout << "mobility " << res.mobility << std::endl;
+-			std::cout << "static pawn " << res.staticPawn << std::endl;
+-			std::cout << "passed pawn " << res.passedPawn << std::endl;
+-			std::cout << "rook files "  << res.rookOpenFiles << std::endl;
+-			std::cout << "king safety " << res.kingSafety << std::endl;
+-			std::cout << "bishop pair" << res.bishoppair << std::endl;
+-			undoMove(&position);
++}
+ 
++int main() {
++	initUserEvents();
++	bool continueLoop = true;
++	while(continueLoop) {
++		userEvent ev = getNextUserEvent();
++
++		switch(ev.input) {
++			case uci:
++				handleUciInput(std::cout);
++				break;
++			case isready:
++				handleIsReady(std::cout);
++				break;
++			case go:
++				handleGo(ev.data);
++				break;
++			case position:
++				handlePosition(ev.data);
++				break;
++			case stop:
++				handleStop();
++				break;
++			case quit:
++				continueLoop = false;
++				break;
++			default:
++				std::cout << "Not yet implemented" << std::endl;
+ 		}
+ 	}
++	return 0;
+ }
+ 
+ 
+diff --git a/Cpp/src/userInterface/userInterface.hpp b/Cpp/src/userInterface/userInterface.hpp
+index 9d8f390..48a9248 100644
+--- a/Cpp/src/userInterface/userInterface.hpp
++++ b/Cpp/src/userInterface/userInterface.hpp
+@@ -12,6 +12,7 @@
+ #include <vector>
+ #include "interfaceStructs.hpp"
+ 
++
+ class userInterface {
+ 	public:
+ 		virtual void initialize()=0;
 diff --git a/output b/output
 deleted file mode 100644
 index e69de29..0000000
+diff --git a/to_checkin.diff b/to_checkin.diff
+index f2f092d..ab68531 100644
+--- a/to_checkin.diff
++++ b/to_checkin.diff
+@@ -1,782 +0,0 @@
+-diff --git a/Cpp/src/Search/negamax.cpp b/Cpp/src/Search/negamax.cpp
+-index f60c727..12e53ab 100644
+---- a/Cpp/src/Search/negamax.cpp
+-+++ b/Cpp/src/Search/negamax.cpp
+-@@ -135,15 +135,15 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
+- 			int16_t oldEval  = hashVal.eval;
+- 			if((depth <= hashVal.depth) && (oldEval > -10000) && (oldEval < 10000) && (oldEval != 0)){ //TODO: the != 0 is stupid, but somehwere something goes wrong with 3fold rep scores, so excluded ehre for safety
+- 				if( ((hashVal.flag == FAILHIGH) || (hashVal.flag == FULLSEARCH)) && (oldEval >= beta)){
+--					setSearchId(searchId, position->zobristHash);
+-+					setSearchId(searchId, position->zobristHash, hashVal.index);
+- 					return beta;
+- 				}
+- 				else if( ((hashVal.flag == FAILLOW) || (hashVal.flag == FULLSEARCH)) && (oldEval <= alpha)){
+--					setSearchId(searchId, position->zobristHash);
+-+					setSearchId(searchId, position->zobristHash, hashVal.index);
+- 					return alpha; //node will fail low
+- 				}
+- 				else if((hashVal.flag == FULLSEARCH)){ //TODO: this condition can be vastly improved
+--					setSearchId(searchId, position->zobristHash);
+-+					setSearchId(searchId, position->zobristHash, hashVal.index);
+- 					if(oldEval <= alpha){
+- 						return alpha;
+- 					}
+-@@ -266,9 +266,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
+- 		undoMove(position);
+- 
+- 		if((alpha >= beta)) {
+--			if((depth >= hashVal.depth) || (searchId != hashVal.searchId)) {
+--				setHashEntry(FAILHIGH, beta, depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), position->zobristHash);
+--			}
+-+			setHashEntry(FAILHIGH, beta, depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), position->zobristHash);
+- 			if(bestIndex != -1){
+- 				searchCounts.bestIndex[depth][bestIndex]++;
+- 			}
+-@@ -317,13 +315,9 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
+- 
+- 
+- 	if(foundGoodMove) {
+--		if((depth >= hashVal.depth) || (searchId != hashVal.searchId)) {
+--			setHashEntry(FULLSEARCH, alpha, depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), position->zobristHash);
+--		}
+-+		setHashEntry(FULLSEARCH, alpha, depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), position->zobristHash);
+- 	} else { //we failed low, remember as well
+--		if((depth >= hashVal.depth) || (searchId != hashVal.searchId)) {
+- 			setHashEntry(FAILLOW, alpha, depth, searchId, 0, position->zobristHash);
+--		}
+- 	}
+- 
+- 	qmvStack.release();
+-diff --git a/Cpp/src/Vabi.cpp b/Cpp/src/Vabi.cpp
+-index 5d9bd3d..4456608 100644
+---- a/Cpp/src/Vabi.cpp
+-+++ b/Cpp/src/Vabi.cpp
+-@@ -69,7 +69,11 @@ int main() {
+- 	for(uint32_t index=0; index < 7; index++) {
+- 		for(uint32_t t=0; t < 2; t++) {
+- 			for(uint32_t k=0; k < 64; k++) {
+-+#ifdef EXPERIMENTAL
+-+					completePieceTables[index][t][k] = ((uint16_t) (pieceTables[index][t][k]/2+figureValues[index])) |  ( ((uint16_t) (endGamepieceTables[index][t][k]/2+figureValues[index])) << 16);
+-+#else
+- 					completePieceTables[index][t][k] = ((uint16_t) (pieceTables[index][t][k]/2+figureValues[index])) |  ( ((uint16_t) (endGamepieceTables[index][t][k]+figureValues[index])) << 16);
+-+#endif
+- 			}
+- 		}
+- 	}
+-@@ -86,8 +90,8 @@ int main() {
+- 		latexOutput(line, out);
+- 	}*/
+- 
+--	/*runPerformanceTests();
+--	return 0;*/
+-+	runPerformanceTests();
+-+	return 0;
+- 	/*std::cout << testPerftTestSuite().passed << std::endl;
+- 	return 0;*/
+- 	UIloop();
+-diff --git a/Cpp/src/hashTables/hashTables.hpp b/Cpp/src/hashTables/hashTables.hpp
+-index aded8bc..feea41b 100644
+---- a/Cpp/src/hashTables/hashTables.hpp
+-+++ b/Cpp/src/hashTables/hashTables.hpp
+-@@ -9,7 +9,7 @@
+- #define HASHTABLES_HASHTABLES_HPP_
+- 
+- 
+--#define HASHSIZE 0x3FFFFFF //needs to be a power of 2!
+-+#define HASHSIZE 0xFFFFFF //needs to be a power of 2!
+- 
+- void fillZobristHash();
+- uint64_t calcZobristHash(const chessPosition* position);
+-@@ -18,6 +18,6 @@ void setHashEntry(hashEntry entry, uint64_t zobristKey);
+- uint16_t getHashMove(uint64_t zobristKey);
+- void setHashMove(uint16_t move, uint64_t zobristKey, uint8_t searchId);
+- void setHashEntry(hashFlag flag, int16_t eval, uint8_t depth, uint8_t searchId, uint16_t bestMove, uint64_t key);
+--void setSearchId(uint8_t searchId, uint64_t key);
+-+void setSearchId(uint8_t searchId, uint64_t key, uint16_t index);
+- 
+- #endif /* HASHTABLES_HASHTABLES_HPP_ */
+-diff --git a/Cpp/src/hashTables/zobristHash.cpp b/Cpp/src/hashTables/zobristHash.cpp
+-index 1406c4b..b5b240c 100644
+---- a/Cpp/src/hashTables/zobristHash.cpp
+-+++ b/Cpp/src/hashTables/zobristHash.cpp
+-@@ -12,54 +12,99 @@
+- #include <assert.h>
+- #include <iostream>
+- 
+--static hashEntry moveOrderingHashTable[HASHSIZE+1];
+-+static hashBucket moveOrderingHashTable[HASHSIZE+1];
+- 
+- uint64_t zobristHash[7][2][64];
+- uint64_t movingSideHash[2];
+- uint64_t castlingHash[16];
+- uint64_t enpassantHash[9];
+- 
+-+
+-+static uint16_t permutationIndex = 0;
+-+
+-+
+-+static uint16_t permutations[4][4] = {{0,1,2,3}, {1,2,3,0}, {2,3,0,1}, {3,0,1,2}};
+-+
+-+
+-+
+-+
+- //TODO: somehow force-inline these functions everywhere
+- 
+- hashEntry getHashTableEntry(uint64_t zobristKey) {
+--	return moveOrderingHashTable[zobristKey & HASHSIZE];
+--}
+-+	hashBucket current = moveOrderingHashTable[zobristKey & HASHSIZE];
+- 
+--void setHashEntry(hashEntry entry, uint64_t zobristKey){
+--	moveOrderingHashTable[zobristKey & HASHSIZE] = entry;
+--}
+-+	hashEntry ret = current.hashData[0];
+- 
+--void setSearchId(uint8_t searchId, uint64_t key) {
+--	moveOrderingHashTable[key & HASHSIZE].searchId = searchId;
+-+	uint32_t zobristHigher = (uint32_t) (zobristKey  >> 32);
+-+	uint16_t zobristLower  = (uint16_t) (((uint32_t) (zobristKey  & 0xFFFFFFFF)) >> 16);
+- 
+-+	for(uint8_t ind=1; ind < 4; ind++){
+-+		hashEntry entry = current.hashData[ind];
+-+		if((entry.hashHighBits == zobristHigher) && (entry.hashLower == zobristLower)){
+-+			ret = entry;
+-+		}
+-+	}
+-+	return ret;
+-+}
+-+
+-+void setSearchId(uint8_t searchId, uint64_t key, uint16_t index) {
+-+	moveOrderingHashTable[key & HASHSIZE].hashData[index].searchId = searchId;
+- }
+- 
+- void setHashEntry(hashFlag flag, int16_t eval, uint8_t depth, uint8_t searchId, uint16_t bestMove, uint64_t key){
+--	hashEntry entry;
+--	entry.flag = flag;
+--	entry.eval  = eval;
+--	entry.depth = depth;
+--	entry.searchId = searchId;
+--	entry.bestMove = bestMove;
+--	entry.hashHighBits = (uint32_t) (key >> 32);
+--	entry.hashLower    = (uint16_t) (((uint32_t) (key & 0xFFFFFFFF)) >> 16);
+--	moveOrderingHashTable[key & HASHSIZE] = entry;
+-+	hashBucket* current = &moveOrderingHashTable[key & HASHSIZE];
+-+
+-+	for(uint8_t ind=0; ind < 4; ind++){
+-+		hashEntry* entry = &current->hashData[permutations[permutationIndex][ind]];
+-+		if((entry->depth <= depth) || (entry->searchId != searchId)) {
+-+			entry->flag = flag;
+-+			entry->eval  = eval;
+-+			entry->depth = depth;
+-+			entry->searchId = searchId;
+-+			entry->bestMove = bestMove;
+-+			entry->hashHighBits = (uint32_t) (key >> 32);
+-+			entry->hashLower    = (uint16_t) (((uint32_t) (key & 0xFFFFFFFF)) >> 16);
+-+			entry->index        = permutations[permutationIndex][ind];
+-+			break;
+-+		}
+-+	}
+-+	permutationIndex = (permutationIndex+1) & 3;
+- }
+- 
+- uint16_t getHashMove(uint64_t zobristKey){
+--	return moveOrderingHashTable[zobristKey & HASHSIZE].bestMove;
+-+	hashBucket* current = &moveOrderingHashTable[zobristKey & HASHSIZE];
+-+	uint32_t zobristHigher = (uint32_t) (zobristKey  >> 32);
+-+	uint16_t zobristLower  = (uint16_t) (((uint32_t) (zobristKey  & 0xFFFFFFFF)) >> 16);
+-+	for(uint8_t ind=0; ind < 4; ind++){
+-+		hashEntry* entry = &current->hashData[ind];
+-+		if ((entry->hashHighBits == zobristHigher) && (entry->hashLower == zobristLower)) {
+-+			return entry->bestMove;
+-+		}
+-+	}
+-+	return 0;
+-+
+- }
+- 
+- void setHashMove(uint16_t move, uint64_t zobristKey, uint8_t searchId) {
+--	if(moveOrderingHashTable[zobristKey & HASHSIZE].searchId != searchId) {
+--		moveOrderingHashTable[zobristKey & HASHSIZE].bestMove = move;
+--		moveOrderingHashTable[zobristKey & HASHSIZE].depth    = 0;
+-+	hashBucket* current = &moveOrderingHashTable[zobristKey & HASHSIZE];
+-+	uint32_t zobristHigher = (uint32_t) (zobristKey  >> 32);
+-+	uint16_t zobristLower  = (uint16_t) (((uint32_t) (zobristKey  & 0xFFFFFFFF)) >> 16);
+-+	for(uint8_t ind=0; ind < 4; ind++){
+-+		hashEntry* entry = &current->hashData[permutations[permutationIndex][ind]];
+-+		if ((entry->searchId != searchId)){
+-+			entry->searchId = searchId;
+-+			entry->depth    = 0;
+-+			entry->bestMove = move;
+-+			entry->hashHighBits = zobristHigher;
+-+			entry->hashLower    = zobristLower;
+-+		}
+- 	}
+-+	permutationIndex = (permutationIndex+1) & 3;
+- }
+- 
+- 
+- void clearHashTables() {
+--	memset(moveOrderingHashTable, 0, sizeof(hashEntry)*(HASHSIZE+1));
+-+	memset(moveOrderingHashTable, 0, sizeof(hashBucket)*(HASHSIZE+1));
+- }
+- 
+- void fillZobristHash(){
+-diff --git a/Cpp/src/lib/Defines/pieceTables.cpp b/Cpp/src/lib/Defines/pieceTables.cpp
+-index 276a2a6..68809d1 100644
+---- a/Cpp/src/lib/Defines/pieceTables.cpp
+-+++ b/Cpp/src/lib/Defines/pieceTables.cpp
+-@@ -7,7 +7,7 @@
+- 
+- #include <stdint.h>
+- 
+--
+-+//TODO: We are actually using 1/2 these values - change all values here instead!
+- 
+- int16_t pieceTables[7][2][64] = {
+- 		{
+-@@ -254,12 +254,12 @@ int16_t endGamepieceTables[7][2][64] = {
+- 						-15,-5,0,0,0,0,-5,-15,
+- 						-10,-5,0,0,0,0,-5,-10,
+- 						-15,-5,0,0,0,0,-5,15,
+--						30,30,40,40,40,40,30,30,
+-+						10,20,20,20,20,20,20,10,
+- 						10,20,20,20,20,20,20,10
+- 				},
+- 				{ //black rooks
+- 						10,20,20,20,20,20,20,10,
+--						30,30,40,40,40,40,30,30,
+-+						10,20,20,20,20,20,20,10,
+- 						0,0,0,0,0,0,0,0,
+- 						0,0,0,0,0,0,0,0,
+- 						-15,-5,0,0,0,0,-5,-15,
+-@@ -276,13 +276,13 @@ int16_t endGamepieceTables[7][2][64] = {
+- 						-15,-5,10,30,30,10,-5,-15,
+- 						-10,-5,5,20,20,5,-5,-10,
+- 						-15,-5,10,15,15,10,-5,15,
+--						30,30,40,40,40,40,30,30,
+-+						-20,-10,10,15,15,10,-10,-20,
+- 						0,10,20,20,20,20,10,0
+- 
+- 				},
+- 				{ //black queens
+- 						0,10,20,20,20,20,10,0,
+--						30,30,40,40,40,40,30,30,
+-+						-20,-10,10,15,15,10,-10,-20,
+- 						-15,-5,10,15,15,10,-5,15,
+- 						-10,-5,5,20,20,5,-5,-10,
+- 						-15,-5,10,30,30,10,-5,-15,
+-@@ -293,27 +293,25 @@ int16_t endGamepieceTables[7][2][64] = {
+- 		},
+- 		{
+- 				{ //white kings
+--						-100,-70,-40,-25,-25,-40,-70,-100,
+--						-70,-50,-30,-10,-10,-30,-50,-70,
+--						-40,-30,-10, 10, 10,-10,-30,-40,
+--						-25,-10, 10, 30, 30, 10,-10,-25,
+--						-25,-10, 10, 30, 30, 10,-10,-25,
+--						-40,-30,-10, 10, 10,-10,-30,-40,
+--						-70,-50,-30,-10,-10,-30,-50,-70,
+--						-100,-70,-40,-25,-25,-40,-70,-100,
+-+						-200,-140,-80,-50,-50,-80,-140,-200,
+-+						-140,-100,-60,-20,-20,-60,-100,-140,
+-+						-80,-60,-20, 20, 20,-20,-60,-80,
+-+						-50,-20, 20, 60, 60, 20,-20,-50,
+-+						-50,-20, 20, 60, 60, 20,-20,-50,
+-+						-80,-60,-20, 20, 20,-20,-60,-80,
+-+						-140,-100,-60,-20,-20,-60,-100,-140,
+-+						-200,-140,-80,-50,-50,-80,-140,-200,
+- 				},
+- 				{ //black kings
+--						-100,-70,-40,-25,-25,-40,-70,-100,
+--						-70,-50,-30,-10,-10,-30,-50,-70,
+--						-40,-30,-10, 10, 10,-10,-30,-40,
+--						-25,-10, 10, 30, 30, 10,-10,-25,
+--						-25,-10, 10, 30, 30, 10,-10,-25,
+--						-40,-30,-10, 10, 10,-10,-30,-40,
+--						-70,-50,-30,-10,-10,-30,-50,-70,
+--						-100,-70,-40,-25,-25,-40,-70,-100,
+-+						200,-140,-80,-50,-50,-80,-140,-200,
+-+						-140,-100,-60,-20,-20,-60,-100,-140,
+-+						-80,-60,-20, 20, 20,-20,-60,-80,
+-+						-50,-20, 20, 60, 60, 20,-20,-50,
+-+						-50,-20, 20, 60, 60, 20,-20,-50,
+-+						-80,-60,-20, 20, 20,-20,-60,-80,
+-+						-140,-100,-60,-20,-20,-60,-100,-140,
+-+						-200,-140,-80,-50,-50,-80,-140,-200,
+- 				}
+--
+--
+- 		},
+- 		{			//non-captures
+- 					{
+-@@ -336,10 +334,7 @@ int16_t endGamepieceTables[7][2][64] = {
+- 							0,0,0,0,0,0,0,0,
+- 							0,0,0,0,0,0,0,0
+- 					}
+--
+- 			}
+--
+--
+- };
+- 
+- int32_t completePieceTables[7][2][64];
+-diff --git a/Cpp/src/lib/Evaluation/evaluation.cpp b/Cpp/src/lib/Evaluation/evaluation.cpp
+-index 64cf5d8..0d33e3d 100644
+---- a/Cpp/src/lib/Evaluation/evaluation.cpp
+-+++ b/Cpp/src/lib/Evaluation/evaluation.cpp
+-@@ -22,7 +22,7 @@ evaluationResult getEvaluationResult(){
+- 	return result;
+- }
+- 
+--//std::ofstream out("/home/vabi/TeX/Chess/positions.tex");
+-+
+- 
+- uint16_t taperingValues[81] = {  0,  0,  0,  0,  0,  0,  0,  0,
+- 						       	 0,  0,  0,  0,  0,  0,  0,  0,
+-diff --git a/Cpp/src/lib/basics.hpp b/Cpp/src/lib/basics.hpp
+-index fd2cb6f..2bd8e39 100644
+---- a/Cpp/src/lib/basics.hpp
+-+++ b/Cpp/src/lib/basics.hpp
+-@@ -66,6 +66,8 @@ struct chessPosition {
+- 
+- enum hashFlag: uint16_t {FULLSEARCH=0,FAILLOW=1,FAILHIGH=2};
+- 
+-+
+-+
+- struct hashEntry{
+- 	uint32_t hashHighBits;
+- 	uint16_t hashLower;
+-@@ -74,8 +76,13 @@ struct hashEntry{
+- 	uint16_t eval;
+- 	uint8_t depth;
+- 	uint8_t searchId;
+-+	uint16_t index;
+- } __attribute__((packed));
+- 
+-+struct hashBucket{
+-+	hashEntry hashData[4];
+-+};
+-+
+- class timeoutException: public std::exception
+- {
+-   virtual const char* what() const throw()
+-diff --git a/Cpp/src/userInterface/UIfunctions.cpp b/Cpp/src/userInterface/UIfunctions.cpp
+-index 91392c7..e331694 100644
+---- a/Cpp/src/userInterface/UIfunctions.cpp
+-+++ b/Cpp/src/userInterface/UIfunctions.cpp
+-@@ -24,47 +24,10 @@ static char figureNames[2][6] = {{'P', 'N', 'B', 'R', 'Q', 'K'},
+- 		{'p', 'n', 'b', 'r', 'q', 'k'},
+- };
+- 
+--void putTableLine(std::ostream& out, int16_t value, std::string name) {
+--	out << name << " & " << value << "\\\\ \\hline" << std::endl;
+--}
+- 
+--static int clearPageCounter = 0;
+--
+--void latexOutput(const chessPosition* pos, std::ostream& out, evaluationResult ev, int16_t eval) {
+--
+--	int16_t figureVal = calcFigureEvaluation(pos);
+--	out << "\\begin{figure}[!htbp] " << std::endl;
+--	out << "\\newgame" << std::endl;
+--	out << "\\fenboard{"+chessPositionToFenString(*pos, false)+"}" << std::endl;
+--
+--	out << "\\begin{tabular}{ll}" << std::endl;
+--	out << "\\raisebox{-.5\\height}{\\showboard}&   \\begin{tabular}{ l | c  }" << std::endl;
+--
+--	putTableLine(out, eval, "Total");
+--	putTableLine(out, figureVal, "Material");
+--	putTableLine(out, ev.PSQ-figureVal, "Piece Square Tables");
+--	putTableLine(out, ev.mobility, "Mobility");
+--	putTableLine(out, ev.kingSafety, "King Safety");
+--	putTableLine(out, ev.bishoppair, "Bishop pair");
+--	putTableLine(out, ev.staticPawn, "Pawn structure");
+--	putTableLine(out, ev.passedPawn, "Passed pawns");
+--	putTableLine(out, ev.rookOpenFiles, "Rooks on open files");
+--	out << "\\end{tabular}" << std::endl;
+--	out << "\\end{tabular}" << std::endl;
+--	out << "\\end{figure}" << std::endl;
+--	clearPageCounter++;
+--	if(clearPageCounter == 3) {
+--		out << "\\clearpage" << std::endl;
+--		clearPageCounter = 0;
+--	}
+--}
+- 
+--void latexOutput(std::string FEN, std::ostream& out) {
+--	chessPosition pos = FENtoChessPosition(FEN);
+--	int16_t eval = evaluation(&pos, -32000, 32000);
+--	evaluationResult ev = getEvaluationResult();
+--	latexOutput(&pos, out,  ev, eval);
+--}
+-+
+-+
+- 
+- 
+- uint8_t searchId = 0;
+-diff --git a/Cpp/src/userInterface/UIlayer.hpp b/Cpp/src/userInterface/UIlayer.hpp
+-index 8022c27..5f5d2d0 100644
+---- a/Cpp/src/userInterface/UIlayer.hpp
+-+++ b/Cpp/src/userInterface/UIlayer.hpp
+-@@ -23,7 +23,6 @@ uint64_t stringToMove(std::string mv);
+- bool checkAndMakeMove(chessPosition& position, std::string move);
+- void runPerformanceTests();
+- uint64_t get_timestamp();
+--void latexOutput(std::string FEN, std::ostream& out);
+--void latexOutput(const chessPosition* pos, std::ostream& out, evaluationResult ev, int16_t eval);
+-+
+- std::string moveToExtendedString(chessMove move, chessPosition position);
+- #endif /* USERINTERFACE_UILAYER_HPP_ */
+-diff --git a/Cpp/src/userInterface/UImainLoop.cpp b/Cpp/src/userInterface/UImainLoop.cpp
+-index 153d6b8..a7b750c 100644
+---- a/Cpp/src/userInterface/UImainLoop.cpp
+-+++ b/Cpp/src/userInterface/UImainLoop.cpp
+-@@ -18,6 +18,7 @@
+- #include <iomanip>
+- #include <userInterface/interfaceStructs.hpp>
+- #include <lib/moveGeneration/moveGeneration.hpp>
+-+#include <logging/logger.hpp>
+- userInterface* UI;
+- 
+- extern uint8_t searchId;
+-@@ -85,6 +86,8 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
+- 
+- 	//uint64_t goalNodes = 1800*maximal_time;
+- 	while(get_timestamp()-start_ts <= totalTime) {
+-+		/*setTotalTime(100000000, start_ts);
+-+		while(depth < 14) {*/
+- #endif
+- 		try{
+- 			chessMove localBestMove;
+-@@ -148,6 +151,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
+- 
+- 		*nodeCount = (data.totalNodes+getQuiescenceNodes());
+- 		UI->sendSearchInfo(*nodeCount, *mtime, *eval, depth, moveToString(*bestMove, *position));
+-+		logSearch(*nodeCount, *mtime, *eval, depth, moveToString(*bestMove, *position));
+- 		depth++;
+- 		searchedNodes = searchedNodes+*nodeCount;
+- 		if(*eval > 29000) {
+-@@ -192,6 +196,8 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t maxim
+- 		std::cout << qindices[k] << " ";
+- 	}
+- 	std::cout << std::endl;*/
+-+	int16_t neval = evaluation(position, -32000, 32000);
+-+	latexOutput(position,  getEvaluationResult(), neval);
+- 	return depth;
+- }
+- 
+-diff --git a/chessGui/.idea/workspace.xml b/chessGui/.idea/workspace.xml
+-index fa98113..2908af8 100644
+---- a/chessGui/.idea/workspace.xml
+-+++ b/chessGui/.idea/workspace.xml
+-@@ -67,11 +67,7 @@
+-           <provider selected="true" editor-type-id="text-editor">
+-             <state relative-caret-position="1035">
+-               <caret line="82" column="35" selection-start-line="82" selection-start-column="35" selection-end-line="82" selection-end-column="35" />
+--              <folding>
+--                <element signature="imports" expanded="false" />
+--                <element signature="e#1121#1122#0" expanded="false" />
+--                <element signature="e#1168#1169#0" expanded="false" />
+--              </folding>
+-+              <folding />
+-             </state>
+-           </provider>
+-         </entry>
+-@@ -81,21 +77,7 @@
+-           <provider selected="true" editor-type-id="text-editor">
+-             <state relative-caret-position="1290">
+-               <caret line="106" column="54" selection-start-line="106" selection-start-column="54" selection-end-line="106" selection-end-column="54" />
+--              <folding>
+--                <element signature="imports" expanded="false" />
+--                <element signature="e#1047#1048#0" expanded="false" />
+--                <element signature="e#1117#1118#0" expanded="false" />
+--                <element signature="e#1165#1166#0" expanded="false" />
+--                <element signature="e#1229#1230#0" expanded="false" />
+--                <element signature="e#1540#1541#0" expanded="false" />
+--                <element signature="e#1607#1608#0" expanded="false" />
+--                <element signature="e#3451#3452#0" expanded="false" />
+--                <element signature="e#3517#3518#0" expanded="false" />
+--                <element signature="e#6836#6837#0" expanded="false" />
+--                <element signature="e#6888#6889#0" expanded="false" />
+--                <element signature="e#7967#7968#0" expanded="false" />
+--                <element signature="e#8015#8016#0" expanded="false" />
+--              </folding>
+-+              <folding />
+-             </state>
+-           </provider>
+-         </entry>
+-@@ -113,8 +95,8 @@
+-       <file leaf-file-name="Main.java" pinned="false" current-in-tab="true">
+-         <entry file="file://$PROJECT_DIR$/src/sample/Main.java">
+-           <provider selected="true" editor-type-id="text-editor">
+--            <state relative-caret-position="225">
+--              <caret line="28" column="26" selection-start-line="28" selection-start-column="26" selection-end-line="28" selection-end-column="26" />
+-+            <state relative-caret-position="585">
+-+              <caret line="52" column="0" selection-start-line="52" selection-start-column="0" selection-end-line="52" selection-end-column="0" />
+-               <folding />
+-             </state>
+-           </provider>
+-@@ -125,11 +107,7 @@
+-           <provider selected="true" editor-type-id="text-editor">
+-             <state relative-caret-position="1845">
+-               <caret line="133" column="28" selection-start-line="133" selection-start-column="28" selection-end-line="133" selection-end-column="28" />
+--              <folding>
+--                <element signature="imports" expanded="false" />
+--                <element signature="e#5464#5465#0" expanded="false" />
+--                <element signature="e#5490#5491#0" expanded="false" />
+--              </folding>
+-+              <folding />
+-             </state>
+-           </provider>
+-         </entry>
+-@@ -139,11 +117,7 @@
+-           <provider selected="true" editor-type-id="text-editor">
+-             <state relative-caret-position="855">
+-               <caret line="58" column="51" selection-start-line="58" selection-start-column="51" selection-end-line="58" selection-end-column="51" />
+--              <folding>
+--                <element signature="imports" expanded="false" />
+--                <element signature="e#2569#2570#0" expanded="false" />
+--                <element signature="e#2602#2603#0" expanded="false" />
+--              </folding>
+-+              <folding />
+-             </state>
+-           </provider>
+-         </entry>
+-@@ -163,9 +137,7 @@
+-           <provider selected="true" editor-type-id="text-editor">
+-             <state relative-caret-position="240">
+-               <caret line="17" column="0" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
+--              <folding>
+--                <element signature="imports" expanded="false" />
+--              </folding>
+-+              <folding />
+-             </state>
+-           </provider>
+-         </entry>
+-@@ -185,16 +157,7 @@
+-           <provider selected="true" editor-type-id="text-editor">
+-             <state relative-caret-position="180">
+-               <caret line="12" column="4" selection-start-line="12" selection-start-column="4" selection-end-line="12" selection-end-column="4" />
+--              <folding>
+--                <element signature="e#492#493#0" expanded="false" />
+--                <element signature="e#531#532#0" expanded="false" />
+--                <element signature="e#575#576#0" expanded="false" />
+--                <element signature="e#618#619#0" expanded="false" />
+--                <element signature="e#677#678#0" expanded="false" />
+--                <element signature="e#713#714#0" expanded="false" />
+--                <element signature="e#773#774#0" expanded="false" />
+--                <element signature="e#819#820#0" expanded="false" />
+--              </folding>
+-+              <folding />
+-             </state>
+-           </provider>
+-         </entry>
+-@@ -307,8 +270,6 @@
+-     </navigator>
+-     <panes>
+-       <pane id="Scope" />
+--      <pane id="Scratches" />
+--      <pane id="PackagesPane" />
+-       <pane id="ProjectPane">
+-         <subPane>
+-           <PATH>
+-@@ -361,6 +322,8 @@
+-           </PATH>
+-         </subPane>
+-       </pane>
+-+      <pane id="PackagesPane" />
+-+      <pane id="Scratches" />
+-     </panes>
+-   </component>
+-   <component name="PropertiesComponent">
+-@@ -642,21 +605,17 @@
+-     <layout>
+-       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+-       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+--      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.34994912" sideWeight="0.5" order="14" side_tool="false" content_ui="tabs" />
+-       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+-       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32960325" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+-       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+-       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
+--      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3926755" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+-       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="13" side_tool="false" content_ui="tabs" />
+-       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+--      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15364583" sideWeight="0.6703755" order="0" side_tool="false" content_ui="combo" />
+--      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32960325" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+-+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15364583" sideWeight="0.6703755" order="0" side_tool="false" content_ui="combo" />
+-       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+-       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+-       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+-       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+--      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.26754832" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+-       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+-       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+-       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+-@@ -664,10 +623,14 @@
+-       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+-       <window_info id="Profiler" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+-       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+-+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.26754832" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+-       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+-+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.34994912" sideWeight="0.5" order="14" side_tool="false" content_ui="tabs" />
+-       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+-+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3926755" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+-       <window_info id="JetGradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+-       <window_info id="Problems" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
+-+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32960325" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+-     </layout>
+-   </component>
+-   <component name="Vcs.Log.UiProperties">
+-@@ -914,14 +877,14 @@
+-       </provider>
+-     </entry>
+-     <entry file="file://$PROJECT_DIR$/src/EditorGUI/editorgui.fxml">
+-+      <provider editor-type-id="JavaFX-Scene-Builder">
+-+        <state />
+-+      </provider>
+-       <provider selected="true" editor-type-id="text-editor">
+-         <state relative-caret-position="270">
+-           <caret line="18" column="28" selection-start-line="18" selection-start-column="28" selection-end-line="18" selection-end-column="28" />
+-         </state>
+-       </provider>
+--      <provider editor-type-id="JavaFX-Scene-Builder">
+--        <state />
+--      </provider>
+-     </entry>
+-     <entry file="file://$PROJECT_DIR$/src/EditorGUI/EditorGUI.java">
+-       <provider selected="true" editor-type-id="text-editor">
+-@@ -966,34 +929,20 @@
+-       </provider>
+-     </entry>
+-     <entry file="file://$PROJECT_DIR$/src/PlayingGUI/playinggui.fxml">
+-+      <provider editor-type-id="JavaFX-Scene-Builder">
+-+        <state />
+-+      </provider>
+-       <provider selected="true" editor-type-id="text-editor">
+-         <state relative-caret-position="679">
+-           <caret line="59" column="90" selection-start-line="59" selection-start-column="90" selection-end-line="59" selection-end-column="90" />
+-         </state>
+-       </provider>
+--      <provider editor-type-id="JavaFX-Scene-Builder">
+--        <state />
+--      </provider>
+-     </entry>
+-     <entry file="file://$PROJECT_DIR$/src/PlayingGUI/PlayingController.java">
+-       <provider selected="true" editor-type-id="text-editor">
+-         <state relative-caret-position="1290">
+-           <caret line="106" column="54" selection-start-line="106" selection-start-column="54" selection-end-line="106" selection-end-column="54" />
+--          <folding>
+--            <element signature="imports" expanded="false" />
+--            <element signature="e#1047#1048#0" expanded="false" />
+--            <element signature="e#1117#1118#0" expanded="false" />
+--            <element signature="e#1165#1166#0" expanded="false" />
+--            <element signature="e#1229#1230#0" expanded="false" />
+--            <element signature="e#1540#1541#0" expanded="false" />
+--            <element signature="e#1607#1608#0" expanded="false" />
+--            <element signature="e#3451#3452#0" expanded="false" />
+--            <element signature="e#3517#3518#0" expanded="false" />
+--            <element signature="e#6836#6837#0" expanded="false" />
+--            <element signature="e#6888#6889#0" expanded="false" />
+--            <element signature="e#7967#7968#0" expanded="false" />
+--            <element signature="e#8015#8016#0" expanded="false" />
+--          </folding>
+-+          <folding />
+-         </state>
+-       </provider>
+-     </entry>
+-@@ -1001,11 +950,7 @@
+-       <provider selected="true" editor-type-id="text-editor">
+-         <state relative-caret-position="1035">
+-           <caret line="82" column="35" selection-start-line="82" selection-start-column="35" selection-end-line="82" selection-end-column="35" />
+--          <folding>
+--            <element signature="imports" expanded="false" />
+--            <element signature="e#1121#1122#0" expanded="false" />
+--            <element signature="e#1168#1169#0" expanded="false" />
+--          </folding>
+-+          <folding />
+-         </state>
+-       </provider>
+-     </entry>
+-@@ -1017,15 +962,27 @@
+-         </state>
+-       </provider>
+-     </entry>
+-+    <entry file="file://$PROJECT_DIR$/src/sample/Main.java">
+-+      <provider selected="true" editor-type-id="text-editor">
+-+        <state relative-caret-position="585">
+-+          <caret line="52" column="0" selection-start-line="52" selection-start-column="0" selection-end-line="52" selection-end-column="0" />
+-+          <folding />
+-+        </state>
+-+      </provider>
+-+    </entry>
+-+    <entry file="file://$PROJECT_DIR$/src/uciClient/UciProcessing.java">
+-+      <provider selected="true" editor-type-id="text-editor">
+-+        <state relative-caret-position="1845">
+-+          <caret line="133" column="28" selection-start-line="133" selection-start-column="28" selection-end-line="133" selection-end-column="28" />
+-+          <folding />
+-+        </state>
+-+      </provider>
+-+    </entry>
+-     <entry file="file://$PROJECT_DIR$/src/uciClient/uciEngineHandler.java">
+-       <provider selected="true" editor-type-id="text-editor">
+-         <state relative-caret-position="855">
+-           <caret line="58" column="51" selection-start-line="58" selection-start-column="51" selection-end-line="58" selection-end-column="51" />
+--          <folding>
+--            <element signature="imports" expanded="false" />
+--            <element signature="e#2569#2570#0" expanded="false" />
+--            <element signature="e#2602#2603#0" expanded="false" />
+--          </folding>
+-+          <folding />
+-         </state>
+-       </provider>
+-     </entry>
+-@@ -1041,9 +998,7 @@
+-       <provider selected="true" editor-type-id="text-editor">
+-         <state relative-caret-position="240">
+-           <caret line="17" column="0" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
+--          <folding>
+--            <element signature="imports" expanded="false" />
+--          </folding>
+-+          <folding />
+-         </state>
+-       </provider>
+-     </entry>
+-@@ -1059,35 +1014,6 @@
+-       <provider selected="true" editor-type-id="text-editor">
+-         <state relative-caret-position="180">
+-           <caret line="12" column="4" selection-start-line="12" selection-start-column="4" selection-end-line="12" selection-end-column="4" />
+--          <folding>
+--            <element signature="e#492#493#0" expanded="false" />
+--            <element signature="e#531#532#0" expanded="false" />
+--            <element signature="e#575#576#0" expanded="false" />
+--            <element signature="e#618#619#0" expanded="false" />
+--            <element signature="e#677#678#0" expanded="false" />
+--            <element signature="e#713#714#0" expanded="false" />
+--            <element signature="e#773#774#0" expanded="false" />
+--            <element signature="e#819#820#0" expanded="false" />
+--          </folding>
+--        </state>
+--      </provider>
+--    </entry>
+--    <entry file="file://$PROJECT_DIR$/src/uciClient/UciProcessing.java">
+--      <provider selected="true" editor-type-id="text-editor">
+--        <state relative-caret-position="1845">
+--          <caret line="133" column="28" selection-start-line="133" selection-start-column="28" selection-end-line="133" selection-end-column="28" />
+--          <folding>
+--            <element signature="imports" expanded="false" />
+--            <element signature="e#5464#5465#0" expanded="false" />
+--            <element signature="e#5490#5491#0" expanded="false" />
+--          </folding>
+--        </state>
+--      </provider>
+--    </entry>
+--    <entry file="file://$PROJECT_DIR$/src/sample/Main.java">
+--      <provider selected="true" editor-type-id="text-editor">
+--        <state relative-caret-position="225">
+--          <caret line="28" column="26" selection-start-line="28" selection-start-column="26" selection-end-line="28" selection-end-column="26" />
+-           <folding />
+-         </state>
+-       </provider>
+-diff --git a/output b/output
+-deleted file mode 100644
+-index e69de29..0000000

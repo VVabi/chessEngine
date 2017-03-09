@@ -20,10 +20,10 @@
 #include <lib/Evaluation/evaluation.hpp>
 #include <fstream>
 #include <userInterface/UIlayer.hpp>
-
+#include <atomic>
 extern int32_t historyTable[2][64][64];
 extern uint8_t searchId;
-
+extern std::atomic<bool> continueSearch;
 static searchDebugData searchCounts;
 
 searchDebugData getSearchData(){
@@ -103,8 +103,14 @@ static inline bool check_nullmove(chessPosition* position, uint16_t* refutationM
 
 int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t depth, int16_t alpha, int16_t beta, chessMove* bestMove, bool allowNullMove, bool doHashProbe){
 
-	if(depth >= 3) { //TODO: be careful here - we may have to reset the stack in quiescence search as well!
+	if(depth > 3) { //TODO: be careful here - we may have to reset the stack in quiescence search as well!
 		if(get_timestamp()-start_ts >= totalTime){ //TODO: how is this performance wise?
+			qmvStack.reset();
+			std::cout << "Total time " << totalTime << std::endl;
+			throw timeoutException();
+		}
+
+		if(!continueSearch) {
 			qmvStack.reset();
 			throw timeoutException();
 		}
