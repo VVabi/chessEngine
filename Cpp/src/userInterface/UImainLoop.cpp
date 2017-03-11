@@ -27,6 +27,7 @@
 #include <atomic>
 #include <thread>
 #include "mingw.thread.h"
+#include <tests/tests.hpp>
 
 extern uint8_t searchId;
 extern uint16_t killerMoves[20][2];
@@ -60,6 +61,11 @@ chessPosition cposition;
 uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t numMadeMoves, uint32_t* worst_case_time) {
 
 	if(params.type == infinite) {
+		*worst_case_time = UINT32_MAX;
+		return UINT32_MAX;
+	}
+
+	if(params.type == fixed_depth) {
 		*worst_case_time = UINT32_MAX;
 		return UINT32_MAX;
 	}
@@ -106,12 +112,16 @@ void sendSearchInfo(uint64_t nodes, uint32_t time, int32_t eval, uint32_t depth,
 
 bool checkContinue(searchParameters params, uint16_t depth, uint16_t passedTime, uint16_t allottedTime) {
 
+	if(depth > 27) {
+		return false;
+	}
+
 	if(params.type == infinite) {
 		return true;
 	}
 
 	if(params.type == fixed_depth) {
-		return (params.depth <= depth) && (depth > 3);
+		return (params.depth >= depth) || (depth <= 3);
 	}
 
 	if(params.type == time_until_move) {
@@ -142,11 +152,12 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 	uint16_t madeMoves = position->madeMoves.length;
 	while(checkContinue(params, depth, get_timestamp()-start_ts, totalTime)) {
 		try{
+			//std::cout << "Depth " << depth << std::endl;
 			chessMove localBestMove;
 			*eval = negamax(position, 0, depth+3, depth, alpha, beta, &localBestMove, true, false);
 			if(doAspiration) {
 				if ((*eval <= alpha) || (*eval >= beta)) {
-					//std::cout << "Aspiration window search failed, researching..." <<std::endl;
+					std::cout << "Aspiration window search failed, researching..." <<std::endl;
 					*eval = negamax(position, 0, depth+3, depth, -32000, 32000, &localBestMove, true, false);
 				}
 
@@ -204,7 +215,7 @@ void search(chessPosition p, searchParameters params){
 	uint32_t nodeCount = 0;
 	uint64_t mtime = 0;
 	int32_t eval = 0;
-	searchMove(&p, &bestMove,&nodeCount, &mtime, &eval, true, params);
+	searchMove(&p, &bestMove,&nodeCount, &mtime, &eval, false, params);
 	std::cout << "bestmove " << moveToString(bestMove, p) << std::endl;
 	std::cout << "Leaving thread" <<std::endl;
 }
@@ -351,6 +362,18 @@ void handleGo(std::list<std::string> input) {
 
 }
 
+void handlePerft(std::list<std::string> input){
+
+		auto iterator = input.begin();
+
+		if(iterator != input.end()) {
+			uint16_t depth = StringToNumber<int32_t>(*iterator);
+			uint32_t perftret = perftNodes(&cposition, depth);
+			std::cout << "Perft result " << perftret << std::endl;
+
+		}
+}
+
 
 void handlePosition(std::list<std::string> input) {
 
@@ -365,10 +388,17 @@ void handlePosition(std::list<std::string> input) {
 		fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 		iterator++;
 	} else {
+		if(*iterator != "fen") {
+			std::cout << "Invalid position request" << std::endl;
+			return;
+		}
+		iterator++;
 		fen = *iterator;
 		iterator++;
 		while((iterator != input.end()) && ("moves" != *iterator)) {
+			if("fen" != *iterator) {
 			fen = fen+" "+*iterator;
+			}
 			iterator++;
 		}
 
@@ -401,6 +431,21 @@ void handlePosition(std::list<std::string> input) {
 
 }
 
+void handleEval() {
+	int32_t eval = evaluation(&cposition, -32000, 32000);
+	evaluationResult res = getEvaluationResult();
+	std::cout << "Total " << eval;
+	std::cout << " Material " << cposition.figureEval;
+	std::cout << " PSQ " << res.PSQ-cposition.figureEval;
+	std::cout << " King safety " <<  res.kingSafety;
+	std::cout << " Mobility " << res.mobility;
+	std::cout << " Pawns " << res.staticPawn;
+	std::cout << " Passed pawns " << res.passedPawn;
+	std::cout << " rook open files " << res.rookOpenFiles;
+	std::cout << " bishoppair " << res.bishoppair;
+	std::cout << std::endl;
+}
+
 void UIloop() {
 	initUserEvents();
 	bool continueLoop = true;
@@ -424,7 +469,14 @@ void UIloop() {
 				handleStop();
 				break;
 			case quit:
+				handleStop();
 				continueLoop = false;
+				break;
+			case perft:
+				handlePerft(ev.data);
+				break;
+			case eval:
+				handleEval();
 				break;
 			default:
 				std::cout << "Not yet implemented" << std::endl;

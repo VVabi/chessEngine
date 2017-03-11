@@ -59,7 +59,7 @@ public class Main extends Application {
        UciProcessing processesList[] = new UciProcessing[3];
 
         for(int ind=0; ind < 3; ind++) {
-            processesList[ind] = new UciProcessing("/home/vabi/code/chessEngine/Cpp/uciChallengeRelease/Vabi", "params1", "/home/vabi/code/chessEngine/Cpp/uciDefenderRelease/Vabi", "params2", 10000);
+            processesList[ind] = new UciProcessing("/home/vabi/code/chessEngine/Cpp/uciDefenderRelease/Vabi", "params1", "/home/vabi/code/chessEngine/Cpp/uciChallengeRelease/Vabi", "params2", 10000);
             //final Core cor = new Core(primaryStage);
             final int index = ind;
             Thread.sleep(1523);

@@ -75,7 +75,8 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 	}
 //#endif
 
-	/*hashEntry hashVal      = getHashTableEntry(position->zobristHash);
+#ifdef HASH
+	hashEntry hashVal      = getHashTableEntry(position->zobristHash);
 
 	uint32_t zobristHigher = (uint32_t) (position->zobristHash >> 32);
 	uint16_t zobristLower  = (uint16_t) (((uint32_t) (position->zobristHash & 0xFFFFFFFF)) >> 16);
@@ -102,19 +103,17 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 				return oldEval;
 			}
 		}
-	}*/
-
-
-
-
-
+	}
+#endif
 	int32_t baseEval = evaluation(position, alpha, beta);
 
 	if(baseEval > alpha){
 		alpha = baseEval;
 	}
 	if(alpha >= beta) {
+#ifdef HASH
 		setHashEntry(FAILHIGH, alpha, 0, searchId, 0, position->zobristHash);
+#endif
 		return beta;
 	}
 	//delta pruning preparations
@@ -149,7 +148,7 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 		}
 		if(ind == 1){
 			sortqCalled++;
-			std::sort(moves.data, moves.data+moves.length);
+			std::stable_sort(moves.data, moves.data+moves.length);
 		}
 
 		//delta pruning. TODO: make define
@@ -176,7 +175,9 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 		}
 		undoMove(position);
 		if(alpha >= beta) {
+#ifdef HASH
 			setHashEntry(FAILHIGH, alpha, 0, searchId, (bestMove.sourceField | (bestMove.targetField << 8)), position->zobristHash);
+#endif
 			mvStack.release();
 			assert(stackCounter == mvStack.getCounter());
 			if(bestIndex != -1){
@@ -186,12 +187,14 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 		}
 	}
 
+#ifdef HASH
 	if(bestIndex != -1){
 		qindices[bestIndex]++;
 		setHashEntry(FULLSEARCH, alpha, 0, searchId, (bestMove.sourceField | (bestMove.targetField << 8)), position->zobristHash);
 	} else {
 		setHashEntry(FAILLOW, alpha, 0, searchId, 0, position->zobristHash);
 	}
+#endif
 	mvStack.release();
 	assert(stackCounter == mvStack.getCounter());
 	return alpha;

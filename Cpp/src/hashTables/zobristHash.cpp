@@ -19,7 +19,7 @@ uint64_t movingSideHash[2];
 uint64_t castlingHash[16];
 uint64_t enpassantHash[9];
 
-
+#ifdef HASH
 static uint16_t permutationIndex = 0;
 
 
@@ -32,13 +32,20 @@ static uint16_t permutations[4][4] = {{0,1,2,3}, {1,2,3,0}, {2,3,0,1}, {3,0,1,2}
 
 hashEntry getHashTableEntry(uint64_t zobristKey) {
 	hashBucket current = moveOrderingHashTable[zobristKey & HASHSIZE];
-
-	hashEntry ret = current.hashData[0];
+	hashEntry ret;
+	ret.bestMove = 0;
+	ret.depth   = 0;
+	ret.eval    = 0;
+	ret.hashHighBits = 0;
+	ret.hashLower = 0;
+	ret.index = 0;
+	ret.searchId = 0;
+	ret.flag = FULLSEARCH;
 
 	uint32_t zobristHigher = (uint32_t) (zobristKey  >> 32);
 	uint16_t zobristLower  = (uint16_t) (((uint32_t) (zobristKey  & 0xFFFFFFFF)) >> 16);
 
-	for(uint8_t ind=1; ind < 4; ind++){
+	for(uint8_t ind=0; ind < 4; ind++){
 		hashEntry entry = current.hashData[ind];
 		if((entry.hashHighBits == zobristHigher) && (entry.hashLower == zobristLower)){
 			ret = entry;
@@ -85,6 +92,7 @@ uint16_t getHashMove(uint64_t zobristKey){
 
 }
 
+
 void setHashMove(uint16_t move, uint64_t zobristKey, uint8_t searchId) {  //DEPRECATED
 	hashBucket* current = &moveOrderingHashTable[zobristKey & HASHSIZE];
 	uint32_t zobristHigher = (uint32_t) (zobristKey  >> 32);
@@ -100,11 +108,12 @@ void setHashMove(uint16_t move, uint64_t zobristKey, uint8_t searchId) {  //DEPR
 			entry->flag     = FAILHIGH;
 			entry->hashHighBits = zobristHigher;
 			entry->hashLower    = zobristLower;
+			entry->index        = ind;
 		}
 	}
 	permutationIndex = (permutationIndex+1) & 3;
 }
-
+#endif
 
 void clearHashTables() {
 	memset(moveOrderingHashTable, 0, sizeof(hashBucket)*(HASHSIZE+1));

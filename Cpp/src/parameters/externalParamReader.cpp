@@ -36,12 +36,10 @@ bool parameterReader::readParameters(preParameters* pars, std::string filename){
 
 		std::ifstream input = std::ifstream(filename);
 		if(!input.is_open()) {
-			std::cout << "No parameter file found" << std::endl;
 			return false;
 		}
 		std::string line;
 		int64_t* ptr = (int64_t*) pars;
-		std::cout << "trying to read parameters " << filename << std::endl;
 		while(std::getline(input, line)) {
 			std::stringstream line_stream(line);
 			std::string key;
@@ -50,14 +48,11 @@ bool parameterReader::readParameters(preParameters* pars, std::string filename){
 			auto pair = parameterFields.find(key);
 
 			if(pair != parameterFields.end()) {
-				std::cout << "Key found" << std::endl;
-				std::cout << pair->first << std::endl;
-				std::cout << pair->second << std::endl;
 				int64_t value;
 				line_stream >> value;
 				*(ptr+pair->second) = value;
 			} else {
-				std::cout << "Key not found" << std::endl;
+
 			}
 
 		}

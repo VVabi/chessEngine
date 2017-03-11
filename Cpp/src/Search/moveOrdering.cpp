@@ -147,6 +147,8 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 
 	if(targetAttacked && mv->type == kingMove) {
 		sortEval = ILLEGAL;
+		mv->sortEval = sortEval;
+		return;
 	}
 
 	if( (mv->captureType != none) && ((BIT64(mv->targetField) & opponentAttackTable->completeAttackTable) == 0)) {
@@ -203,11 +205,15 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 		sortEval  = 110;
 		if(kingBlockers[position->toMove] & opponentAttackTable->completeAttackTable) {
 			sortEval = ILLEGAL;
+			mv->sortEval = sortEval;
+			return;
 		}
 	} else if(mv->type == castlingQueenside) {
 		sortEval  = 70;
 		if(queenBlockers[position->toMove] & opponentAttackTable->completeAttackTable) {
 			sortEval = ILLEGAL;
+			mv->sortEval = sortEval;
+		    return;
 		}
 	}
 
@@ -243,8 +249,12 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 		sortEval = sortEval+100;
 	}
 
+	if(sortEval > 20000) {
+		std::cout << "????" <<std::endl;
+	}
+
 	if( ((mv->sourceField) | (mv->targetField << 8)) == hashedMove) {
-			sortEval = sortEval+2000;
+			sortEval = sortEval+10000;
 	}
 
 	mv->sortEval = sortEval;
@@ -283,7 +293,11 @@ void orderCaptureMoves(chessPosition* position, vdt_vector<chessMove>* moves) {
 		return;
 	}
 
+#ifdef HASH
 	uint16_t hashedMove = getHashMove(position->zobristHash);
+#else
+	uint16_t hashedMove = 0;
+#endif
 	int16_t bestEval = INT16_MIN;
 	uint16_t bestIndex = 0;
 

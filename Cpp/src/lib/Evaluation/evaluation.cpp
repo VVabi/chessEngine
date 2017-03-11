@@ -69,7 +69,7 @@ static int32_t rookOpenFiles(const chessPosition* position, uint8_t* pawnOccupan
 
 //static uint32_t counter = 0;
 
-int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
+int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, bool PSQ_only){
 
 
 	if( (position->pieceTables[white][pawn] == 0) &&
@@ -106,6 +106,10 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta){
 
 	int32_t pieceTableEval = ((256-taperingValues[phase])*bufferEndgame+taperingValues[phase]*bufferMidgame)/256; //division by 256
 	eval = eval+pieceTableEval;
+
+	if(PSQ_only) {
+		return (1-2*position->toMove)*eval;
+	}
 	result.PSQ = pieceTableEval;
 
 	int32_t evalsigned = (1-2*position->toMove)*eval;

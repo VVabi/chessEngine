@@ -43,6 +43,8 @@ void initUserEvents() {
 	userEventList["stop"] 				= stop;
 	userEventList["ponderhit"] 			= ponderhit;
 	userEventList["quit"] 				= quit;
+	userEventList["perft"] 				= perft;
+	userEventList["eval"] 				= eval;
 }
 
 userEvent getNextUserEvent() {

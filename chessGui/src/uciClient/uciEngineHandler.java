@@ -77,7 +77,7 @@ public class uciEngineHandler {
 
 
     public void startSearch() throws IOException{
-        put("go depth 6");
+        put("go depth 5");
     }
 
     public int readBestmove(String[] in) throws IOException {

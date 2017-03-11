@@ -43,6 +43,28 @@ void setTotalTime(uint32_t tTime, uint64_t start){
 }
 
 
+uint64_t trueRets = 0;
+uint64_t falseRets = 0;
+
+bool getHashMoveToFront(vdt_vector<chessMove>* moves, uint16_t hashMove, chessMove* mov) {
+
+	for(uint16_t ind=0; ind < moves->length; ind++) {
+		chessMove mv = (*moves)[ind];
+		if( ((mv.sourceField) | (mv.targetField << 8)) == hashMove) {
+			 chessMove buffer = (*moves)[0];
+			 (*moves)[0] = (*moves)[ind];
+			 (*moves)[ind] = buffer;
+			 *mov = mv;
+			 trueRets++;
+			 return true;
+		}
+
+	}
+	falseRets++;
+	return false;
+
+}
+
 uint16_t killerMoves[40][2];
 
 //static chessMove buffer[5000];
@@ -74,7 +96,7 @@ static uint8_t nullmoveReductions[40] = {0,1,2,2,2,2,2,2,
 };
 
 static inline bool check_nullmove(chessPosition* position, uint16_t* refutationMoveTarget, uint16_t ply, uint16_t max_ply, int16_t depth, int32_t beta){
-
+	//return false;
 
 	if(beta > 10000){ //TODO: more dynamic condition here?
 		return false;
@@ -90,18 +112,26 @@ static inline bool check_nullmove(chessPosition* position, uint16_t* refutationM
 
 	makeNullMove(position);
 	chessMove mv;
+	mv.targetField = 64;
 	searchCounts.nullMovePruningTried++;
 	int32_t value = -negamax(position, ply+1, max_ply-nullmoveReductions[depth], depth-1-nullmoveReductions[depth], -beta, -beta+1, &mv, false);
 	undoNullMove(position);
 	if(value < beta) {
 		*refutationMoveTarget = mv.targetField;
+		assert(*refutationMoveTarget < 65);
 		return false; //didnt manage a cutoff :(
 	}
 	searchCounts.nullMovePruningSuccessful++;
 	return true;
 }
 
+//std::ofstream plogger("/home/vabi/Tools/log.txt");
+
 int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t depth, int16_t alpha, int16_t beta, chessMove* bestMove, bool allowNullMove, bool doHashProbe){
+
+	/*std::string pos = chessPositionToFenString(*position, false);
+	plogger << pos << " DEPTH " << depth  << " ply " << ply << " alpha " << alpha << " beta " << beta << std::endl;*/
+
 
 	if(depth > 3) { //TODO: be careful here - we may have to reset the stack in quiescence search as well!
 		if(get_timestamp()-start_ts >= totalTime){ //TODO: how is this performance wise?
@@ -133,6 +163,11 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 		}
 	}
 
+	if(doHashProbe) {
+		trueRets++;
+	}
+
+#ifdef HASH
 	hashEntry hashVal      = getHashTableEntry(position->zobristHash);
 
 	uint32_t zobristHigher = (uint32_t) (position->zobristHash >> 32);
@@ -162,7 +197,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 			}
 		}
 	}
-
+#endif
 	//go to quiescence on depth 0
 	//---------------------------
 	if(depth <= 0) {
@@ -187,32 +222,41 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 	if((depth == 1) && (alpha > -2000)) {
 		if(!movingSideInCheck) {
 			searchCounts.futility_tried++;
-			int32_t base = evaluation(position, alpha-151, alpha);
-			if(base+150 < alpha){
-				searchCounts.futility_successful++;
-				//in this case, trying a silent move is pointless.
-				//std::cout << "Successful futility pruning" << std::endl;
-				return  negamaxQuiescence(position, alpha, beta, 0);
+			int32_t simpleEval = evaluation(position, alpha-151, alpha, true);
+			if(simpleEval < alpha+100) {
+				int32_t base = evaluation(position, alpha-151, alpha);
+				if(base+150 < alpha){
+					searchCounts.futility_successful++;
+					//in this case, trying a silent move is pointless.
+					//std::cout << "Successful futility pruning" << std::endl;
+					return  negamaxQuiescence(position, alpha, beta, 0);
+				}
 			}
 		}
 	}
 
-
 	uint16_t stackCounter = qmvStack.getCounter();
 	vdt_vector<chessMove> moves = qmvStack.getNext();
 	generateAllMoves(&moves, position);
-	bool isInCheck = orderStandardMoves(position, &moves, ply, hashVal.bestMove, refutationTarget);
 
+#ifdef HASH
+	uint16_t hashmove = hashVal.bestMove;
+#else
+	uint16_t hashmove = 0;
+#endif
+
+	bool isInCheck = orderStandardMoves(position, &moves, ply, hashmove, refutationTarget);
 	assert(isInCheck == movingSideInCheck);
+
 	bool legalMovesAvailable = false;
 	bool foundGoodMove = false;
 	searchCounts.wentToSearch++;
 
-	for(uint16_t ind=0; ind < moves.length; ind++){
+	for(volatile uint16_t ind=0; ind < moves.length; ind++){
 
 		if(ind == 1){
 			searchCounts.neededSort++;
-			std::sort(moves.data, moves.data+moves.length);
+			std::stable_sort(moves.data, moves.data+moves.length);
 		}
 
 		if(moves[ind].sortEval < -10000){
@@ -236,7 +280,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 			bool check = isFieldAttacked(position,  (playerColor) (1-position->toMove), ownkingField); //the last move gave check!
 			uint16_t reduction = 0;
 			uint16_t extension = 0;
-			if(!check && !isInCheck && (moves[ind].captureType == none) && (depth > 2) && (ply > 0)){
+			if(!check && !movingSideInCheck && (moves[ind].captureType == none) && (depth > 2) && (ply > 0)){
 				if((ind > 3)){
 					reduction = 1;
 //#ifdef EXPERIMENTAL
@@ -280,7 +324,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 				}
 			}
 
-			int32_t value = -negamax(position, ply+1, max_ply, depth-1+extension, -beta, -alpha, &mv);
+			volatile int32_t value = -negamax(position, ply+1, max_ply, depth-1+extension, -beta, -alpha, &mv);
 
 			if(value > alpha){
 				foundGoodMove = true;
@@ -292,7 +336,9 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 		undoMove(position);
 
 		if((alpha >= beta)) {
+#ifdef HASH
 			setHashEntry(FAILHIGH, beta, depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), position->zobristHash);
+#endif
 			if(bestIndex != -1){
 				searchCounts.bestIndex[depth][bestIndex]++;
 			}
@@ -334,21 +380,23 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 	}
 
 	if(!legalMovesAvailable){
-		if(isInCheck){
+		if(movingSideInCheck){
 			alpha = -30000+ply;
 		} else {
 			alpha = 0;
 		}
 	}
 
+#ifdef HASH
 
 	if(foundGoodMove) {
 		setHashEntry(FULLSEARCH, alpha, depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), position->zobristHash);
 	} else { //we failed low, remember as well
 		setHashEntry(FAILLOW, alpha, depth, searchId, 0, position->zobristHash);
 	}
-
+#endif
 	qmvStack.release();
 	assert(stackCounter == qmvStack.getCounter());
+
 	return alpha;
 }

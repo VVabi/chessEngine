@@ -20,6 +20,8 @@
 #include <lib/moveGeneration/moveGeneration.hpp>
 #include <algorithm>
 #include <lib/Evaluation/evaluation.hpp>
+#include <atomic>
+
 static char figureNames[2][6] = {{'P', 'N', 'B', 'R', 'Q', 'K'},
 		{'p', 'n', 'b', 'r', 'q', 'k'},
 };
@@ -702,8 +704,10 @@ bool checkAndMakeMove(chessPosition& position, std::string move){
 		moves.free_array();
 		return found;
 }
+extern std::atomic<bool> continueSearch;
 
 void runPerformanceTests(){
+	continueSearch = true;
 	for(int depth = 3; depth < 11; depth++){
 		std::ifstream file;
 		file.open("chesspositionsfixed.txt");
