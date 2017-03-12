@@ -641,7 +641,7 @@ bool checkAndMakeMove(chessPosition& position, std::string move){
 	vdt_vector<chessMove> moves = vdt_vector<chessMove>(100);
 		uint64_t mv = stringToMove(move);
 		generateAllMoves(&moves, &position);
-		orderStandardMoves(&position, &moves, 0, 0, NO_REFUTATION);
+		calculateStandardSortEvals(&position, &moves, 0, 0, NO_REFUTATION);
 		std::sort(moves.data, moves.data+moves.length);
 		bool found = false;
 		chessMove m;

@@ -11,23 +11,9 @@
 #include <string>
 #include <vector>
 #include "interfaceStructs.hpp"
+#include <lib/basics.hpp>
 
-
-class userInterface {
-	public:
-		virtual void initialize()=0;
-		virtual void sendNewPosition(std::string newPosition)=0;
-		virtual void sendSearchInfo(uint64_t nodes, uint32_t time, int32_t eval, uint32_t depth, std::string bestMove)=0;
-		virtual bool receiveMove(std::string& move)=0;
-		virtual bool receiveUndoMove()=0;
-		virtual bool receiveForceMove()=0;
-		virtual bool receiveNewPosition(std::string& position, std::vector<std::string>& moves)=0;
-		virtual~ userInterface(){};
-		virtual void readInput()=0;
-		virtual void sendBestMove(std::string position)=0;
-		virtual bool receiveAnalyze(std::string& position, searchParameters& params)=0;
-		virtual bool positionRequested()=0;
-};
-
+void memoryLibrarianAdd(std::string newPosition, std::vector<std::string> moves);
+chessPosition memoryLibrarianRetrievePosition();
 
 #endif /* USERINTERFACE_USERINTERFACE_HPP_ */

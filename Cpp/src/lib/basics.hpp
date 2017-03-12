@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <string>
 #include <DataTypes/vdt_vector.hpp>
-
+#include <assert.h>
 #define NUM_DIFFERENT_PIECES 6
 
 #define BIT64(x) (1ULL << x)
@@ -35,7 +35,7 @@ struct chessMove{
 	figureType captureType;
 	int16_t sortEval;
 	bool operator<(chessMove move) const{
-		return sortEval > move.sortEval;
+			return sortEval > move.sortEval;
 	}
 };
 

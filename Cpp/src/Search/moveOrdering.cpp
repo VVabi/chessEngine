@@ -17,13 +17,15 @@
 #include <lib/moveMaking/moveMaking.hpp>
 #include <parameters/parameters.hpp>
 #include <cmath>
-
-
+#include <userInterface/UIlayer.hpp>
+extern uint64_t bishopFieldTable[];
+extern uint64_t rookFieldTable[];
 extern int32_t historyTable[2][64][64];
 extern int16_t pieceTables[7][2][64];
 
 extern uint16_t killerMoves[20][2];
-
+extern uint64_t bishopMoveTables[64][512];
+extern uint64_t rookMoveTables[64][4096];
 #define WHITEKINGCASTLECHESSFIELDS ((1ULL << 4) | (1ULL << 5) | (1ULL << 6))
 #define WHITEQUEENCASTLECHESSFIELDS ((1ULL << 4) | (1ULL << 3) | (1ULL << 2))
 #define BLACKKINGCASTLECHESSFIELDS ((1ULL << 60) | (1ULL << 61) | (1ULL << 62))
@@ -68,14 +70,41 @@ void calcCaptureSortEval(chessPosition* position, chessMove* mv, uint16_t hashed
 
 #define ILLEGAL -20000
 
-static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackTable* opponentAttackTable, AttackTable* ownAttackTable, uint16_t hashedMove, uint16_t killerA, uint16_t killerB, uint16_t refutationTarget) {
+static inline void calcSortEval( chessPosition* position, chessMove* mv, bool isInCheck, AttackTable* opponentAttackTable, AttackTable* ownAttackTable, uint16_t hashedMove, uint16_t killerA, uint16_t killerB, uint16_t refutationTarget) {
 	//TODO: add bonus for pawn pushes to 6th/7th row!
+	/*if(isInCheck) {   //for some reason I don't fully understand, adding this here slows and changes the search?? Maybe because these moves then are not history-reduced? At least possible.
+		uint16_t kingField = findLSB(position->pieceTables[position->toMove][king]);
+
+		uint64_t bishopmoves =  bishopMoveTables[kingField][0];
+		uint64_t rookmoves   =  rookMoveTables[kingField][0];
+		const uint64_t kingSliderAttackFields = bishopmoves | rookmoves;
+
+		bool mayBlockCheck = BIT64(mv->targetField) & kingSliderAttackFields;
+
+		if(!mayBlockCheck && !(mv->captureType == knight) && !(mv->type == kingMove) && !(mv->type == enpassant)) {
+			mv->sortEval = ILLEGAL;
+			makeMove(mv, position);
+			kingField = findLSB(position->pieceTables[1-position->toMove][king]);
+			if(!isFieldAttacked(position, position->toMove, kingField)) {
+				std::cout << chessPositionToFenString(*position) << std::endl;
+				std::cout << chessPositionToOutputString(*position) << std::endl;
+				undoMove(position);
+				std::cout << chessPositionToFenString(*position) << std::endl;
+				std::cout << "WTF??" << std::endl;
+			}
+			undoMove(position);
+			return;
+		}
+	}*/
+	isInCheck = !isInCheck;
 	const evalParameters* evalPars 						= getEvalParameters(); //TODO: move outside
 	int16_t sortEval = 0;
 
 	if( ((uint16_t) mv->type) < 6) {
 		sortEval = sortEval+captureEvals[mv->type][mv->captureType];
 	}
+
+
 
 	/*if(mv->captureType != none){
 		makeMove(mv, position);
@@ -260,7 +289,7 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, AttackT
 	mv->sortEval = sortEval;
 }
 
-bool orderStandardMoves(chessPosition* position, vdt_vector<chessMove>* moves, uint16_t ply, uint16_t hashedMove, uint16_t refutationTarget) {
+bool calculateStandardSortEvals(chessPosition* position, vdt_vector<chessMove>* moves, uint16_t ply, uint16_t hashedMove, uint16_t refutationTarget) {
 
 	AttackTable opponentAttackTable = makeAttackTable(position, (playerColor) (1-position->toMove), position->pieceTables[position->toMove][king]);
 	AttackTable ownAttackTable 		= makeAttackTable(position, position->toMove);
@@ -270,7 +299,7 @@ bool orderStandardMoves(chessPosition* position, vdt_vector<chessMove>* moves, u
 	uint16_t killerMoveA = killerMoves[ply][0];
 	uint16_t killerMoveB = killerMoves[ply][1];
 	for (uint16_t ind=0; ind < moves->length; ind++) {
-		calcSortEval(position, &(*moves)[ind], &opponentAttackTable, &ownAttackTable, hashedMove, killerMoveA, killerMoveB, refutationTarget);
+		calcSortEval(position, &(*moves)[ind], isInCheck, &opponentAttackTable, &ownAttackTable, hashedMove, killerMoveA, killerMoveB, refutationTarget);
 		if((*moves)[ind].sortEval > bestEval){
 			bestEval = (*moves)[ind].sortEval;
 			bestIndex = ind;

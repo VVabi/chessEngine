@@ -26,8 +26,13 @@
 #include <map>
 #include <atomic>
 #include <thread>
-#include "mingw.thread.h"
 #include <tests/tests.hpp>
+#include <mutex>
+
+//necessary to get windows compile to run
+//----------------------------------------
+#include "mingw.thread.h"
+#include "mingw.mutex.h"
 
 extern uint8_t searchId;
 extern uint16_t killerMoves[20][2];
@@ -50,13 +55,17 @@ T StringToNumber ( const std::string &Text )//Text not by const reference so tha
 	return ss >> result ? result : 0;
 }
 
+std::mutex m;
 
-
+void putLine(std::string output) {
+	m.lock();
+	std::cout << output << std::endl;
+	m.unlock();
+}
 
 
 searchParameters paramsToUse;
 std::atomic<bool> continueSearch;
-chessPosition cposition;
 
 uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t numMadeMoves, uint32_t* worst_case_time) {
 
@@ -70,11 +79,7 @@ uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t n
 		return UINT32_MAX;
 	}
 
-	/*if(depth < 7){
-		return true;
-	} else {
-		return false;
-	}*/
+	//TODO: implement the movesToGo parameter handling - currently we play stuff like "40 moves in 40 min" extremely badly
 	if(params.totalTime[toMove] > 0) {
 		uint32_t total = params.totalTime[toMove];
 		uint32_t increment = params.increment[toMove];
@@ -89,8 +94,6 @@ uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t n
 		}
 
 		uint32_t completeExpectedTime = total+remainingMoves*increment;
-		std::cout << remainingMoves << std::endl;
-		std::cout << completeExpectedTime << std::endl;
 		float timeAllotted = completeExpectedTime/(2.0*remainingMoves);
 
 		if(timeAllotted > total/10.0){
@@ -106,7 +109,9 @@ uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t n
 void sendSearchInfo(uint64_t nodes, uint32_t time, int32_t eval, uint32_t depth, std::string bestMove){
 	double nps = ((double) nodes)/((double) time)*1000.0;
 	uint64_t npsInt = nps;
-	std::cout << "info depth " << depth << " score cp " << eval << " nps " << npsInt << " nodes " << nodes << " pv " << bestMove << std::endl;
+	std::stringstream out;
+	out << "info depth " << depth << " score cp " << eval << " nps " << npsInt << " nodes " << nodes << " pv " << bestMove;
+	putLine(out.str());
 }
 
 
@@ -157,7 +162,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 			*eval = negamax(position, 0, depth+3, depth, alpha, beta, &localBestMove, true, false);
 			if(doAspiration) {
 				if ((*eval <= alpha) || (*eval >= beta)) {
-					std::cout << "Aspiration window search failed, researching..." <<std::endl;
+
 					*eval = negamax(position, 0, depth+3, depth, -32000, 32000, &localBestMove, true, false);
 				}
 
@@ -167,7 +172,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 
 			*bestMove = localBestMove;
 		} catch(timeoutException& e) {
-			std::cout << "Search timed out" << std::endl;
+			//std::cout << "Search timed out" << std::endl;
 			break;
 		}
 
@@ -208,16 +213,17 @@ void setSearchParams(searchParameters params) {
 }
 
 std::thread engineThread;
+std::atomic<bool> isSearching(false);
 
-void search(chessPosition p, searchParameters params){
-	std::cout << "Thread started" <<std::endl;
+void search(chessPosition cposition, searchParameters params){
 	chessMove bestMove;
 	uint32_t nodeCount = 0;
 	uint64_t mtime = 0;
 	int32_t eval = 0;
-	searchMove(&p, &bestMove,&nodeCount, &mtime, &eval, false, params);
-	std::cout << "bestmove " << moveToString(bestMove, p) << std::endl;
-	std::cout << "Leaving thread" <<std::endl;
+	searchMove(&cposition, &bestMove,&nodeCount, &mtime, &eval, false, params);
+	putLine("bestmove " + moveToString(bestMove, cposition));
+	free_position(&cposition);
+	isSearching = false;
 }
 
 void launchSearch() {
@@ -225,8 +231,9 @@ void launchSearch() {
 	if(engineThread.joinable()) {
 		engineThread.join();
 	}
+	isSearching = true;
+	chessPosition cposition = memoryLibrarianRetrievePosition();
 	engineThread = std::thread(search, cposition, paramsToUse);
-	std::cout << "Launched thread" <<std::endl;
 }
 
 
@@ -236,7 +243,7 @@ void handleStop() {
 	if(engineThread.joinable()) {
 		engineThread.join();
 	}
-	std::cout << "Joined engine thread" << std::endl;
+	assert(!isSearching);
 }
 
 void handleGo(std::list<std::string> input) {
@@ -257,7 +264,7 @@ void handleGo(std::list<std::string> input) {
 		if("wtime" == current) {
 			iterator++;
 			if(iterator == input.end()) {
-				std::cout << "Missing parameter for " << current << std::endl;
+				putLine( "Missing parameter for " + current);
 				params.type = unknown;
 				break;
 			}
@@ -268,7 +275,7 @@ void handleGo(std::list<std::string> input) {
 		if("btime" == current) {
 			iterator++;
 			if(iterator == input.end()) {
-				std::cout << "Missing parameter for " << current << std::endl;
+				putLine( "Missing parameter for " + current);
 				params.type = unknown;
 				break;
 			}
@@ -279,7 +286,7 @@ void handleGo(std::list<std::string> input) {
 		if("winc" == current) {
 			iterator++;
 			if(iterator == input.end()) {
-				std::cout << "Missing parameter for " << current << std::endl;
+				putLine( "Missing parameter for " + current);
 				params.type = unknown;
 				break;
 			}
@@ -290,7 +297,7 @@ void handleGo(std::list<std::string> input) {
 		if("binc" == current) {
 			iterator++;
 			if(iterator == input.end()) {
-				std::cout << "Missing parameter for " << current << std::endl;
+				putLine( "Missing parameter for " + current);
 				params.type = unknown;
 				break;
 			}
@@ -306,7 +313,7 @@ void handleGo(std::list<std::string> input) {
 		if("movetime" == current) {
 			iterator++;
 			if(iterator == input.end()) {
-				std::cout << "Missing parameter for " << current << std::endl;
+				putLine( "Missing parameter for " + current);
 				params.type = unknown;
 				break;
 			}
@@ -318,7 +325,7 @@ void handleGo(std::list<std::string> input) {
 		if("depth" == current) {
 			iterator++;
 			if(iterator == input.end()) {
-				std::cout << "Missing parameter for " << current << std::endl;
+				putLine( "Missing parameter for " + current);
 				params.type = unknown;
 				break;
 			}
@@ -331,7 +338,7 @@ void handleGo(std::list<std::string> input) {
 		if("movestogo" == current) {
 			iterator++;
 			if(iterator == input.end()) {
-				std::cout << "Missing parameter for " << current << std::endl;
+				putLine( "Missing parameter for " + current);
 				params.type = unknown;
 				break;
 			}
@@ -343,7 +350,7 @@ void handleGo(std::list<std::string> input) {
 	}
 
 
-	std::cout << params.type << std::endl;
+	/*std::cout << params.type << std::endl;
 
 	if(params.type == time_until_move) {
 		std::cout << "White time "      << params.totalTime[0] << std::endl;
@@ -351,12 +358,10 @@ void handleGo(std::list<std::string> input) {
 		std::cout << "White increment " << params.increment[0] << std::endl;
 		std::cout << "Black increment " << params.increment[1] << std::endl;
 		std::cout << "Moves to go "     << params.movesToGo    << std::endl;
-	}
+	}*/
 
 	if(params.type != unknown) {
 		setSearchParams(params);
-
-
 		launchSearch();
 	}
 
@@ -368,9 +373,12 @@ void handlePerft(std::list<std::string> input){
 
 		if(iterator != input.end()) {
 			uint16_t depth = StringToNumber<int32_t>(*iterator);
-			uint32_t perftret = perftNodes(&cposition, depth);
-			std::cout << "Perft result " << perftret << std::endl;
-
+			chessPosition p = memoryLibrarianRetrievePosition();
+			uint32_t perftret = perftNodes(&p, depth);
+			free_position(&p);
+			std::stringstream ret;
+			ret << "perftresult " << perftret;
+			putLine(ret.str());
 		}
 }
 
@@ -380,7 +388,7 @@ void handlePosition(std::list<std::string> input) {
 	std::string fen = "";
 
 	if(input.empty()) {
-		std::cout << "Invalid position request" << std::endl;
+		//std::cout << "Invalid position request" << std::endl;
 		return;
 	}
 	auto iterator = input.begin();
@@ -389,7 +397,7 @@ void handlePosition(std::list<std::string> input) {
 		iterator++;
 	} else {
 		if(*iterator != "fen") {
-			std::cout << "Invalid position request" << std::endl;
+			putLine("Invalid position request");
 			return;
 		}
 		iterator++;
@@ -403,9 +411,6 @@ void handlePosition(std::list<std::string> input) {
 		}
 
 	}
-
-
-
 	std::vector<std::string> moveList;
 	while(iterator != input.end()) {
 		if("moves" !=*iterator) {
@@ -414,36 +419,26 @@ void handlePosition(std::list<std::string> input) {
 		iterator++;
 	}
 
-	std::cout << fen << std::endl;
-
-	for(auto iterator = moveList.begin(); iterator != moveList.end(); iterator++) {
-		std::cout << *iterator << std::endl;
-	}
-
-	free_position(&cposition);
-	cposition = FENtoChessPosition(fen);
-	for(std::string seg: moveList){
-		//std::cout << seg << std::endl;
-		if(!checkAndMakeMove(cposition, seg)){
-			std::cout << "Illegal move detected" << std::endl;
-		}
-	}
-
+	memoryLibrarianAdd(fen, moveList);
 }
 
 void handleEval() {
+
+	chessPosition cposition = memoryLibrarianRetrievePosition();
 	int32_t eval = evaluation(&cposition, -32000, 32000);
 	evaluationResult res = getEvaluationResult();
-	std::cout << "Total " << eval;
-	std::cout << " Material " << cposition.figureEval;
-	std::cout << " PSQ " << res.PSQ-cposition.figureEval;
-	std::cout << " King safety " <<  res.kingSafety;
-	std::cout << " Mobility " << res.mobility;
-	std::cout << " Pawns " << res.staticPawn;
-	std::cout << " Passed pawns " << res.passedPawn;
-	std::cout << " rook open files " << res.rookOpenFiles;
-	std::cout << " bishoppair " << res.bishoppair;
-	std::cout << std::endl;
+	std::stringstream evalInfo;
+	evalInfo << "Total " << eval;
+	evalInfo << " Material " << cposition.figureEval;
+	evalInfo << " PSQ " << res.PSQ-cposition.figureEval;
+	evalInfo << " King safety " <<  res.kingSafety;
+	evalInfo << " Mobility " << res.mobility;
+	evalInfo << " Pawns " << res.staticPawn;
+	evalInfo << " Passed pawns " << res.passedPawn;
+	evalInfo << " rook open files " << res.rookOpenFiles;
+	evalInfo << " bishoppair " << res.bishoppair;
+	putLine(evalInfo.str());
+	free_position(&cposition);
 }
 
 void UIloop() {
@@ -452,34 +447,59 @@ void UIloop() {
 	while(continueLoop) {
 		userEvent ev = getNextUserEvent();
 
-		switch(ev.input) {
-			case uci:
-				handleUciInput(std::cout);
-				break;
-			case isready:
-				handleIsReady(std::cout);
-				break;
-			case go:
-				handleGo(ev.data);
-				break;
-			case position:
-				handlePosition(ev.data);
-				break;
-			case stop:
-				handleStop();
-				break;
-			case quit:
-				handleStop();
-				continueLoop = false;
-				break;
-			case perft:
-				handlePerft(ev.data);
-				break;
-			case eval:
-				handleEval();
-				break;
-			default:
-				std::cout << "Not yet implemented" << std::endl;
+		//restricted interface during search
+		//------------------------------------
+		if(isSearching) {
+			switch(ev.input) {
+				case isready:
+					handleIsReady(std::cout);
+					break;
+				case stop:
+					handleStop();
+					break;
+				case quit:
+					handleStop();
+					continueLoop = false;
+					break;
+				default:
+					putLine("Invalid request during search");
+			}
+
+		} else {
+			//full interface otherwise
+			//---------------------------
+			switch(ev.input) {
+				case uci:
+					handleUciInput(std::cout);
+					break;
+				case isready:
+					handleIsReady(std::cout);
+					break;
+				case go:
+					handleGo(ev.data);
+					break;
+				case position:
+					handlePosition(ev.data);
+					break;
+				case stop:
+					handleStop();
+					break;
+				case quit:
+					handleStop();
+					continueLoop = false;
+					break;
+				case perft:
+					handlePerft(ev.data);
+					break;
+				case eval:
+					handleEval();
+					break;
+				case invalid:
+					putLine("Invalid request");
+					break;
+				default:
+					putLine("Not yet implemented");
+			}
 		}
 	}
 

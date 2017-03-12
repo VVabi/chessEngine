@@ -213,7 +213,6 @@ void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 		#ifdef DEBUG
 		if(captureType == none){
 			std::cout << "Pawn capture move generation is buggy" << std::endl;
-
 		}
 		#endif
 		chessMove move;

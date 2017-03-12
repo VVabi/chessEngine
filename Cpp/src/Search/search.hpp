@@ -14,7 +14,7 @@ void rescaleHistoryTable();
 int16_t negamax(chessPosition* position,  uint16_t ply, uint16_t max_ply, int16_t depth, int16_t alpha, int16_t beta, chessMove* bestMove, bool allowNullMove = true,  bool allowHashProbe = true);
 int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, uint16_t depth);
 void resetNodes();
-bool orderStandardMoves(chessPosition* position, vdt_vector<chessMove>* moves, uint16_t ply, uint16_t hashedMove, uint16_t refutationTarget);
+bool calculateStandardSortEvals(chessPosition* position, vdt_vector<chessMove>* moves, uint16_t ply, uint16_t hashedMove, uint16_t refutationTarget);
 void orderCaptureMoves(chessPosition* position, vdt_vector<chessMove>* moves);
 uint32_t getNodes();
 

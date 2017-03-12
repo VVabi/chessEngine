@@ -1,6 +1,7 @@
 package uciClient;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,7 +38,7 @@ public class uciEngineHandler {
 
             String answer = reader.readLine();
 
-            if("uciok".equals(answer)){
+            if("readyok".equals(answer)){
                 break;
             }
         }
@@ -45,18 +46,22 @@ public class uciEngineHandler {
 
     }
 
-    public String getCurrentPosition() throws IOException { //This is a dirty hack
-        put("getPosition");
-        while(true){
+
+    public List<String> debugSearchOutput(int depth) throws IOException {
+        put("go depth "+depth);
+        List<String> ret = new ArrayList<>();
+        while(true) {
             String answer = reader.readLine();
-           // System.out.println(answer);
-            String[] splitted = answer.split(" ");
-            if("currentPosition".equals(splitted[0])){
-                return splitted[1];
+            ret.add(answer);
+            System.out.println(answer);
+
+            if((answer.length() >= 8) && ("bestmove".equals(answer.substring(0, 8)))){
+                break;
             }
         }
-
+        return ret;
     }
+
 
 
     public void setPosition(String fenPosition, List<String> moveList) throws IOException{
@@ -77,7 +82,7 @@ public class uciEngineHandler {
 
 
     public void startSearch() throws IOException{
-        put("go depth 5");
+        put("go depth 7");
     }
 
     public int readBestmove(String[] in) throws IOException {
@@ -107,6 +112,9 @@ public class uciEngineHandler {
         }
         return eval;
     }
+
+
+
 
     public void close(){
         process.destroy();

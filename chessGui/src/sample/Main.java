@@ -1,5 +1,6 @@
 package sample;
 
+import Tests.TestDebugVsRelease;
 import core.Core;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -15,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,7 +58,31 @@ public class Main extends Application {
             System.out.println(st);
         }*/
 
-       UciProcessing processesList[] = new UciProcessing[3];
+
+        String s = "110000010010001000010100000000000";
+        s = new StringBuilder(s).reverse().toString();
+
+        for(int ind=0; ind < s.length(); ind++) {
+            if(s.charAt(ind) == '1') {
+                System.out.println(ind);
+            }
+        }
+       /* if(TestDebugVsRelease.testDebugvsRelease("/home/vabi/code/chessEngine/Cpp/Debug/Vabi", "/home/vabi/code/chessEngine/Cpp/Release/Vabi")) {
+            System.out.println("Test passed");
+        } else {
+            System.out.println("Test failed");
+        }*/
+
+
+
+        /*uciEngineHandler handler = new uciEngineHandler("/home/vabi/code/chessEngine/Cpp/Release/Vabi",  "params1");
+        List<String> debugSearchOutput = handler.debugSearchOutput(12);
+
+        for(String s: debugSearchOutput){
+            System.out.println(s);
+        }*/
+
+      /* UciProcessing processesList[] = new UciProcessing[3];
 
         for(int ind=0; ind < 3; ind++) {
             processesList[ind] = new UciProcessing("/home/vabi/code/chessEngine/Cpp/uciDefenderRelease/Vabi", "params1", "/home/vabi/code/chessEngine/Cpp/uciChallengeRelease/Vabi", "params2", 10000);
@@ -107,7 +133,7 @@ public class Main extends Application {
 
 
             Thread.sleep(10000);
-        }
+        }*/
 
 
 
