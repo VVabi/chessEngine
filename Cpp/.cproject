@@ -89,7 +89,7 @@
 								</option>
 								<option id="gnu.cpp.compiler.option.dialect.std.1794188881" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.c++1y" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.debugging.gprof.292291608" name="Generate gprof information (-pg)" superClass="gnu.cpp.compiler.option.debugging.gprof" useByScannerDiscovery="false" value="false" valueType="boolean"/>
-								<option id="gnu.cpp.compiler.option.warnings.toerrors.1369119801" name="Warnings as errors (-Werror)" superClass="gnu.cpp.compiler.option.warnings.toerrors" useByScannerDiscovery="false" value="true" valueType="boolean"/>
+								<option id="gnu.cpp.compiler.option.warnings.toerrors.1369119801" name="Warnings as errors (-Werror)" superClass="gnu.cpp.compiler.option.warnings.toerrors" useByScannerDiscovery="false" value="false" valueType="boolean"/>
 								<option id="gnu.cpp.compiler.option.other.other.1052557102" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.optimization.flags.1382838263" name="Other optimization flags" superClass="gnu.cpp.compiler.option.optimization.flags" useByScannerDiscovery="false" value="-funroll-loops" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.warnings.extrawarn.1780748801" name="Extra warnings (-Wextra)" superClass="gnu.cpp.compiler.option.warnings.extrawarn" useByScannerDiscovery="false" value="true" valueType="boolean"/>
@@ -101,15 +101,17 @@
 							<tool command="gcc" id="cdt.managedbuild.tool.gnu.c.compiler.exe.release.1303530301" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.release">
 								<option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.exe.release.option.optimization.level.76018763" name="Optimization Level" superClass="gnu.c.compiler.exe.release.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
 								<option id="gnu.c.compiler.exe.release.option.debugging.level.1157675710" name="Debug Level" superClass="gnu.c.compiler.exe.release.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.debugging.gprof.509557369" name="Generate gprof information (-pg)" superClass="gnu.c.compiler.option.debugging.gprof" useByScannerDiscovery="false" value="false" valueType="boolean"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.87800735" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.release.1570629757" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.release"/>
 							<tool command="g++" id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.1807986095" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release">
-								<option id="gnu.cpp.link.option.debugging.gprof.991351659" name="Generate gprof information (-pg)" superClass="gnu.cpp.link.option.debugging.gprof" useByScannerDiscovery="false" value="false" valueType="boolean"/>
+								<option id="gnu.cpp.link.option.debugging.gprof.991351659" name="Generate gprof information (-pg)" superClass="gnu.cpp.link.option.debugging.gprof" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 								<option id="gnu.cpp.link.option.flags.1898320997" name="Linker flags" superClass="gnu.cpp.link.option.flags" useByScannerDiscovery="false" value="" valueType="string"/>
 								<option id="gnu.cpp.link.option.libs.1443749932" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" useByScannerDiscovery="false" valueType="libs">
 									<listOptionValue builtIn="false" value="pthread"/>
 								</option>
+								<option id="gnu.cpp.link.option.other.147689278" name="Other options (-Xlinker [option])" superClass="gnu.cpp.link.option.other" useByScannerDiscovery="false"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1054062417" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>

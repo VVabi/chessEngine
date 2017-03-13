@@ -72,7 +72,8 @@ void calcCaptureSortEval(chessPosition* position, chessMove* mv, uint16_t hashed
 
 #define ILLEGAL -20000
 
-static inline void calcSortEval( chessPosition* position, chessMove* mv, bool isInCheck, AttackTable* opponentAttackTable, AttackTable* ownAttackTable, uint16_t hashedMove, uint16_t killerA, uint16_t killerB, uint16_t refutationTarget) {
+static inline void calcSortEval( chessPosition* position, chessMove* mv, bool isInCheck, AttackTable* opponentAttackTable, AttackTable* ownAttackTable, uint16_t hashedMove, uint16_t killerA, uint16_t killerB, uint16_t refutationTarget, const evalParameters* evalPars) {
+	//this function is completely ridiculously expensive. Whats going on??
 	//TODO: add bonus for pawn pushes to 6th/7th row!
 	/*if(isInCheck) {   //for some reason I don't fully understand, adding this here slows and changes the search?? Maybe because these moves then are not history-reduced? At least possible.
 		uint16_t kingField = findLSB(position->pieceTables[position->toMove][king]);
@@ -100,7 +101,7 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
 	}*/
 	isInCheck = !isInCheck;
 
-	const evalParameters* evalPars 						= getEvalParameters(); //TODO: move outside
+
 	int16_t sortEval = 0;
 
 
@@ -258,8 +259,10 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
 	if(mv->captureType == none){
 		int32_t hist = historyTable[position->toMove][mv->sourceField][mv->targetField];
 
-		int32_t historyValue = std::round(std::sqrt(std::abs(hist)));
-		historyValue = (hist > 0 ? historyValue: -historyValue);
+
+
+		int32_t historyValue = hist/100; //std::sqrt(std::abs(hist)); //TODO: this is absolutely NOT a good idea performance-wise
+		//historyValue = (hist > 0 ? historyValue: -historyValue);
 
 
 		if(historyValue > 128) {
@@ -279,10 +282,6 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
 		sortEval = sortEval+100;
 	}
 
-	if(sortEval > 20000) {
-		std::cout << "????" <<std::endl;
-	}
-
 	if( ((mv->sourceField) | (mv->targetField << 8)) == hashedMove) {
 			sortEval = sortEval+10000;
 	}
@@ -291,7 +290,6 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
 }
 
 bool calculateStandardSortEvals(chessPosition* position, vdt_vector<chessMove>* moves, uint16_t ply, uint16_t hashedMove, uint16_t refutationTarget) {
-
 	AttackTable opponentAttackTable = makeAttackTable(position, (playerColor) (1-position->toMove), position->pieceTables[position->toMove][king]);
 	AttackTable ownAttackTable 		= makeAttackTable(position, position->toMove);
 	bool isInCheck      = ((opponentAttackTable.completeAttackTable & position->pieceTables[position->toMove][king]) != 0);
@@ -299,8 +297,9 @@ bool calculateStandardSortEvals(chessPosition* position, vdt_vector<chessMove>* 
 	uint16_t bestIndex = 0;
 	uint16_t killerMoveA = killerMoves[ply][0];
 	uint16_t killerMoveB = killerMoves[ply][1];
+	const evalParameters* evalPars 						= getEvalParameters(); //TODO: move outside
 	for (uint16_t ind=0; ind < moves->length; ind++) {
-		calcSortEval(position, &(*moves)[ind], isInCheck, &opponentAttackTable, &ownAttackTable, hashedMove, killerMoveA, killerMoveB, refutationTarget);
+		calcSortEval(position, &(*moves)[ind], isInCheck, &opponentAttackTable, &ownAttackTable, hashedMove, killerMoveA, killerMoveB, refutationTarget, evalPars);
 		if((*moves)[ind].sortEval > bestEval){
 			bestEval = (*moves)[ind].sortEval;
 			bestIndex = ind;
@@ -310,8 +309,6 @@ bool calculateStandardSortEvals(chessPosition* position, vdt_vector<chessMove>* 
 	chessMove buffer = (*moves)[0];
 	(*moves)[0] = (*moves)[bestIndex];
 	(*moves)[bestIndex] = buffer;
-
-
 	//std::sort(moves->data, moves->data+moves->length);
 	return isInCheck;
 
@@ -322,12 +319,7 @@ void orderCaptureMoves(chessPosition* position, vdt_vector<chessMove>* moves) {
 	if(moves->length == 0){
 		return;
 	}
-
-#ifdef HASH
 	uint16_t hashedMove = getHashMove(position->zobristHash);
-#else
-	uint16_t hashedMove = 0;
-#endif
 	int16_t bestEval = INT16_MIN;
 	uint16_t bestIndex = 0;
 

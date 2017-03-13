@@ -145,8 +145,6 @@ int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOcc
 	int32_t eval = 0;
 	*pawnColumnOccupancy = 0;
 	uint8_t doublePawns         = 0; //TODO: extend to triple pawns
-
-
 	for (uint16_t ind=0; ind <8; ind++) {
 		uint64_t occ = pawns & files[ind];
 		if(occ) {
@@ -198,6 +196,13 @@ int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupan
 		staticpawnhashhits++;
 		pawnColumnOccupancy[0] = entry.pawnColumnOcc[0];
 		pawnColumnOccupancy[1] = entry.pawnColumnOcc[1];
+
+#ifdef DEBUG
+		int16_t staticPawnReal = staticPawnEval(whitePawns, white, pawnColumnOccupancy,&evalPars->staticPawnParameters)+staticPawnEval(blackPawns, black,  pawnColumnOccupancy+1,&evalPars->staticPawnParameters);
+		assert(staticPawnReal == staticPawn);
+		assert(pawnColumnOccupancy[0] == entry.pawnColumnOcc[0]);
+		assert(pawnColumnOccupancy[1] == entry.pawnColumnOcc[1]);
+#endif
 	} else {
 		staticpawncalls++;
 		staticPawn = staticPawnEval(whitePawns, white, pawnColumnOccupancy,&evalPars->staticPawnParameters)+staticPawnEval(blackPawns, black,  pawnColumnOccupancy+1,&evalPars->staticPawnParameters);

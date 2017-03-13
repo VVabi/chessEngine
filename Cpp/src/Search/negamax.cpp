@@ -246,6 +246,8 @@ static inline void checkTimeout() {
 
 //std::ofstream plogger("/home/vabi/Tools/log.txt");
 
+uint64_t gotHashMove = 0;
+uint64_t noHashMove   = 0;
 int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t depth, int16_t alpha, int16_t beta, chessMove* bestMove, bool allowNullMove, bool doHashProbe){
 
 	/*std::string pos =chessPositionToFenString(*position);
@@ -289,7 +291,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 		return hashEval;
 	}
 
-	//go to quiescence on depth 0
+	//go to quiescence on depth 0. TODO: move before hashing? otherwise we request hash entry twice
 	//---------------------------
 	if(depth <= 0) {
 		searchCounts.wentToQuiescence++;
@@ -325,6 +327,12 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 	vdt_vector<chessMove> moves = qmvStack.getNext();
 	generateAllMoves(&moves, position);
 
+	if(hashmove == 0) {
+		noHashMove++;
+	} else {
+		gotHashMove++;
+	}
+
 	//calc sorteval
 	//------------------------
 	bool isInCheck = calculateStandardSortEvals(position, &moves, ply, hashmove, refutationTarget); //does no complete sort, but puts best move at the front
@@ -342,8 +350,6 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 
 
 	for(uint16_t ind=0; ind < moves.length; ind++){
-
-
 		if(ind == 1){
 			//first move didn't produce cutoff, now we need to sort
 			//------------------------------------------------------

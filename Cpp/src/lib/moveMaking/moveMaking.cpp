@@ -21,6 +21,8 @@ extern uint64_t castlingHash[16];
 extern uint64_t enpassantHash[9];
 extern uint16_t repetitionData[16384];
 
+int16_t figureValues[7] = {100,320,330,500,975,10000,0};
+
 void makeNullMove(chessPosition* position){
 	position->data.hash = position->zobristHash;
 	position->dataStack.add(&position->data);
@@ -39,7 +41,7 @@ void makeNullMove(chessPosition* position){
 	position->madeMoves.add(&move);
 }
 
-inline static void makeNormalMove(chessMove* move, chessPosition* position) {
+void makeNormalMove(chessMove* move, chessPosition* position) {
 	playerColor toMove 									= position->toMove;
 	position->pieces[toMove] 							= position->pieces[toMove]^move->move;
 	position->pieces[1-toMove] 							= position->pieces[1-toMove] & (~move->move);
@@ -55,7 +57,7 @@ inline static void makeNormalMove(chessMove* move, chessPosition* position) {
 
 
 //TODO: get rid of the ifs
-inline static void makeKingSideCastle(chessPosition* position) {
+void makeKingSideCastle(chessPosition* position) {
 	playerColor toMove = position->toMove;
 
 	if(toMove == white){
@@ -75,7 +77,7 @@ inline static void makeKingSideCastle(chessPosition* position) {
 }
 
 
-inline static void makeQueenSideCastle(chessPosition* position) {
+void makeQueenSideCastle(chessPosition* position) {
 	playerColor toMove = position->toMove;
 	if(toMove == white){
 		position->pieces[toMove] 		     = position->pieces[toMove]^(WHITEQUEENSIDECASTLEOCCUPANCYCHANGE);
@@ -93,7 +95,7 @@ inline static void makeQueenSideCastle(chessPosition* position) {
 
 }
 
-inline static void makeEnPassant(chessMove* move, chessPosition* position) {
+void makeEnPassant(chessMove* move, chessPosition* position) {
 	playerColor toMove 									= position->toMove;
 	position->pieces[toMove] 							= position->pieces[toMove]^move->move;
 	position->pieceTables[toMove][pawn] 			    = position->pieceTables[toMove][pawn]^move->move;
@@ -109,7 +111,7 @@ inline static void makeEnPassant(chessMove* move, chessPosition* position) {
 }
 
 
-inline static void makePromotion(chessMove* move, chessPosition* position, figureType promotedFigure) {
+void makePromotion(chessMove* move, chessPosition* position, figureType promotedFigure) {
 	playerColor toMove 									= position->toMove;
 	position->pieces[toMove] 							= position->pieces[toMove]^move->move;
 	position->pieces[1-toMove] 							= position->pieces[1-toMove] & (~move->move);
@@ -121,9 +123,9 @@ inline static void makePromotion(chessMove* move, chessPosition* position, figur
 	position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*completePieceTables[move->captureType][1-toMove][move->targetField];
 	position->zobristHash = position->zobristHash^zobristHash[promotedFigure][toMove][move->targetField]^zobristHash[pawn][toMove][move->sourceField]^zobristHash[move->captureType][1-toMove][move->targetField];
 	position->pawnHash = position->pawnHash^pawnHashValues[pawn][toMove][move->sourceField]^pawnHashValues[move->captureType][1-toMove][move->targetField];
-	const evalParameters* evalPars = getEvalParameters();
-	position->figureEval     = position->figureEval+(1-2*toMove)*(evalPars->figureValues[promotedFigure]-evalPars->figureValues[pawn]);
-	position->totalFigureEval     = position->totalFigureEval+(evalPars->figureValues[promotedFigure]-evalPars->figureValues[pawn]);
+	//const evalParameters* evalPars = getEvalParameters();
+	position->figureEval     = position->figureEval+(1-2*toMove)*(figureValues[promotedFigure]-figureValues[pawn]);
+	position->totalFigureEval     = position->totalFigureEval+(figureValues[promotedFigure]-figureValues[pawn]);
 }
 
 void makeMove(chessMove* move, chessPosition* position) {
@@ -149,9 +151,9 @@ void makeMove(chessMove* move, chessPosition* position) {
 	castlingRights = (move->move & BLACKQUEENSIDECASTLEMASK ? (castlingRights &  7):castlingRights);
 	position->data.castlingRights = castlingRights;
 	position->zobristHash = position->zobristHash^castlingHash[position->data.castlingRights];
-	const evalParameters* evalPars = getEvalParameters();
-	position->figureEval     = position->figureEval+(1-2*position->toMove)*evalPars->figureValues[move->captureType];
-	position->totalFigureEval     = position->totalFigureEval-evalPars->figureValues[move->captureType];
+	//const evalParameters* evalPars = getEvalParameters();
+	position->figureEval     = position->figureEval+(1-2*position->toMove)*figureValues[move->captureType];
+	position->totalFigureEval     = position->totalFigureEval-figureValues[move->captureType];
 	position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
 	position->data.enPassantFile  = 8;
 	switch(move->type){

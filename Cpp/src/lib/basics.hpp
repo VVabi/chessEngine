@@ -80,9 +80,9 @@ struct hashEntry{
 	uint16_t index;
 } __attribute__((packed));
 
-struct hashBucket{
+struct hashBucket {
 	hashEntry hashData[4];
-};
+}; //__attribute__((aligned(64)));
 
 
 struct pawnHashEntry{
