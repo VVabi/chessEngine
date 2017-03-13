@@ -28,7 +28,8 @@
 #include <thread>
 #include <tests/tests.hpp>
 #include <mutex>
-
+#include <algorithm>
+#include <hashTables/hashTables.hpp>
 //necessary to get windows compile to run
 //----------------------------------------
 #include "mingw.thread.h"
@@ -155,6 +156,15 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 	uint32_t totalTime = calcSearchTime(params, position->toMove, position->madeMoves.length, &worst_case_search_time);
 	setTotalTime(worst_case_search_time, start_ts);
 	uint16_t madeMoves = position->madeMoves.length;
+	vdt_vector<chessMove> moves = vdt_vector<chessMove>(150);
+	generateAllMoves(&moves, position);
+	uint16_t refutationTarget = 0;
+	calculateStandardSortEvals(position, &moves, 0, getHashMove(position->zobristHash), refutationTarget);
+	std::stable_sort(moves.data, moves.data+moves.length);
+	/*for(uint16_t ind=0; ind < moves.length; ind++) {
+		std::cout<< moveToString(moves[ind], *position) << " Eval " << moves[ind].sortEval << std::endl;
+	}*/
+
 	while(checkContinue(params, depth, get_timestamp()-start_ts, totalTime)) {
 		try{
 			//std::cout << "Depth " << depth << std::endl;
@@ -171,6 +181,70 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 			}
 
 			*bestMove = localBestMove;
+			/*chessMove localBestMove;
+
+			uint64_t* nodeCounts = new uint64_t[moves.length];
+			for(uint16_t ind=0; ind < moves.length; ind++) {
+				nodeCounts[ind] = 0;
+			}
+
+
+			*eval =  root_search(position, &localBestMove, alpha, beta, depth, depth+3, &moves, nodeCounts);
+			if(doAspiration) {
+				if ((*eval <= alpha) || (*eval >= beta)) {
+					for(uint16_t ind=0; ind < moves.length; ind++) {
+						nodeCounts[ind] = 0;
+					}
+					*eval = root_search(position, &localBestMove, -32000, 32000, depth, depth+3, &moves, nodeCounts);
+				}
+
+				alpha = *eval-50;
+				beta  = *eval+50;
+			}
+
+			*bestMove = localBestMove;
+
+			uint64_t maxCount = 0;
+
+			for(uint16_t ind=0; ind < moves.length; ind++) {
+
+				if(nodeCounts[ind] > maxCount){
+					maxCount = nodeCounts[ind];
+				}
+
+			}
+			uint32_t scaling = 1;
+
+			if(maxCount > INT16_MAX) {
+				scaling = maxCount/10000+1;
+			}
+			for(uint16_t ind=0; ind < moves.length; ind++) {
+
+				if(nodeCounts[ind] > 0) {
+					moves[ind].sortEval = (nodeCounts[ind]/scaling);
+				} else {
+					if(moves[ind].sortEval > 0) {
+						moves[ind].sortEval = moves[ind].sortEval-500;
+					}
+				}
+
+				if(moves[ind].move == bestMove->move) {
+					moves[ind].sortEval = INT16_MAX;
+				}
+				//std::cout << moves[ind].sortEval << std::endl;
+			}
+
+			std::stable_sort(moves.data, moves.data+moves.length);*/
+
+			/*std::cout << "New move list" << std::endl;
+
+			for(uint16_t ind=0; ind < moves.length; ind++) {
+				std::cout<< moveToString(moves[ind], *position) << " Eval " << moves[ind].sortEval << std::endl;
+			}*/
+
+			//TODO: free MEMORY!!!
+
+
 		} catch(timeoutException& e) {
 			//std::cout << "Search timed out" << std::endl;
 			break;

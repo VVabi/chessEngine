@@ -60,6 +60,7 @@ struct chessPosition {
 	uint16_t totalFigureEval;
 	uint32_t pieceTableEval;
 	uint64_t zobristHash;
+	uint64_t pawnHash;
 	vdt_vector<chessMove> madeMoves;
 	vdt_vector<pathDependentPositionData> dataStack;
 };
@@ -81,6 +82,14 @@ struct hashEntry{
 
 struct hashBucket{
 	hashEntry hashData[4];
+};
+
+
+struct pawnHashEntry{
+	uint32_t hashHighBits;
+	uint16_t hashLower;
+	int16_t  eval;
+	uint8_t pawnColumnOcc[2];
 };
 
 class timeoutException: public std::exception

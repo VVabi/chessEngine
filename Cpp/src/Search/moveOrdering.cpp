@@ -18,6 +18,8 @@
 #include <parameters/parameters.hpp>
 #include <cmath>
 #include <userInterface/UIlayer.hpp>
+#include <Search/search.hpp>
+
 extern uint64_t bishopFieldTable[];
 extern uint64_t rookFieldTable[];
 extern int32_t historyTable[2][64][64];
@@ -97,8 +99,11 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
 		}
 	}*/
 	isInCheck = !isInCheck;
+
 	const evalParameters* evalPars 						= getEvalParameters(); //TODO: move outside
 	int16_t sortEval = 0;
+
+
 
 	if( ((uint16_t) mv->type) < 6) {
 		sortEval = sortEval+captureEvals[mv->type][mv->captureType];
@@ -202,9 +207,9 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
 
 	if((mv->type == pawnMove)) {
 		if(BIT64(mv->targetField) & CENTER){
-			sortEval = sortEval+80;
-		} else if(BIT64(mv->targetField) & WIDECENTER){
 			sortEval = sortEval+50;
+		} else if(BIT64(mv->targetField) & WIDECENTER){
+			sortEval = sortEval+30;
 		} /*else {
 			sortEval = sortEval+30;
 		}*/
@@ -251,23 +256,19 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
 	}
 
 	if(mv->captureType == none){
-		int32_t historyValue = historyTable[position->toMove][mv->sourceField][mv->targetField]/4;
-		/*if(historyValue > 20){
-			historyValue = 21+(historyValue/8);
+		int32_t hist = historyTable[position->toMove][mv->sourceField][mv->targetField];
+
+		int32_t historyValue = std::round(std::sqrt(std::abs(hist)));
+		historyValue = (hist > 0 ? historyValue: -historyValue);
+
+
+		if(historyValue > 128) {
+			historyValue = 128;
 		}
 
-		if(historyValue < -20){
-			historyValue = -21+(historyValue/8);
-		}*/
-
-		if(historyValue > 100) {
-			historyValue = 100;
+		if(historyValue < -128) {
+			historyValue = -128;
 		}
-
-		/*if(historyValue < -100) {
-			historyValue = -100;
-		}*/
-
 
 		sortEval = sortEval+historyValue;
 		//std::cout << historyValue << std::endl;

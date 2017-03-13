@@ -112,7 +112,7 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 	}
 	if(alpha >= beta) {
 #ifdef HASH
-		setHashEntry(FAILHIGH, alpha, 0, searchId, 0, position->zobristHash);
+		//setHashEntry(FAILHIGH, alpha, 0, searchId, 0, position->zobristHash);
 #endif
 		return beta;
 	}
@@ -176,7 +176,7 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 		undoMove(position);
 		if(alpha >= beta) {
 #ifdef HASH
-			setHashEntry(FAILHIGH, alpha, 0, searchId, (bestMove.sourceField | (bestMove.targetField << 8)), position->zobristHash);
+			//setHashEntry(FAILHIGH, alpha, 0, searchId, (bestMove.sourceField | (bestMove.targetField << 8)), position->zobristHash);
 #endif
 			mvStack.release();
 			assert(stackCounter == mvStack.getCounter());
@@ -188,12 +188,12 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 	}
 
 #ifdef HASH
-	if(bestIndex != -1){
+	/*if(bestIndex != -1){
 		qindices[bestIndex]++;
 		setHashEntry(FULLSEARCH, alpha, 0, searchId, (bestMove.sourceField | (bestMove.targetField << 8)), position->zobristHash);
 	} else {
 		setHashEntry(FAILLOW, alpha, 0, searchId, 0, position->zobristHash);
-	}
+	}*/
 #endif
 	mvStack.release();
 	assert(stackCounter == mvStack.getCounter());

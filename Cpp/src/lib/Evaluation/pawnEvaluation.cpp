@@ -11,6 +11,7 @@
 #include <lib/bitfiddling.h>
 #include <lib/Defines/boardParts.hpp>
 #include <parameters/parameters.hpp>
+#include <hashTables/hashTables.hpp>
 
 extern uint64_t files[];
 extern uint64_t  passedPawnMasks[2][64];
@@ -43,6 +44,8 @@ static uint16_t distBetweenFields(uint16_t a, uint16_t b) {
 	return std::max(rowDiff, fileDiff);
 }
 
+uint64_t staticpawncalls = 0;
+uint64_t staticpawnhashhits = 0;
 
 static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint64_t blackPawns, uint16_t blackKing, uint16_t whiteKing) {
 	//TODO: remove code duplication. Generally this code sucks - too many white/black diffs...
@@ -161,18 +164,22 @@ int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOcc
 
 	uint64_t nonIsolatedDoublePawns =  (~isolatedPawns) & doublePawns;
 
+
+
+
+
 	eval = eval+staticPawnParameters->isolatedDoublePawn*popcount(isolatedDoublePawns)+staticPawnParameters->nonIsolatedDoublePawn*popcount(nonIsolatedDoublePawns);
 
 	eval = eval+staticPawnParameters->isolatedPawn*popcount(isolatedPawns & (~isolatedDoublePawns));
 
-/*#ifdef EXPERIMENTAL
+#ifdef EXPERIMENTAL
 	//reward pawns covered by other pawns
 	//---------------------------------------
 	uint64_t takesRight = (color ? pawns >> 7 : pawns << 9) & NOTFILEA;
 	uint64_t takesLeft = (color ? pawns >> 9 : pawns << 7) & NOTFILEH;
 	uint64_t takes = takesLeft | takesRight;
 	eval = eval+3*popcount(takes & pawns);
-#endif*/
+#endif
 
 	return eval*(1-2*color);
 }
@@ -183,8 +190,19 @@ int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupan
 	uint32_t eval=0;
 	uint64_t whitePawns = position->pieceTables[white][pawn];
 	uint64_t blackPawns = position->pieceTables[black][pawn];
+	int16_t staticPawn = 0;
 
-	int16_t staticPawn = staticPawnEval(whitePawns, white, pawnColumnOccupancy,&evalPars->staticPawnParameters)+staticPawnEval(blackPawns, black,  pawnColumnOccupancy+1,&evalPars->staticPawnParameters);
+	pawnHashEntry entry;
+	if(getPawnHashTableEntry(&entry, position->pawnHash)) {
+		staticPawn = entry.eval;
+		staticpawnhashhits++;
+		pawnColumnOccupancy[0] = entry.pawnColumnOcc[0];
+		pawnColumnOccupancy[1] = entry.pawnColumnOcc[1];
+	} else {
+		staticpawncalls++;
+		staticPawn = staticPawnEval(whitePawns, white, pawnColumnOccupancy,&evalPars->staticPawnParameters)+staticPawnEval(blackPawns, black,  pawnColumnOccupancy+1,&evalPars->staticPawnParameters);
+		setPawnHashEntry(staticPawn, pawnColumnOccupancy[0], pawnColumnOccupancy[1], position->pawnHash);
+	}
 	eval = eval+staticPawn;
 	result.staticPawn = staticPawn;
 	int32_t untapered = 0;

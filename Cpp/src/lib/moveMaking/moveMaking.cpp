@@ -15,6 +15,7 @@
 
 extern int32_t completePieceTables[7][2][64];
 extern uint64_t zobristHash[7][2][64];
+extern uint64_t pawnHashValues[7][2][64];
 extern uint64_t movingSideHash[2];
 extern uint64_t castlingHash[16];
 extern uint64_t enpassantHash[9];
@@ -49,6 +50,7 @@ inline static void makeNormalMove(chessMove* move, chessPosition* position) {
 	position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*completePieceTables[move->captureType][1-toMove][move->targetField];
 
 	position->zobristHash    = position->zobristHash^zobristHash[move->type][toMove][move->targetField]^zobristHash[move->type][toMove][move->sourceField]^zobristHash[move->captureType][1-toMove][move->targetField];
+	position->pawnHash       = position->pawnHash^pawnHashValues[move->type][toMove][move->targetField]^pawnHashValues[move->type][toMove][move->sourceField]^pawnHashValues[move->captureType][1-toMove][move->targetField];
 }
 
 
@@ -102,6 +104,7 @@ inline static void makeEnPassant(chessMove* move, chessPosition* position) {
 	position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*completePieceTables[pawn][1-toMove][shift];
 
 	position->zobristHash = position->zobristHash^zobristHash[pawn][toMove][move->targetField]^zobristHash[pawn][toMove][move->sourceField]^zobristHash[pawn][1-toMove][shift];
+	position->pawnHash = position->pawnHash^pawnHashValues[pawn][toMove][move->targetField]^pawnHashValues[pawn][toMove][move->sourceField]^pawnHashValues[pawn][1-toMove][shift];
 	//position->totalFigureEval     = position->totalFigureEval-figureValues[pawn];
 }
 
@@ -117,6 +120,7 @@ inline static void makePromotion(chessMove* move, chessPosition* position, figur
 	position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*(completePieceTables[promotedFigure][toMove][move->targetField]-completePieceTables[pawn][toMove][move->sourceField]);
 	position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*completePieceTables[move->captureType][1-toMove][move->targetField];
 	position->zobristHash = position->zobristHash^zobristHash[promotedFigure][toMove][move->targetField]^zobristHash[pawn][toMove][move->sourceField]^zobristHash[move->captureType][1-toMove][move->targetField];
+	position->pawnHash = position->pawnHash^pawnHashValues[pawn][toMove][move->sourceField]^pawnHashValues[move->captureType][1-toMove][move->targetField];
 	const evalParameters* evalPars = getEvalParameters();
 	position->figureEval     = position->figureEval+(1-2*toMove)*(evalPars->figureValues[promotedFigure]-evalPars->figureValues[pawn]);
 	position->totalFigureEval     = position->totalFigureEval+(evalPars->figureValues[promotedFigure]-evalPars->figureValues[pawn]);

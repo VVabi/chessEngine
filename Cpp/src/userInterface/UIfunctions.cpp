@@ -344,7 +344,7 @@ chessPosition FENtoChessPosition(std::string fen){
 	position.pieceTableEval = ((1 << 15) + position.figureEval+ calcPieceTableValue(&position))
 							+(((1 << 14) + calcEndGamePieceTableValue(&position)+position.figureEval) << 16);
 	position.zobristHash    = calcZobristHash(&position);
-
+	position.pawnHash       = calcPawnHash(&position);
 	position.data.hash = position.zobristHash;
 	position.data.enPassantFile = 8;
 	position.data.fiftyMoveRuleCounter = 0;

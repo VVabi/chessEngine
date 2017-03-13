@@ -24,7 +24,7 @@
 extern int32_t historyTable[2][64][64];
 extern uint8_t searchId;
 extern std::atomic<bool> continueSearch;
-static searchDebugData searchCounts;
+searchDebugData searchCounts;
 
 extern uint64_t bishopFieldTable[];
 extern uint64_t rookFieldTable[];
@@ -90,6 +90,8 @@ static inline void get_extensions_reductions(uint16_t* reduction, uint16_t* exte
 				}
 			}
 		}
+
+
 
 		if(check && ((ply+depth < max_ply-1) || ((depth == 1) && (ply+depth < max_ply)) )){
 			*extension = 1;
@@ -200,7 +202,7 @@ static inline bool checkHashTable(int16_t* eval, uint16_t* hashMove, bool doHash
 
 static inline void updateHistoryTables(chessMove* bestMove, int16_t depth, vdt_vector<chessMove>* moves, uint16_t bestIndex, playerColor toMove) {
 	if(bestMove->captureType == none){
-		historyTable[toMove][bestMove->sourceField][bestMove->targetField] += 2*depth*depth;
+		historyTable[toMove][bestMove->sourceField][bestMove->targetField] += depth*depth;
 		int32_t cutoff = HISTORY_CUTOFF;
 		if(historyTable[toMove][bestMove->sourceField][bestMove->targetField] > cutoff){
 			rescaleHistoryTable();
@@ -210,7 +212,7 @@ static inline void updateHistoryTables(chessMove* bestMove, int16_t depth, vdt_v
 		chessMove mv = (*moves)[cnt];
 		if(mv.captureType == none){
 			int32_t cutoff = HISTORY_CUTOFF;
-			historyTable[toMove][mv.sourceField][mv.targetField] -= depth*depth;
+			historyTable[toMove][mv.sourceField][mv.targetField] -= (depth*depth);
 			if(historyTable[toMove][mv.sourceField][mv.targetField] < (-cutoff)){
 				rescaleHistoryTable();
 			}
@@ -337,6 +339,8 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 	//remembers the index of best move after sorting
 	//-------------------------------------------
 	int16_t bestIndex = -1;
+
+
 	for(uint16_t ind=0; ind < moves.length; ind++){
 
 
@@ -344,7 +348,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 			//first move didn't produce cutoff, now we need to sort
 			//------------------------------------------------------
 			searchCounts.neededSort++;
-			std::stable_sort(moves.data, moves.data+moves.length);
+			std::stable_sort(moves.data, moves.data+moves.length); //stable sort makes the engine 100% predictable and comaprable between different optimization levels
 		}
 
 		//illegal move. Since list is sorted or, in case ind=0, best move is first, we can leave here: all further moves are also illegal.
@@ -368,13 +372,15 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 			}
 		}
 
-//#ifdef DEBUG
+#ifdef DEBUG
+		//debug check: if we overlooked an illegal move, we scream here
+		//-------------------------------------------------------------
 		if(isFieldAttacked( position,  position->toMove, kingField)) {
 			std::cout << chessPositionToOutputString(*position);
 			std::cout <<  (rookFieldTable[kingField] | bishopFieldTable[kingField]);
 			std::cout << "WTF" << std::endl;
 		}
-//#endif
+#endif
 		searchCounts.nodes[depth]++;
 		searchCounts.totalNodes++;
 		legalMovesAvailable = true;
@@ -422,6 +428,9 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 			handleBetaCutoff(bestMove, position->zobristHash, beta, depth, ply, searchId);
 			if(bestIndex != -1){
 				searchCounts.bestIndex[depth][bestIndex]++;
+				if(bestMove->captureType == none) {
+					updateHistoryTables(bestMove, depth, &moves, bestIndex, position->toMove);
+				}
 			}
 			qmvStack.release();
 			assert(stackCounter == qmvStack.getCounter());

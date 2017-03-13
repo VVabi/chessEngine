@@ -15,6 +15,7 @@
 #include <parameters/parameters.hpp>
 
 extern uint64_t zobristHash[7][2][64];
+extern uint64_t pawnHashValues[7][2][64];
 extern uint64_t movingSideHash[2];
 extern int32_t completePieceTables[7][2][64];
 extern uint16_t repetitionData[16384];
@@ -41,6 +42,7 @@ inline static void undoNormalMove(chessPosition* position, chessMove move) {
 	position->pieceTableEval = position->pieceTableEval-(1-2*toMove)*(completePieceTables[move.type][toMove][move.targetField]-completePieceTables[move.type][toMove][move.sourceField]);
 	position->pieceTableEval = position->pieceTableEval-(1-2*toMove)*completePieceTables[move.captureType][1-toMove][move.targetField];
 	position->zobristHash    = position->zobristHash^zobristHash[move.type][toMove][move.targetField]^zobristHash[move.type][toMove][move.sourceField]^zobristHash[move.captureType][1-toMove][move.targetField];
+	position->pawnHash    = position->pawnHash^pawnHashValues[move.type][toMove][move.targetField]^pawnHashValues[move.type][toMove][move.sourceField]^pawnHashValues[move.captureType][1-toMove][move.targetField];
 }
 
 inline static void undoKingSideCastling(chessPosition* position) {
@@ -92,6 +94,7 @@ inline static void undoEnPassant(chessPosition* position, chessMove move) {
 	position->pieceTableEval 							= position->pieceTableEval-(1-2*toMove)*(completePieceTables[pawn][toMove][move.targetField]-completePieceTables[pawn][toMove][move.sourceField]);
 	position->pieceTableEval 							= position->pieceTableEval-(1-2*toMove)*completePieceTables[pawn][1-toMove][shift];
 	position->zobristHash = position->zobristHash^zobristHash[pawn][toMove][move.targetField]^zobristHash[pawn][toMove][move.sourceField]^zobristHash[pawn][1-toMove][shift];
+	position->pawnHash = position->pawnHash^pawnHashValues[pawn][toMove][move.targetField]^pawnHashValues[pawn][toMove][move.sourceField]^pawnHashValues[pawn][1-toMove][shift];
 }
 
 inline static void undoPromotion(chessPosition* position, chessMove move, figureType promotedFigure) {
@@ -109,6 +112,7 @@ inline static void undoPromotion(chessPosition* position, chessMove move, figure
 	position->figureEval     							= position->figureEval-(1-2*toMove)*(evalPars->figureValues[promotedFigure]-evalPars->figureValues[pawn]);
 	position->totalFigureEval     						= position->totalFigureEval-(evalPars->figureValues[promotedFigure]-evalPars->figureValues[pawn]);
 	position->zobristHash = position->zobristHash^zobristHash[promotedFigure][toMove][move.targetField]^zobristHash[pawn][toMove][move.sourceField]^zobristHash[move.captureType][1-toMove][move.targetField];
+	position->pawnHash = position->pawnHash^pawnHashValues[pawn][toMove][move.sourceField]^pawnHashValues[move.captureType][1-toMove][move.targetField];
 }
 
 

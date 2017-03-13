@@ -118,7 +118,10 @@ void debug_incremental_calculations(const chessPosition* position) {
 		std::cout << "zobrist hash wrong after make move" << std::endl;
 	}
 
-
+	uint64_t pawnhash = calcPawnHash(position);
+	if(pawnhash != position->pawnHash){
+		std::cout << "zobrist pawn hash wrong after make move" << std::endl;
+	}
 
 }
 

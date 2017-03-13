@@ -14,7 +14,11 @@
 
 static hashBucket moveOrderingHashTable[HASHSIZE+1];
 
+static pawnHashEntry pawnHashTable[8192];
+
+
 uint64_t zobristHash[7][2][64];
+uint64_t pawnHashValues[7][2][64];
 uint64_t movingSideHash[2];
 uint64_t castlingHash[16];
 uint64_t enpassantHash[9];
@@ -26,6 +30,35 @@ static uint16_t permutationIndex = 0;
 static uint16_t permutations[4][4] = {{0,1,2,3}, {1,2,3,0}, {2,3,0,1}, {3,0,1,2}};
 
 
+bool getPawnHashTableEntry(pawnHashEntry* entry, uint64_t key) {
+	uint32_t index = (key & 8191);
+	uint32_t zobristHigher = (uint32_t) (key  >> 32);
+	uint16_t zobristLower  = (uint16_t) (((uint32_t) (key  & 0xFFFFFFFF)) >> 16);
+
+	pawnHashEntry tentry = pawnHashTable[index];
+
+	if( (tentry.hashHighBits == zobristHigher) && (tentry.hashLower == zobristLower)) {
+		*entry = tentry;
+		return true;
+	}
+
+	return false;
+
+}
+
+void setPawnHashEntry(int16_t eval, uint8_t whiteColumns, uint8_t blackColumns, uint64_t key){
+	uint32_t index = (key & 8191);
+	uint32_t zobristHigher = (uint32_t) (key  >> 32);
+	uint16_t zobristLower  = (uint16_t) (((uint32_t) (key  & 0xFFFFFFFF)) >> 16);
+
+	pawnHashEntry entry;
+	entry.eval = eval;
+	entry.hashHighBits = zobristHigher;
+	entry.hashLower = zobristLower;
+	entry.pawnColumnOcc[0] = whiteColumns;
+	entry.pawnColumnOcc[1] = blackColumns;
+	pawnHashTable[index] = entry;
+}
 
 
 //TODO: somehow force-inline these functions everywhere
@@ -142,6 +175,35 @@ void fillZobristHash(){
 	for(uint16_t ind=0; ind <16; ind++) {
 		castlingHash[ind]  =getRandUint64();
 	}
+
+
+	for(uint16_t cnt=0; cnt < 2; cnt++){
+			for(uint16_t ind=0; ind < 1; ind++){
+				for(uint16_t field=0; field < 64; field++){
+					pawnHashValues[ind][cnt][field] = getRandUint64();
+				}
+			}
+			for(uint16_t ind=1; ind < 7; ind++){
+				for(uint16_t field=0; field < 64; field++){
+					pawnHashValues[ind][cnt][field] = 0;
+				}
+			}
+	}
+}
+
+
+uint64_t calcPawnHash(const chessPosition* position){
+	uint64_t hash = 0;
+	for(uint16_t movingSide = 0; movingSide < 2; movingSide++){
+		for(uint16_t figureType = 0; figureType < 6; figureType++){
+			uint64_t pieces = position->pieceTables[movingSide][figureType];
+			while(pieces){
+				uint16_t field = popLSB(pieces);
+				hash = hash^pawnHashValues[figureType][movingSide][field];
+			}
+		}
+	}
+	return hash;
 }
 
 uint64_t calcZobristHash(const chessPosition* position){
