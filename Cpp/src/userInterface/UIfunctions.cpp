@@ -650,6 +650,21 @@ bool checkAndMakeMove(chessPosition& position, std::string move){
 				break;
 			}
 			if(moves[ind].move == mv){
+				if( (moves[ind].type > 8)) { //its a promotion
+					char type = move.at(4);
+					if((type == 'r') && moves[ind].type != promotionRook){
+						continue;
+					}
+					if((type == 'q') && moves[ind].type != promotionQueen){
+						continue;
+					}
+					if((type == 'b') && moves[ind].type != promotionBishop){
+						continue;
+					}
+					if((type == 'n') && moves[ind].type != promotionKnight){
+						continue;
+					}
+				}
 				found = true;
 				m = moves[ind];
 				break;
@@ -737,5 +752,19 @@ void runPerformanceTests(){
 		std::cout << "qnodes " <<  qNodes << std::endl;
 		file.close();
 
+	}
+}
+
+void outputUint64(uint64_t num) {
+	for(int16_t row = 7; row > -1; row--) {
+		for(uint16_t file = 0; file < 8; file++) {
+			uint16_t field = 8*row+file;
+			if(BIT64(field) & num) {
+				std::cout << "1";
+			} else {
+				std::cout << "0";
+			}
+		}
+		std::cout << std::endl;
 	}
 }

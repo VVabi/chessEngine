@@ -30,6 +30,7 @@
 #include <mutex>
 #include <algorithm>
 #include <hashTables/hashTables.hpp>
+#include <lib/bitfiddling.h>
 //necessary to get windows compile to run
 //----------------------------------------
 #include "mingw.thread.h"
@@ -515,6 +516,14 @@ void handleEval() {
 	free_position(&cposition);
 }
 
+
+void handlePawnEval() {
+	chessPosition cposition = memoryLibrarianRetrievePosition();
+	uint8_t pawnOcc[2];
+	std::cout << staticPawnEvalComplete(&cposition, pawnOcc) << std::endl;
+	free_position(&cposition);
+}
+
 void UIloop() {
 	initUserEvents();
 	bool continueLoop = true;
@@ -567,6 +576,9 @@ void UIloop() {
 					break;
 				case eval:
 					handleEval();
+					break;
+				case pawnEval:
+					handlePawnEval();
 					break;
 				case invalid:
 					putLine("Invalid request");

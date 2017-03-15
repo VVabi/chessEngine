@@ -170,14 +170,14 @@ int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOcc
 
 	eval = eval+staticPawnParameters->isolatedPawn*popcount(isolatedPawns & (~isolatedDoublePawns));
 
-#ifdef EXPERIMENTAL
+/*#ifdef EXPERIMENTAL
 	//reward pawns covered by other pawns
 	//---------------------------------------
 	uint64_t takesRight = (color ? pawns >> 7 : pawns << 9) & NOTFILEA;
 	uint64_t takesLeft = (color ? pawns >> 9 : pawns << 7) & NOTFILEH;
 	uint64_t takes = takesLeft | takesRight;
 	eval = eval+3*popcount(takes & pawns);
-#endif
+#endif*/
 
 	return eval*(1-2*color);
 }
@@ -205,7 +205,11 @@ int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupan
 #endif
 	} else {
 		staticpawncalls++;
+#ifdef EXPERIMENTAL
+		staticPawn = staticPawnEvalComplete(position, pawnColumnOccupancy);
+#else
 		staticPawn = staticPawnEval(whitePawns, white, pawnColumnOccupancy,&evalPars->staticPawnParameters)+staticPawnEval(blackPawns, black,  pawnColumnOccupancy+1,&evalPars->staticPawnParameters);
+#endif
 		setPawnHashEntry(staticPawn, pawnColumnOccupancy[0], pawnColumnOccupancy[1], position->pawnHash);
 	}
 	eval = eval+staticPawn;

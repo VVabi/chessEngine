@@ -39,6 +39,11 @@ struct chessMove{
 	}
 };
 
+struct pvLine {
+	uint16_t numMoves;
+	chessMove line[40];
+};
+
 struct pathDependentPositionData{
 	uint8_t castlingRights;
 	uint8_t enPassantFile; //the file of the CAPTURED pawn

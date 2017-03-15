@@ -33,43 +33,6 @@ int main() {
 
 	initializeParameters();
 
-	/*uint64_t typeArr[13] = {0};
-	uint64_t captureArr[7] = {0};
-	std::ifstream logger;
-	logger.open("/home/vabi/log7.txt");
-	std::string line;
-	while(std::getline(logger, line)){
-
-		std::vector<std::string> seglist;
-		std::string part;
-		std::stringstream sstream = std::stringstream(line);
-		while(std::getline(sstream, part, ' '))
-		{
-		   seglist.push_back(part);
-		}
-
-		uint16_t type, captureType;
-		std::stringstream(seglist[2]) >> type;
-		std::stringstream(seglist[3]) >> captureType;
-
-		typeArr[type]++;
-		captureArr[captureType]++;
-
-
-	}
-
-	for(uint32_t ind=0; ind < 13; ind++){
-		std::cout << typeArr[ind] << " ";
-	}
-	std::cout << std::endl;
-
-	for(uint32_t ind=0; ind < 7; ind++){
-		std::cout << captureArr[ind] << " ";
-	}
-	std::cout << std::endl;
-	return 0;*/
-
-
 	const evalParameters* evalPars =  getEvalParameters();
 	for(uint32_t index=0; index < 7; index++) {
 		for(uint32_t t=0; t < 2; t++) {

@@ -348,7 +348,6 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 	//-------------------------------------------
 	int16_t bestIndex = -1;
 
-
 	for(uint16_t ind=0; ind < moves.length; ind++){
 		if(ind == 1){
 			//first move didn't produce cutoff, now we need to sort
