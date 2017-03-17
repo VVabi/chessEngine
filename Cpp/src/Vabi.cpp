@@ -26,21 +26,61 @@ using namespace std;
 extern int32_t completePieceTables[7][2][64];
 extern int16_t pieceTables[7][2][64];
 extern int16_t endGamepieceTables[7][2][64];
-
-
+extern int16_t rawPieceTables[6][32];
+extern int16_t endgameRawPieceTables[6][32];
 
 int main() {
 
 	initializeParameters();
 
+	for(uint16_t type = 0; type < 6; type++) {
+
+		for(uint16_t field = 0; field < 32; field++) {
+
+			int16_t value = rawPieceTables[type][field];
+			uint16_t file = field % 4;
+			uint16_t row = field/4;
+			pieceTables[type][white][8*row+file] = value;
+			pieceTables[type][white][8*row+7-file] = value;
+			pieceTables[type][black][8*(7-row)+file] = value;
+			pieceTables[type][black][8*(7-row)+7-file] = value;
+		}
+
+	}
+
+	for(uint16_t type = 0; type < 6; type++) {
+
+		for(uint16_t field = 0; field < 32; field++) {
+
+			int16_t value = endgameRawPieceTables[type][field];
+			uint16_t file = field % 4;
+			uint16_t row = field/4;
+			endGamepieceTables[type][white][8*row+file] = value;
+			endGamepieceTables[type][white][8*row+7-file] = value;
+			endGamepieceTables[type][black][8*(7-row)+file] = value;
+			endGamepieceTables[type][black][8*(7-row)+7-file] = value;
+		}
+
+	}
+
+
+	for(uint16_t ind=0; ind < 2; ind++) {
+		for(uint16_t field=0; field < 64; field++) {
+			endGamepieceTables[6][ind][field] = 0;
+			pieceTables[6][ind][field] = 0;
+		}
+	}
+
 	const evalParameters* evalPars =  getEvalParameters();
 	for(uint32_t index=0; index < 7; index++) {
 		for(uint32_t t=0; t < 2; t++) {
 			for(uint32_t k=0; k < 64; k++) {
-				completePieceTables[index][t][k] = ((uint16_t) (pieceTables[index][t][k]/2+evalPars->figureValues[index])) |  ( ((uint16_t) (endGamepieceTables[index][t][k]/2+evalPars->figureValues[index])) << 16);
+				completePieceTables[index][t][k] = ((uint16_t) (pieceTables[index][t][k]+evalPars->figureValues[index])) |  ( ((uint16_t) (endGamepieceTables[index][t][k]/2+evalPars->figureValues[index])) << 16);
 			}
 		}
 	}
+
+
 	std::cout << "ENDGAME" << std::endl;
 	for(uint32_t index=0; index < 7; index++) {
 			for(uint32_t t=0; t < 2; t++) {

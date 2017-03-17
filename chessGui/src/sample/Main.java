@@ -133,9 +133,9 @@ public class Main extends Application {
 
         while(wins+draws+losses < 30000) {
 
-            wins = 0;
-            draws = 0;
-            losses = 0;
+            wins = 1201;
+            draws = 1010;
+            losses = 1248;
 
             for(int ind=0; ind < 3; ind++) {
                 int[] res = processesList[ind].getCurrentResult();

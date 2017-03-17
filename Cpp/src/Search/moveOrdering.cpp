@@ -119,7 +119,7 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
 	}*/
 
 	if (((uint16_t) mv->type) < 6) {
-		sortEval = sortEval+(pieceTables[mv->type][position->toMove][mv->targetField]-pieceTables[mv->type][position->toMove][mv->sourceField])/4;
+		sortEval = sortEval+(pieceTables[mv->type][position->toMove][mv->targetField]-pieceTables[mv->type][position->toMove][mv->sourceField])/2;
 	}
 
 	if(mv->type == promotionQueen) {

@@ -14,7 +14,7 @@ public class uciEngineHandler {
     Process process;
     BufferedReader reader;
     BufferedWriter writer;
-
+    ArrayList<String> moves = new ArrayList<>();
 
     private void put(String s) throws IOException{
         //System.out.println(s);
@@ -75,7 +75,7 @@ public class uciEngineHandler {
 
     public void setPosition(String fenPosition, List<String> moveList) throws IOException{
         String putStr = "position fen "+fenPosition;
-
+        moves = new ArrayList<>(moveList);
         if(moveList.size() > 0){
             putStr = putStr+" moves";
 
@@ -100,6 +100,20 @@ public class uciEngineHandler {
         while(true){
 
             String answer = reader.readLine();
+            if(answer != null)  {
+                moves.add(answer);
+            } else {
+                for(String m: moves ){
+                    System.out.println(m);
+                }
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
             //System.out.println(answer);
             String[] splitted = answer.split(" ");
             if("bestmove".equals(splitted[0])){
