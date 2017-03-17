@@ -63,17 +63,16 @@ void resetSortqCalled(){
 static moveStack mvStack;
 
 
-int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, uint16_t depth) {
+int16_t negamaxQuiescence(chessPosition* position, uint16_t ply, int16_t alpha, int16_t beta, uint16_t depth) {
 
 	assert(alpha < beta);
 	const evalParameters* evalPars 						= getEvalParameters();
-//#ifdef EXPERIMENTAL
 	uint64_t ownKing = position->pieceTables[position->toMove][king];
 	if(isFieldAttacked(position, (playerColor) (1-position->toMove), findLSB(ownKing))) {
-		chessMove mv;
-		return negamax(position, 30,31, 1, alpha, beta, &mv, false, false);
+		pvLine line;
+		return negamax(position, ply, ply+1, 1, alpha, beta, &line, false, false);
 	}
-//#endif
+
 
 #ifdef HASH
 	hashEntry hashVal      = getHashTableEntry(position->zobristHash);
@@ -111,9 +110,6 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 		alpha = baseEval;
 	}
 	if(alpha >= beta) {
-#ifdef HASH
-		//setHashEntry(FAILHIGH, alpha, 0, searchId, 0, position->zobristHash);
-#endif
 		return beta;
 	}
 	//delta pruning preparations
@@ -166,7 +162,7 @@ int16_t negamaxQuiescence(chessPosition* position, int16_t alpha, int16_t beta, 
 
 		} else {
 			nodes++;
-			int32_t value = -negamaxQuiescence(position, -beta, -alpha, depth+1);
+			int32_t value = -negamaxQuiescence(position, ply+1, -beta, -alpha, depth+1);
 			if(value > alpha){
 				alpha = value;
 				bestMove = moves[ind];

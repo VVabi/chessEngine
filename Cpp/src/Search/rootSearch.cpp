@@ -4,7 +4,7 @@
  *  Created on: Nov 6, 2016
  *      Author: vabi
  */
-
+#ifdef NDEF
 
 #include <iostream>
 #include <lib/basics.hpp>
@@ -222,3 +222,5 @@ int16_t root_search(chessPosition* position, chessMove* bestMove, int16_t alpha,
 	//--------------------------
 	return alpha;
 }
+
+#endif

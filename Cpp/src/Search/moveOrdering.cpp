@@ -25,7 +25,7 @@ extern uint64_t rookFieldTable[];
 extern int32_t historyTable[2][64][64];
 extern int16_t pieceTables[7][2][64];
 
-extern uint16_t killerMoves[20][2];
+extern uint16_t killerMoves[40][2];
 extern uint64_t bishopMoveTables[64][512];
 extern uint64_t rookMoveTables[64][4096];
 #define WHITEKINGCASTLECHESSFIELDS ((1ULL << 4) | (1ULL << 5) | (1ULL << 6))
@@ -259,10 +259,8 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
 	if(mv->captureType == none){
 		int32_t hist = historyTable[position->toMove][mv->sourceField][mv->targetField];
 
-
-
-		int32_t historyValue = hist/100; //std::sqrt(std::abs(hist)); //TODO: this is absolutely NOT a good idea performance-wise
-		//historyValue = (hist > 0 ? historyValue: -historyValue);
+		int32_t historyValue = std::sqrt(std::abs(hist)); //TODO: this is absolutely NOT a good idea performance-wise
+		historyValue = (hist > 0 ? historyValue: -historyValue);
 
 
 		if(historyValue > 128) {

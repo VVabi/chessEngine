@@ -1,5 +1,6 @@
 package sample;
 
+import Library.FenHelper;
 import Tests.TestDebugVsRelease;
 import core.Core;
 import javafx.application.Application;
@@ -12,36 +13,57 @@ import PlayingGUI.PlayingGUI;
 import uciClient.UciProcessing;
 import uciClient.uciEngineHandler;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-/*        uciEngineHandler vabiHandler = new uciEngineHandler("/home/vabi/code/chessEngine/Cpp/Release/Vabi");
 
-        List<String> moves = new ArrayList<>();
-        while(true){
-            vabiHandler.setPosition(moves);
-            vabiHandler.startSearch();
-            String mv = vabiHandler.readBestmove();
-            moves.add(mv);
-            System.out.println(mv);
-            stockfishHandler.setPosition(moves);
-            stockfishHandler.startSearch();
-            mv = stockfishHandler.readBestmove();
-            moves.add(mv);
-            System.out.println(mv);
-            if("(none)".equals(mv)){
-                break;
+
+       /* ArrayList<String> fens = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader("fen.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                fens.add(line);
             }
-        }*/
+        }
+
+
+       System.out.println(FenHelper.mirror("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w Kkq c6 0 2"));
+
+        uciEngineHandler vabiHandler = new uciEngineHandler("/home/vabi/code/chessEngine/Cpp/Release/Vabi", "");
+
+        for(String fen: fens) {
+            /*System.out.println(fen);
+            System.out.println(FenHelper.mirror(fen));*/
+           /* vabiHandler.setPosition(fen, new LinkedList<>());
+            int eval1 = vabiHandler.getEval();
+            vabiHandler.setPosition(FenHelper.changeSide(fen), new LinkedList<>());
+            int eval2 = vabiHandler.getEval();
+            vabiHandler.setPosition(FenHelper.mirror(fen), new LinkedList<>());
+            int eval3 = vabiHandler.getEval();
+
+            if(eval1 != eval2) {
+                System.out.println("Unsymmetric black/white eval detected");
+                System.out.println(fen);
+                System.out.println(FenHelper.changeSide(fen));
+            }
+
+            if(eval1 != eval3){
+                System.out.println("Asymmetric east/west eval detected");
+                System.out.println(fen);
+                System.out.println(FenHelper.mirror(fen));
+            }
+
+        }
+
+
+        System.out.println("Test done");*/
        /* Runtime runtime = Runtime.getRuntime();
         Process process;
         BufferedReader reader;

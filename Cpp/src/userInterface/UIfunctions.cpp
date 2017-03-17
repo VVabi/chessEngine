@@ -50,7 +50,6 @@ uint64_t runSinglePositionPerformanceTest(std::string position, uint16_t depth, 
 	searchId++;
 	chessPosition c = stringToChessPosition(position);
 
-	chessMove bestMove;
 	resetSearchData();
 	resetQuiescenceNodes();
 	struct timeval start, end;
@@ -65,7 +64,8 @@ uint64_t runSinglePositionPerformanceTest(std::string position, uint16_t depth, 
 	while(searchdepth <= depth && (searchdepth < 14)) {
 
 		bool succeeded = false;
-		int32_t eval = negamax(&c, 0, depth+3, searchdepth, alpha, beta, &bestMove);
+		pvLine line;
+		int32_t eval = negamax(&c, 0, depth+3, searchdepth, alpha, beta, &line);
 
 		if(useAspiration) {
 			if ((eval <= alpha)) {
@@ -454,6 +454,7 @@ chessPosition stringToChessPosition(std::string strposition) {
 							+(((1 << 14) + calcEndGamePieceTableValue(&position)+position.figureEval) << 16);
 	position.zobristHash    = calcZobristHash(&position);
 
+	position.pawnHash = calcPawnHash(&position);
 	position.data.hash = position.zobristHash;
 	position.data.enPassantFile = 8;
 	position.data.fiftyMoveRuleCounter = 0;

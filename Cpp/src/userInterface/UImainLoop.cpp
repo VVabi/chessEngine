@@ -35,7 +35,7 @@
 //----------------------------------------
 #include "mingw.thread.h"
 #include "mingw.mutex.h"
-
+#include <list>
 extern uint8_t searchId;
 extern uint16_t killerMoves[20][2];
 
@@ -108,11 +108,25 @@ uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t n
 	return 100; //some default
 }
 
-void sendSearchInfo(uint64_t nodes, uint32_t time, int32_t eval, uint32_t depth, std::string bestMove){
+void sendSearchInfo(uint64_t nodes, uint32_t time, int32_t eval, uint32_t depth, std::list<std::string>& PV){
 	double nps = ((double) nodes)/((double) time)*1000.0;
 	uint64_t npsInt = nps;
 	std::stringstream out;
-	out << "info depth " << depth << " score cp " << eval << " nps " << npsInt << " nodes " << nodes << " pv " << bestMove;
+
+
+	if(eval > 29000) {
+		int16_t mate_in = (30000-eval+1)/2;
+		out << "info depth " << depth << " mate " << mate_in << " nps " << npsInt << " nodes " << nodes << " pv ";
+	} else if(eval < -29000) {
+		int16_t mate_in = (-30000-eval)/2;
+		out << "info depth " << depth << " mate " << mate_in << " nps " << npsInt << " nodes " << nodes << " pv ";
+	} else {
+		out << "info depth " << depth << " score cp " << eval << " nps " << npsInt << " nodes " << nodes << " pv ";
+	}
+
+	for(auto iterator = PV.begin(); iterator != PV.end(); iterator++) {
+		out << *iterator << " ";
+	}
 	putLine(out.str());
 }
 
@@ -142,7 +156,16 @@ bool checkContinue(searchParameters params, uint16_t depth, uint16_t passedTime,
 	return true;
 }
 
+/*#ifdef EXPERIMENTAL
+std::ofstream fenLogger;
+#endif*/
+
 uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval, bool doAspiration, searchParameters params) {
+/*#ifdef EXPERIMENTAL
+
+	fenLogger.open("fen.txt", std::ios::app);
+
+#endif*/
 	memset(killerMoves,0, 20*2*sizeof(uint16_t));
 	resetSearchData();
 	resetQuiescenceNodes();
@@ -166,22 +189,24 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 		std::cout<< moveToString(moves[ind], *position) << " Eval " << moves[ind].sortEval << std::endl;
 	}*/
 
+	pvLine line;
+	line.numMoves = 0;
 	while(checkContinue(params, depth, get_timestamp()-start_ts, totalTime)) {
 		try{
 			//std::cout << "Depth " << depth << std::endl;
-			chessMove localBestMove;
-			*eval = negamax(position, 0, depth+3, depth, alpha, beta, &localBestMove, true, false);
+
+			*eval = negamax(position, 0, depth+3, depth, alpha, beta, &line, true, false);
 			if(doAspiration) {
 				if ((*eval <= alpha) || (*eval >= beta)) {
 
-					*eval = negamax(position, 0, depth+3, depth, -32000, 32000, &localBestMove, true, false);
+					*eval = negamax(position, 0, depth+3, depth, -32000, 32000, &line, true, false);
 				}
 
 				alpha = *eval-50;
 				beta  = *eval+50;
 			}
 
-			*bestMove = localBestMove;
+			*bestMove = line.line[0];
 			/*chessMove localBestMove;
 
 			uint64_t* nodeCounts = new uint64_t[moves.length];
@@ -259,14 +284,33 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 		}
 
 		*nodeCount = (data.totalNodes+getQuiescenceNodes());
-		sendSearchInfo(*nodeCount, *mtime, *eval, depth, moveToString(*bestMove, *position));
+
+		std::list<std::string> moveList;
+
+		for(uint16_t ind=0; ind < line.numMoves; ind++) {
+			std::string mv = moveToString(line.line[ind], *position);
+			moveList.push_back(mv);
+			makeMove(&line.line[ind], position);
+		}
+
+		for(uint16_t ind=0; ind < line.numMoves; ind++) {
+			undoMove(position);
+		}
+
+		sendSearchInfo(*nodeCount, *mtime, *eval, depth, moveList);
 		logSearch(*nodeCount, *mtime, *eval, depth, moveToString(*bestMove, *position));
+		line.numMoves = 0;
 		depth++;
 		searchedNodes = searchedNodes+*nodeCount;
 		if(*eval > 29000) {
 			break;
 		}
 	}
+
+/*#ifdef EXPERIMENTAL
+	fenLogger << chessPositionToFenString(*position, false) << std::endl;
+	fenLogger.close();
+#endif*/
 	depth--;
 	*mtime = get_timestamp()-start_ts;
 	while(position->madeMoves.length > madeMoves){

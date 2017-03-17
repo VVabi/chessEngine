@@ -63,6 +63,15 @@ public class uciEngineHandler {
     }
 
 
+    public int getEval() throws IOException {
+        put("eval");
+        String answer = reader.readLine();
+
+        String[] parts = answer.split(" ");
+
+        return Integer.parseInt(parts[1]);
+
+    }
 
     public void setPosition(String fenPosition, List<String> moveList) throws IOException{
         String putStr = "position fen "+fenPosition;
@@ -103,6 +112,15 @@ public class uciEngineHandler {
                     if("score".equals(splitted[index])){
                         eval = Integer.parseInt(splitted[index+2]);
 
+                    }
+
+                    if("mate".equals(splitted[index])){
+                        int matein = Integer.parseInt(splitted[index+1]);
+                        if(matein > 0) {
+                            eval = 20000;
+                        } else {
+                            eval = -20000;
+                        }
                     }
 
                 }

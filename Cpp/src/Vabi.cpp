@@ -41,6 +41,56 @@ int main() {
 			}
 		}
 	}
+	std::cout << "ENDGAME" << std::endl;
+	for(uint32_t index=0; index < 7; index++) {
+			for(uint32_t t=0; t < 2; t++) {
+				for(uint32_t k=0; k < 64; k++) {
+						int16_t val1 = endGamepieceTables[index][t][k];
+						uint16_t file = FILE(k);
+						uint16_t row = ROW(k);
+						uint16_t mirrorFile = 7-file;
+						uint16_t field = 8*row+mirrorFile;
+						int16_t val2 = endGamepieceTables[index][t][field];
+
+						uint16_t bfield = (7-row)*8+file;
+						int16_t val3 = endGamepieceTables[index][1-t][bfield];
+
+						if(val1 != val2) {
+							std::cout << "East/west" << std::endl;
+							std::cout << index << " " << t << " " << k << std::endl;
+						}
+
+						if(val1 != val3) {
+							std::cout << "North/South" << std::endl;
+							std::cout << index << " " << t << " " << k << std::endl;
+						}
+				}
+			}
+	}
+	std::cout << "MIDGAME" << std::endl;
+	for(uint32_t index=0; index < 7; index++) {
+			for(uint32_t t=0; t < 2; t++) {
+				for(uint32_t k=0; k < 64; k++) {
+						int16_t val1 = pieceTables[index][t][k];
+						uint16_t file = FILE(k);
+						uint16_t row = ROW(k);
+						file = 7-file;
+						uint16_t field = 8*row+file;
+						int16_t val2 = pieceTables[index][t][field];
+						uint16_t bfield = (7-row)*8+file;
+						int16_t val3 = pieceTables[index][1-t][bfield];
+						if(val1 != val2) {
+							std::cout << "East/west" << std::endl;
+							std::cout << index << " " << t << " " << k << std::endl;
+						}
+
+						if(val1 != val3) {
+							std::cout << "North/South" << std::endl;
+							std::cout << index << " " << t << " " << k << std::endl;
+						}
+				}
+			}
+	}
 
 	srand (time(NULL));
 	fillZobristHash();

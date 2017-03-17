@@ -205,11 +205,7 @@ int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupan
 #endif
 	} else {
 		staticpawncalls++;
-#ifdef EXPERIMENTAL
 		staticPawn = staticPawnEvalComplete(position, pawnColumnOccupancy);
-#else
-		staticPawn = staticPawnEval(whitePawns, white, pawnColumnOccupancy,&evalPars->staticPawnParameters)+staticPawnEval(blackPawns, black,  pawnColumnOccupancy+1,&evalPars->staticPawnParameters);
-#endif
 		setPawnHashEntry(staticPawn, pawnColumnOccupancy[0], pawnColumnOccupancy[1], position->pawnHash);
 	}
 	eval = eval+staticPawn;

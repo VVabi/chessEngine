@@ -15,7 +15,7 @@
 
 bool enablePawnEval;
 
-int32_t selfPlayMakeMove(chessPosition* position, uint16_t whitedepth, uint16_t blackdepth) {
+/*int32_t selfPlayMakeMove(chessPosition* position, uint16_t whitedepth, uint16_t blackdepth) {
 
 
 
@@ -128,5 +128,5 @@ selfPlayResult playSelf(uint16_t depth1, uint16_t depth2, uint32_t numGames) {
 	return ret;
 
 
-}
+}*/
 
