@@ -24,7 +24,7 @@ uint64_t perftNodes(chessPosition* position, uint16_t depth){
 	uint64_t nodes = 0;
 	vdt_vector<chessMove> moves = vdt_vector<chessMove>(150);
 	generateAllMoves(&moves, position);
-	calculateStandardSortEvals(position, &moves, 0, 0, NO_REFUTATION);
+	calculateStandardSortEvals(position, &moves, 0, 0, 0, NO_REFUTATION);
 	std::sort(moves.data, moves.data+moves.length);
 	bool isMate = true;
 	for(uint16_t ind=0; ind < moves.length; ind++){

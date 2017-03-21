@@ -183,7 +183,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 	vdt_vector<chessMove> moves = vdt_vector<chessMove>(150);
 	generateAllMoves(&moves, position);
 	uint16_t refutationTarget = 0;
-	calculateStandardSortEvals(position, &moves, 0, getHashMove(position->zobristHash), refutationTarget);
+	calculateStandardSortEvals(position, &moves, 0, 0, getHashMove(position->zobristHash), refutationTarget);
 	std::stable_sort(moves.data, moves.data+moves.length);
 	/*for(uint16_t ind=0; ind < moves.length; ind++) {
 		std::cout<< moveToString(moves[ind], *position) << " Eval " << moves[ind].sortEval << std::endl;

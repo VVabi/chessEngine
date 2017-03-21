@@ -46,18 +46,50 @@ void setTotalTime(uint32_t tTime, uint64_t start){
 }
 
 
-enum sortState {not_sorted, hash_handled, good_captures_handled, fully_sorted};
+enum sortState {not_sorted, hash_handled, good_captures_handled, killers_handled, fully_sorted};
+extern int16_t figureValues[7];
 
+static inline bool getGoodCaptureToFront(vdt_vector<chessMove>* moves, uint16_t start_index) {
 
-bool getHashMoveToFront(vdt_vector<chessMove>* moves, uint16_t hashMove, chessMove* mov) {
+	int16_t best_index = -1;
 
-	for(uint16_t ind=0; ind < moves->length; ind++) {
+	int16_t best = 0;
+
+	for(uint16_t ind=start_index; ind < moves->length; ind++) {
 		chessMove mv = (*moves)[ind];
-		if( ((mv.sourceField) | (mv.targetField << 8)) == hashMove) {
-			 chessMove buffer = (*moves)[0];
-			 (*moves)[0] = (*moves)[ind];
+		if(mv.captureType == none) {
+			continue;
+		}
+
+		if( ((uint16_t) mv.captureType) >= ((uint16_t) mv.type)) { // || ((mv.captureType == knight) && (mv.type == bishopMove))){
+			int16_t local_best = 5*figureValues[mv.captureType]/2-figureValues[mv.type];
+			if(local_best > best) {
+				best = local_best;
+				best_index = ind;
+			}
+		}
+	}
+
+	if(best_index > -1) {
+		chessMove buffer = (*moves)[start_index];
+		(*moves)[start_index] = (*moves)[best_index];
+		(*moves)[best_index] = buffer;
+		return true;
+	}
+
+	return false;
+
+}
+
+
+static inline bool getHashMoveToFront(vdt_vector<chessMove>* moves, uint16_t hashMove, uint16_t startIndex) {
+
+	for(uint16_t ind=startIndex; ind < moves->length; ind++) {
+		chessMove mv = (*moves)[ind];
+		if( (((mv.sourceField) | (mv.targetField << 8)) == hashMove) && (mv.type != castlingKingside) && (mv.type != castlingQueenside)){
+			 chessMove buffer = (*moves)[startIndex];
+			 (*moves)[startIndex] = (*moves)[ind];
 			 (*moves)[ind] = buffer;
-			 *mov = mv;
 			 return true;
 		}
 
@@ -375,13 +407,52 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 
 	sortState currentState = not_sorted;
 
+	if(movingSideInCheck) {
+		currentState = killers_handled;
+	}
+
 	for(uint16_t ind=0; ind < moves.length; ind++){
-		if(ind == 1){
-			//first move didn't produce cutoff, now we need to sort
-			//------------------------------------------------------
-			searchCounts.neededSort++;
-			std::stable_sort(moves.data, moves.data+moves.length); //stable sort makes the engine 100% predictable and comparable between different optimization levels
+		switch(currentState) {
+			case not_sorted:
+				assert(ind == 0);
+				currentState = hash_handled;
+				if(getHashMoveToFront(&moves, hashmove, ind)) {
+					moves[ind].sortEval = 0;
+					break;
+				}
+			case hash_handled:
+				if(getGoodCaptureToFront(&moves, ind)) {
+					moves[ind].sortEval = 0;
+					break;
+				}
+				currentState = good_captures_handled;
+			case good_captures_handled: {
+				uint16_t killerA = killerMoves[ply][0];
+				if(getHashMoveToFront(&moves, killerA, ind)) {
+					moves[ind].sortEval = 0;
+					break;
+				}
+				uint16_t killerB = killerMoves[ply][1];
+				if(getHashMoveToFront(&moves, killerB, ind)) {
+					moves[ind].sortEval = 0;
+					break;
+				}
+				currentState = killers_handled;
+			}
+			case killers_handled:
+				//first move didn't produce cutoff, now we need to sort
+				//------------------------------------------------------
+				calculateStandardSortEvals(position, &moves, ind, ply, hashmove, refutationTarget);
+				searchCounts.neededSort++;
+				std::stable_sort(moves.data+ind, moves.data+moves.length); //stable sort makes the engine 100% predictable and comparable between different optimization levels
+				currentState = fully_sorted;
+				break;
+			case fully_sorted:
+				break;
+
 		}
+
+
 
 		//illegal move. Since list is sorted or, in case ind=0, best move is first, we can leave here: all further moves are also illegal.
 		//---------------------------------------------------------------------------------------------------------------------------------
@@ -394,14 +465,14 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 		makeMove(&moves[ind], position);
 		uint16_t kingField = findLSB( position->pieceTables[1- position->toMove][king]);
 
-		if(movingSideInCheck || (BIT64(moves[ind].sourceField) & (rookFieldTable[kingField] | bishopFieldTable[kingField]))) {
+		if(movingSideInCheck || (BIT64(moves[ind].sourceField) & (rookFieldTable[kingField] | bishopFieldTable[kingField])) || (moves[ind].type == kingMove)) {
 			if(isFieldAttacked( position,  position->toMove, kingField)){
-				if(moves[ind].type == kingMove) {
+				/*if(moves[ind].type == kingMove) {
 					std::cout << chessPositionToFenString(*position) << std::endl;
-				}
+				}*/
 				//move exposed our king, undo and continue
 				//---------------------------------------------
-                assert(moves[ind].type != kingMove); //all king moves moving into check should be found by move ordering!
+                //assert(moves[ind].type != kingMove); //all king moves moving into check should be found by move ordering!
 				undoMove(position);
 				continue;
 			}
