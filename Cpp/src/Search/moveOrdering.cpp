@@ -186,8 +186,12 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
 		return;
 	}
 
-	if( (mv->captureType != none) && ((BIT64(mv->targetField) & opponentAttackTable->completeAttackTable) == 0)) {
-		sortEval = sortEval+evalPars->figureValues[mv->captureType];
+	if( (mv->captureType != none)) {
+		if ((BIT64(mv->targetField) & opponentAttackTable->completeAttackTable) == 0) {
+			sortEval = sortEval+evalPars->figureValues[mv->captureType];
+		} else {
+			sortEval = sortEval+evalPars->figureValues[mv->captureType]/2;
+		}
 	}
 
 
@@ -279,6 +283,7 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
 	if( mv->sourceField == refutationTarget) {
 		sortEval = sortEval+100;
 	}
+
 
 	if( ((mv->sourceField) | (mv->targetField << 8)) == hashedMove) {
 			sortEval = sortEval+10000;

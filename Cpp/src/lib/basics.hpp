@@ -14,13 +14,13 @@
 #include <assert.h>
 #define NUM_DIFFERENT_PIECES 6
 
-#define BIT64(x) (1ULL << x)
+#define BIT64(x) (1ULL << (x))
 
-#define PIECETABLE(a)  			((a & 0xFFFF)-(1 << 15)-64*500)
-#define ENDGAMEPIECETABLE(a)  	((a >> 16)-(1 << 15)-64*500)
+#define PIECETABLE(a)  			(((a) & 0xFFFF)-(1 << 15)-64*500)
+#define ENDGAMEPIECETABLE(a)  	(((a) >> 16)-(1 << 15)-64*500)
 
-#define FILE(x) (x & 7)
-#define ROW(x)  (x >> 3)
+#define FILE(x) ((x) & 7)
+#define ROW(x)  ((x) >> 3)
 
 enum figureType: uint16_t {pawn=0, knight=1, bishop=2, rook=3, queen=4, king=5, none=6};
 enum moveType: uint16_t   {pawnMove=0, knightMove=1, bishopMove=2, rookMove=3, queenMove=4, kingMove=5,

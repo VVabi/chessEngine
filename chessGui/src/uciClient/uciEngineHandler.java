@@ -100,18 +100,9 @@ public class uciEngineHandler {
         while(true){
 
             String answer = reader.readLine();
-            if(answer != null)  {
-                moves.add(answer);
-            } else {
-                for(String m: moves ){
-                    System.out.println(m);
-                }
-
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            if(answer == null) {
+                System.out.println("Engine seems to have crashed???");
+                return -20000;
             }
 
             //System.out.println(answer);

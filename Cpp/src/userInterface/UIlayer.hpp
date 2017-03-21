@@ -18,12 +18,12 @@ std::string chessPositionToOutputString(const chessPosition position);
 chessPosition stringToChessPosition(std::string strposition);
 chessPosition FENtoChessPosition(std::string fen);
 std::string chessPositionToFenString(chessPosition position, bool EPD=false);
-std::string moveToString(chessMove move, chessPosition position);
+std::string moveToString(chessMove move);
 uint64_t stringToMove(std::string mv);
 bool checkAndMakeMove(chessPosition& position, std::string move);
 void runPerformanceTests();
 uint64_t get_timestamp();
 void outputUint64(uint64_t num);
 
-std::string moveToExtendedString(chessMove move, chessPosition position);
+std::string moveToExtendedString(chessMove move);
 #endif /* USERINTERFACE_UILAYER_HPP_ */

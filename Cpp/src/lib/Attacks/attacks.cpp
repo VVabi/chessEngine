@@ -182,13 +182,24 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
 	uint64_t takesLeft = (attackingSide ? pawns >> 9 : pawns << 7) & NOTFILEH;
 	retTable.attackTables[pawn] = takesLeft | takesRight;
 
+/*#ifdef EXPERIMENTAL //didnt work out :( should be revisited
+	uint64_t takesRightOpp = ((1-attackingSide) ? pawns >> 7 : pawns << 9) & NOTFILEA;
+	uint64_t takesLeftOpp = ((1-attackingSide) ? pawns >> 9 : pawns << 7) & NOTFILEH;
+
+	uint64_t opppawnTakes = takesRightOpp | takesLeftOpp;
+#endif*/
+
 	//knights
 	uint64_t knights = position->pieceTables[attackingSide][knight];
 	uint64_t knightAttackTable = 0;
 	while(knights){
 		uint16_t nextKnight = popLSB(knights);
 		knightAttackTable = knightAttackTable | knightmovetables[nextKnight];
+/*#ifdef EXPERIMENTAL
+		uint16_t legalMoves = popcount(knightmovetables[nextKnight] & ~ownPieces & ~opppawnTakes);
+#else*/
 		uint16_t legalMoves = popcount(knightmovetables[nextKnight] & ~ownPieces);
+//#endif
 		assert(legalMoves < 9);
 		*mobilityScore = *mobilityScore+knightMobility[legalMoves];
 	}
@@ -241,9 +252,8 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
 		uint64_t potentialMoves = rookMoveTables[nextPieceField][hashValue];
 		queenAttackTable = queenAttackTable | potentialMoves;
 		*mobilityScore = *mobilityScore+popcount(potentialMoves & ~ownPieces);
-/*#ifdef EXPERIMENTAL
-		*mobilityScore = *mobilityScore-6;
-#endif*/
+
+
 	}
 
 	//TODO: this could be optimized by merging with the rook table and doing both at once
@@ -256,9 +266,6 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
 		uint64_t potentialMoves = bishopMoveTables[nextPieceField][hashValue];
 		queenAttackTable = queenAttackTable | potentialMoves;
 		*mobilityScore = *mobilityScore+popcount(potentialMoves & ~ownPieces);
-	/*#ifdef EXPERIMENTAL
-		*mobilityScore = *mobilityScore-6;
-	#endif*/
 	}
 	retTable.attackTables[queen] = queenAttackTable;
 

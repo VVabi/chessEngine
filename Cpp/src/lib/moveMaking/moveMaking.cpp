@@ -156,12 +156,14 @@ void makeMove(chessMove* move, chessPosition* position) {
 	position->totalFigureEval     = position->totalFigureEval-figureValues[move->captureType];
 	position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
 	position->data.enPassantFile  = 8;
+
+	if((move->type == pawnMove) && ((move->targetField-move->sourceField) & 15) == 0) { //pawn went two ahead
+		position->data.enPassantFile = FILE(move->targetField);
+	}
+
+
 	switch(move->type){
 		case pawnMove:
-			if(((move->targetField-move->sourceField) & 15) == 0) { //pawn went two ahead
-				position->data.enPassantFile = FILE(move->targetField);
-			}
-
 		case knightMove:
 		case bishopMove:
 		case rookMove:

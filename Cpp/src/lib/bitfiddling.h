@@ -8,7 +8,7 @@
 #ifndef BIT_FIDDLING_
 #define BIT_FIDDLING_
 #include <stdint.h>
-
+#include <lib/Defines/boardParts.hpp>
 
 #define LOWESTBITONLY(a) (a & (-a))
 

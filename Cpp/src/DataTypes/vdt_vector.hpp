@@ -47,7 +47,7 @@ template<typename T> class vdt_vector{
 
 		void add(T* element){
 
-			if(length > allocated_length){
+			/*if(length > allocated_length){
 				//add fatal
 			}
 			if(length >= allocated_length){
@@ -61,7 +61,7 @@ template<typename T> class vdt_vector{
 				std::cout << "NEED TO RESIZE VECTOR! WTF?" << std::endl;
 				delete[] data;
 				data = buffer;
-			}
+			}*/
 			data[length] = *element;
 			length++;
 		}

@@ -96,7 +96,7 @@ uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t n
 		}
 
 		uint32_t completeExpectedTime = total+remainingMoves*increment;
-		float timeAllotted = completeExpectedTime/(2.0*remainingMoves);
+		float timeAllotted = completeExpectedTime/(remainingMoves);
 
 		if(timeAllotted > total/10.0){
 			timeAllotted = total/10.0;
@@ -288,17 +288,13 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 		std::list<std::string> moveList;
 
 		for(uint16_t ind=0; ind < line.numMoves; ind++) {
-			std::string mv = moveToString(line.line[ind], *position);
+			std::string mv = moveToString(line.line[ind]);
 			moveList.push_back(mv);
-			makeMove(&line.line[ind], position);
 		}
 
-		for(uint16_t ind=0; ind < line.numMoves; ind++) {
-			undoMove(position);
-		}
 
 		sendSearchInfo(*nodeCount, *mtime, *eval, depth, moveList);
-		logSearch(*nodeCount, *mtime, *eval, depth, moveToString(*bestMove, *position));
+		//logSearch(*nodeCount, *mtime, *eval, depth, moveToString(*bestMove));
 		line.numMoves = 0;
 		depth++;
 		searchedNodes = searchedNodes+*nodeCount;
@@ -340,7 +336,7 @@ void search(chessPosition cposition, searchParameters params){
 	uint64_t mtime = 0;
 	int32_t eval = 0;
 	searchMove(&cposition, &bestMove,&nodeCount, &mtime, &eval, false, params);
-	putLine("bestmove " + moveToString(bestMove, cposition));
+	putLine("bestmove " + moveToString(bestMove));
 	free_position(&cposition);
 	isSearching = false;
 }
@@ -556,6 +552,8 @@ void handleEval() {
 	evalInfo << " Passed pawns " << res.passedPawn;
 	evalInfo << " rook open files " << res.rookOpenFiles;
 	evalInfo << " bishoppair " << res.bishoppair;
+	evalInfo << " Trapped pieces " << res.trappedPieces;
+	evalInfo << " Outposts " << res.outPosts;
 	putLine(evalInfo.str());
 	free_position(&cposition);
 }

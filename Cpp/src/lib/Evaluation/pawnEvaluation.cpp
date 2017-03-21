@@ -47,7 +47,9 @@ static uint16_t distBetweenFields(uint16_t a, uint16_t b) {
 uint64_t staticpawncalls = 0;
 uint64_t staticpawnhashhits = 0;
 
-static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint64_t blackPawns, uint16_t blackKing, uint16_t whiteKing) {
+#define BLOCKED 3
+
+static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint64_t blackPawns, uint16_t blackKing, uint16_t whiteKing, uint64_t whitePieces, uint64_t blackPieces) {
 	//TODO: remove code duplication. Generally this code sucks - too many white/black diffs...
 	int32_t eval = 0;
 	uint64_t whitePawnBuffer = whitePawns;
@@ -59,10 +61,17 @@ static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint6
 			uint16_t promotionField  = FILE(field)+56;
 			uint16_t distToPromotion = 7-ROW(field);
 			uint16_t kingDist        = distBetweenFields(promotionField, blackKing);
+			bool blocked = blackPieces & BIT64(field+8);
 			if(distToPromotion <= 2) {
 				*untaperedEval = *untaperedEval+7*passedPawnEvalValues[white][field];
+				if(blocked) {
+					*untaperedEval = *untaperedEval-BLOCKED*passedPawnEvalValues[white][field];
+				}
 			} else {
 				eval = eval+7*passedPawnEvalValues[white][field];
+				if(blocked) {
+					eval = eval-BLOCKED*passedPawnEvalValues[white][field];
+				}
 			}
 /*#ifdef EXPERIMENTAL
 			int16_t coverage = 0;
@@ -100,11 +109,17 @@ static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint6
 			uint16_t promotionField  = FILE(field);
 			uint16_t distToPromotion = ROW(field);
 			uint16_t kingDist        = distBetweenFields(promotionField, whiteKing);
-
+			bool blocked = whitePieces & BIT64(field-8);
 			if(distToPromotion <= 2) {
 				*untaperedEval = *untaperedEval-7*passedPawnEvalValues[black][field];
+				if(blocked) {
+					*untaperedEval = *untaperedEval+BLOCKED*passedPawnEvalValues[black][field];
+				}
 			} else {
 				eval = eval-7*passedPawnEvalValues[black][field];
+				if(blocked) {
+					eval = eval+BLOCKED*passedPawnEvalValues[black][field];
+				}
 			}
 
 		/*#ifdef EXPERIMENTAL
@@ -184,7 +199,7 @@ int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOcc
 
 extern evaluationResult result;
 
-int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupancy, uint16_t phase, const evalParameters* evalPars) {
+int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupancy, uint16_t phase) {
 	uint32_t eval=0;
 	uint64_t whitePawns = position->pieceTables[white][pawn];
 	uint64_t blackPawns = position->pieceTables[black][pawn];
@@ -197,12 +212,12 @@ int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupan
 		pawnColumnOccupancy[0] = entry.pawnColumnOcc[0];
 		pawnColumnOccupancy[1] = entry.pawnColumnOcc[1];
 
-#ifdef DEBUG
+/*#ifdef DEBUG
 		int16_t staticPawnReal = staticPawnEval(whitePawns, white, pawnColumnOccupancy,&evalPars->staticPawnParameters)+staticPawnEval(blackPawns, black,  pawnColumnOccupancy+1,&evalPars->staticPawnParameters);
 		assert(staticPawnReal == staticPawn);
 		assert(pawnColumnOccupancy[0] == entry.pawnColumnOcc[0]);
 		assert(pawnColumnOccupancy[1] == entry.pawnColumnOcc[1]);
-#endif
+#endif*/
 	} else {
 		staticpawncalls++;
 		staticPawn = staticPawnEvalComplete(position, pawnColumnOccupancy);
@@ -211,7 +226,7 @@ int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupan
 	eval = eval+staticPawn;
 	result.staticPawn = staticPawn;
 	int32_t untapered = 0;
-	int32_t passedPawns = passedPawnEval(&untapered, whitePawns, blackPawns, findLSB(position->pieceTables[black][king]), findLSB(position->pieceTables[white][king]));
+	int32_t passedPawns = passedPawnEval(&untapered, whitePawns, blackPawns, findLSB(position->pieceTables[black][king]), findLSB(position->pieceTables[white][king]), position->pieces[white], position->pieces[black]);
 /*#ifdef EXPERIMENTAL
 	int16_t passedPawnPhase = std::max(phase-10, 0);
 #else*/
@@ -222,43 +237,5 @@ int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupan
 	eval = eval+passedPawns+untapered;
 	result.passedPawn = passedPawns+untapered;
 
-
-#ifdef NDEF //EXPERIMENTAL  //looks like very small gain (~ 5-6 elo), but I was hoping for more...
-	//backwards pawn
-	/*int64_t wpawns = position->pieceTables[white][pawn];
-
-	uint64_t wtakesRight =  wpawns << 9 & NOTFILEA;
-	uint64_t wtakesLeft =   wpawns << 7 & NOTFILEH;
-	uint64_t wtakes     = wtakesLeft | wtakesRight;
-
-	uint64_t bpawns = position->pieceTables[black][pawn];
-
-	uint64_t btakesRight =  bpawns >> 7  & NOTFILEA;
-	uint64_t btakesLeft  =  bpawns >> 9  & NOTFILEH;
-	uint64_t btakes      =  btakesLeft | btakesRight;*/
-
-	uint64_t buffer = position->pieceTables[white][pawn];
-	while(buffer){
-		uint16_t n = popLSB(buffer)+8;
-		if(!(passedPawnMasks[black][n] & (position->pieceTables[white][pawn] & ~(1ULL << (n-8)))) && !(position->pieceTables[black][pawn] & files[FILE(n)])){
-			eval = eval-15;
-
-			/*if(btakes & BIT64(n)){
-				eval = eval-10;
-			}*/
-		}
-	}
-
-	buffer = position->pieceTables[black][pawn];
-	while(buffer){
-		uint16_t n = popLSB(buffer)-8;
-		if(!(passedPawnMasks[white][n] & (position->pieceTables[black][pawn] & ~(1ULL << (n+8)))) && !(position->pieceTables[white][pawn] & files[FILE(n)])){
-			eval = eval+15;
-			/*if(wtakes & BIT64(n)){
-				eval = eval+10;
-			}*/
-		}
-	}
-#endif
 	return eval;
 }

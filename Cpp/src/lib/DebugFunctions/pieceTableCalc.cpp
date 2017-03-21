@@ -18,12 +18,12 @@ int16_t calcPieceTableValue(const chessPosition* position) {
 		uint64_t whitePieces = position->pieceTables[white][ind];
 		while(whitePieces){
 			uint16_t field = popLSB(whitePieces);
-			val = val+pieceTables[ind][white][field]/2;
+			val = val+pieceTables[ind][white][field];
 		}
 		uint64_t blackPieces = position->pieceTables[black][ind];
 		while(blackPieces){
 			uint16_t field = popLSB(blackPieces);
-			val = val-pieceTables[ind][black][field]/2;
+			val = val-pieceTables[ind][black][field];
 		}
 	}
 	return val;
@@ -37,12 +37,12 @@ int16_t calcEndGamePieceTableValue(const chessPosition* position) {
 		uint64_t whitePieces = position->pieceTables[white][ind];
 		while(whitePieces){
 			uint16_t field = popLSB(whitePieces);
-			val = val+endGamepieceTables[ind][white][field]/2;
+			val = val+endGamepieceTables[ind][white][field];
 		}
 		uint64_t blackPieces = position->pieceTables[black][ind];
 		while(blackPieces){
 			uint16_t field = popLSB(blackPieces);
-			val = val-endGamepieceTables[ind][black][field]/2;
+			val = val-endGamepieceTables[ind][black][field];
 		}
 	}
 	return val;

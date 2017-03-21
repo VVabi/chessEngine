@@ -46,10 +46,8 @@ void setTotalTime(uint32_t tTime, uint64_t start){
 }
 
 
+enum sortState {not_sorted, hash_handled, good_captures_handled, fully_sorted};
 
-
-uint64_t trueRets = 0;
-uint64_t falseRets = 0;
 
 bool getHashMoveToFront(vdt_vector<chessMove>* moves, uint16_t hashMove, chessMove* mov) {
 
@@ -60,14 +58,11 @@ bool getHashMoveToFront(vdt_vector<chessMove>* moves, uint16_t hashMove, chessMo
 			 (*moves)[0] = (*moves)[ind];
 			 (*moves)[ind] = buffer;
 			 *mov = mv;
-			 trueRets++;
 			 return true;
 		}
 
 	}
-	falseRets++;
 	return false;
-
 }
 
 uint16_t killerMoves[40][2];
@@ -85,13 +80,11 @@ static inline void get_extensions_reductions(uint16_t* reduction, uint16_t* exte
 		if(!check && !movingSideInCheck && (move->captureType == none) && (depth > 2) && (ply > 0)){
 			if((ind > 3)){
 				*reduction = 1;
-				if(move->sortEval < -50) {
+				if((move->sortEval < -50)) {
 					*reduction = 2;
 				}
 			}
 		}
-
-
 
 		if(check && ((ply+depth < max_ply-1) || ((depth == 1) && (ply+depth < max_ply)) )){
 			*extension = 1;
@@ -104,7 +97,6 @@ static inline void get_extensions_reductions(uint16_t* reduction, uint16_t* exte
 			*extension = *extension+1;
 			*reduction = 0;
 		}
-
 }
 
 static inline bool backtrack_position_for_repetition(chessPosition* position) {
@@ -126,6 +118,8 @@ static uint8_t nullmoveReductions[40] = {0,1,2,2,2,2,2,2,
 										 3,3,3,3,3,3,3,3,
 										 3,3,3,3,3,3,3,3,
 };
+
+//std::ofstream badMoveLogger("/home/vabi/Tools/lateCutoffs.txt");
 
 
 static inline bool check_futility(bool movingSideInCheck, int32_t alpha, chessPosition* position) {
@@ -242,7 +236,7 @@ static inline void handleBetaCutoff(chessMove* bestMove, uint64_t zobristHash, i
 static inline void checkTimeout() {
 	if(get_timestamp()-start_ts >= totalTime){ //TODO: how is this performance wise?
 		qmvStack.reset();
-		std::cout << "Total time " << totalTime << std::endl;
+		//std::cout << "Total time " << totalTime << std::endl;
 		throw timeoutException();
 	}
 	if(!continueSearch) {
@@ -257,6 +251,18 @@ uint64_t gotHashMove = 0;
 uint64_t noHashMove   = 0;
 int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t depth, int16_t alpha, int16_t beta, pvLine* PV, bool allowNullMove, bool doHashProbe){
 
+
+	/*int16_t max_score = 30000-ply-1;
+
+	if(max_score < alpha) {
+		return alpha; //mate score somewhere above us in the tree which we will never surpass anyway.
+	}
+
+	int16_t min_score = -30000+ply;
+
+	if(min_score > beta) {
+		return beta;
+	}*/
 	/*std::string pos =chessPositionToFenString(*position);
 	plogger << pos << std::endl;
 
@@ -351,8 +357,8 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 
 	//calc sorteval
 	//------------------------
-	bool isInCheck = calculateStandardSortEvals(position, &moves, ply, hashmove, refutationTarget); //does no complete sort, but puts best move at the front
-	assert(isInCheck == movingSideInCheck);
+	//bool isInCheck = calculateStandardSortEvals(position, &moves, ply, hashmove, refutationTarget); //does no complete sort, but puts best move at the front
+	//assert(isInCheck == movingSideInCheck);
 
 	//init variables
 	//-----------------------------
@@ -366,6 +372,9 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 
 	pvLine localPV;
 	localPV.numMoves = 0;
+
+	sortState currentState = not_sorted;
+
 	for(uint16_t ind=0; ind < moves.length; ind++){
 		if(ind == 1){
 			//first move didn't produce cutoff, now we need to sort
@@ -385,8 +394,11 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 		makeMove(&moves[ind], position);
 		uint16_t kingField = findLSB( position->pieceTables[1- position->toMove][king]);
 
-		if(isInCheck || (BIT64(moves[ind].sourceField) & (rookFieldTable[kingField] | bishopFieldTable[kingField]))) {
+		if(movingSideInCheck || (BIT64(moves[ind].sourceField) & (rookFieldTable[kingField] | bishopFieldTable[kingField]))) {
 			if(isFieldAttacked( position,  position->toMove, kingField)){
+				if(moves[ind].type == kingMove) {
+					std::cout << chessPositionToFenString(*position) << std::endl;
+				}
 				//move exposed our king, undo and continue
 				//---------------------------------------------
                 assert(moves[ind].type != kingMove); //all king moves moving into check should be found by move ordering!
@@ -447,9 +459,14 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 
 		undoMove(position);
 
+
 		//in case of beta cutoff, leave
 		//----------------------------------
 		if((alpha >= beta)) {
+			//if(ind > 0) {
+				//badMoveLogger << moveToExtendedString(PV->line[0]) << " index " << ind << " of " << moves.length << " " << chessPositionToFenString(*position) << std::endl;
+			//}
+
 			handleBetaCutoff(&PV->line[0], position->zobristHash, beta, depth, ply, searchId);
 			if(bestIndex != -1){
 				searchCounts.bestIndex[depth][bestIndex]++;

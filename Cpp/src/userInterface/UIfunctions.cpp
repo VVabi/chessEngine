@@ -464,10 +464,10 @@ chessPosition stringToChessPosition(std::string strposition) {
 }
 
 
-std::string moveToString(chessMove move, chessPosition position) {
+std::string moveToString(chessMove move) {
 
 	if(move.type == castlingKingside){
-			if(position.toMove == white){
+			if(move.sourceField < 32){
 				return "e1g1";
 			} else {
 				return "e8g8";
@@ -475,20 +475,15 @@ std::string moveToString(chessMove move, chessPosition position) {
 	}
 
 	if(move.type == castlingQueenside){
-			if(position.toMove == white){
+			if(move.sourceField < 32){
 				return "e1c1";
 			} else {
 				return "e8c8";
 			}
 	}
 
-	uint64_t mv = move.move;
-	uint64_t occupancy = position.pieces[position.toMove];
-	uint64_t source = mv & occupancy;
-	uint64_t target = mv^source;
-
-	uint16_t sourceField = findLSB(source);
-	uint16_t targetField = findLSB(target);
+	uint16_t sourceField = move.sourceField;
+	uint16_t targetField = move.targetField;
 
 	char ret[4];
 	ret[0] = FILE(sourceField)+'a';
@@ -518,8 +513,8 @@ std::string moveToString(chessMove move, chessPosition position) {
 
 }
 
-std::string moveToExtendedString(chessMove move, chessPosition position){
-	std::string ret = moveToString(move, position);
+std::string moveToExtendedString(chessMove move){
+	std::string ret = moveToString(move);
 	ret = ret+" "+std::to_string(((int) move.type))+" "+std::to_string(((int) move.captureType));
 	return ret;
 }
@@ -704,7 +699,7 @@ bool checkAndMakeMove(chessPosition& position, std::string move){
 			}
 		}
 		if(found){
-			std::cout << moveToString(m, position) << std::endl;
+			std::cout << moveToString(m) << std::endl;
 			makeMove(&m, &position);
 			uint16_t kingField = findLSB(position.pieceTables[1-position.toMove][king]);
 			if(isFieldAttacked(&position, position.toMove, kingField)){

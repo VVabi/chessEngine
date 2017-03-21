@@ -24,10 +24,10 @@ uint64_t castlingHash[16];
 uint64_t enpassantHash[9];
 
 #ifdef HASH
-static uint16_t permutationIndex = 0;
+//static uint16_t permutationIndex = 0;
 
 
-static uint16_t permutations[4][4] = {{0,1,2,3}, {1,2,3,0}, {2,3,0,1}, {3,0,1,2}};
+//static uint16_t permutations[4][4] = {{0,1,2,3}, {1,2,3,0}, {2,3,0,1}, {3,0,1,2}};
 
 
 bool getPawnHashTableEntry(pawnHashEntry* entry, uint64_t key) {
@@ -95,7 +95,7 @@ void setHashEntry(hashFlag flag, int16_t eval, uint8_t depth, uint8_t searchId, 
 	hashBucket* current = &moveOrderingHashTable[key & HASHSIZE];
 
 	for(uint8_t ind=0; ind < 4; ind++){
-		hashEntry* entry = &current->hashData[permutations[permutationIndex][ind]];
+		hashEntry* entry = &current->hashData[ind]; //&current->hashData[permutations[permutationIndex][ind]];
 		if((entry->depth <= depth) || (entry->searchId != searchId)) {
 			entry->flag = flag;
 			entry->eval  = eval;
@@ -104,11 +104,11 @@ void setHashEntry(hashFlag flag, int16_t eval, uint8_t depth, uint8_t searchId, 
 			entry->bestMove = bestMove;
 			entry->hashHighBits = (uint32_t) (key >> 32);
 			entry->hashLower    = (uint16_t) (((uint32_t) (key & 0xFFFFFFFF)) >> 16);
-			entry->index        = permutations[permutationIndex][ind];
+			entry->index        = ind; //permutations[permutationIndex][ind];
 			break;
 		}
 	}
-	permutationIndex = (permutationIndex+1) & 3;
+	//permutationIndex = (permutationIndex+1) & 3;
 }
 
 uint16_t getHashMove(uint64_t zobristKey){
@@ -131,7 +131,7 @@ void setHashMove(uint16_t move, uint64_t zobristKey, uint8_t searchId) {  //DEPR
 	uint32_t zobristHigher = (uint32_t) (zobristKey  >> 32);
 	uint16_t zobristLower  = (uint16_t) (((uint32_t) (zobristKey  & 0xFFFFFFFF)) >> 16);
 	for(uint8_t ind=0; ind < 4; ind++){
-		hashEntry* entry = &current->hashData[permutations[permutationIndex][ind]];
+		hashEntry* entry = &current->hashData[ind]; //&current->hashData[permutations[permutationIndex][ind]];
 		if ((entry->searchId != searchId)){
 			entry->searchId = searchId;
 			entry->depth    = 0;
@@ -144,7 +144,7 @@ void setHashMove(uint16_t move, uint64_t zobristKey, uint8_t searchId) {  //DEPR
 			entry->index        = ind;
 		}
 	}
-	permutationIndex = (permutationIndex+1) & 3;
+	//permutationIndex = (permutationIndex+1) & 3;
 }
 #endif
 
