@@ -77,11 +77,13 @@ hashEntry getHashTableEntry(uint64_t zobristKey) {
 
 	uint32_t zobristHigher = (uint32_t) (zobristKey  >> 32);
 	uint16_t zobristLower  = (uint16_t) (((uint32_t) (zobristKey  & 0xFFFFFFFF)) >> 16);
+	int16_t max_depth = -1;
 
 	for(uint8_t ind=0; ind < 4; ind++){
 		hashEntry entry = current.hashData[ind];
-		if((entry.hashHighBits == zobristHigher) && (entry.hashLower == zobristLower)){
+		if((entry.hashHighBits == zobristHigher) && (entry.hashLower == zobristLower) && (entry.depth > max_depth)){
 			ret = entry;
+			max_depth = entry.depth;
 		}
 	}
 	return ret;

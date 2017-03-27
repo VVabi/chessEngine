@@ -34,11 +34,12 @@ void undoNullMove(chessPosition* position) {
 inline static void undoNormalMove(chessPosition* position, chessMove move) {
 	position->toMove = (playerColor) (1-position->toMove);
 	playerColor toMove 									= position->toMove;
-	position->pieces[toMove] 							= position->pieces[toMove]^move.move;
-	position->pieceTables[toMove][move.type] 			= position->pieceTables[toMove][move.type]^move.move;
+	uint64_t moveMask          							= BIT64(move.sourceField) | BIT64(move.targetField);
+	position->pieces[toMove] 							= position->pieces[toMove]^moveMask;
+	position->pieceTables[toMove][move.type] 			= position->pieceTables[toMove][move.type]^moveMask;
 	uint64_t isCapture = ((none == move.captureType) ? 0:UINT64_MAX);
-	position->pieces[1-toMove] 							= (position->pieces[1-toMove] | (isCapture & move.move)) & (~position->pieces[toMove]);
-	position->pieceTables[1-toMove][move.captureType] 	= (position->pieceTables[1-toMove][move.captureType] | (isCapture & move.move)) & (~position->pieces[toMove]);
+	position->pieces[1-toMove] 							= (position->pieces[1-toMove] | (isCapture & moveMask)) & (~position->pieces[toMove]);
+	position->pieceTables[1-toMove][move.captureType] 	= (position->pieceTables[1-toMove][move.captureType] | (isCapture & moveMask)) & (~position->pieces[toMove]);
 	position->pieceTableEval = position->pieceTableEval-(1-2*toMove)*(completePieceTables[move.type][toMove][move.targetField]-completePieceTables[move.type][toMove][move.sourceField]);
 	position->pieceTableEval = position->pieceTableEval-(1-2*toMove)*completePieceTables[move.captureType][1-toMove][move.targetField];
 	position->zobristHash    = position->zobristHash^zobristHash[move.type][toMove][move.targetField]^zobristHash[move.type][toMove][move.sourceField]^zobristHash[move.captureType][1-toMove][move.targetField];
@@ -86,8 +87,9 @@ inline static void undoQueenSideCastling(chessPosition* position) {
 inline static void undoEnPassant(chessPosition* position, chessMove move) {
 	position->toMove = (playerColor) (1-position->toMove);
 	playerColor toMove 									= position->toMove;
-	position->pieces[toMove] 							= position->pieces[toMove]^move.move;
-	position->pieceTables[toMove][pawn] 			    = position->pieceTables[toMove][pawn]^move.move;
+	uint64_t moveMask          							= BIT64(move.sourceField) | BIT64(move.targetField);
+	position->pieces[toMove] 							= position->pieces[toMove]^moveMask;
+	position->pieceTables[toMove][pawn] 			    = position->pieceTables[toMove][pawn]^moveMask;
 	uint16_t shift 										= (toMove? move.targetField+8: move.targetField-8);
 	position->pieceTables[1-toMove][pawn] 				= position->pieceTables[1-toMove][pawn] ^ BIT64(shift);
 	position->pieces[1-toMove] 							= position->pieces[1-toMove] ^ BIT64(shift);
@@ -100,12 +102,13 @@ inline static void undoEnPassant(chessPosition* position, chessMove move) {
 inline static void undoPromotion(chessPosition* position, chessMove move, figureType promotedFigure) {
 	position->toMove = (playerColor) (1-position->toMove);
 	playerColor toMove 									= position->toMove;
-	position->pieces[toMove] 							= position->pieces[toMove]^move.move;
+	uint64_t moveMask          							= BIT64(move.sourceField) | BIT64(move.targetField);
+	position->pieces[toMove] 							= position->pieces[toMove]^moveMask;
 	position->pieceTables[toMove][pawn] 				= position->pieceTables[toMove][pawn]^BIT64(move.sourceField);
 	position->pieceTables[toMove][promotedFigure] 		= position->pieceTables[toMove][promotedFigure]^BIT64(move.targetField);
 	uint64_t isCapture 									= ((none == move.captureType) ? 0:UINT64_MAX);
-	position->pieces[1-toMove] 							= (position->pieces[1-toMove] | (isCapture & move.move)) & (~position->pieces[toMove]);
-	position->pieceTables[1-toMove][move.captureType] 	= (position->pieceTables[1-toMove][move.captureType] | (isCapture & move.move)) & (~position->pieces[toMove]);
+	position->pieces[1-toMove] 							= (position->pieces[1-toMove] | (isCapture & moveMask)) & (~position->pieces[toMove]);
+	position->pieceTables[1-toMove][move.captureType] 	= (position->pieceTables[1-toMove][move.captureType] | (isCapture & moveMask)) & (~position->pieces[toMove]);
 	position->pieceTableEval 							= position->pieceTableEval-(1-2*toMove)*(completePieceTables[promotedFigure][toMove][move.targetField]-completePieceTables[pawn][toMove][move.sourceField]);
 	position->pieceTableEval 							= position->pieceTableEval-(1-2*toMove)*completePieceTables[move.captureType][1-toMove][move.targetField];
 	const evalParameters* evalPars 						= getEvalParameters();
@@ -119,7 +122,6 @@ inline static void undoPromotion(chessPosition* position, chessMove move, figure
 void undoMove(chessPosition* position) {
 
 	if(position->madeMoves.length == 0){
-		std::cout << "Nothing to undo" << std::endl;
 		return;
 	}
 

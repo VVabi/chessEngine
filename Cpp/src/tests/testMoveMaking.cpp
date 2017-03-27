@@ -37,7 +37,6 @@ testResult testMakeMove(){
 			chessPosition pos = stringToChessPosition(randomPosition);
 
 			chessMove move;
-			move.move 		 = BIT64(start) | BIT64(end);
 			move.type 		 = (moveType) getFigureTypeFromChar(piece);
 			move.captureType = none;
 			makeMove(&move, &pos);
@@ -72,7 +71,6 @@ testResult testMakeMove(){
 			chessPosition pos = stringToChessPosition(randomPosition);
 			pos.toMove = color;
 			chessMove move;
-			move.move 		 = BIT64(start) | BIT64(end);
 			move.type 		 = (moveType) getFigureTypeFromChar(piece);
 			move.captureType = getFigureTypeFromChar(capturePiece);
 			makeMove(&move, &pos);
@@ -120,7 +118,6 @@ testResult testUndoMove() {
 			chessPosition pos = stringToChessPosition(randomPosition);
 			pos.toMove = color;
 			chessMove move;
-			move.move 		 = BIT64(start) | BIT64(end);
 			move.type 		 = (moveType) getFigureTypeFromChar(piece);
 			move.captureType = none;
 			makeMove(&move, &pos);
@@ -155,7 +152,6 @@ testResult testUndoMove() {
 			chessPosition pos = stringToChessPosition(randomPosition);
 			pos.toMove = color;
 			chessMove move;
-			move.move 		 = BIT64(start) | BIT64(end);
 			move.type 		 = (moveType) getFigureTypeFromChar(piece);
 			move.captureType = getFigureTypeFromChar(capturePiece);
 			makeMove(&move, &pos);

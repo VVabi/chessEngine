@@ -108,9 +108,9 @@ uint16_t repetitionData[16384] = {0};
 //std::ofstream logger("/home/vabi/log8.txt");
 
 static inline void get_extensions_reductions(uint16_t* reduction, uint16_t* extension, bool check, bool movingSideInCheck, uint16_t ply, uint16_t max_ply, int16_t depth, chessMove* move, uint16_t ind) {
-
+//#ifdef EXPERIMENTAL
 		if(!check && !movingSideInCheck && (move->captureType == none) && (depth > 2) && (ply > 0)){
-			if((ind > 3)){
+			if(move->sortEval < 20){
 				*reduction = 1;
 				if((move->sortEval < -50)) {
 					*reduction = 2;
@@ -118,6 +118,21 @@ static inline void get_extensions_reductions(uint16_t* reduction, uint16_t* exte
 			}
 		}
 
+		if(ind > 1000) {
+			*reduction = 0;
+		}
+/*#else
+		if(!check && !movingSideInCheck && (move->captureType == none) && (depth > 2) && (ply > 0)){
+				if(ind > 3){
+					*reduction = 1;
+					if((move->sortEval < -50)) {
+						*reduction = 2;
+					}
+				}
+			}
+
+
+#endif*/
 		if(check && ((ply+depth < max_ply-1) || ((depth == 1) && (ply+depth < max_ply)) )){
 			*extension = 1;
 			*reduction = 0;
@@ -145,7 +160,7 @@ static inline bool backtrack_position_for_repetition(chessPosition* position) {
 }
 
 static uint8_t nullmoveReductions[40] = {0,1,2,2,2,2,2,2,
-										 2,2,2,2,2,2,2,2,
+										 3,3,3,3,3,3,3,3,
 										 3,3,3,3,3,3,3,3,
 										 3,3,3,3,3,3,3,3,
 										 3,3,3,3,3,3,3,3,
@@ -158,7 +173,7 @@ static inline bool check_futility(bool movingSideInCheck, int32_t alpha, chessPo
 	if(!movingSideInCheck && (alpha > -2000)) {
 		searchCounts.futility_tried++;
 		int32_t simpleEval = evaluation(position, alpha-151, alpha, true);
-		if(simpleEval < alpha+100) {
+		if(simpleEval < alpha-100) {
 			int32_t base = evaluation(position, alpha-151, alpha);
 			if(base+150 < alpha){
 				searchCounts.futility_successful++;
@@ -281,8 +296,7 @@ static inline void checkTimeout() {
 
 uint64_t gotHashMove = 0;
 uint64_t noHashMove   = 0;
-int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t depth, int16_t alpha, int16_t beta, pvLine* PV, bool allowNullMove, bool doHashProbe){
-
+int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t depth, int16_t alpha, int16_t beta, pvLine* PV, bool allowNullMove, bool doHashProbe) {
 
 	/*int16_t max_score = 30000-ply-1;
 
@@ -333,6 +347,16 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 		}
 	}
 
+
+
+	//go to quiescence on depth 0.
+	//---------------------------
+	if(depth <= 0) {
+		searchCounts.wentToQuiescence++;
+		PV->numMoves = 0;
+		return negamaxQuiescence(position, ply, alpha, beta, 0);
+	}
+
 	//check in hashtable for position value
 	//----------------------------------------
 	uint16_t hashmove = 0;
@@ -342,13 +366,6 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 		return hashEval;
 	}
 
-	//go to quiescence on depth 0. TODO: move before hashing? otherwise we request hash entry twice
-	//---------------------------
-	if(depth <= 0) {
-		searchCounts.wentToQuiescence++;
-		PV->numMoves = 0;
-		return negamaxQuiescence(position, ply, alpha, beta, 0);
-	}
 
 	//try nullmove pruning
 	//-------------------------
@@ -394,7 +411,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 
 	//init variables
 	//-----------------------------
-	bool legalMovesAvailable = false;
+	uint16_t numlegalMoves = 0;
 	bool foundGoodMove = false;
 	searchCounts.wentToSearch++;
 
@@ -444,7 +461,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 				//------------------------------------------------------
 				calculateStandardSortEvals(position, &moves, ind, ply, hashmove, refutationTarget);
 				searchCounts.neededSort++;
-				std::stable_sort(moves.data+ind, moves.data+moves.length); //stable sort makes the engine 100% predictable and comparable between different optimization levels
+				std::stable_sort(moves.data+ind, moves.data+moves.length);//stable sort makes the engine 100% predictable and comparable between different optimization levels
 				currentState = fully_sorted;
 				break;
 			case fully_sorted:
@@ -489,7 +506,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 #endif
 		searchCounts.nodes[depth]++;
 		searchCounts.totalNodes++;
-		legalMovesAvailable = true;
+	    numlegalMoves++;
 
 		uint16_t ownkingField = findLSB( position->pieceTables[position->toMove][king]);
 
@@ -561,7 +578,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 
 	//mate scores originate here!
 	//------------------------------
-	if(!legalMovesAvailable){
+	if(numlegalMoves == 0){
 		if(movingSideInCheck){
 			alpha = -30000+ply;
 		} else {

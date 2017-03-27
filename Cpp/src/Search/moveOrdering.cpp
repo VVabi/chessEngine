@@ -47,10 +47,22 @@ int16_t captureEvals[6][7] = {
 
 void calcCaptureSortEval(chessPosition* position, chessMove* mv, uint16_t hashedMove) {
 
-	makeMove(mv, position);
-	int16_t sortEval = SEE(position, mv);
-	undoMove(position);
 
+	/*makeMove(mv, position);
+	int16_t sortEval = SEEold(position, mv);
+	undoMove(position);*/
+	//makeMove(mv, position);
+	int16_t sortEval = SEE(position, mv);
+	//undoMove(position);
+
+	/*if(sortEvaln != sortEval) {
+		std::cout << sortEval << std::endl;
+		std::cout << sortEvaln << std::endl;
+		std::cout << chessPositionToFenString(*position) << std::endl;
+		std::cout << moveToString(*mv) << std::endl;
+	}
+
+	assert(sortEvaln == sortEval);*/
 	/*int16_t sortEval = 0;
 	if( ((uint16_t) mv->type) < 6) {
 		sortEval = sortEval+captureEvals[mv->type][mv->captureType];
@@ -317,12 +329,12 @@ bool calculateStandardSortEvals(chessPosition* position,  vdt_vector<chessMove>*
 
 }
 
-void orderCaptureMoves(chessPosition* position, vdt_vector<chessMove>* moves) {
+void orderCaptureMoves(chessPosition* position, vdt_vector<chessMove>* moves, uint16_t hashedMove) {
 
 	if(moves->length == 0){
 		return;
 	}
-	uint16_t hashedMove = getHashMove(position->zobristHash);
+
 	int16_t bestEval = INT16_MIN;
 	uint16_t bestIndex = 0;
 

@@ -11,12 +11,13 @@
 #define HISTORY_CUTOFF (1ULL << 12)
 #define NO_REFUTATION 64
 void rescaleHistoryTable();
+void clearHistoryTable();
 int16_t negamax(chessPosition* position,  uint16_t ply, uint16_t max_ply, int16_t depth, int16_t alpha, int16_t beta,  pvLine* PV, bool allowNullMove = true,  bool allowHashProbe = true);
 int16_t negamaxQuiescence(chessPosition* position, uint16_t ply, int16_t alpha, int16_t beta, uint16_t depth);
 int16_t root_search(chessPosition* position, chessMove* bestMove, int16_t alpha, int16_t beta, int16_t depth, uint16_t max_ply, vdt_vector<chessMove>* moves, uint64_t* nodeCounts);
 void resetNodes();
 bool calculateStandardSortEvals(chessPosition* position, vdt_vector<chessMove>* moves, uint16_t start_index, uint16_t ply, uint16_t hashedMove, uint16_t refutationTarget);
-void orderCaptureMoves(chessPosition* position, vdt_vector<chessMove>* moves);
+void orderCaptureMoves(chessPosition* position, vdt_vector<chessMove>* moves, uint16_t hashedMove);
 uint32_t getNodes();
 
 uint32_t getQuiescenceNodes();
@@ -43,9 +44,9 @@ struct searchDebugData{
 	uint64_t wentToQuiescence;
 	uint64_t fake_3fold_repetitions;
 	uint64_t threefold_repetitions;
-	uint64_t nodes[25];
+	uint64_t nodes[40];
 	uint64_t totalNodes;
-	uint64_t bestIndex[25][150];
+	uint64_t bestIndex[40][150];
 	uint64_t futility_tried;
 	uint64_t futility_successful;
 	uint64_t wentToSearch;

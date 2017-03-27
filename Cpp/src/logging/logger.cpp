@@ -12,7 +12,6 @@
 static int clearPageCounter = 0;
 
 std::ofstream evalDebugging("/home/vabi/TeX/Chess/gamePositions.tex");
-std::ofstream searchLog("/home/vabi/vabiLog.txt");
 
 void putTableLine(std::ostream& out, int16_t value, std::string name) {
 	out << name << " & " << value << "\\\\ \\hline" << std::endl;
@@ -60,7 +59,5 @@ void latexOutput(const chessPosition* pos, evaluationResult ev, int16_t eval){
 	latexOutput(pos, ev, eval, evalDebugging);
 }
 
-void logSearch(uint64_t nodes, uint32_t time, int32_t eval, uint32_t depth, std::string bestMove) {
-	searchLog << "Depth " << depth << " eval " << eval << " bestMove " << bestMove << " time " << time << " Nodes " << nodes << " NPS " << nodes/((float) time)*1000.0 << std::endl;
-}
+
 

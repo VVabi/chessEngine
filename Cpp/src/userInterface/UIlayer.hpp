@@ -21,6 +21,7 @@ std::string chessPositionToFenString(chessPosition position, bool EPD=false);
 std::string moveToString(chessMove move);
 uint64_t stringToMove(std::string mv);
 bool checkAndMakeMove(chessPosition& position, std::string move);
+bool checkMove(chessPosition& position, std::string move, chessMove* out);
 void runPerformanceTests();
 uint64_t get_timestamp();
 void outputUint64(uint64_t num);

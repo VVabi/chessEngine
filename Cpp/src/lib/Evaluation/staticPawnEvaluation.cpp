@@ -68,10 +68,18 @@ int16_t staticPawnEvalComplete(const chessPosition* position, uint8_t* pawnOcc) 
 	uint64_t doubledPawns[2];
 	uint64_t isolatedPawns[2];
 	uint64_t backwardsPawns[2];
-	uint64_t columnFill[2];
+	//uint64_t columnFill[2];
 	uint64_t neighboringColumn[2];
 	uint64_t frontColumnFill[2];
 
+	uint64_t wStops = NORTHONE(position->pieceTables[white][pawn]);
+	uint64_t wPawnFill = northFill(wStops);
+	uint64_t wPawnAttackSpan = WESTONE(wPawnFill) | EASTONE(wPawnFill);
+	//uint64_t wPawnAttacks = WESTONE(wStops) | EASTONE(wStops);
+	uint64_t bStops = SOUTHONE(position->pieceTables[black][pawn]);
+	uint64_t bPawnFill = southFill(bStops);
+	uint64_t bPawnAttackSpan = WESTONE(bPawnFill) | EASTONE(bPawnFill);
+	//uint64_t bPawnAttacks = WESTONE(bStops) | EASTONE(bStops);
 
 	doubledPawns[white] = getDoubledPawns(position->pieceTables[white][pawn]);
 	doubledPawns[black] = getDoubledPawns(position->pieceTables[black][pawn]);
@@ -79,17 +87,21 @@ int16_t staticPawnEvalComplete(const chessPosition* position, uint8_t* pawnOcc) 
 	isolatedPawns[black] = getIsolatedPawns(position->pieceTables[black][pawn]);
 	getBackwardsPawns(backwardsPawns, backwardsPawns+1, position->pieceTables[white][pawn], position->pieceTables[black][pawn]);
 
-	columnFill[white]  = southFill(position->pieceTables[white][pawn]) | northFill(position->pieceTables[white][pawn]);
-	columnFill[black]  = southFill(position->pieceTables[black][pawn]) | northFill(position->pieceTables[black][pawn]);
-
+	/*columnFill[white]  = southFill(position->pieceTables[white][pawn]) | northFill(position->pieceTables[white][pawn]);
+	columnFill[black]  = southFill(position->pieceTables[black][pawn]) | northFill(position->pieceTables[black][pawn]);*/
+/*
 	neighboringColumn[white] = WESTONE(columnFill[white]) | EASTONE(columnFill[white]);
 	neighboringColumn[black] = WESTONE(columnFill[black]) | EASTONE(columnFill[black]);
+*/
+	neighboringColumn[white] = wPawnAttackSpan;
+	neighboringColumn[black] = bPawnAttackSpan;
 
 	frontColumnFill[white] = NORTHONE(position->pieceTables[white][pawn]);
 	frontColumnFill[black] = SOUTHONE(position->pieceTables[black][pawn]);
 
 	pawnOcc[0] = getColumnOcc(position->pieceTables[white][pawn]);
 	pawnOcc[1] = getColumnOcc(position->pieceTables[black][pawn]);
+
 	uint64_t wDouble = doubledPawns[white];
 	while(wDouble) {
 		ev = ev-10;
@@ -101,6 +113,8 @@ int16_t staticPawnEvalComplete(const chessPosition* position, uint8_t* pawnOcc) 
 		}
 	}
 
+
+
 	uint64_t bDouble = doubledPawns[black];
 	while(bDouble) {
 		ev = ev+10;
@@ -111,6 +125,31 @@ int16_t staticPawnEvalComplete(const chessPosition* position, uint8_t* pawnOcc) 
 			//std::cout << "Black double pawn unresolvable on " << field << " " << ev <<  std::endl;
 		}
 	}
+
+	/*uint64_t wDouble = doubledPawns[white];
+		while(wDouble) {
+			ev = ev-10;
+			uint16_t field = popLSB(wDouble);
+			std::cout << "White double pawn on " << field << " " << ev <<  std::endl;
+			if(!(BIT64(field) & neighboringColumn[black])) { //no black pawn on an adjacent column
+				ev = ev-5;
+				std::cout << "White double pawn unresolvable on " << field << " " << ev <<  std::endl;
+			}
+		}
+
+
+
+		uint64_t bDouble = doubledPawns[black];
+		while(bDouble) {
+			ev = ev+10;
+			uint16_t field = popLSB(bDouble);
+			std::cout << "Black double pawn on " << field << " " << ev <<  std::endl;
+			if(!(BIT64(field) & neighboringColumn[white])) { //no black pawn on an adjacent column
+				ev = ev+5;
+				std::cout << "Black double pawn unresolvable on " << field << " " << ev <<  std::endl;
+			}
+		}*/
+
 
 	uint64_t wIso = isolatedPawns[white];
 	while(wIso) {

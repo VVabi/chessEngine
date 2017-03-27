@@ -187,7 +187,7 @@ public class Main extends Application {
         }*/
 
 
-
+       // 1r3rk1/2nbbp1p/2p1p1p1/2PpP2P/pP4P1/p1RNPN2/P4P2/1K3B1R w - -
 
         UciProcessing processesList[] = new UciProcessing[6];
 

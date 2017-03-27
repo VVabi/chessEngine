@@ -22,5 +22,5 @@ uint16_t getHashMove(uint64_t zobristKey);
 void setHashMove(uint16_t move, uint64_t zobristKey, uint8_t searchId);
 void setHashEntry(hashFlag flag, int16_t eval, uint8_t depth, uint8_t searchId, uint16_t bestMove, uint64_t key);
 void setSearchId(uint8_t searchId, uint64_t key, uint16_t index);
-
+void clearHashTables();
 #endif /* HASHTABLES_HASHTABLES_HPP_ */

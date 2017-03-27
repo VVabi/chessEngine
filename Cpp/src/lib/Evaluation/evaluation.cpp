@@ -27,6 +27,7 @@ evaluationResult getEvaluationResult(){
 	return result;
 }
 
+
 uint16_t taperingValues[81] = {  0,  0,  0,  0,  0,  0,  0,  0,
 						       	 0,  0,  0,  0,  0,  0,  0,  0,
 								0, 2, 7, 12, 17, 22, 27, 33,
@@ -38,6 +39,7 @@ uint16_t taperingValues[81] = {  0,  0,  0,  0,  0,  0,  0,  0,
 							   256,256,256,256,256,256,256,256,
 							   256,256,256,256,256,256,256,256,256
 };
+
 /*
 uint16_t taperingValues[81] = {  0,  0,  0,  0,  0,  0,  0,  0,
 						       	 0,  0,  0,  0,  0,  0,  0,  0,
@@ -178,9 +180,18 @@ static int32_t rookOpenFiles(const chessPosition* position, uint8_t* pawnOccupan
 		while(rooks) {
 			uint16_t field = popLSB(rooks);
 			uint16_t file = FILE(field);
+/*#ifdef EXPERIMENTAL
+			if(((pawnOccupancy[color] | pawnOccupancy[1-color]) & (1 << file)) == 0){
+				ret = ret+(1-2*color)*evalParams->rookOnOpenFile;
+			}
+			else if((pawnOccupancy[color] & (1 << file)) == 0){
+				ret = ret+5;
+			}
+#else*/
 			if((pawnOccupancy[color] & (1 << file)) == 0){
 				ret = ret+(1-2*color)*evalParams->rookOnOpenFile;
 			}
+//#endif
 		}
 	}
 	return ret;
@@ -256,7 +267,6 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
 	eval = eval+rookFiles;
 	result.rookOpenFiles = rookFiles;
 
-
 	uint64_t numWhiteBishops = popcount(position->pieceTables[white][bishop]);
 
 	result.bishoppair = 0;
@@ -284,7 +294,6 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
 	int16_t oposts = outposts(position);
 	eval = eval+oposts;
 	result.outPosts = oposts;
-
 
 	if(position->toMove == white) {
 		eval = eval+10;

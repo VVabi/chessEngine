@@ -28,7 +28,6 @@ enum moveType: uint8_t   {pawnMove=0, knightMove=1, bishopMove=2, rookMove=3, qu
 enum playerColor: uint16_t {white=0, black=1};
 
 struct chessMove{
-	uint64_t move;
 	uint16_t sourceField;
 	uint16_t targetField;
 	moveType type;
@@ -83,7 +82,7 @@ struct hashEntry{
 	uint8_t depth;
 	uint8_t searchId;
 	uint16_t index;
-} __attribute__((packed));
+}__attribute__((packed));
 
 struct hashBucket {
 	hashEntry hashData[4];

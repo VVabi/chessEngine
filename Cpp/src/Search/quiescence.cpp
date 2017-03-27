@@ -66,23 +66,22 @@ static moveStack mvStack;
 int16_t negamaxQuiescence(chessPosition* position, uint16_t ply, int16_t alpha, int16_t beta, uint16_t depth) {
 
 	assert(alpha < beta);
+
 	const evalParameters* evalPars 						= getEvalParameters();
 	uint64_t ownKing = position->pieceTables[position->toMove][king];
 	if(isFieldAttacked(position, (playerColor) (1-position->toMove), findLSB(ownKing))) {
 		pvLine line;
 		return negamax(position, ply, ply+1, 1, alpha, beta, &line, false, false);
 	}
-
-
 #ifdef HASH
 	hashEntry hashVal      = getHashTableEntry(position->zobristHash);
 
 	uint32_t zobristHigher = (uint32_t) (position->zobristHash >> 32);
 	uint16_t zobristLower  = (uint16_t) (((uint32_t) (position->zobristHash & 0xFFFFFFFF)) >> 16);
-
+	uint16_t hashMove = hashVal.bestMove;
 	if((zobristHigher == hashVal.hashHighBits) && (zobristLower == hashVal.hashLower)) { //TODO: assign bestMove - this can blow up in our face easily TODO: add proper checkmate handling
 		int16_t oldEval  = hashVal.eval;
-		if( (oldEval > -10000) && (oldEval < 10000) && (oldEval != 0)){ //TODO: the != 0 is stupid, but somehwere something goes wrong with 3fold rep scores, so excluded ehre for safety
+		if( (oldEval > -10000) && (oldEval < 10000) && (oldEval != 0)){ //TODO: the != 0 is stupid, but somewhere something goes wrong with 3fold rep scores, so excluded ehre for safety
 			if( ((hashVal.flag == FAILHIGH) || (hashVal.flag == FULLSEARCH)) && (oldEval >= beta)){
 				setSearchId(searchId, position->zobristHash, hashVal.index);
 				return beta;
@@ -104,6 +103,8 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t ply, int16_t alpha, 
 		}
 	}
 #endif
+
+
 	int32_t baseEval = evaluation(position, alpha, beta);
 
 	if(baseEval > alpha){
@@ -129,7 +130,7 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t ply, int16_t alpha, 
 	uint16_t stackCounter = mvStack.getCounter();
 	vdt_vector<chessMove> moves = mvStack.getNext();
 	generateAllCaptureMoves(&moves, position);
-	orderCaptureMoves(position, &moves);
+	orderCaptureMoves(position, &moves, hashMove);
 	if(moves.length > 0){
 		qcalled++;
 	}
@@ -139,14 +140,32 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t ply, int16_t alpha, 
 	int16_t bestIndex = -1;
 	for(uint16_t ind=0; ind < moves.length; ind++){
 
-		if(moves[ind].sortEval < -50){
-			break; //SEE pruning
-		}
+//#ifdef EXPERIMENTAL
 		if(ind == 1){
 			sortqCalled++;
 			std::stable_sort(moves.data, moves.data+moves.length);
 		}
 
+
+		//This has to be done AFTER sorting of course - that was a nasty bug
+		//-----------------------
+		if(moves[ind].sortEval < -50){
+			break; //SEE pruning
+		}
+/*#else
+		//This has to be done AFTER sorting of course - that was a nasty bug
+		//-----------------------
+		if(moves[ind].sortEval < -50){
+			break; //SEE pruning
+		}
+
+		if(ind == 1){
+			sortqCalled++;
+			std::stable_sort(moves.data, moves.data+moves.length);
+		}
+
+
+#endif*/
 		//delta pruning. TODO: make define
 		//----------------------------------------------------
 		int32_t gainValue = evalPars->figureValues[moves[ind].captureType];

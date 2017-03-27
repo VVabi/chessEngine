@@ -46,7 +46,6 @@ inline void extractMoves(const uint64_t currentPiece, const figureType figure, u
 			}
 		}
 		chessMove move;
-		move.move = nextMove | currentPiece;
 		move.type = (moveType) figure;
 		move.sourceField = sourceField;
 		move.targetField = findLSB(nextMove);
@@ -118,13 +117,12 @@ void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 		uint64_t target = LOWESTBITONLY(forward);
 		uint64_t source = (toMove? target << 8: target >> 8);
 		chessMove move;
-		move.move = target | source;
 		move.type = pawnMove;
 		move.captureType = none;
 		move.sourceField = findLSB(source);
 		move.targetField = findLSB(target);
 		uint64_t promotionRow = promotionRows[position->toMove];
-		if(move.move & promotionRow){
+		if(target & promotionRow){
 			move.type = promotionQueen;
 			vec->add(&move);
 			move.type = promotionRook;
@@ -149,7 +147,6 @@ void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 		uint64_t target = LOWESTBITONLY(forward);
 		uint64_t source = (toMove? target << 16: target >> 16);
 		chessMove move;
-		move.move = target | source;
 		move.type = pawnMove;
 		move.captureType = none;
 		move.sourceField = findLSB(source);
@@ -177,13 +174,12 @@ void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 		}
 		#endif
 		chessMove move;
-		move.move = target | source;
 		move.type = pawnMove;
 		move.captureType = captureType;
 		move.sourceField = findLSB(source);
 		move.targetField = findLSB(target);
 		uint64_t promotionRow = promotionRows[position->toMove];
-		if(move.move & promotionRow){
+		if(target & promotionRow){
 			move.type = promotionQueen;
 			vec->add(&move);
 			move.type = promotionRook;
@@ -216,13 +212,12 @@ void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 		}
 		#endif
 		chessMove move;
-		move.move = target | source;
 		move.type = pawnMove;
 		move.captureType = captureType;
 		move.sourceField = findLSB(source);
 		move.targetField = findLSB(target);
 		uint64_t promotionRow = promotionRows[position->toMove];
-		if(move.move & promotionRow){
+		if(target & promotionRow){
 			move.type = promotionQueen;
 			vec->add(&move);
 			move.type = promotionRook;
@@ -254,7 +249,6 @@ void generateCastling(vdt_vector<chessMove>* vec, chessPosition* position){
 
 		if ((position->data.castlingRights & (1 << castlingOffset)) && ((occupancy & castlingBlockers[toMove][KINGSIDE]) == 0)){
 			chessMove mv;
-			mv.move = (toMove ? BLACKKINGSIDECASTLEMASK: WHITEKINGSIDECASTLEMASK);
 			mv.captureType = none;
 			mv.type        = castlingKingside;
 			mv.sourceField = (toMove ? 60: 4);
@@ -264,7 +258,6 @@ void generateCastling(vdt_vector<chessMove>* vec, chessPosition* position){
 
 		if ((position->data.castlingRights & (1 << (castlingOffset+1))) && ((occupancy & castlingBlockers[toMove][QUEENSIDE]) == 0)){
 			chessMove mv;
-			mv.move = (toMove ? BLACKQUEENSIDECASTLEMASK: WHITEQUEENSIDECASTLEMASK);
 			mv.captureType = none;
 			mv.type        = castlingQueenside;
 			mv.sourceField = (toMove ? 60: 4);
@@ -289,7 +282,6 @@ static void generateEnPassant(vdt_vector<chessMove>* vec, chessPosition* positio
 		chessMove mov;
 		mov.sourceField = source;
 		mov.targetField = target;
-		mov.move        = BIT64(target) | BIT64(source);
 		mov.captureType = pawn;
 		mov.type        = enpassant;
 		vec->add(&mov);
@@ -308,21 +300,6 @@ void generateAllMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 	generatePawnMoves(vec, position);
 	generateEnPassant(vec, position);
 
-
-#ifdef DEBUG
-
-
-	for(uint16_t ind = 0; ind < vec->length; ind++){
-		chessMove mv = (*vec)[ind];
-		if( mv.move != (BIT64(mv.sourceField) | BIT64(mv.targetField))) {
-			std::cout << "Move source/target is wrong..." << std::endl;
-
-		}
-
-	}
-
-
-#endif
 }
 
 

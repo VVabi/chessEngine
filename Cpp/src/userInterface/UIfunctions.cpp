@@ -633,71 +633,85 @@ std::string chessPositionToFenString(const chessPosition position, bool EPD){
 
 }
 
-bool checkAndMakeMove(chessPosition& position, std::string move){
+bool checkMove(chessPosition& position, std::string move, chessMove* out) {
 	vdt_vector<chessMove> moves = vdt_vector<chessMove>(100);
-		uint64_t mv = stringToMove(move);
-		generateAllMoves(&moves, &position);
-		calculateStandardSortEvals(&position, &moves, 0, 0, 0, NO_REFUTATION);
-		std::sort(moves.data, moves.data+moves.length);
-		bool found = false;
-		chessMove m;
-		for(uint16_t ind=0; ind < moves.length; ind++) {
-			if(moves[ind].sortEval < -10000) {
-				break;
+			uint64_t mv = stringToMove(move);
+			generateAllMoves(&moves, &position);
+			calculateStandardSortEvals(&position, &moves, 0, 0, 0, NO_REFUTATION);
+			std::sort(moves.data, moves.data+moves.length);
+			bool found = false;
+			chessMove m;
+			for(uint16_t ind=0; ind < moves.length; ind++) {
+				if(moves[ind].sortEval < -10000) {
+					break;
+				}
+
+				uint64_t current = BIT64(moves[ind].sourceField) | BIT64(moves[ind].targetField);
+				if(current == mv){
+					if( (moves[ind].type > 8)) { //its a promotion
+						char type = move.at(4);
+						if((type == 'r') && moves[ind].type != promotionRook){
+							continue;
+						}
+						if((type == 'q') && moves[ind].type != promotionQueen){
+							continue;
+						}
+						if((type == 'b') && moves[ind].type != promotionBishop){
+							continue;
+						}
+						if((type == 'n') && moves[ind].type != promotionKnight){
+							continue;
+						}
+					}
+					found = true;
+					m = moves[ind];
+					break;
+				}
+				if(moves[ind].type == castlingKingside){
+					if(position.toMove == white){
+						if(move == "e1g1"){
+							found = true;
+							m = moves[ind];
+							break;
+						}
+					}
+					if(position.toMove == black){
+						if(move == "e8g8"){
+							found = true;
+							m = moves[ind];
+							break;
+						}
+					}
+				}
+				if(moves[ind].type == castlingQueenside){
+					if(position.toMove == white){
+						if(move == "e1c1"){
+							found = true;
+							m = moves[ind];
+							break;
+						}
+					}
+					if(position.toMove == black){
+						if(move == "e8c8"){
+							found = true;
+							m = moves[ind];
+							break;
+						}
+					}
+				}
 			}
-			if(moves[ind].move == mv){
-				if( (moves[ind].type > 8)) { //its a promotion
-					char type = move.at(4);
-					if((type == 'r') && moves[ind].type != promotionRook){
-						continue;
-					}
-					if((type == 'q') && moves[ind].type != promotionQueen){
-						continue;
-					}
-					if((type == 'b') && moves[ind].type != promotionBishop){
-						continue;
-					}
-					if((type == 'n') && moves[ind].type != promotionKnight){
-						continue;
-					}
-				}
-				found = true;
-				m = moves[ind];
-				break;
-			}
-			if(moves[ind].type == castlingKingside){
-				if(position.toMove == white){
-					if(move == "e1g1"){
-						found = true;
-						m = moves[ind];
-						break;
-					}
-				}
-				if(position.toMove == black){
-					if(move == "e8g8"){
-						found = true;
-						m = moves[ind];
-						break;
-					}
-				}
-			}
-			if(moves[ind].type == castlingQueenside){
-				if(position.toMove == white){
-					if(move == "e1c1"){
-						found = true;
-						m = moves[ind];
-						break;
-					}
-				}
-				if(position.toMove == black){
-					if(move == "e8c8"){
-						found = true;
-						m = moves[ind];
-						break;
-					}
-				}
-			}
-		}
+			moves.free_array();
+			*out = m;
+			return found;
+
+}
+
+
+bool checkAndMakeMove(chessPosition& position, std::string move){
+
+	chessMove m;
+	bool found = checkMove(position, move, &m);
+
 		if(found){
 			std::cout << moveToString(m) << std::endl;
 			makeMove(&m, &position);
@@ -712,7 +726,7 @@ bool checkAndMakeMove(chessPosition& position, std::string move){
 		} else {
 			std::cout << "Invalid move!" << std::endl;
 		}
-		moves.free_array();
+
 		return found;
 }
 extern std::atomic<bool> continueSearch;

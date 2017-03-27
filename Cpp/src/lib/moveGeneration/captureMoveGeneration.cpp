@@ -48,7 +48,6 @@ inline void extractCaptureMoves(const uint64_t currentPiece, const figureType fi
 			std::cout << "A capture move doesnt actually capture anything - WTF?" << std::endl;
 		}
 		chessMove move;
-		move.move = nextMove | currentPiece;
 		move.type = (moveType) figure;
 		move.sourceField = sourceField;
 		move.targetField = findLSB(nextMove);
@@ -135,13 +134,12 @@ void generatePawnCaptureMoves(vdt_vector<chessMove>* vec, chessPosition* positio
 		}
 		#endif
 		chessMove move;
-		move.move = target | source;
 		move.type = pawnMove;
 		move.captureType = captureType;
 		move.sourceField = findLSB(source);
 		move.targetField = findLSB(target);
 		uint64_t promotionRow = promotionRows[position->toMove];
-		if(move.move & promotionRow){
+		if(BIT64(move.targetField) & promotionRow){
 			move.type = promotionQueen;
 		}
 		vec->add(&move);
@@ -167,13 +165,12 @@ void generatePawnCaptureMoves(vdt_vector<chessMove>* vec, chessPosition* positio
 		}
 		#endif
 		chessMove move;
-		move.move = target | source;
 		move.type = pawnMove;
 		move.captureType = captureType;
 		move.sourceField = findLSB(source);
 		move.targetField = findLSB(target);
 		uint64_t promotionRow = promotionRows[position->toMove];
-		if(move.move & promotionRow){
+		if(BIT64(move.targetField) & promotionRow){
 			move.type = promotionQueen;
 		}
 		vec->add(&move);
@@ -198,7 +195,6 @@ static void generateCaptureEnPassant(vdt_vector<chessMove>* vec, chessPosition* 
 		chessMove mov;
 		mov.sourceField = source;
 		mov.targetField = target;
-		mov.move        = BIT64(target) | BIT64(source);
 		mov.captureType = pawn;
 		mov.type        = enpassant;
 		vec->add(&mov);
@@ -215,22 +211,6 @@ void generateAllCaptureMoves(vdt_vector<chessMove>* vec, chessPosition* position
 	generateBishopCaptureMoves(vec, position, queen);
 	generatePawnCaptureMoves(vec, position);
 	generateCaptureEnPassant(vec, position);
-
-
-#ifdef DEBUG
-
-
-	for(uint16_t ind = 0; ind < vec->length; ind++){
-		chessMove mv = (*vec)[ind];
-		if( mv.move != (BIT64(mv.sourceField) | BIT64(mv.targetField))) {
-			std::cout << "Move source/target is wrong..." << std::endl;
-
-		}
-
-	}
-
-
-#endif
 }
 
 

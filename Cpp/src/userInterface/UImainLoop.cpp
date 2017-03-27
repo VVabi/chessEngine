@@ -37,7 +37,7 @@
 #include "mingw.mutex.h"
 #include <list>
 extern uint8_t searchId;
-extern uint16_t killerMoves[20][2];
+extern uint16_t killerMoves[40][2];
 
 void handleUciInput(std::ostream& stream) {
 	stream << "id name Vabi" << std::endl;
@@ -96,7 +96,7 @@ uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t n
 		}
 
 		uint32_t completeExpectedTime = total+remainingMoves*increment;
-		float timeAllotted = completeExpectedTime/(remainingMoves);
+		float timeAllotted = 2*completeExpectedTime/(3.0*remainingMoves);
 
 		if(timeAllotted > total/10.0){
 			timeAllotted = total/10.0;
@@ -107,6 +107,7 @@ uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t n
 
 	return 100; //some default
 }
+
 
 void sendSearchInfo(uint64_t nodes, uint32_t time, int32_t eval, uint32_t depth, std::list<std::string>& PV){
 	double nps = ((double) nodes)/((double) time)*1000.0;
@@ -152,6 +153,7 @@ bool checkContinue(searchParameters params, uint16_t depth, uint16_t passedTime,
 	if(params.type == fixed_time) {
 		return passedTime < params.fixedTime;
 	}
+
 
 	return true;
 }
@@ -279,7 +281,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 		*mtime = get_timestamp()-start_ts;
 		uint64_t totalNodes=0;
 		searchDebugData data = getSearchData();
-		for(uint16_t ind=0; ind < 25; ind++){
+		for(uint16_t ind=0; ind < 40; ind++){
 			totalNodes = totalNodes+data.nodes[ind];
 		}
 
@@ -312,7 +314,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 	while(position->madeMoves.length > madeMoves){
 		chessMove current = position->madeMoves[position->madeMoves.length-1];
 
-		if(current.move == 0) {
+		if(current.sourceField == 0 && current.targetField == 0) {
 			undoNullMove(position);
 		} else {
 			undoMove(position);
@@ -351,7 +353,11 @@ void launchSearch() {
 	engineThread = std::thread(search, cposition, paramsToUse);
 }
 
-
+void handleClear() {
+	memset(killerMoves,0, 40*2*sizeof(uint16_t));
+	clearHashTables();
+	clearHistoryTable();
+}
 
 void handleStop() {
 	continueSearch = false;
@@ -501,7 +507,6 @@ void handlePerft(std::list<std::string> input){
 void handlePosition(std::list<std::string> input) {
 
 	std::string fen = "";
-
 	if(input.empty()) {
 		//std::cout << "Invalid position request" << std::endl;
 		return;
@@ -566,9 +571,23 @@ void handlePawnEval() {
 	free_position(&cposition);
 }
 
+
+void handleSEE(std::list<std::string> input) {
+	chessPosition cposition = memoryLibrarianRetrievePosition();
+
+	chessMove m;
+	if(checkMove(cposition, input.front(), &m)) {
+		std::cout << SEE(&cposition, &m) << std::endl;
+	} else {
+		std::cout << "not a valid move" << std::endl;
+	}
+
+}
+
 void UIloop() {
 	initUserEvents();
 	bool continueLoop = true;
+	handleClear();
 	while(continueLoop) {
 		userEvent ev = getNextUserEvent();
 
@@ -624,6 +643,12 @@ void UIloop() {
 					break;
 				case invalid:
 					putLine("Invalid request");
+					break;
+				case see:
+					handleSEE(ev.data);
+					break;
+				case clear:
+					handleClear();
 					break;
 				default:
 					putLine("Not yet implemented");
