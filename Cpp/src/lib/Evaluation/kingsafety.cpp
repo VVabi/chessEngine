@@ -26,8 +26,12 @@ int32_t attacksCloseToKingEvals[] =
 
 };
 
-int32_t attackScores[] = {1,3,3,4,7};
 
+#ifdef EXPERIMENTAL
+int32_t attackScores[] = {1,2,2,4,7};
+#else
+int32_t attackScores[] = {1,3,3,4,7};
+#endif
 
 
 

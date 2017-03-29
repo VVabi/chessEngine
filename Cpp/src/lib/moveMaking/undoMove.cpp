@@ -188,15 +188,16 @@ void undoMove(chessPosition* position) {
 
 	position->zobristHash = position->zobristHash^movingSideHash[0];
 
-	if(position->zobristHash != position->data.hash){
-		std::cout << chessPositionToOutputString(*position) << std::endl;
-		std::cout << "WTF???" << std::endl;
-	}
+
 
 	assert(position->zobristHash == position->data.hash);
 
 	#ifdef DEBUG
 
+	if(position->zobristHash != position->data.hash){
+		std::cout << chessPositionToOutputString(*position) << std::endl;
+		std::cout << "WTF???" << std::endl;
+	}
 	debug_incremental_calculations(position);
 
 	#endif

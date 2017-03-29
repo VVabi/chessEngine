@@ -294,6 +294,8 @@ static inline void checkTimeout() {
 
 //std::ofstream plogger("/home/vabi/Tools/log.txt");
 
+#define DEFAULT_SORTEVAL 10000
+
 uint64_t gotHashMove = 0;
 uint64_t noHashMove   = 0;
 int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t depth, int16_t alpha, int16_t beta, pvLine* PV, bool allowNullMove, bool doHashProbe) {
@@ -346,8 +348,6 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 			searchCounts.fake_3fold_repetitions++;
 		}
 	}
-
-
 
 	//go to quiescence on depth 0.
 	//---------------------------
@@ -406,8 +406,6 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 
 	//calc sorteval
 	//------------------------
-	//bool isInCheck = calculateStandardSortEvals(position, &moves, ply, hashmove, refutationTarget); //does no complete sort, but puts best move at the front
-	//assert(isInCheck == movingSideInCheck);
 
 	//init variables
 	//-----------------------------
@@ -422,6 +420,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 	pvLine localPV;
 	localPV.numMoves = 0;
 
+
 	sortState currentState = not_sorted;
 
 	if(movingSideInCheck) {
@@ -434,24 +433,24 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 				assert(ind == 0);
 				currentState = hash_handled;
 				if(getHashMoveToFront(&moves, hashmove, ind)) {
-					moves[ind].sortEval = 0;
+					moves[ind].sortEval = DEFAULT_SORTEVAL;
 					break;
 				}
 			case hash_handled:
 				if(getGoodCaptureToFront(&moves, ind)) {
-					moves[ind].sortEval = 0;
+					moves[ind].sortEval = DEFAULT_SORTEVAL;
 					break;
 				}
 				currentState = good_captures_handled;
 			case good_captures_handled: {
 				uint16_t killerA = killerMoves[ply][0];
 				if(getHashMoveToFront(&moves, killerA, ind)) {
-					moves[ind].sortEval = 0;
+					moves[ind].sortEval = DEFAULT_SORTEVAL;
 					break;
 				}
 				uint16_t killerB = killerMoves[ply][1];
 				if(getHashMoveToFront(&moves, killerB, ind)) {
-					moves[ind].sortEval = 0;
+					moves[ind].sortEval = DEFAULT_SORTEVAL;
 					break;
 				}
 				currentState = killers_handled;
@@ -468,7 +467,6 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 				break;
 
 		}
-
 
 
 		//illegal move. Since list is sorted or, in case ind=0, best move is first, we can leave here: all further moves are also illegal.

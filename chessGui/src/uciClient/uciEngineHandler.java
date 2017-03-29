@@ -137,6 +137,13 @@ public class uciEngineHandler {
     }
 
 
+    public long perft(int depth) throws IOException {
+        put("perft "+depth);
+        String answer = reader.readLine();
+        String[] splitted = answer.split(" ");
+        return Long.parseLong(splitted[1]);
+    }
+
 
 
     public void close(){

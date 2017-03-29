@@ -13,7 +13,7 @@ public class TestSuite {
 
 
     public static class TestResult {
-        boolean result;
+        public boolean result;
 
         TestResult(boolean b) {
             result = b;

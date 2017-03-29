@@ -117,10 +117,10 @@ void sendSearchInfo(uint64_t nodes, uint32_t time, int32_t eval, uint32_t depth,
 
 	if(eval > 29000) {
 		int16_t mate_in = (30000-eval+1)/2;
-		out << "info depth " << depth << " mate " << mate_in << " nps " << npsInt << " nodes " << nodes << " pv ";
+		out << "info depth " << depth << " score mate " << mate_in << " nps " << npsInt << " nodes " << nodes << " pv ";
 	} else if(eval < -29000) {
 		int16_t mate_in = (-30000-eval)/2;
-		out << "info depth " << depth << " mate " << mate_in << " nps " << npsInt << " nodes " << nodes << " pv ";
+		out << "info depth " << depth << " score mate " << mate_in << " nps " << npsInt << " nodes " << nodes << " pv ";
 	} else {
 		out << "info depth " << depth << " score cp " << eval << " nps " << npsInt << " nodes " << nodes << " pv ";
 	}

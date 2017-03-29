@@ -12,7 +12,7 @@
 #include <assert.h>
 #include <iostream>
 
-static hashBucket moveOrderingHashTable[HASHSIZE+1];
+static hashBucket* moveOrderingHashTable = NULL;
 
 static pawnHashEntry pawnHashTable[8192];
 
@@ -144,6 +144,7 @@ void setHashMove(uint16_t move, uint64_t zobristKey, uint8_t searchId) {  //DEPR
 			entry->hashHighBits = zobristHigher;
 			entry->hashLower    = zobristLower;
 			entry->index        = ind;
+			break;
 		}
 	}
 	//permutationIndex = (permutationIndex+1) & 3;
@@ -156,6 +157,7 @@ void clearHashTables() {
 
 void fillZobristHash(){
 	assert(popcount(HASHSIZE+1)==1); //this needs to be a power of 2!
+	moveOrderingHashTable = new hashBucket[HASHSIZE+1];
 	clearHashTables();
 	movingSideHash[0] = getRandUint64();
 	movingSideHash[1] = 0;

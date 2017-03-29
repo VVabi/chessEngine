@@ -1,7 +1,10 @@
 package sample;
 
 import Library.FenHelper;
+import Tests.EvalSymmetries;
+import Tests.PerftTests;
 import Tests.TestDebugVsRelease;
+import Tests.TestSuite;
 import core.Core;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -40,6 +43,17 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
+
+
+        /*uciEngineHandler handler = new uciEngineHandler("/home/vabi/code/chessEngine/Cpp/Release/Vabi", "");
+        System.out.println("perft tests");
+        TestSuite.TestResult perftResult = PerftTests.testPerft(handler);
+        System.out.println(perftResult.result);
+        System.out.println("eval symmetry tests");
+        TestSuite.TestResult symmetryresult = EvalSymmetries.testEvalSymmetry(handler);
+        System.out.println(symmetryresult.result);*/
+
+
 
       /*  ArrayList<String> fens = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader("/home/vabi/lateCutoffs.txt"))) {
@@ -107,45 +121,7 @@ public class Main extends Application {
            }*/
 
 
-       /* ArrayList<String> fens = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader("fen.txt"))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                fens.add(line);
-            }
-        }
 
-
-       System.out.println(FenHelper.mirror("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w Kkq c6 0 2"));
-
-        uciEngineHandler vabiHandler = new uciEngineHandler("/home/vabi/code/chessEngine/Cpp/Release/Vabi", "");
-
-        for(String fen: fens) {
-            /*System.out.println(fen);
-            System.out.println(FenHelper.mirror(fen));*/
-           /* vabiHandler.setPosition(fen, new LinkedList<>());
-            int eval1 = vabiHandler.getEval();
-            vabiHandler.setPosition(FenHelper.changeSide(fen), new LinkedList<>());
-            int eval2 = vabiHandler.getEval();
-            vabiHandler.setPosition(FenHelper.mirror(fen), new LinkedList<>());
-            int eval3 = vabiHandler.getEval();
-
-            if(eval1 != eval2) {
-                System.out.println("Unsymmetric black/white eval detected");
-                System.out.println(fen);
-                System.out.println(FenHelper.changeSide(fen));
-            }
-
-            if(eval1 != eval3){
-                System.out.println("Asymmetric east/west eval detected");
-                System.out.println(fen);
-                System.out.println(FenHelper.mirror(fen));
-            }
-
-        }
-
-
-        System.out.println("Test done");*/
        /* Runtime runtime = Runtime.getRuntime();
         Process process;
         BufferedReader reader;
@@ -189,7 +165,7 @@ public class Main extends Application {
 
        // 1r3rk1/2nbbp1p/2p1p1p1/2PpP2P/pP4P1/p1RNPN2/P4P2/1K3B1R w - -
 
-        UciProcessing processesList[] = new UciProcessing[6];
+       UciProcessing processesList[] = new UciProcessing[6];
 
         for(int ind=0; ind < 6; ind++) {
             processesList[ind] = new UciProcessing("/home/vabi/code/chessEngine/Cpp/uciDefenderRelease/Vabi", "params1", "/home/vabi/code/chessEngine/Cpp/uciChallengeRelease/Vabi", "params2", 5000);

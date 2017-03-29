@@ -321,7 +321,8 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
 #ifdef RANDOMEVAL
 	eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?
 #endif
-	/*counter++;
+	/*static uint32_t counter = 0;
+	counter++;
 
 	if((counter > 100000) && (std::abs(eval-position->figureEval) > 100)){
 		counter = 0;

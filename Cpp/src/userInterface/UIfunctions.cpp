@@ -321,11 +321,11 @@ chessPosition FENtoChessPosition(std::string fen){
 	}
 	ind++; //should be a space now
 	position.data.castlingRights = 0;
-	for(uint16_t k=0; k<4; k++) {
+	while((fen.at(ind) == ' ') && ( (int) (ind+1) < (int) fen.size())) {
 		ind++;
-		if( fen.at(ind) == ' '){
-			break;
-		}
+	}
+
+	while(fen.at(ind) != ' ') {
 		if (fen.at(ind) == 'K') {
 			position.data.castlingRights = position.data.castlingRights | 1;
 		}
@@ -338,7 +338,20 @@ chessPosition FENtoChessPosition(std::string fen){
 		if (fen.at(ind) == 'q') {
 			position.data.castlingRights = position.data.castlingRights | 8;
 		}
+		ind++;
 	}
+
+	while((fen.at(ind) == ' ') && ( (int) (ind+1) < (int) fen.size())) {
+		ind++;
+	}
+	position.data.enPassantFile = 8;
+	position.data.fiftyMoveRuleCounter = 0;
+
+	if (fen.at(ind) != '-') {
+		position.data.enPassantFile = fen.at(ind)-'a';
+		ind++;
+	}
+
 	position.totalFigureEval   = calcTotalFigureEvaluation(&position);
 	position.figureEval   = calcFigureEvaluation(&position);
 	position.pieceTableEval = ((1 << 15) + position.figureEval+ calcPieceTableValue(&position))
@@ -346,8 +359,7 @@ chessPosition FENtoChessPosition(std::string fen){
 	position.zobristHash    = calcZobristHash(&position);
 	position.pawnHash       = calcPawnHash(&position);
 	position.data.hash = position.zobristHash;
-	position.data.enPassantFile = 8;
-	position.data.fiftyMoveRuleCounter = 0;
+
 	return position;
 
 }

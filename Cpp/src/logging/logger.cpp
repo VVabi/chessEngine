@@ -19,11 +19,12 @@ void putTableLine(std::ostream& out, int16_t value, std::string name) {
 
 
 void latexOutput(const chessPosition* pos, evaluationResult ev, int16_t eval, std::ostream& out) {
-
+	std::string fen = chessPositionToFenString(*pos, false);
 	int16_t figureVal = calcFigureEvaluation(pos);
 	out << "\\begin{figure}[!htbp] " << std::endl;
+	out << "\\caption{"+fen+"}" << std::endl;
 	out << "\\newgame" << std::endl;
-	out << "\\fenboard{"+chessPositionToFenString(*pos, false)+"}" << std::endl;
+	out << "\\fenboard{"+fen+"}" << std::endl;
 
 	out << "\\begin{tabular}{ll}" << std::endl;
 	out << "\\raisebox{-.5\\height}{\\showboard}&   \\begin{tabular}{ l | c  }" << std::endl;
@@ -37,6 +38,8 @@ void latexOutput(const chessPosition* pos, evaluationResult ev, int16_t eval, st
 	putTableLine(out, ev.staticPawn, "Pawn structure");
 	putTableLine(out, ev.passedPawn, "Passed pawns");
 	putTableLine(out, ev.rookOpenFiles, "Rooks on open files");
+	putTableLine(out, ev.outPosts, "Outposts");
+	putTableLine(out, ev.trappedPieces, "Trapped Pieces");
 	out << "\\end{tabular}" << std::endl;
 	out << "\\end{tabular}" << std::endl;
 	out << "\\end{figure}" << std::endl;
