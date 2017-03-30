@@ -162,6 +162,8 @@ bool checkContinue(searchParameters params, uint16_t depth, uint16_t passedTime,
 std::ofstream fenLogger;
 #endif*/
 
+#define EXTENSIONS_ALLOWED 3  //TODO: investigate why going to 5 is not significantly better??
+
 uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval, bool doAspiration, searchParameters params) {
 /*#ifdef EXPERIMENTAL
 
@@ -197,11 +199,11 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 		try{
 			//std::cout << "Depth " << depth << std::endl;
 
-			*eval = negamax(position, 0, depth+3, depth, alpha, beta, &line, true, false);
+			*eval = negamax(position, 0, depth+EXTENSIONS_ALLOWED, depth, alpha, beta, &line, true, false);
 			if(doAspiration) {
 				if ((*eval <= alpha) || (*eval >= beta)) {
 
-					*eval = negamax(position, 0, depth+3, depth, -32000, 32000, &line, true, false);
+					*eval = negamax(position, 0, depth+EXTENSIONS_ALLOWED, depth, -32000, 32000, &line, true, false);
 				}
 
 				alpha = *eval-50;

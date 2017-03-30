@@ -167,15 +167,22 @@ static uint8_t nullmoveReductions[40] = {0,1,2,2,2,2,2,2,
 };
 
 //std::ofstream badMoveLogger("/home/vabi/Tools/lateCutoffs.txt");
-
+/*#ifdef EXPERIMENTAL
+#define PREMARGIN 200
+#define MARGIN 300
+#else*/
+#define PREMARGIN 100
+#define MARGIN 150
+//#endif
 
 static inline bool check_futility(bool movingSideInCheck, int32_t alpha, chessPosition* position) {
+
 	if(!movingSideInCheck && (alpha > -2000)) {
 		searchCounts.futility_tried++;
-		int32_t simpleEval = evaluation(position, alpha-151, alpha, true);
-		if(simpleEval < alpha-100) {
-			int32_t base = evaluation(position, alpha-151, alpha);
-			if(base+150 < alpha){
+		int32_t simpleEval = evaluation(position, alpha-MARGIN-1, alpha, true);
+		if(simpleEval < alpha-PREMARGIN) {
+			int32_t base = evaluation(position, alpha-MARGIN-1, alpha);
+			if(base+MARGIN < alpha){
 				searchCounts.futility_successful++;
 				//in this case, trying a silent move is pointless.
 				//std::cout << "Successful futility pruning" << std::endl;
@@ -187,9 +194,21 @@ static inline bool check_futility(bool movingSideInCheck, int32_t alpha, chessPo
 }
 
 static inline bool check_nullmove(chessPosition* position, uint16_t* refutationMoveTarget, uint16_t ply, uint16_t max_ply, int16_t depth, int32_t beta){
+
 	if(beta > 10000){ //TODO: more dynamic condition here?
 		return false;
 	}
+
+//#ifdef EXPERIMENTAL
+	bool noPieces = ((position->pieceTables[position->toMove][knight] || position->pieceTables[position->toMove][bishop] ||position->pieceTables[position->toMove][rook] ||position->pieceTables[position->toMove][queen]) == 0);
+	bool opponentNoPawns = (position->pieceTables[1-position->toMove][pawn] == 0);
+
+
+	if(noPieces || opponentNoPawns) {
+		return false;
+	}
+//#endif
+
 	int32_t eval = evaluation(position, beta-1, beta);
 	if(eval < beta){
 		return false; //no point in trying nullmove when the current evaluation is already worse than beta
@@ -384,7 +403,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 	if(depth == 1) {
 		if(check_futility(movingSideInCheck, alpha, position)) {
 			PV->numMoves = 0;
-			return  negamaxQuiescence(position, ply+1, alpha, beta, 0);
+			return  negamaxQuiescence(position, ply, alpha, beta, 0);
 		}
 	}
 

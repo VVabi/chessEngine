@@ -329,6 +329,20 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
 		latexOutput(position, result, eval);
 	}*/
 
+
+	if((position->pieceTables[white][pawn] == 0) && (eval > 0)) {
+		if((position->pieceTables[white][rook] | position->pieceTables[white][queen]) == 0) {
+			eval = eval/16;
+		}
+	}
+
+
+	if((position->pieceTables[black][pawn] == 0) && (eval < 0)) {
+		if((position->pieceTables[black][rook] | position->pieceTables[black][queen]) == 0) {
+			eval = eval/16;
+		}
+	}
+
 	return (1-2*position->toMove)*eval;
 
 }

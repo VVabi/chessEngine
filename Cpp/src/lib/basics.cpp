@@ -70,8 +70,8 @@ void zeroInitPosition(chessPosition* position) {
 	position->figureEval    = 0;
 #else
 	memset(position, 0, sizeof(chessPosition));
-	position->madeMoves = vdt_vector<chessMove>(300);
-	position->dataStack = vdt_vector<pathDependentPositionData>(300);
+	position->madeMoves = vdt_vector<chessMove>(600);
+	position->dataStack = vdt_vector<pathDependentPositionData>(600);
 #endif
 	position->zobristHash    = calcZobristHash(position);
 	position->data.castlingRights = 0;
