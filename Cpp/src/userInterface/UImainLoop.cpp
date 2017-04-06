@@ -162,7 +162,7 @@ bool checkContinue(searchParameters params, uint16_t depth, uint16_t passedTime,
 std::ofstream fenLogger;
 #endif*/
 
-#define EXTENSIONS_ALLOWED 3  //TODO: investigate why going to 5 is not significantly better??
+#define EXTENSIONS_ALLOWED 7  //TODO: investigate why going to 5 is not significantly better??
 
 uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval, bool doAspiration, searchParameters params) {
 /*#ifdef EXPERIMENTAL
@@ -170,7 +170,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 	fenLogger.open("fen.txt", std::ios::app);
 
 #endif*/
-	memset(killerMoves,0, 20*2*sizeof(uint16_t));
+	memset(killerMoves,0, 40*2*sizeof(uint16_t));
 	resetSearchData();
 	resetQuiescenceNodes();
 	uint64_t start_ts  = get_timestamp();

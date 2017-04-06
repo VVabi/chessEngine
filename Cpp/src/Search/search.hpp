@@ -12,7 +12,7 @@
 #define NO_REFUTATION 64
 void rescaleHistoryTable();
 void clearHistoryTable();
-int16_t negamax(chessPosition* position,  uint16_t ply, uint16_t max_ply, int16_t depth, int16_t alpha, int16_t beta,  pvLine* PV, bool allowNullMove = true,  bool allowHashProbe = true);
+int16_t negamax(chessPosition* position,  uint16_t ply, uint16_t max_ply, int16_t depth, int16_t alpha, int16_t beta,  pvLine* PV, bool allowNullMove = true,  bool allowHashProbe = true, bool extendChecks = true);
 int16_t negamaxQuiescence(chessPosition* position, uint16_t ply, int16_t alpha, int16_t beta, uint16_t depth);
 int16_t root_search(chessPosition* position, chessMove* bestMove, int16_t alpha, int16_t beta, int16_t depth, uint16_t max_ply, vdt_vector<chessMove>* moves, uint64_t* nodeCounts);
 void resetNodes();
@@ -58,12 +58,12 @@ struct searchDebugData{
 
 
 class moveStack {
-	chessMove moveArray[6000];
+	chessMove moveArray[7500];
 	uint16_t counter = 0;
 
 public:
 	vdt_vector<chessMove> getNext(){
-		assert(counter < 35);
+		assert(counter < 45);
 		counter++;
 		//std::cout << counter << std::endl;
 		return vdt_vector<chessMove>(moveArray+(counter-1)*150,150);

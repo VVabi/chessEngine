@@ -17,8 +17,25 @@ extern uint64_t files[];
 extern uint64_t  passedPawnMasks[2][64];
 extern uint16_t taperingValues[81];
 
-static int16_t const passedPawnEvalValues[2][64] = {{ 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 9, 9, 9, 9, 9, 9, 9, 9, 13, 13, 13, 13, 13, 13, 13, 13,0,0,0,0,0,0,0,0 },
-{ 0, 0, 0, 0, 0, 0, 0, 0, 13, 13, 13, 13, 13, 13, 13, 13, 9, 9, 9, 9, 9, 9, 9, 9, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0,0 }};
+
+static int16_t const passedPawnEvalValues[2][64] = {
+		{ 0, 0, 0, 0, 0, 0, 0, 0,
+		  8, 7, 6, 5, 5, 6, 7, 8,
+		  16, 15, 14, 13, 13, 14, 15, 16,
+		  31, 29, 27, 25, 25, 27, 29, 31,
+		  47, 44, 42, 40, 40, 42, 44, 47,
+		  70,69, 64, 60, 60, 64, 69, 70,
+		  100, 96, 93, 90,90,93, 96, 100,
+		  0 ,0, 0, 0, 0, 0, 0, 0 },
+		{ 0, 0, 0, 0, 0, 0, 0, 0,
+		100, 96, 93, 90,90,93, 96, 100,
+		 70,69, 64, 60, 60, 64, 69, 70,
+		  45, 44, 42, 40, 40, 42, 44, 45,
+		  31, 29, 27, 25, 25, 27, 29, 31,
+		  16, 15, 14, 13, 13, 14, 15, 16,
+		  8, 7, 6, 5, 5, 6, 7, 8,
+		  0, 0, 0, 0, 0, 0, 0, 0 }
+};
 
 
 static int16_t kingToPromotionFieldDistance[7][7] = {  // [dist to promotion][king distance from promotion field
@@ -63,15 +80,17 @@ static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint6
 			uint16_t kingDist        = distBetweenFields(promotionField, blackKing);
 			bool blocked = blackPieces & BIT64(field+8);
 			if(distToPromotion <= 2) {
-				*untaperedEval = *untaperedEval+7*passedPawnEvalValues[white][field];
-				if(blocked) {
-					*untaperedEval = *untaperedEval-BLOCKED*passedPawnEvalValues[white][field];
-				}
-			} else {
-				eval = eval+7*passedPawnEvalValues[white][field];
-				if(blocked) {
-					eval = eval-BLOCKED*passedPawnEvalValues[white][field];
-				}
+
+
+				*untaperedEval = *untaperedEval+passedPawnEvalValues[white][field];
+								if(blocked) {
+									*untaperedEval = *untaperedEval-passedPawnEvalValues[white][field]/2;
+								}
+							} else {
+				eval = eval+passedPawnEvalValues[white][field];
+					if(blocked) {
+						eval = eval-passedPawnEvalValues[white][field]/2;
+					}
 			}
 /*#ifdef EXPERIMENTAL
 			int16_t coverage = 0;
@@ -111,15 +130,17 @@ static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint6
 			uint16_t kingDist        = distBetweenFields(promotionField, whiteKing);
 			bool blocked = whitePieces & BIT64(field-8);
 			if(distToPromotion <= 2) {
-				*untaperedEval = *untaperedEval-7*passedPawnEvalValues[black][field];
+
+				*untaperedEval = *untaperedEval-passedPawnEvalValues[black][field];
 				if(blocked) {
-					*untaperedEval = *untaperedEval+BLOCKED*passedPawnEvalValues[black][field];
+					*untaperedEval = *untaperedEval+passedPawnEvalValues[black][field]/2;
 				}
 			} else {
-				eval = eval-7*passedPawnEvalValues[black][field];
-				if(blocked) {
-					eval = eval+BLOCKED*passedPawnEvalValues[black][field];
-				}
+				eval = eval-passedPawnEvalValues[black][field];
+					if(blocked) {
+						eval = eval+passedPawnEvalValues[black][field]/2;
+					}
+
 			}
 
 		/*#ifdef EXPERIMENTAL

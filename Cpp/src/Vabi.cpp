@@ -146,8 +146,8 @@ int main() {
 		latexOutput(line, out);
 	}*/
 
-
-	/*runPerformanceTests();
+/*
+	runPerformanceTests();
 	return 0;*/
 	/*std::cout << testPerftTestSuite().passed << std::endl;
 	return 0;*/

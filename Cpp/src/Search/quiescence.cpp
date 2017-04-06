@@ -71,7 +71,7 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t ply, int16_t alpha, 
 	uint64_t ownKing = position->pieceTables[position->toMove][king];
 	if(isFieldAttacked(position, (playerColor) (1-position->toMove), findLSB(ownKing))) {
 		pvLine line;
-		return negamax(position, ply, ply+1, 1, alpha, beta, &line, false, false);
+		return negamax(position, ply, ply+1, 1, alpha, beta, &line, false, false, false);
 	}
 #ifdef HASH
 	hashEntry hashVal      = getHashTableEntry(position->zobristHash);

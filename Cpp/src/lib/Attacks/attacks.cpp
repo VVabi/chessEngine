@@ -440,7 +440,10 @@ int16_t SEE(chessPosition* position, chessMove* mv){
 	if(mv->type > 5){
 		return 0;
 	}
+
+
 	const evalParameters* evalPars = getEvalParameters();
+	assert(evalPars->figureValues[none] == 0);
 	uint16_t val = evalPars->figureValues[mv->captureType];
 	uint64_t mask = BIT64(mv->sourceField);
 	position->toMove = (playerColor) (1-position->toMove);

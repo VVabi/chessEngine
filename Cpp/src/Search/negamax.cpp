@@ -97,7 +97,7 @@ static inline bool getHashMoveToFront(vdt_vector<chessMove>* moves, uint16_t has
 	return false;
 }
 
-uint16_t killerMoves[40][2];
+uint16_t killerMoves[50][2];
 
 //static chessMove buffer[5000];
 
@@ -107,13 +107,16 @@ uint16_t repetitionData[16384] = {0};
 
 //std::ofstream logger("/home/vabi/log8.txt");
 
-static inline void get_extensions_reductions(uint16_t* reduction, uint16_t* extension, bool check, bool movingSideInCheck, uint16_t ply, uint16_t max_ply, int16_t depth, chessMove* move, uint16_t ind) {
+static inline void get_extensions_reductions(chessPosition* position, uint16_t* reduction, uint16_t* extension, bool check, bool movingSideInCheck, uint16_t ply, uint16_t max_ply, int16_t depth, chessMove* move, uint16_t ind) {
 //#ifdef EXPERIMENTAL
 		if(!check && !movingSideInCheck && (move->captureType == none) && (depth > 2) && (ply > 0)){
-			if(move->sortEval < 20){
+			if(move->sortEval < 50){
 				*reduction = 1;
 				if((move->sortEval < -50)) {
 					*reduction = 2;
+					if(depth > 10) {
+						*reduction = 3;
+					}
 				}
 			}
 		}
@@ -130,12 +133,39 @@ static inline void get_extensions_reductions(uint16_t* reduction, uint16_t* exte
 					}
 				}
 			}
-
-
 #endif*/
-		if(check && ((ply+depth < max_ply-1) || ((depth == 1) && (ply+depth < max_ply)) )){
-			*extension = 1;
+
+/*#ifdef EXPERIMENTAL
+		if(check) {
+			*reduction = 0; //TODO: A check should NEVER be reduced, indepeoent of the ply/depth stuff
+			if(((ply+depth < max_ply-1) || ((depth == 1) && (ply+depth < max_ply)) )){
+				if(SEE(position, move) > -50) {
+					*extension = 1;
+				}
+			}
+
+		}
+
+		bool closeToPromotion = (move->type == pawnMove) && ( (move->targetField > 48) || (move->targetField < 16));
+
+		if( (closeToPromotion || (move->type == promotionQueen))) {
+
 			*reduction = 0;
+
+			if((ply+depth+*extension <= max_ply-1)) {
+				*extension = *extension+1;
+			}
+
+		}
+
+#else*/
+
+		if(check && ((ply+depth < max_ply-1) || ((depth == 1) && (ply+depth < max_ply)) )){
+			*reduction = 0; //TODO: A check should NEVER be reduced, indepeoent of the ply/depth stuff
+			if(SEE(position, move) > -50) {
+				*extension = 1;
+			}
+
 		}
 
 		bool closeToPromotion = (move->type == pawnMove) && ( (move->targetField > 48) || (move->targetField < 16));
@@ -144,6 +174,33 @@ static inline void get_extensions_reductions(uint16_t* reduction, uint16_t* exte
 			*extension = *extension+1;
 			*reduction = 0;
 		}
+
+
+
+
+
+
+		/*bool toSixthRank = false;
+
+		if(move->type == pawnMove) {
+			if((position->toMove == white) && (move->targetField > 40)) {
+				toSixthRank = true;
+			}
+			if((position->toMove == black) && (move->targetField < 24)) {
+				toSixthRank = true;
+			}
+
+		}
+
+		if(toSixthRank ||  (move->type == promotionQueen)) {
+			*reduction = 0;
+			if((ply+depth+*extension < max_ply-1)) {
+				*extension = *extension+1;
+			}
+		}*/
+
+
+
 }
 
 static inline bool backtrack_position_for_repetition(chessPosition* position) {
@@ -159,7 +216,7 @@ static inline bool backtrack_position_for_repetition(chessPosition* position) {
 	return false;
 }
 
-static uint8_t nullmoveReductions[40] = {0,1,2,2,2,2,2,2,
+static uint8_t nullmoveReductions[40] = {0,1,2,2,2,3,3,3,
 										 3,3,3,3,3,3,3,3,
 										 3,3,3,3,3,3,3,3,
 										 3,3,3,3,3,3,3,3,
@@ -171,18 +228,16 @@ static uint8_t nullmoveReductions[40] = {0,1,2,2,2,2,2,2,
 #define PREMARGIN 200
 #define MARGIN 300
 #else*/
-#define PREMARGIN 100
-#define MARGIN 150
 //#endif
 
-static inline bool check_futility(bool movingSideInCheck, int32_t alpha, chessPosition* position) {
+static inline bool check_futility(bool movingSideInCheck, int32_t alpha, chessPosition* position, int16_t premargin, int16_t margin) {
 
 	if(!movingSideInCheck && (alpha > -2000)) {
 		searchCounts.futility_tried++;
-		int32_t simpleEval = evaluation(position, alpha-MARGIN-1, alpha, true);
-		if(simpleEval < alpha-PREMARGIN) {
-			int32_t base = evaluation(position, alpha-MARGIN-1, alpha);
-			if(base+MARGIN < alpha){
+		int32_t simpleEval = evaluation(position, alpha-premargin-1, alpha, true);
+		if(simpleEval < alpha-premargin) {
+			int32_t base = evaluation(position, alpha-margin-1, alpha);
+			if(base+margin < alpha){
 				searchCounts.futility_successful++;
 				//in this case, trying a silent move is pointless.
 				//std::cout << "Successful futility pruning" << std::endl;
@@ -317,7 +372,7 @@ static inline void checkTimeout() {
 
 uint64_t gotHashMove = 0;
 uint64_t noHashMove   = 0;
-int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t depth, int16_t alpha, int16_t beta, pvLine* PV, bool allowNullMove, bool doHashProbe) {
+int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t depth, int16_t alpha, int16_t beta, pvLine* PV, bool allowNullMove, bool doHashProbe, bool extendChecks) {
 
 	/*int16_t max_score = 30000-ply-1;
 
@@ -401,11 +456,20 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 	//futility pruning
 	//-----------------
 	if(depth == 1) {
-		if(check_futility(movingSideInCheck, alpha, position)) {
+		if(check_futility(movingSideInCheck, alpha, position, 100,150)) {
 			PV->numMoves = 0;
 			return  negamaxQuiescence(position, ply, alpha, beta, 0);
 		}
 	}
+
+//#ifdef EXPERIMENTAL
+	if(depth == 2) {
+		if(check_futility(movingSideInCheck, alpha, position, 500, 600)) {
+			PV->numMoves = 0;
+			return  negamaxQuiescence(position, ply, alpha, beta, 0);
+		}
+	}
+//#endif
 
 	//------------------------------------------------------------------
 	//now we are out of tricks, we need to start the actual search.
@@ -535,8 +599,12 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 		//------------------------------
 		uint16_t reduction = 0;
 		uint16_t extension = 0;
-		get_extensions_reductions(&reduction, &extension, check, movingSideInCheck, ply, max_ply, depth, &moves[ind], ind);
 
+		get_extensions_reductions(position, &reduction, &extension, check, movingSideInCheck, ply, max_ply, depth, &moves[ind], ind);
+
+		if(!extendChecks){
+			extension = 0;
+		}
 		//PVSearch, currently a small gain for us with the > 3
 		//-------------------------------------------------
 		if(((ind > 3) || foundGoodMove )&& (depth > 2)) {
