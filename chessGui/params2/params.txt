@@ -4,7 +4,7 @@ rookvalue  500
 knightvalue 320
 bishopvalue 330
 bishoppair  			50
-rookonopenfile 			10
+rookonopenfile 			15
 isolateddoublepawns 	-50
 nonisolateddoublepawns 	-20
 isolatedpawns   		-10

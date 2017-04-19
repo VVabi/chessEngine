@@ -24,17 +24,18 @@ static int16_t const passedPawnEvalValues[2][64] = {
 		  16, 15, 14, 13, 13, 14, 15, 16,
 		  31, 29, 27, 25, 25, 27, 29, 31,
 		  47, 44, 42, 40, 40, 42, 44, 47,
-		  70,69, 64, 60, 60, 64, 69, 70,
-		  100, 96, 93, 90,90,93, 96, 100,
+		  90,89, 84, 80, 80, 84, 89, 90,
+		  135, 131, 128, 125,125,128, 131, 135,
 		  0 ,0, 0, 0, 0, 0, 0, 0 },
 		{ 0, 0, 0, 0, 0, 0, 0, 0,
-		100, 96, 93, 90,90,93, 96, 100,
-		 70,69, 64, 60, 60, 64, 69, 70,
+		 135, 131, 128, 125,125,128, 131, 135,
+		 90,89, 84, 80, 80, 84, 89, 90,
 		  45, 44, 42, 40, 40, 42, 44, 45,
 		  31, 29, 27, 25, 25, 27, 29, 31,
 		  16, 15, 14, 13, 13, 14, 15, 16,
 		  8, 7, 6, 5, 5, 6, 7, 8,
 		  0, 0, 0, 0, 0, 0, 0, 0 }
+
 };
 
 
@@ -64,7 +65,8 @@ static uint16_t distBetweenFields(uint16_t a, uint16_t b) {
 uint64_t staticpawncalls = 0;
 uint64_t staticpawnhashhits = 0;
 
-#define BLOCKED 3
+#define BLOCKEDDIVISOR 2
+
 
 static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint64_t blackPawns, uint16_t blackKing, uint16_t whiteKing, uint64_t whitePieces, uint64_t blackPieces) {
 	//TODO: remove code duplication. Generally this code sucks - too many white/black diffs...
@@ -84,12 +86,12 @@ static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint6
 
 				*untaperedEval = *untaperedEval+passedPawnEvalValues[white][field];
 								if(blocked) {
-									*untaperedEval = *untaperedEval-passedPawnEvalValues[white][field]/2;
+									*untaperedEval = *untaperedEval-passedPawnEvalValues[white][field]/BLOCKEDDIVISOR;
 								}
 							} else {
 				eval = eval+passedPawnEvalValues[white][field];
 					if(blocked) {
-						eval = eval-passedPawnEvalValues[white][field]/2;
+						eval = eval-passedPawnEvalValues[white][field]/BLOCKEDDIVISOR;
 					}
 			}
 /*#ifdef EXPERIMENTAL
@@ -133,12 +135,12 @@ static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint6
 
 				*untaperedEval = *untaperedEval-passedPawnEvalValues[black][field];
 				if(blocked) {
-					*untaperedEval = *untaperedEval+passedPawnEvalValues[black][field]/2;
+					*untaperedEval = *untaperedEval+passedPawnEvalValues[black][field]/BLOCKEDDIVISOR;
 				}
 			} else {
 				eval = eval-passedPawnEvalValues[black][field];
 					if(blocked) {
-						eval = eval+passedPawnEvalValues[black][field]/2;
+						eval = eval+passedPawnEvalValues[black][field]/BLOCKEDDIVISOR;
 					}
 
 			}

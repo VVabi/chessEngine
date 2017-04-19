@@ -163,11 +163,15 @@ AttackTable makeAttackTable(const chessPosition* position, playerColor attacking
 	return retTable;
 }
 
-
-int16_t bishopMobility[14]   = {-25,-20,-18,-13,-5,0,3,5,8,10,11,12,12,13};
-int16_t rookMobility[15]     = {-25,-20,-18,-15,-10,-8,-3,0,3,5,8,9,10,11,12};
-int16_t knightMobility[9]   = {-15,-13,-8,0,3,5,8,9,10};
-
+#ifdef EXPERIMENTAL
+int16_t bishopMobility[14]   = {-35,-25,-18,-13,-5,0,3,5,8,10,13,15,17,18};
+int16_t rookMobility[15]     = {-35,-25,-18,-15,-10,-8,-3,0,3,5,8,9,11,13,16};
+int16_t knightMobility[9]   = {-25,-18,-8,0,3,5,8,10,12};
+#else
+int16_t bishopMobility[14]   = {-35,-25,-18,-13,-5,0,3,5,8,10,11,12,12,13};
+int16_t rookMobility[15]     = {-35,-25,-18,-15,-10,-8,-3,0,3,5,8,9,10,11,12};
+int16_t knightMobility[9]   = {-25,-18,-8,0,3,5,8,9,10};
+#endif
 AttackTable makeAttackTableWithMobility(const chessPosition* position, playerColor attackingSide, int16_t* mobilityScore) {
 
 
