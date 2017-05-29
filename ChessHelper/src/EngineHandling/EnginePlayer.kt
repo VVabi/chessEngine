@@ -35,19 +35,38 @@ class EnginePlayer(path1: String, params1: String, path2: String, params2: Strin
 
         var moveCounter = 0
         var ret = GameResult.DRAW
+        var currentEngine: ChessEngine
+        var engine1ToMove = true
+
         while(true) {
-            engine1.setPosition(start, moveList)
+
+            if(engine1ToMove) {
+                currentEngine = engine1
+            } else {
+                currentEngine = engine2
+            }
+
+
+            currentEngine.setPosition(start, moveList)
             try {
-                var res = engine1.search(depth, timeOut)
+                var res = currentEngine.search(depth, timeOut)
                 moveList = moveList+res.bestMove
 
                 if(res.eval > 20000) {
-                    ret = GameResult.ENG1
+                    if(engine1ToMove) {
+                        ret = GameResult.ENG1
+                    } else {
+                        ret = GameResult.ENG2
+                    }
                     break
                 }
 
                 if(res.eval < -20000) {
-                    ret = GameResult.ENG2
+                    if(engine1ToMove) {
+                        ret = GameResult.ENG2
+                    } else {
+                        ret = GameResult.ENG1
+                    }
                     break
                 }
             } catch(e: TimeoutException) {
@@ -57,28 +76,7 @@ class EnginePlayer(path1: String, params1: String, path2: String, params2: Strin
                 return GameInfo(GameResult.TIMEOUT, moveList)
             }
 
-
-            engine2.setPosition(start, moveList)
-            try {
-                var res = engine2.search(depth, timeOut)
-                moveList = moveList+res.bestMove
-
-                if(res.eval > 20000) {
-                    ret = GameResult.ENG2
-                    break
-                }
-
-                if(res.eval < -20000) {
-                    ret = GameResult.ENG1
-                    break
-                }
-            } catch(e: TimeoutException) {
-                engine1.close()
-                engine2.close()
-                println("Search timed out")
-                return GameInfo(GameResult.TIMEOUT, moveList)
-            }
-
+            engine1ToMove = !engine1ToMove
 
             moveCounter++
             if(moveCounter > 300) {
