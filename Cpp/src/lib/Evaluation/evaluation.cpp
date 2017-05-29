@@ -54,7 +54,11 @@ uint16_t taperingValues[81] = {  0,  0,  0,  0,  0,  0,  0,  0,
 };
 */
 
-
+#ifdef EXPERIMENTAL
+#define OUTPOSTVALUE 20
+#else
+#define OUTPOSTVALUE 15
+#endif
 static int16_t outposts(const chessPosition* position) {
 	uint64_t wPawns = position->pieceTables[white][pawn];
 	uint64_t bPawns = position->pieceTables[black][pawn];
@@ -69,7 +73,7 @@ static int16_t outposts(const chessPosition* position) {
 
 	uint64_t bKnightOutposts = bKnights & (~wPawnAttackSpan) & wStops;
 
-	ret = ret-15*popcount(bKnightOutposts);
+	ret = ret-OUTPOSTVALUE*popcount(bKnightOutposts);
 
 	uint64_t bStops = SOUTHONE(bPawns);
 
@@ -77,7 +81,7 @@ static int16_t outposts(const chessPosition* position) {
 
 	uint64_t wKnightOutposts = wKnights & (~bPawnAttackSpan) & bStops;
 
-	ret = ret+15*popcount(wKnightOutposts);
+	ret = ret+OUTPOSTVALUE*popcount(wKnightOutposts);
 	return ret;
 
 }

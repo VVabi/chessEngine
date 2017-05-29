@@ -43,8 +43,6 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-
-
         /*uciEngineHandler handler = new uciEngineHandler("/home/vabi/code/chessEngine/Cpp/Release/Vabi", "");
         System.out.println("perft tests");
         TestSuite.TestResult perftResult = PerftTests.testPerft(handler);
