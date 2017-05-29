@@ -7,25 +7,25 @@ import java.util.concurrent.TimeoutException
  * Created by vabi on 29.05.17.
  */
 
-enum class GameResult {
-    ENG1,ENG2,DRAW,TIMEOUT
-}
 
+data class GameInfo(val res: String, val moves: List<String>)
 
-data class GameInfo(val res: GameResult, val moves: List<String>)
+data class EngineDescriptor(val executablePath: String, val workingDirectory: String, val name: String)
 
-class EnginePlayer(path1: String, params1: String, path2: String, params2: String, startPos: String, depth: Int, timeOut: Int) {
+data class LaunchedEngine(val engine: ChessEngine, val name: String)
 
-    val engine1: ChessEngine
-    val engine2: ChessEngine
+class EnginePlayer(engineDescriptor1: EngineDescriptor, engineDescriptor2: EngineDescriptor, startPos: String, depth: Int, timeOut: Int) {
+
+    val engine1: LaunchedEngine
+    val engine2: LaunchedEngine
 
     var moveList = listOf<String>()
     var start: String
     var timeOut: Int
     var depth: Int
     init {
-        engine1 = ChessEngine(path1, params1)
-        engine2 = ChessEngine(path2, params2)
+        this.engine1 = LaunchedEngine(ChessEngine(engineDescriptor1.executablePath, engineDescriptor1.workingDirectory), engineDescriptor1.name)
+        this.engine2 = LaunchedEngine(ChessEngine(engineDescriptor2.executablePath, engineDescriptor2.workingDirectory), engineDescriptor2.name)
         start = startPos
         this.timeOut = timeOut
         this.depth   = depth
@@ -34,8 +34,8 @@ class EnginePlayer(path1: String, params1: String, path2: String, params2: Strin
     fun play(): GameInfo {
 
         var moveCounter = 0
-        var ret = GameResult.DRAW
-        var currentEngine: ChessEngine
+        var ret = "DRAW"
+        var currentEngine: LaunchedEngine
         var engine1ToMove = true
 
         while(true) {
@@ -47,33 +47,32 @@ class EnginePlayer(path1: String, params1: String, path2: String, params2: Strin
             }
 
 
-            currentEngine.setPosition(start, moveList)
+            currentEngine.engine.setPosition(start, moveList)
             try {
-                var res = currentEngine.search(depth, timeOut)
+                var res = currentEngine.engine.search(depth, timeOut)
                 moveList = moveList+res.bestMove
 
                 if(res.eval > 20000) {
                     if(engine1ToMove) {
-                        ret = GameResult.ENG1
+                        ret = engine1.name
                     } else {
-                        ret = GameResult.ENG2
+                        ret = engine2.name
                     }
                     break
                 }
 
                 if(res.eval < -20000) {
                     if(engine1ToMove) {
-                        ret = GameResult.ENG2
+                        ret = engine2.name
                     } else {
-                        ret = GameResult.ENG1
+                        ret = engine1.name
                     }
                     break
                 }
             } catch(e: TimeoutException) {
-                engine1.close()
-                engine2.close()
+                close()
                 println("Search timed out")
-                return GameInfo(GameResult.TIMEOUT, moveList)
+                return GameInfo("TIMEOUT", moveList)
             }
 
             engine1ToMove = !engine1ToMove
@@ -84,18 +83,13 @@ class EnginePlayer(path1: String, params1: String, path2: String, params2: Strin
             }
         }
 
-        for(move in moveList) {
-            println(move)
-        }
-
-        engine1.close()
-        engine2.close()
+        close()
         return GameInfo(ret, moveList)
     }
 
     fun close() {
-        engine1.close()
-        engine2.close()
+        engine1.engine.close()
+        engine2.engine.close()
     }
 
 }
