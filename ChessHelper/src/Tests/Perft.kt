@@ -54,6 +54,6 @@ fun runPerftTests(engine: ChessEngine): Boolean {
         }
 
     }
-    engine.close()
+
     return res
 }
