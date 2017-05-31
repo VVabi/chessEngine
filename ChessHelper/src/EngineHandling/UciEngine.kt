@@ -21,7 +21,7 @@ class UciEngine(path: String, workingDirectory: String) {
         reader = BufferedReader(InputStreamReader(process.inputStream))
         writer = BufferedWriter(OutputStreamWriter(process.outputStream))
 
-        put("EngineHandling")
+        put("uci")
         put("isready")
 
         while(true) {
@@ -30,8 +30,6 @@ class UciEngine(path: String, workingDirectory: String) {
                 break;
             }
         }
-
-        println("Successfully initialized engine!");
     }
 
     fun put(message: String) {

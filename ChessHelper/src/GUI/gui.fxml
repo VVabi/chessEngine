@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+
+<TabPane prefHeight="419.0" prefWidth="450.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8.0.102-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.controller">
+    <tabs>
+        <Tab text="Tuning">
+            <content>
+                <fx:include fx:id="barTabPage" source="tuning.fxml" />
+            </content>
+        </Tab>
+        <Tab text="Tests">
+            <content>
+                <fx:include fx:id="fooTabPage" source="tests.fxml" />
+            </content>
+        </Tab>
+    </tabs>
+</TabPane>

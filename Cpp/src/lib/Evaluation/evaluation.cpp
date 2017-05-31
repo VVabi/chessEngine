@@ -55,7 +55,7 @@ uint16_t taperingValues[81] = {  0,  0,  0,  0,  0,  0,  0,  0,
 */
 
 #ifdef EXPERIMENTAL
-#define OUTPOSTVALUE 20
+#define OUTPOSTVALUE 12
 #else
 #define OUTPOSTVALUE 15
 #endif

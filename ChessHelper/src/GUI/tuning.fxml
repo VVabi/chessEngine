@@ -1,0 +1,7 @@
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.Button?>
+<GridPane fx:controller="GUI.controller" xmlns:fx="http://javafx.com/fxml" xmlns="http://javafx.com/javafx/8" alignment="center" hgap="10" vgap="30">
+    <Label fx:id="helloLabel" text="Hello" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+    <Button fx:id="testButton" text="ClickMeNow" onAction="#handleClickMe" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+</GridPane>

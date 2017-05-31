@@ -27,18 +27,11 @@ class ChessEngine(path: String, workingDirectory: String) {
         uciEngine.put(putString)
     }
 
-    fun search(depth: Int, timeoutMillis: Int = 0): SearchResult {
+    fun search(depth: Int): SearchResult {
         uciEngine.put("go depth "+depth)
-        var current = System.currentTimeMillis()
         var eval = 0
         var bestMove: String
         while(true) {
-
-            if(timeoutMillis > 0) {
-                if(System.currentTimeMillis()-current > timeoutMillis) {
-                    throw TimeoutException("Search timed out")
-                }
-            }
 
             var answer = uciEngine.readAnswer()
             var parts = answer.split(" ")
@@ -65,6 +58,14 @@ class ChessEngine(path: String, workingDirectory: String) {
             }
         }
         return SearchResult(eval, bestMove)
+    }
+
+
+    fun runPerft(depth: Int): Long {
+        uciEngine.put("perft "+depth)
+        var answer = uciEngine.readAnswer()
+        answer = answer.substring(12)
+        return java.lang.Long.parseLong(answer)
     }
 
     fun close() {

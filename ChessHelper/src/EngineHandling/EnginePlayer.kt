@@ -14,20 +14,18 @@ data class EngineDescriptor(val executablePath: String, val workingDirectory: St
 
 data class LaunchedEngine(val engine: ChessEngine, val name: String)
 
-class EnginePlayer(engineDescriptor1: EngineDescriptor, engineDescriptor2: EngineDescriptor, startPos: String, depth: Int, timeOut: Int) {
+class EnginePlayer(engineDescriptor1: EngineDescriptor, engineDescriptor2: EngineDescriptor, startPos: String, depth: Int) {
 
     val engine1: LaunchedEngine
     val engine2: LaunchedEngine
 
     var moveList = listOf<String>()
     var start: String
-    var timeOut: Int
     var depth: Int
     init {
         this.engine1 = LaunchedEngine(ChessEngine(engineDescriptor1.executablePath, engineDescriptor1.workingDirectory), engineDescriptor1.name)
         this.engine2 = LaunchedEngine(ChessEngine(engineDescriptor2.executablePath, engineDescriptor2.workingDirectory), engineDescriptor2.name)
         start = startPos
-        this.timeOut = timeOut
         this.depth   = depth
     }
 
@@ -49,7 +47,7 @@ class EnginePlayer(engineDescriptor1: EngineDescriptor, engineDescriptor2: Engin
 
             currentEngine.engine.setPosition(start, moveList)
             try {
-                var res = currentEngine.engine.search(depth, timeOut)
+                var res = currentEngine.engine.search(depth)
                 moveList = moveList+res.bestMove
 
                 if(res.eval > 20000) {

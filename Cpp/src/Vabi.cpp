@@ -134,7 +134,7 @@ int main() {
 			}
 	}
 
-	srand (time(NULL));
+	srand (get_timestamp());
 	fillZobristHash();
 	/*std::ofstream out("/home/vabi/TeX/Chess/positions.tex");
 	std::ifstream in("/home/vabi/code/chessEngine/chessGui/openingPositions.txt");
