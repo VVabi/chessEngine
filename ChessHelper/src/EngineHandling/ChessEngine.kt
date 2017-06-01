@@ -93,4 +93,11 @@ class ChessEngine(path: String, workingDirectory: String) {
         uciEngine.destroy()
     }
 
+    fun getEval(): Int {
+        uciEngine.put("eval")
+        val answer = uciEngine.readAnswer()
+        val parts = answer.split(" ")
+        return Integer.parseInt(parts[1])
+    }
+
 }

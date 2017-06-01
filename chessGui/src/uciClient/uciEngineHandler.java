@@ -35,14 +35,11 @@ public class uciEngineHandler {
         put("isready");
 
         while(true){
-
             String answer = reader.readLine();
-
             if("readyok".equals(answer)){
                 break;
             }
         }
-
 
     }
 

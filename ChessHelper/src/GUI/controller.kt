@@ -4,6 +4,7 @@ package GUI
  * Created by vabi on 31.05.17.
  */
 import EngineHandling.ChessEngine
+import Tests.runEvalSymmetryTests
 import Tests.runPerftTests
 import Tests.testDebugvsRelease
 import javafx.fxml.FXML
@@ -20,11 +21,13 @@ class controller {
 
     @FXML var perft: Button? = null
     @FXML var debugVsRelease: Button? = null
+    @FXML var evalSymmetry: Button? = null
     var testMap: HashMap<String, testData> = HashMap()
 
     init {
         testMap.put("perft", testData(::runPerftTests, AtomicBoolean(false)))
         testMap.put("debugVsRelease", testData(::testDebugvsRelease, AtomicBoolean(false)))
+        testMap.put("evalSymmetry", testData(::runEvalSymmetryTests, AtomicBoolean(false)))
     }
 
     @FXML var helloLabel: Label? = null
@@ -46,6 +49,12 @@ class controller {
         }
     }
 
+    @FXML fun handleEvalSymmetryTests() {
+        thread {
+            runTest("evalSymmetry")
+        }
+    }
+
 
     fun runTest(name: String) {
         val data = testMap[name]
@@ -55,7 +64,7 @@ class controller {
             val debugEngine:   ChessEngine = ChessEngine("/home/vabi/code/chessEngine/Cpp/Debug/Vabi",   "")
 
             if(debugEngine.getType() == releaseEngine.getType()) {
-                println("Alleged Release and Debug engines are the same type??");
+                println("Alleged Release and Debug engines are the same type??")
                 exit(1) //to be REALLY verbose about this
             }
 
@@ -66,6 +75,7 @@ class controller {
                 onTestStateChanged(name, testStatus.FAILED)
             }
             releaseEngine.close()
+            debugEngine.close()
             data.isRunning.set(false)
         } else {
             println("Test "+name+" already running")
@@ -87,10 +97,13 @@ class controller {
 
         when(name) {
             "perft" -> {
-                    perft?.setStyle("-fx-base: #"+colorString+";")
+                perft?.style = "-fx-base: #$colorString;"
             }
             "debugVsRelease" -> {
-                debugVsRelease?.setStyle("-fx-base: #"+colorString+";")
+                debugVsRelease?.style = "-fx-base: #$colorString;"
+            }
+            "evalSymmetry" -> {
+                evalSymmetry?.style = "-fx-base: #$colorString;"
             }
             else -> {
                 println("Unknown test encountered")
