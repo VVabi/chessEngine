@@ -1,5 +1,7 @@
 package EngineHandling
 
+import java.io.IOException
+import java.util.ArrayList
 import java.util.concurrent.TimeoutException
 
 /**
@@ -66,6 +68,25 @@ class ChessEngine(path: String, workingDirectory: String) {
         var answer = uciEngine.readAnswer()
         answer = answer.substring(12)
         return java.lang.Long.parseLong(answer)
+    }
+
+    fun debugSearchOutput(depth: Int): List<String> {
+        uciEngine.put("go depth " + depth)
+        val ret = ArrayList<String>()
+        while (true) {
+            val answer = uciEngine.readAnswer()
+            ret.add(answer)
+            println(answer)
+            if (answer.length >= 8 && "bestmove" == answer.substring(0, 8)) {
+                break
+            }
+        }
+        return ret
+    }
+
+    fun getType(): String  {
+        uciEngine.put("info")
+        return uciEngine.readAnswer()
     }
 
     fun close() {

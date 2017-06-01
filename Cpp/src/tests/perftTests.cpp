@@ -88,7 +88,7 @@ uint64_t perftNodes(chessPosition* position, uint16_t depth){
 	}
 
 
-	bool isMate = true;
+
 	for(uint16_t ind=0; ind < moves.length; ind++){
 
 		switch(currentState) {
@@ -139,19 +139,12 @@ uint64_t perftNodes(chessPosition* position, uint16_t depth){
 		if(isFieldAttacked(position, position->toMove, kingField)){
 
 		} else {
-			isMate = false;
 			additional_nodes = perftNodes(position, depth-1);
 
 			nodes = nodes+additional_nodes;
 		}
 
 		undoMove(position);
-
-		if(!isMate){
-			if(depth == 6) {
-				//std::cout << moveToString(moves[ind], *c) << " : " << additional_nodes << std::endl;
-			}
-		}
 	}
 
 	moves.free_array();

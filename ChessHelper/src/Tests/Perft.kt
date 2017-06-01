@@ -12,7 +12,7 @@ import java.io.FileReader
 
 private data class PerftTestData(val fen: String, val depth: Int, val numNodes: Long);
 
-fun runPerftTests(engine: ChessEngine): Boolean {
+fun runPerftTests(engine: ChessEngine, debugEngine: ChessEngine): Boolean {
 
     var data = ArrayList<PerftTestData>();
     val localData = java.util.ArrayList<String>()

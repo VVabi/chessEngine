@@ -586,8 +586,13 @@ void handleSEE(std::list<std::string> input) {
 
 }
 
-
-
+void handleInfo() {
+#ifdef DEBUG
+	putLine("DEBUG");
+#else
+	putLine("RELEASE");
+#endif
+}
 
 void UIloop() {
 	initUserEvents();
@@ -654,6 +659,9 @@ void UIloop() {
 					break;
 				case clear:
 					handleClear();
+					break;
+				case info:
+					handleInfo();
 					break;
 				default:
 					putLine("Not yet implemented");

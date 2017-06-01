@@ -48,6 +48,7 @@ void initUserEvents() {
 	userEventList["pawneval"] 			= pawnEval;
 	userEventList["see"] 			    = see;
 	userEventList["clear"] 			    = clear;
+	userEventList["info"] 			    = info;
 }
 
 userEvent getNextUserEvent() {
@@ -64,9 +65,6 @@ userEvent getNextUserEvent() {
 		inputType = iterator->second;
 	}
 	in.pop_front();
-
-
-
 	userEvent ev = userEvent(inputType, in);
 	return ev;
 }

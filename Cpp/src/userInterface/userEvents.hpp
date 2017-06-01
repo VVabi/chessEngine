@@ -10,7 +10,7 @@
 #include <string>
 #include <list>
 
-enum uciInput {invalid, uci, debug, isready, setoption, ucinewgame, position, go, stop, ponderhit, quit, perft, eval, pawnEval, see, clear};
+enum uciInput {invalid, uci, debug, isready, setoption, ucinewgame, position, go, stop, ponderhit, quit, perft, eval, pawnEval, see, clear, info};
 
 struct userEvent {
 public:
