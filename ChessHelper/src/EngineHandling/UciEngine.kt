@@ -26,8 +26,8 @@ class UciEngine(path: String, workingDirectory: String) {
 
         while(true) {
             val answer = readAnswer()
-            if("readyok".equals(answer)) {
-                break;
+            if("readyok" == answer) {
+                break
             }
         }
     }

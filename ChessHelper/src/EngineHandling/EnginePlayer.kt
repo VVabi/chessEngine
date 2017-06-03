@@ -1,6 +1,5 @@
 package EngineHandling
 
-import java.util.*
 import java.util.concurrent.TimeoutException
 
 /**
@@ -8,26 +7,19 @@ import java.util.concurrent.TimeoutException
  */
 
 
-data class GameInfo(val res: String, val moves: List<String>)
+data class GameInfo(val res: String, val startFen: String, val moves: List<String>)
 
 data class EngineDescriptor(val executablePath: String, val workingDirectory: String, val name: String)
 
 data class LaunchedEngine(val engine: ChessEngine, val name: String)
 
-class EnginePlayer(engineDescriptor1: EngineDescriptor, engineDescriptor2: EngineDescriptor, startPos: String, depth: Int) {
+class EnginePlayer(engineDescriptor1: EngineDescriptor, engineDescriptor2: EngineDescriptor, startPos: String, var depth: Int) {
 
-    val engine1: LaunchedEngine
-    val engine2: LaunchedEngine
+    val engine1: LaunchedEngine = LaunchedEngine(ChessEngine(engineDescriptor1.executablePath, engineDescriptor1.workingDirectory), engineDescriptor1.name)
+    val engine2: LaunchedEngine = LaunchedEngine(ChessEngine(engineDescriptor2.executablePath, engineDescriptor2.workingDirectory), engineDescriptor2.name)
 
     var moveList = listOf<String>()
-    var start: String
-    var depth: Int
-    init {
-        this.engine1 = LaunchedEngine(ChessEngine(engineDescriptor1.executablePath, engineDescriptor1.workingDirectory), engineDescriptor1.name)
-        this.engine2 = LaunchedEngine(ChessEngine(engineDescriptor2.executablePath, engineDescriptor2.workingDirectory), engineDescriptor2.name)
-        start = startPos
-        this.depth   = depth
-    }
+    var start: String = startPos
 
     fun play(): GameInfo {
 
@@ -47,8 +39,8 @@ class EnginePlayer(engineDescriptor1: EngineDescriptor, engineDescriptor2: Engin
 
             currentEngine.engine.setPosition(start, moveList)
             try {
-                var res = currentEngine.engine.search(depth)
-                moveList = moveList+res.bestMove
+                val res = currentEngine.engine.search(depth)
+                moveList += res.bestMove
 
                 if(res.eval > 20000) {
                     if(engine1ToMove) {
@@ -70,7 +62,7 @@ class EnginePlayer(engineDescriptor1: EngineDescriptor, engineDescriptor2: Engin
             } catch(e: TimeoutException) {
                 close()
                 println("Search timed out")
-                return GameInfo("TIMEOUT", moveList)
+                return GameInfo("TIMEOUT", start, moveList)
             }
 
             engine1ToMove = !engine1ToMove
@@ -82,7 +74,7 @@ class EnginePlayer(engineDescriptor1: EngineDescriptor, engineDescriptor2: Engin
         }
 
         close()
-        return GameInfo(ret, moveList)
+        return GameInfo(ret, start,  moveList)
     }
 
     fun close() {

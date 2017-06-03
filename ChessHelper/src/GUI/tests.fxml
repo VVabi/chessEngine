@@ -1,7 +1,6 @@
-<?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.control.Button?>
-<GridPane fx:controller="GUI.controller" xmlns:fx="http://javafx.com/fxml" xmlns="http://javafx.com/javafx/8" alignment="center" hgap="10" vgap="30">
+<GridPane fx:controller="GUI.testController" xmlns:fx="http://javafx.com/fxml" xmlns="http://javafx.com/javafx/8" alignment="center" hgap="10" vgap="30">
     <Button fx:id="perft" text="Run Perft Tests" onAction="#handlePerftTests" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
     <Button fx:id="debugVsRelease" text="Run Debug vs Release tests" onAction="#handleDebugVsReleaseTest" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
     <Button fx:id="evalSymmetry" text="Run Eval Symmetry tests" onAction="#handleEvalSymmetryTests" GridPane.rowIndex="3" GridPane.columnIndex="1"/>

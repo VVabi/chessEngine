@@ -36,7 +36,7 @@ fun changeSide(FEN: String): String {
     var ret = ""
 
     for (ind in 7 downTo -1 + 1) {
-        ret = ret + reverseCase(rows[ind])
+        ret += reverseCase(rows[ind])
 
         if (ind > 0) {
             ret += "/"

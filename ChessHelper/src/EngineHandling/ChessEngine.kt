@@ -1,25 +1,19 @@
 package EngineHandling
 
-import java.io.IOException
 import java.util.ArrayList
-import java.util.concurrent.TimeoutException
 
 /**
- * Created by vabi on 29.05.17.
+ * Created by vabi on 29.05.17. Abstract a chess engine (currently UCI only)
  */
 data class SearchResult(var eval: Int, var bestMove: String)
 
 class ChessEngine(path: String, workingDirectory: String) {
 
-    var uciEngine: UciEngine
-
-    init {
-        uciEngine = UciEngine(path, workingDirectory)
-    }
+    var uciEngine: UciEngine = UciEngine(path, workingDirectory)
 
     fun setPosition(fenPosition: String, moveList: List<String>) {
         var putString = "position fen "+fenPosition
-        if(moveList.size > 0) {
+        if(moveList.isNotEmpty()) {
             putString += " moves"
             for(move in moveList) {
                 putString += " "
@@ -32,18 +26,18 @@ class ChessEngine(path: String, workingDirectory: String) {
     fun search(depth: Int): SearchResult {
         uciEngine.put("go depth "+depth)
         var eval = 0
-        var bestMove: String
+        val bestMove: String
         while(true) {
 
-            var answer = uciEngine.readAnswer()
-            var parts = answer.split(" ")
+            val answer = uciEngine.readAnswer()
+            val parts = answer.split(" ")
 
-            if("bestmove".equals(parts[0])) {
+            if("bestmove" == parts[0]) {
                 bestMove = parts[1]
                 break
             }
 
-            if("info".equals(parts[0])) {
+            if("info" == parts[0]) {
                 for (index in parts.indices) {
                     if ("score" == parts[index]) {
                         eval = Integer.parseInt(parts[index + 2])

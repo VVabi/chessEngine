@@ -18,9 +18,9 @@ fun launchGui() {
 
 class mainGuiApplication : Application() {
     override fun start(primaryStage: Stage) {
-        var loader: FXMLLoader = FXMLLoader(javaClass.getResource("gui.fxml"))
-        var root = loader.load<Parent>()
-        var scene = Scene(root, 640.0, 480.0)
+        val loader: FXMLLoader = FXMLLoader(javaClass.getResource("gui.fxml"))
+        val root = loader.load<Parent>()
+        val scene = Scene(root, 640.0, 480.0)
         primaryStage.scene = scene
         primaryStage.show()
     }

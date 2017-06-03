@@ -1,7 +1,35 @@
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.control.Button?>
-<GridPane fx:controller="GUI.controller" xmlns:fx="http://javafx.com/fxml" xmlns="http://javafx.com/javafx/8" alignment="center" hgap="10" vgap="30">
-    <Label fx:id="helloLabel" text="Hello" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-    <Button fx:id="testButton" text="ClickMeNow" onAction="#handleClickMe" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-</GridPane>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.TextField?>
+
+<?import javafx.scene.control.TextArea?>
+<VBox fx:controller="GUI.tuningController" xmlns:fx="http://javafx.com/fxml" xmlns="http://javafx.com/javafx/8" spacing="15">
+    <HBox spacing="5">
+        <Label  text="Defending Engine"/>
+        <TextField fx:id="engine1" text="/home/vabi/code/chessEngine/Cpp/uciDefenderRelease/Vabi"/>
+        <Button text="Choose defending engine" onAction="#handleChooseDefender"/>
+    </HBox>
+    <HBox spacing="5">
+        <Label text="Challenging Engine"/>
+        <TextField fx:id="engine2" text="/home/vabi/code/chessEngine/Cpp/uciChallengeRelease/Vabi"/>
+        <Button  text="Choose challenging engine" onAction="#handleChooseChallenger"/>
+    </HBox>
+    <HBox spacing="5">
+        <Label  text="Opening positions"/>
+        <TextField fx:id="openingFile" text="/home/vabi/code/chessEngine/ChessHelper/src/Tools/openingPositions.txt"/>
+        <Button  text="Choose opening position fiels" onAction="#handleChooseOpening"/>
+    </HBox>
+    <HBox spacing="5">
+        <Label  text="Depth"/>
+        <TextField fx:id="depthField"/>
+        <Label  text="Number of Threads"/>
+        <TextField fx:id="threadField"/>
+    </HBox>
+    <HBox spacing="5">
+        <Button text="Run tuning!" onAction="#handleLaunchTournament"/>
+        <Button text="Stop tuning!" onAction="#handleStopTuning"/>
+    </HBox>
+    <TextArea fx:id="resultArea"/>
+</VBox>

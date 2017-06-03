@@ -1,14 +1,14 @@
-import EngineHandling.ChessEngine
-import EngineHandling.EngineDescriptor
-import EngineHandling.EnginePlayer
 import GUI.launchGui
-import Tests.runPerftTests
+import Tools.getLos
 
 /**
  * Created by vabi on 29.05.17.
  */
 
 fun main(args: Array<String>) {
+
+    val losData = getLos(131, 100, 111)
+    println(losData.los)
 
     launchGui()
     /*var defwins = 0

@@ -1,23 +1,21 @@
 package Tests
 
 import EngineHandling.ChessEngine
-import java.io.BufferedReader
 import java.io.File
-import java.io.FileReader
 
 /**
  * Created by vabi on 31.05.17.
  */
 
 
-private data class PerftTestData(val fen: String, val depth: Int, val numNodes: Long);
+private data class PerftTestData(val fen: String, val depth: Int, val numNodes: Long)
 
 fun runPerftTests(engine: ChessEngine, debugEngine: ChessEngine): Boolean {
 
-    var data = ArrayList<PerftTestData>();
+    val data = ArrayList<PerftTestData>()
     val localData = java.util.ArrayList<String>()
     val dataFile = File("src/Tests/perftTests.txt")
-    var lines = dataFile.readLines()
+    val lines = dataFile.readLines()
 
 
     for(line in lines) {
@@ -40,14 +38,14 @@ fun runPerftTests(engine: ChessEngine, debugEngine: ChessEngine): Boolean {
         res = false
     }
 
-    for(item in data) {
-        println("Testing "+item.fen+" to depth "+item.depth);
-        engine.setPosition(item.fen, listOf())
-        println("Required nodes "+item.numNodes)
-        var perftNodes = engine.runPerft(item.depth)
+    for((fen, depth, numNodes) in data) {
+        println("Testing $fen to depth $depth")
+        engine.setPosition(fen, listOf())
+        println("Required nodes "+ numNodes)
+        val perftNodes = engine.runPerft(depth)
         println("Actual nodes "+perftNodes)
 
-        if(perftNodes != item.numNodes) {
+        if(perftNodes != numNodes) {
             println("Wrong perft")
             res = false
             break
