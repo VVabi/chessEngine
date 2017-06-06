@@ -50,16 +50,15 @@ class tuningController {
         selfPlayer?.interrupt()
     }
 
-    fun updateResults(challengerWins: Int, defenderWins: Int, draws: Int) {
+    @Synchronized fun updateResults(challengerWins: Int, defenderWins: Int, draws: Int) {
         var updateText = ""
         updateText += "Challenger $challengerWins Defender $defenderWins Draws $draws\n"
         val losData = getLos(challengerWins, draws, defenderWins)
-        updateText += "Win percentage "+losData.winningFraction+" LOS "+losData.los
+        updateText += "Win percentage "+losData.winningFraction+"\nELO difference "+losData.eloDifference+ "\nLOS "+losData.los
         try {
             resultArea?.text = updateText
         } catch(e: Exception) {
             println(updateText)
         }
     }
-
 }

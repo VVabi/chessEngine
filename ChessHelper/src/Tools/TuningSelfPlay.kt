@@ -70,7 +70,7 @@ class SelfPlayTournament(val defenderPath: String, val challengerPath: String, o
     }
 
     fun gameFinishedCallback(result: GameInfo){
-        //TODO: the strings are too implicit
+        //TODO: the strings are too implicit and defined twice
         if(result.res == "DRAW") {
             draws.incrementAndGet()
         }

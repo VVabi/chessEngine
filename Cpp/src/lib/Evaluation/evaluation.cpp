@@ -54,11 +54,9 @@ uint16_t taperingValues[81] = {  0,  0,  0,  0,  0,  0,  0,  0,
 };
 */
 
-#ifdef EXPERIMENTAL
-#define OUTPOSTVALUE 12
-#else
+
 #define OUTPOSTVALUE 15
-#endif
+
 static int16_t outposts(const chessPosition* position) {
 	uint64_t wPawns = position->pieceTables[white][pawn];
 	uint64_t bPawns = position->pieceTables[black][pawn];
@@ -189,7 +187,7 @@ static int32_t rookOpenFiles(const chessPosition* position, uint8_t* pawnOccupan
 				ret = ret+(1-2*color)*evalParams->rookOnOpenFile;
 			}
 			else if((pawnOccupancy[color] & (1 << file)) == 0){
-				ret = ret+5;
+				ret = ret+(1-2*color)*5;
 			}
 #else*/
 			if((pawnOccupancy[color] & (1 << file)) == 0){

@@ -185,12 +185,10 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
 	uint64_t takesLeft = (attackingSide ? pawns >> 9 : pawns << 7) & NOTFILEH;
 	retTable.attackTables[pawn] = takesLeft | takesRight;
 
-/*#ifdef EXPERIMENTAL //didnt work out :( should be revisited
-	uint64_t takesRightOpp = ((1-attackingSide) ? pawns >> 7 : pawns << 9) & NOTFILEA;
-	uint64_t takesLeftOpp = ((1-attackingSide) ? pawns >> 9 : pawns << 7) & NOTFILEH;
+	uint64_t oppPawns = position->pieceTables[1-attackingSide][pawn];
+	uint64_t oppPawnsForward   = attackingSide ? NORTHONE(oppPawns) : SOUTHONE(oppPawns);
+	uint64_t opppawnTakes = WESTONE(oppPawnsForward) | EASTONE(oppPawnsForward);
 
-	uint64_t opppawnTakes = takesRightOpp | takesLeftOpp;
-#endif*/
 
 	//knights
 	uint64_t knights = position->pieceTables[attackingSide][knight];
@@ -198,11 +196,7 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
 	while(knights){
 		uint16_t nextKnight = popLSB(knights);
 		knightAttackTable = knightAttackTable | knightmovetables[nextKnight];
-/*#ifdef EXPERIMENTAL
 		uint16_t legalMoves = popcount(knightmovetables[nextKnight] & ~ownPieces & ~opppawnTakes);
-#else*/
-		uint16_t legalMoves = popcount(knightmovetables[nextKnight] & ~ownPieces);
-//#endif
 		assert(legalMoves < 9);
 		*mobilityScore = *mobilityScore+knightMobility[legalMoves];
 	}
@@ -220,7 +214,7 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
 		uint16_t hashValue = (blocker*magicNumber) >> 55;
 		uint64_t potentialMoves = bishopMoveTables[nextPieceField][hashValue];
 		bishopAttackTable = bishopAttackTable | potentialMoves;
-		uint16_t legalMoves = popcount(potentialMoves & ~ownPieces);
+		uint16_t legalMoves = popcount(potentialMoves & ~ownPieces & ~opppawnTakes);
 		assert(legalMoves < 14);
 		*mobilityScore = *mobilityScore+bishopMobility[legalMoves];
 	}

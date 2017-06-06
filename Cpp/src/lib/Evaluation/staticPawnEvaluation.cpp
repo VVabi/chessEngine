@@ -186,12 +186,14 @@ int16_t staticPawnEvalComplete(const chessPosition* position, uint8_t* pawnOcc) 
 
 	//reward pawns side by side. Needs further testing; looks questionable actually
 	//---------------------------------
-	/*uint64_t wpawns = position->pieceTables[white][pawn];
+/*#ifdef EXPERIMENTAL
+	uint64_t wpawns = position->pieceTables[white][pawn];
 	uint64_t wsideByside = (wpawns & WESTONE(wpawns)) | (wpawns & WESTONE(wpawns));
 	ev = ev+2*popcount(wsideByside);
 
 	uint64_t bpawns = position->pieceTables[black][pawn];
 	uint64_t bsideByside = (bpawns & WESTONE(bpawns)) | (bpawns & WESTONE(bpawns));
-	ev = ev-2*popcount(bsideByside);*/
+	ev = ev-2*popcount(bsideByside);
+#endif*/
 	return ev;
 }

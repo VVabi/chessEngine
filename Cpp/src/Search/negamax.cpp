@@ -161,11 +161,10 @@ static inline void get_extensions_reductions(chessPosition* position, uint16_t* 
 #else*/
 
 		if(check && ((ply+depth < max_ply-1) || ((depth == 1) && (ply+depth < max_ply)) )){
-			*reduction = 0; //TODO: A check should NEVER be reduced, indepeoent of the ply/depth stuff
+			*reduction = 0; //TODO: A check should NEVER be reduced, independent of the ply/depth stuff
 			if(SEE(position, move) > -50) {
 				*extension = 1;
 			}
-
 		}
 
 		bool closeToPromotion = (move->type == pawnMove) && ( (move->targetField > 48) || (move->targetField < 16));
@@ -512,6 +511,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 
 	for(uint16_t ind=0; ind < moves.length; ind++){
 		switch(currentState) {
+		//TODO: get rid of the fallthroughs
 			case not_sorted:
 				assert(ind == 0);
 				currentState = hash_handled;
@@ -665,9 +665,9 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 	//------------------------------
 	if(numlegalMoves == 0){
 		if(movingSideInCheck){
-			alpha = -30000+ply;
+			alpha = -30000+ply; //position is checkmate
 		} else {
-			alpha = 0;
+			alpha = 0; //position is stalemate
 		}
 	}
 
