@@ -12,18 +12,11 @@
 #include <lib/Defines/kingMoves.hpp>
 #include <lib/Defines/boardParts.hpp>
 #include <lib/bitfiddling.h>
-
+#include "moveGenerationInternals.hpp"
 
 //TODO: for debug purposes I want these rangechecked!
 extern uint64_t knightmovetables[];
 extern uint64_t kingmovetables[];
-extern uint64_t rookFieldTable[];
-extern uint64_t rookMoveTables[64][4096];
-extern uint64_t rookMagicNumbers[];
-
-extern uint64_t bishopFieldTable[];
-extern uint64_t bishopMoveTables[64][512];
-extern uint64_t bishopMagicNumbers[];
 
 extern uint64_t castlingBlockers[2][2];
 extern uint64_t enPassantMoveTable[2][8];
@@ -62,10 +55,11 @@ void generateRookMoves(vdt_vector<chessMove>* vec, chessPosition* position, cons
 	while (pieces != 0) {
 		uint64_t nextPiece = LOWESTBITONLY(pieces);
 		uint16_t nextPieceField = popLSB(pieces);
-		uint64_t magicNumber = rookMagicNumbers[nextPieceField];
+		/*uint64_t magicNumber = rookMagicNumbers[nextPieceField];
 		uint64_t blocker = occupancy & rookFieldTable[nextPieceField];
 		uint16_t hashValue = (blocker*magicNumber) >> 52;
-		uint64_t potentialMoves = rookMoveTables[nextPieceField][hashValue];
+		uint64_t potentialMoves = rookMoveTables[nextPieceField][hashValue];*/
+		uint64_t potentialMoves = getPotentialRookMoves(nextPieceField, occupancy);
 		potentialMoves = potentialMoves & (~position->pieces[toMove]);
 		extractMoves(nextPiece, figure, potentialMoves, vec, position);
 		pieces = pieces & (~nextPiece);
@@ -81,10 +75,7 @@ void generateBishopMoves(vdt_vector<chessMove>* vec, chessPosition* position, co
 	while (pieces != 0) {
 		uint64_t nextPiece = LOWESTBITONLY(pieces);
 		uint16_t nextPieceField = popLSB(pieces);
-		uint64_t magicNumber = bishopMagicNumbers[nextPieceField];
-		uint64_t blocker = occupancy & bishopFieldTable[nextPieceField];
-		uint16_t hashValue = (blocker*magicNumber) >> 55;
-		uint64_t potentialMoves = bishopMoveTables[nextPieceField][hashValue];
+		uint64_t potentialMoves = getPotentialBishopMoves(nextPieceField, occupancy);
 		potentialMoves = potentialMoves & (~position->pieces[toMove]);
 		extractMoves(nextPiece, figure, potentialMoves, vec, position);
 		pieces = pieces & (~nextPiece);

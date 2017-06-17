@@ -13,17 +13,10 @@
 #include "attacks.hpp"
 #include <assert.h>
 #include <parameters/parameters.hpp>
+#include <lib/moveGeneration/moveGenerationInternals.hpp>
 
 extern uint64_t knightmovetables[];
 extern uint64_t kingmovetables[];
-
-extern uint64_t rookFieldTable[];
-extern uint64_t rookMoveTables[64][4096];
-extern uint64_t rookMagicNumbers[];
-
-extern uint64_t bishopFieldTable[];
-extern uint64_t bishopMoveTables[64][512];
-extern uint64_t bishopMagicNumbers[];
 
 bool isFieldAttacked(const chessPosition* position, playerColor attackingSide, uint16_t field){
 
@@ -41,20 +34,15 @@ bool isFieldAttacked(const chessPosition* position, playerColor attackingSide, u
 
 	uint64_t occupancy = (position->pieces[white]) | (position->pieces[black]);
 	//rooks+queens
-	uint64_t magicNumber = rookMagicNumbers[field];
-	uint64_t blocker = occupancy & rookFieldTable[field];
-	uint16_t hashValue = (blocker*magicNumber) >> 52;
-	uint64_t potentialMoves = rookMoveTables[field][hashValue];
+	uint64_t potentialMoves = getPotentialRookMoves(field, occupancy);
 
 	if( potentialMoves & (position->pieceTables[attackingSide][rook] | position->pieceTables[attackingSide][queen])) {
 		return true;
 	}
 
 	//bishops+queens
-	magicNumber = bishopMagicNumbers[field];
-	blocker = occupancy & bishopFieldTable[field];
-	hashValue = (blocker*magicNumber) >> 55;
-	potentialMoves = bishopMoveTables[field][hashValue];
+
+	potentialMoves = getPotentialBishopMoves(field, occupancy);
 
 	if( potentialMoves & (position->pieceTables[attackingSide][bishop] | position->pieceTables[attackingSide][queen])) {
 		return true;
@@ -103,10 +91,7 @@ AttackTable makeAttackTable(const chessPosition* position, playerColor attacking
 	uint64_t bishopAttackTable = 0;
 	while (bishops != 0) {
 		uint16_t nextPieceField = popLSB(bishops);
-		uint64_t magicNumber = bishopMagicNumbers[nextPieceField];
-		uint64_t blocker = occupancy & bishopFieldTable[nextPieceField];
-		uint16_t hashValue = (blocker*magicNumber) >> 55;
-		uint64_t potentialMoves = bishopMoveTables[nextPieceField][hashValue];
+		uint64_t potentialMoves = getPotentialBishopMoves(nextPieceField, occupancy);
 		bishopAttackTable = bishopAttackTable | potentialMoves;
 	}
 	retTable.attackTables[bishop] = bishopAttackTable;
@@ -116,10 +101,7 @@ AttackTable makeAttackTable(const chessPosition* position, playerColor attacking
 	uint64_t rookAttackTable = 0;
 	while (rooks != 0) {
 		uint16_t nextPieceField = popLSB(rooks);
-		uint64_t magicNumber = rookMagicNumbers[nextPieceField];
-		uint64_t blocker = occupancy & rookFieldTable[nextPieceField];
-		uint16_t hashValue = (blocker*magicNumber) >> 52;
-		uint64_t potentialMoves = rookMoveTables[nextPieceField][hashValue];
+		uint64_t potentialMoves = getPotentialRookMoves(nextPieceField, occupancy);
 		rookAttackTable = rookAttackTable | potentialMoves;
 	}
 	retTable.attackTables[rook] = rookAttackTable;
@@ -131,10 +113,7 @@ AttackTable makeAttackTable(const chessPosition* position, playerColor attacking
 	uint64_t queenAttackTable = 0;
 	while (queens != 0) {
 		uint16_t nextPieceField = popLSB(queens);
-		uint64_t magicNumber = rookMagicNumbers[nextPieceField];
-		uint64_t blocker = occupancy & rookFieldTable[nextPieceField];
-		uint16_t hashValue = (blocker*magicNumber) >> 52;
-		uint64_t potentialMoves = rookMoveTables[nextPieceField][hashValue];
+		uint64_t potentialMoves = getPotentialRookMoves(nextPieceField, occupancy);
 		queenAttackTable = queenAttackTable | potentialMoves;
 	}
 
@@ -142,10 +121,7 @@ AttackTable makeAttackTable(const chessPosition* position, playerColor attacking
 	queens = position->pieceTables[attackingSide][queen];
 	while (queens != 0) {
 		uint16_t nextPieceField = popLSB(queens);
-		uint64_t magicNumber = bishopMagicNumbers[nextPieceField];
-		uint64_t blocker = occupancy & bishopFieldTable[nextPieceField];
-		uint16_t hashValue = (blocker*magicNumber) >> 55;
-		uint64_t potentialMoves = bishopMoveTables[nextPieceField][hashValue];
+		uint64_t potentialMoves =  getPotentialBishopMoves(nextPieceField, occupancy);
 		queenAttackTable = queenAttackTable | potentialMoves;
 	}
 	retTable.attackTables[queen] = queenAttackTable;
@@ -172,7 +148,7 @@ int16_t rookMobility[15]     = {-35,-25,-18,-15,-10,-8,-3,0,3,5,8,10,12,14,16};
 int16_t knightMobility[9]   = {-25,-18,-8,0,3,5,8,10,12};
 
 AttackTable makeAttackTableWithMobility(const chessPosition* position, playerColor attackingSide, int16_t* mobilityScore) {
-
+//TODO: get rid of the code duplication
 
 
 	*mobilityScore = 0;
@@ -209,10 +185,7 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
 	uint64_t bishopAttackTable = 0;
 	while (bishops != 0) {
 		uint16_t nextPieceField = popLSB(bishops);
-		uint64_t magicNumber = bishopMagicNumbers[nextPieceField];
-		uint64_t blocker = occupancy & bishopFieldTable[nextPieceField];
-		uint16_t hashValue = (blocker*magicNumber) >> 55;
-		uint64_t potentialMoves = bishopMoveTables[nextPieceField][hashValue];
+		uint64_t potentialMoves =  getPotentialBishopMoves(nextPieceField, occupancy);
 		bishopAttackTable = bishopAttackTable | potentialMoves;
 		uint16_t legalMoves = popcount(potentialMoves & ~ownPieces & ~opppawnTakes);
 		assert(legalMoves < 14);
@@ -225,10 +198,7 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
 	uint64_t rookAttackTable = 0;
 	while (rooks != 0) {
 		uint16_t nextPieceField = popLSB(rooks);
-		uint64_t magicNumber = rookMagicNumbers[nextPieceField];
-		uint64_t blocker = occupancy & rookFieldTable[nextPieceField];
-		uint16_t hashValue = (blocker*magicNumber) >> 52;
-		uint64_t potentialMoves = rookMoveTables[nextPieceField][hashValue];
+		uint64_t potentialMoves =  getPotentialRookMoves(nextPieceField, occupancy);
 		uint16_t legalMoves = popcount(potentialMoves & ~ownPieces);
 		assert(legalMoves < 15);
 		*mobilityScore = *mobilityScore+rookMobility[legalMoves];
@@ -243,10 +213,7 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
 	uint64_t queenAttackTable = 0;
 	while (queens != 0) {
 		uint16_t nextPieceField = popLSB(queens);
-		uint64_t magicNumber = rookMagicNumbers[nextPieceField];
-		uint64_t blocker = occupancy & rookFieldTable[nextPieceField];
-		uint16_t hashValue = (blocker*magicNumber) >> 52;
-		uint64_t potentialMoves = rookMoveTables[nextPieceField][hashValue];
+		uint64_t potentialMoves =  getPotentialRookMoves(nextPieceField, occupancy);
 		queenAttackTable = queenAttackTable | potentialMoves;
 		*mobilityScore = *mobilityScore+popcount(potentialMoves & ~ownPieces);
 
@@ -257,10 +224,7 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
 	queens = position->pieceTables[attackingSide][queen];
 	while (queens != 0) {
 		uint16_t nextPieceField = popLSB(queens);
-		uint64_t magicNumber = bishopMagicNumbers[nextPieceField];
-		uint64_t blocker = occupancy & bishopFieldTable[nextPieceField];
-		uint16_t hashValue = (blocker*magicNumber) >> 55;
-		uint64_t potentialMoves = bishopMoveTables[nextPieceField][hashValue];
+		uint64_t potentialMoves =  getPotentialBishopMoves(nextPieceField, occupancy);;
 		queenAttackTable = queenAttackTable | potentialMoves;
 		*mobilityScore = *mobilityScore+popcount(potentialMoves & ~ownPieces);
 	}
@@ -317,10 +281,7 @@ static inline bool getNextCapture(chessMove* nextCapture, const chessPosition* p
 	uint64_t occupancy = ((position->pieces[white]) | (position->pieces[black])) & ~mask;
 
 	//bishops
-	uint64_t magicNumber = bishopMagicNumbers[field];
-	uint64_t blocker = occupancy & bishopFieldTable[field];
-	uint16_t hashValue = (blocker*magicNumber) >> 55;
-	uint64_t potentialMoves = bishopMoveTables[field][hashValue];
+	uint64_t potentialMoves = getPotentialBishopMoves(field, occupancy);
 
 	if(potentialMoves & (position->pieceTables[attackingSide][bishop] & ~mask)) {
 		uint16_t source = findLSB(potentialMoves & (position->pieceTables[attackingSide][bishop] & ~mask));
@@ -333,10 +294,7 @@ static inline bool getNextCapture(chessMove* nextCapture, const chessPosition* p
 
 
 	//rooks
-	magicNumber = rookMagicNumbers[field];
-	blocker = occupancy & rookFieldTable[field];
-	hashValue = (blocker*magicNumber) >> 52;
-	potentialMoves = rookMoveTables[field][hashValue];
+	potentialMoves =  getPotentialRookMoves(field, occupancy);
 
 	if( potentialMoves & (position->pieceTables[attackingSide][rook]  & ~mask)) {
 		uint16_t source = findLSB(potentialMoves & (position->pieceTables[attackingSide][rook] & ~mask));
@@ -350,10 +308,7 @@ static inline bool getNextCapture(chessMove* nextCapture, const chessPosition* p
 
 
 	//queens
-	magicNumber = rookMagicNumbers[field];
-	blocker = occupancy & rookFieldTable[field];
-	hashValue = (blocker*magicNumber) >> 52;
-	potentialMoves = rookMoveTables[field][hashValue];
+	potentialMoves =  getPotentialRookMoves(field, occupancy);
 
 	if( potentialMoves & (position->pieceTables[attackingSide][queen]  & ~mask)) {
 		uint16_t source = findLSB(potentialMoves & (position->pieceTables[attackingSide][queen] & ~mask));
@@ -364,10 +319,8 @@ static inline bool getNextCapture(chessMove* nextCapture, const chessPosition* p
 		return true;
 	}
 
-	magicNumber = bishopMagicNumbers[field];
-	blocker = occupancy & bishopFieldTable[field];
-	hashValue = (blocker*magicNumber) >> 55;
-	potentialMoves = bishopMoveTables[field][hashValue];
+
+	potentialMoves =  getPotentialBishopMoves(field, occupancy);
 
 	if(potentialMoves & position->pieceTables[attackingSide][queen]  & ~mask) {
 		uint16_t source = findLSB(potentialMoves & (position->pieceTables[attackingSide][queen] & ~mask));
@@ -438,7 +391,6 @@ int16_t SEE(chessPosition* position, chessMove* mv){
 		return 0;
 	}
 
-
 	const evalParameters* evalPars = getEvalParameters();
 	assert(evalPars->figureValues[none] == 0);
 	uint16_t val = evalPars->figureValues[mv->captureType];
@@ -449,156 +401,4 @@ int16_t SEE(chessPosition* position, chessMove* mv){
 	return ret;
 }
 
-
-
-bool getNextCaptureold(chessMove* nextCapture, const chessPosition* position, uint16_t field, figureType occ){
-
-	playerColor attackingSide = position->toMove;
-	//pawns
-	uint64_t potentialTakes;
-	if(attackingSide == white){
-		potentialTakes = ((BIT64(field) >> 9) & NOTFILEH)| ((BIT64(field) >> 7) & NOTFILEA);
-	} else {
-		potentialTakes = ((BIT64(field) << 9) & NOTFILEA) | ((BIT64(field) << 7) & NOTFILEH);
-	}
-
-	if(potentialTakes & position->pieceTables[attackingSide][pawn]){
-		uint16_t source = findLSB(potentialTakes & position->pieceTables[attackingSide][pawn]);
-		nextCapture->captureType = occ;
-		nextCapture->sourceField = source;
-		nextCapture->targetField = field;
-		nextCapture->type        = pawnMove;
-		return true;
-	}
-
-
-	//knights
-	uint64_t knights = position->pieceTables[attackingSide][knight];
-	if(knightmovetables[field] & knights) {
-		uint16_t source = findLSB(knightmovetables[field] & knights);
-		nextCapture->captureType = occ;
-		nextCapture->sourceField = source;
-		nextCapture->targetField = field;
-		nextCapture->type        = knightMove;
-		return true;
-	}
-	uint64_t occupancy = (position->pieces[white]) | (position->pieces[black]);
-
-	//bishops
-	uint64_t magicNumber = bishopMagicNumbers[field];
-	uint64_t blocker = occupancy & bishopFieldTable[field];
-	uint16_t hashValue = (blocker*magicNumber) >> 55;
-	uint64_t potentialMoves = bishopMoveTables[field][hashValue];
-
-	if(potentialMoves & position->pieceTables[attackingSide][bishop]) {
-		uint16_t source = findLSB(potentialMoves & (position->pieceTables[attackingSide][bishop]));
-		nextCapture->captureType = occ;
-		nextCapture->sourceField = source;
-		nextCapture->targetField = field;
-		nextCapture->type        = bishopMove;
-		return true;
-	}
-
-
-	//rooks
-	magicNumber = rookMagicNumbers[field];
-	blocker = occupancy & rookFieldTable[field];
-	hashValue = (blocker*magicNumber) >> 52;
-	potentialMoves = rookMoveTables[field][hashValue];
-
-	if( potentialMoves & (position->pieceTables[attackingSide][rook])) {
-		uint16_t source = findLSB(potentialMoves & (position->pieceTables[attackingSide][rook]));
-		nextCapture->captureType = occ;
-		nextCapture->sourceField = source;
-		nextCapture->targetField = field;
-		nextCapture->type        = rookMove;
-		return true;
-	}
-
-
-
-	//queens
-	magicNumber = rookMagicNumbers[field];
-	blocker = occupancy & rookFieldTable[field];
-	hashValue = (blocker*magicNumber) >> 52;
-	potentialMoves = rookMoveTables[field][hashValue];
-
-	if( potentialMoves & (position->pieceTables[attackingSide][queen])) {
-		uint16_t source = findLSB(potentialMoves & (position->pieceTables[attackingSide][queen]));
-		nextCapture->captureType = occ;
-		nextCapture->sourceField = source;
-		nextCapture->targetField = field;
-		nextCapture->type        = queenMove;
-		return true;
-	}
-
-	magicNumber = bishopMagicNumbers[field];
-	blocker = occupancy & bishopFieldTable[field];
-	hashValue = (blocker*magicNumber) >> 55;
-	potentialMoves = bishopMoveTables[field][hashValue];
-
-	if(potentialMoves & position->pieceTables[attackingSide][queen]) {
-		uint16_t source = findLSB(potentialMoves & (position->pieceTables[attackingSide][queen]));
-		nextCapture->captureType = occ;
-		nextCapture->sourceField = source;
-		nextCapture->targetField = field;
-		nextCapture->type        = queenMove;
-		return true;
-	}
-	//kings
-	uint64_t kings = position->pieceTables[attackingSide][king];
-	if(kingmovetables[field] & kings) {
-		uint16_t source = findLSB(kingmovetables[field] & kings);
-		nextCapture->captureType = occ;
-		nextCapture->sourceField = source;
-		nextCapture->targetField = field;
-		nextCapture->type        = kingMove;
-		return true;
-	}
-
-	return false;
-
-}
-
-
-int16_t see_internalold(int16_t previous, chessPosition* position, uint16_t field, figureType lastCapturingPiece, const evalParameters* evalPars){
-	chessMove mv;
-	if(!getNextCaptureold(&mv, position, field, lastCapturingPiece)){
-		//no more captures available
-		//std::cout << "no further captures found, returning " << -previous << std::endl;
-		return -previous; //from POV of player currently moving
-	}
-
-	if(mv.captureType == king){ //best-case scenario for us
-		return 10000;
-	}
-
-	int16_t standPat = -previous;
-	makeMove(&mv, position);
-
-	int16_t seeVal = -see_internalold(-previous+evalPars->figureValues[mv.captureType], position, field, (figureType) mv.type, evalPars);
-	undoMove(position);
-	/*std::cout << position->madeMoves.length;
-	std::cout << "Capturing with " << mv.type << " from " << mv.sourceField << std::endl;
-	std::cout << "Standpat score was " << standPat << std::endl;
-	std::cout << "see score is " 		<< seeVal << std::endl;*/
-
-	if(seeVal > standPat){
-		return seeVal;
-	}
-	return standPat;
-}
-
-
-int16_t SEEold(chessPosition* position, chessMove* mv){
-
-	//TODO: SEE currently cannot handle promotions!!!!
-	if(mv->type > 5){
-		return 0;
-	}
-	const evalParameters* evalPars 						= getEvalParameters();
-	uint16_t val = evalPars->figureValues[mv->captureType];
-	int16_t ret = -see_internalold(val, position, mv->targetField, (figureType) mv->type, evalPars);
-	return ret;
-}
 
