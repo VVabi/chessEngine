@@ -461,14 +461,13 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 		}
 	}
 
-//#ifdef EXPERIMENTAL
 	if(depth == 2) {
 		if(check_futility(movingSideInCheck, alpha, position, 500, 600)) {
 			PV->numMoves = 0;
 			return  negamaxQuiescence(position, ply, alpha, beta, 0);
 		}
 	}
-//#endif
+
 
 	//------------------------------------------------------------------
 	//now we are out of tricks, we need to start the actual search.
@@ -599,12 +598,15 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 		//------------------------------
 		uint16_t reduction = 0;
 		uint16_t extension = 0;
+//#ifdef EXPERIMENTAL
 
 		get_extensions_reductions(position, &reduction, &extension, check, movingSideInCheck, ply, max_ply, depth, &moves[ind], ind);
 
+//#endif
 		if(!extendChecks){
 			extension = 0;
 		}
+
 		//PVSearch, currently a small gain for us with the > 3
 		//-------------------------------------------------
 		if(((ind > 3) || foundGoodMove )&& (depth > 2)) {
