@@ -108,6 +108,7 @@ class timeoutException: public std::exception
 
 uint64_t getRandUint64();
 void debug_incremental_calculations(const chessPosition* position);
+void logError(std::string msg);
 void free_position(chessPosition* position);
 inline figureType toFigureType(uint16_t num);
 void zeroInitPosition(chessPosition* position);

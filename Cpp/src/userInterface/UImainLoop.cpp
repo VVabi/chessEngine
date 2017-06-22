@@ -65,6 +65,9 @@ void putLine(std::string output) {
 	m.unlock();
 }
 
+void logError(std::string msg) {
+	putLine("ERROR: "+msg);
+}
 
 searchParameters paramsToUse;
 std::atomic<bool> continueSearch;
@@ -199,11 +202,11 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 		try{
 			//std::cout << "Depth " << depth << std::endl;
 
-			*eval = negamax(position, 0, depth+EXTENSIONS_ALLOWED, depth, alpha, beta, &line, true, false);
+			*eval = negamax(position, 0, depth+EXTENSIONS_ALLOWED, 0, depth, alpha, beta, &line, true, false);
 			if(doAspiration) {
 				if ((*eval <= alpha) || (*eval >= beta)) {
 
-					*eval = negamax(position, 0, depth+EXTENSIONS_ALLOWED, depth, -32000, 32000, &line, true, false);
+					*eval = negamax(position, 0, depth+EXTENSIONS_ALLOWED, 0, depth, -32000, 32000, &line, true, false);
 				}
 
 				alpha = *eval-50;
@@ -550,6 +553,10 @@ void handleEval() {
 	int32_t eval = evaluation(&cposition, -32000, 32000);
 	evaluationResult res = getEvaluationResult();
 	std::stringstream evalInfo;
+	if(cposition.toMove == black) {
+		eval = -eval; //always from POV of white
+	}
+
 	evalInfo << "Total " << eval;
 	evalInfo << " Material " << cposition.figureEval;
 	evalInfo << " PSQ " << res.PSQ-cposition.figureEval;

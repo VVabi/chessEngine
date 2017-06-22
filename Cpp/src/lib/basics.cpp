@@ -93,9 +93,7 @@ void debug_incremental_calculations(const chessPosition* position) {
 	uint16_t totalEval = calcTotalFigureEvaluation(position);
 
 	if(totalEval != position->totalFigureEval){
-		std::cout << chessPositionToOutputString(*position) << std::endl;
-		std::cout << chessPositionToString(*position) << std::endl;
-		std::cout << "Total figure evaluation is wrong after moveMake!" << std::endl;
+		logError( "Total figure evaluation is wrong after moveMake!" +chessPositionToFenString(*position));
 	}
 
 	int16_t pieceTableEval = calcPieceTableValue(position)+eval;
@@ -103,24 +101,24 @@ void debug_incremental_calculations(const chessPosition* position) {
 	int32_t buffer2  = buffer-(1 << 15);
 
 	if(pieceTableEval !=  buffer2){
-		std::cout << "Piece table evaluation is wrong after moveMake!" << std::endl;
+		logError("Piece table evaluation is wrong after moveMake!");
 	}
 
 	int16_t endgamepieceTableEval = calcEndGamePieceTableValue(position)+eval;
 	buffer =  (position->pieceTableEval >> 16);
 	buffer2  = buffer-(1 << 14);
 	if(endgamepieceTableEval !=  buffer2){
-		std::cout << "endgame Piece table evaluation is wrong after moveMake!" << std::endl;
+		logError("endgame Piece table evaluation is wrong after moveMake!");
 	}
 
 	uint64_t hash = calcZobristHash(position);
 	if(hash != position->zobristHash){
-		std::cout << "zobrist hash wrong after make move" << std::endl;
+		logError("zobrist hash wrong after make move");
 	}
 
 	uint64_t pawnhash = calcPawnHash(position);
 	if(pawnhash != position->pawnHash){
-		std::cout << "zobrist pawn hash wrong after make move" << std::endl;
+		logError("zobrist pawn hash wrong after make move");
 	}
 
 }

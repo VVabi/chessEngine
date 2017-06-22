@@ -24,7 +24,7 @@ extern uint16_t enPassantTargetFields[2][8];
 
 static uint64_t promotionRows[] = {LASTROW, FIRSTROW};
 
-inline void extractMoves(const uint64_t currentPiece, const figureType figure, uint64_t potentialMoves, vdt_vector<chessMove>* vec, chessPosition* position) {
+__attribute__((always_inline)) static inline void extractMoves(const uint64_t currentPiece, const figureType figure, uint64_t potentialMoves, vdt_vector<chessMove>* vec, chessPosition* position) {
 	uint16_t sourceField = findLSB(currentPiece);
 	playerColor toMove = position->toMove;
 	while (potentialMoves != 0) {
@@ -48,19 +48,15 @@ inline void extractMoves(const uint64_t currentPiece, const figureType figure, u
 	}
 }
 
-void generateRookMoves(vdt_vector<chessMove>* vec, chessPosition* position, const figureType figure) {
+__attribute__((always_inline)) static inline void generateRookMoves(vdt_vector<chessMove>* vec, chessPosition* position, const figureType figure, const uint64_t targetMask) {
 	playerColor toMove = position->toMove;
 	uint64_t pieces    = position->pieceTables[toMove][figure];
 	uint64_t occupancy  = position->pieces[white] | position->pieces[black];
 	while (pieces != 0) {
 		uint64_t nextPiece = LOWESTBITONLY(pieces);
 		uint16_t nextPieceField = popLSB(pieces);
-		/*uint64_t magicNumber = rookMagicNumbers[nextPieceField];
-		uint64_t blocker = occupancy & rookFieldTable[nextPieceField];
-		uint16_t hashValue = (blocker*magicNumber) >> 52;
-		uint64_t potentialMoves = rookMoveTables[nextPieceField][hashValue];*/
 		uint64_t potentialMoves = getPotentialRookMoves(nextPieceField, occupancy);
-		potentialMoves = potentialMoves & (~position->pieces[toMove]);
+		potentialMoves = potentialMoves & (~position->pieces[toMove]) & targetMask;
 		extractMoves(nextPiece, figure, potentialMoves, vec, position);
 		pieces = pieces & (~nextPiece);
 	}
@@ -68,7 +64,7 @@ void generateRookMoves(vdt_vector<chessMove>* vec, chessPosition* position, cons
 
 }
 
-void generateBishopMoves(vdt_vector<chessMove>* vec, chessPosition* position, const figureType figure) {
+__attribute__((always_inline)) static inline void generateBishopMoves(vdt_vector<chessMove>* vec, chessPosition* position, const figureType figure, const uint64_t targetMask) {
 	playerColor toMove = position->toMove;
 	uint64_t pieces    = position->pieceTables[toMove][figure];
 	uint64_t occupancy  = position->pieces[white] | position->pieces[black];
@@ -76,33 +72,33 @@ void generateBishopMoves(vdt_vector<chessMove>* vec, chessPosition* position, co
 		uint64_t nextPiece = LOWESTBITONLY(pieces);
 		uint16_t nextPieceField = popLSB(pieces);
 		uint64_t potentialMoves = getPotentialBishopMoves(nextPieceField, occupancy);
-		potentialMoves = potentialMoves & (~position->pieces[toMove]);
+		potentialMoves = potentialMoves & (~position->pieces[toMove]) & targetMask;
 		extractMoves(nextPiece, figure, potentialMoves, vec, position);
 		pieces = pieces & (~nextPiece);
 	}
 }
 
-void generateNonSliderMoves(vdt_vector<chessMove>* vec, chessPosition* position, const uint64_t* moveTable, const figureType figure) {
+__attribute__((always_inline)) static inline void generateNonSliderMoves(vdt_vector<chessMove>* vec, chessPosition* position, const uint64_t* moveTable, const figureType figure, const uint64_t targetMask) {
 	playerColor toMove = position->toMove;
 	uint64_t pieces    = position->pieceTables[toMove][figure];
 	while (pieces != 0) {
 		uint64_t nextPiece = LOWESTBITONLY(pieces);
 		uint16_t nextPieceField = popLSB(pieces);
 		uint64_t potentialMoves = moveTable[nextPieceField];
-		potentialMoves = potentialMoves & (~position->pieces[toMove]);
+		potentialMoves = potentialMoves & (~position->pieces[toMove]) & targetMask;
 		extractMoves(nextPiece, figure, potentialMoves, vec, position);
 		pieces = pieces & (~nextPiece);
 	}
 }
 
 
-void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
+__attribute__((always_inline)) static inline void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position, uint64_t mask) {
 	//TODO: generate promotions! And this function is too complicated
 	playerColor toMove = position->toMove;
 	uint64_t occupancy  = position->pieces[white] | position->pieces[black];
 	uint64_t pawns     = position->pieceTables[toMove][pawn];
 	uint64_t forward   = (toMove? pawns >> 8: pawns << 8);
-	forward            = forward & (~occupancy);
+	forward            = forward & (~occupancy) & mask;
 
 	while (forward != 0)  {
 		uint64_t target = LOWESTBITONLY(forward);
@@ -132,7 +128,7 @@ void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 	uint64_t onHomeRow 			= pawns & homerow;
 	forward   					= (toMove?  onHomeRow >> 16:  onHomeRow << 16);
 	uint64_t occupancyShifted 	= (toMove?  occupancy >> 8:  occupancy << 8);
-	forward            			= forward & (~occupancy) & (~occupancyShifted);
+	forward            			= forward & (~occupancy) & (~occupancyShifted) & mask;
 
 	while( forward != 0) {
 		uint64_t target = LOWESTBITONLY(forward);
@@ -146,7 +142,7 @@ void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 		forward = forward & (~target);
 	}
 
-	uint64_t takesLeft = (toMove? pawns >> 9 : pawns << 7) & NOTFILEH & position->pieces[1-toMove];
+	uint64_t takesLeft = (toMove? pawns >> 9 : pawns << 7) & NOTFILEH & position->pieces[1-toMove] & mask;
 
 	while(takesLeft){
 		uint64_t target 	= LOWESTBITONLY(takesLeft);
@@ -185,7 +181,7 @@ void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 		takesLeft		 	= takesLeft & (~target);
 	}
 
-	uint64_t takesRight = (toMove? pawns >> 7 : pawns << 9) & NOTFILEA & position->pieces[1-toMove];
+	uint64_t takesRight = (toMove? pawns >> 7 : pawns << 9) & NOTFILEA & position->pieces[1-toMove]& mask;
 
 	while(takesRight){
 		uint64_t target 	= LOWESTBITONLY(takesRight);
@@ -229,7 +225,7 @@ void generatePawnMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 
 
 
-void generateCastling(vdt_vector<chessMove>* vec, chessPosition* position){
+__attribute__((always_inline)) static inline void generateCastling(vdt_vector<chessMove>* vec, chessPosition* position){
 	playerColor toMove = position->toMove;
 	uint8_t castlingMask = (toMove? 12: 3);
 	if(position->data.castlingRights & castlingMask){
@@ -258,7 +254,7 @@ void generateCastling(vdt_vector<chessMove>* vec, chessPosition* position){
 	}
 }
 
-static void generateEnPassant(vdt_vector<chessMove>* vec, chessPosition* position){
+__attribute__((always_inline)) static inline void generateEnPassant(vdt_vector<chessMove>* vec, chessPosition* position){
 
 	if(position->data.enPassantFile > 7){
 		return;
@@ -282,17 +278,44 @@ static void generateEnPassant(vdt_vector<chessMove>* vec, chessPosition* positio
 
 void generateAllMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
 	generateCastling(vec, position);
-	generateNonSliderMoves(vec, position, knightmovetables, knight);
-	generateNonSliderMoves(vec, position, kingmovetables, king);
-	generateRookMoves(vec, position, rook);
-	generateRookMoves(vec, position, queen);
-	generateBishopMoves(vec, position, bishop);
-	generateBishopMoves(vec, position, queen);
-	generatePawnMoves(vec, position);
+	generateNonSliderMoves(vec, position, knightmovetables, knight, UINT64_MAX);
+	generateNonSliderMoves(vec, position, kingmovetables, king, UINT64_MAX);
+	generateRookMoves(vec, position, rook, UINT64_MAX);
+	generateRookMoves(vec, position, queen, UINT64_MAX);
+	generateBishopMoves(vec, position, bishop, UINT64_MAX);
+	generateBishopMoves(vec, position, queen, UINT64_MAX);
+	generatePawnMoves(vec, position, UINT64_MAX);
 	generateEnPassant(vec, position);
-
 }
 
+void generateChecks(vdt_vector<chessMove>* vec, chessPosition* position) {
+	//TODO: this does currently NOT generate discovered checks, and NO pawn checks
+	//note this does NOT generate captures
+	playerColor toMove = position->toMove;
+	uint64_t nonCaptures = ~position->pieces[1-toMove];
+	uint64_t oppKing = position->pieceTables[1-toMove][king];
+	uint16_t oppKingField = findLSB(oppKing);
+	uint64_t knightChecks = knightmovetables[oppKingField];
+	generateNonSliderMoves(vec, position, knightmovetables, knight, knightChecks & nonCaptures);
+	uint64_t occupancy = position->pieces[white] | position->pieces[black];
+	uint64_t rookChecks = getPotentialRookMoves(oppKingField, occupancy);
+	generateRookMoves(vec, position, rook, rookChecks & nonCaptures);
+	generateRookMoves(vec, position, queen, rookChecks & nonCaptures);
+	uint64_t bishopChecks = getPotentialBishopMoves(oppKingField, occupancy);
+	generateBishopMoves(vec, position, bishop, bishopChecks & nonCaptures);
+	generateBishopMoves(vec, position, queen, bishopChecks & nonCaptures);
+}
 
-
+void generateAllCaptureMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
+	playerColor toMove = position->toMove;
+	uint64_t captures = position->pieces[1-toMove];
+	generateNonSliderMoves(vec, position, knightmovetables, knight, captures);
+	generateNonSliderMoves(vec, position, kingmovetables, king, captures);
+	generateRookMoves(vec, position, rook, captures);
+	generateRookMoves(vec, position, queen, captures);
+	generateBishopMoves(vec, position, bishop, captures);
+	generateBishopMoves(vec, position, queen, captures);
+	generatePawnMoves(vec, position, captures);
+	generateEnPassant(vec, position);
+}
 

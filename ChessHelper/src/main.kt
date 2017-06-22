@@ -1,5 +1,8 @@
+import EngineHandling.ChessEngine
+import EngineHandling.getStockfishEval
 import GUI.launchGui
 import Tools.getLos
+import java.io.File
 
 /**
  * Created by vabi on 29.05.17.
@@ -7,10 +10,33 @@ import Tools.getLos
 
 fun main(args: Array<String>) {
 
-    val losData = getLos(131, 100, 111)
-    println(losData.los)
+    println(getStockfishEval("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"))
+    val releaseEngine: ChessEngine = ChessEngine("/home/vabi/code/chessEngine/Cpp/Release/Vabi", "")
+
+    val dataFile = File("/home/vabi/quiet.txt")
+    val lines = dataFile.readLines()
+
+    for(line in lines) {
+        releaseEngine.setPosition(line, listOf())
+        var stockEval = getStockfishEval(line)
+        var vabiEval  = releaseEngine.getEval()
+
+        if((Math.abs(stockEval-vabiEval) > 50) && (Math.abs(stockEval) < 100)) {
+            println(line)
+            println(stockEval)
+            println(vabiEval)
+        }
+
+
+
+    }
+
+
+
 
     launchGui()
+
+
     /*var defwins = 0
     var challengewins = 0
     var draws = 0

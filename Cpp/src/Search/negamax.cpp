@@ -273,7 +273,7 @@ static inline bool check_nullmove(chessPosition* position, uint16_t* refutationM
 	pvLine dummy;
 	dummy.numMoves = 0;
 	dummy.line[0].targetField = NO_REFUTATION;
-	int32_t value = -negamax(position, ply+1, max_ply-nullmoveReductions[depth], depth-1-nullmoveReductions[depth], -beta, -beta+1, &dummy, false);
+	int32_t value = -negamax(position, ply+1, max_ply-nullmoveReductions[depth], 0, depth-1-nullmoveReductions[depth], -beta, -beta+1, &dummy, false);
 	undoNullMove(position);
 	if(value < beta) {
 		*refutationMoveTarget = dummy.line[0].targetField;
@@ -371,7 +371,7 @@ static inline void checkTimeout() {
 
 uint64_t gotHashMove = 0;
 uint64_t noHashMove   = 0;
-int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t depth, int16_t alpha, int16_t beta, pvLine* PV, bool allowNullMove, bool doHashProbe, bool extendChecks) {
+int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, uint16_t qply, int16_t depth, int16_t alpha, int16_t beta, pvLine* PV, bool allowNullMove, bool doHashProbe, bool extendChecks) {
 
 	/*int16_t max_score = 30000-ply-1;
 
@@ -427,7 +427,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 	if(depth <= 0) {
 		searchCounts.wentToQuiescence++;
 		PV->numMoves = 0;
-		return negamaxQuiescence(position, ply, alpha, beta, 0);
+		return negamaxQuiescence(position, qply, ply, alpha, beta, 0);
 	}
 
 	//check in hashtable for position value
@@ -457,14 +457,14 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 	if(depth == 1) {
 		if(check_futility(movingSideInCheck, alpha, position, 100,150)) {
 			PV->numMoves = 0;
-			return  negamaxQuiescence(position, ply, alpha, beta, 0);
+			return  negamaxQuiescence(position, qply, ply, alpha, beta, 0);
 		}
 	}
 
 	if(depth == 2) {
 		if(check_futility(movingSideInCheck, alpha, position, 500, 600)) {
 			PV->numMoves = 0;
-			return  negamaxQuiescence(position, ply, alpha, beta, 0);
+			return  negamaxQuiescence(position, 0, ply, alpha, beta, 0);
 		}
 	}
 
@@ -553,6 +553,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 
 		//illegal move. Since list is sorted or, in case ind=0, best move is first, we can leave here: all further moves are also illegal.
 		//---------------------------------------------------------------------------------------------------------------------------------
+
 		if(moves[ind].sortEval < -10000){
 			break;
 		}
@@ -574,14 +575,11 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 				continue;
 			}
 		}
-
 #ifdef DEBUG
 		//debug check: if we overlooked an illegal move, we scream here
 		//-------------------------------------------------------------
 		if(isFieldAttacked( position,  position->toMove, kingField)) {
-			std::cout << chessPositionToOutputString(*position);
-			std::cout <<  (rookFieldTable[kingField] | bishopFieldTable[kingField]);
-			std::cout << "WTF" << std::endl;
+			logError("Illegal move detected");
 		}
 #endif
 		searchCounts.nodes[depth]++;
@@ -610,7 +608,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 		//PVSearch, currently a small gain for us with the > 3
 		//-------------------------------------------------
 		if(((ind > 3) || foundGoodMove )&& (depth > 2)) {
-			int32_t value = -negamax(position, ply+1, max_ply, depth-1-reduction+extension, -alpha-1, -alpha, &localPV);
+			int32_t value = -negamax(position, ply+1, max_ply, qply, depth-1-reduction+extension, -alpha-1, -alpha, &localPV);
 			if(value < alpha+1){
 				undoMove(position);
 				continue;
@@ -619,7 +617,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, int16_t
 
 		//this is the real, full-fledged search now
 		//-------------------------------------------
-		int32_t value = -negamax(position, ply+1, max_ply, depth-1+extension, -beta, -alpha, &localPV);
+		int32_t value = -negamax(position, ply+1, max_ply, qply, depth-1+extension, -beta, -alpha, &localPV);
 
 		//in case move is better than previous, remember
 		//------------------------------------------------

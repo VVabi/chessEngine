@@ -14,7 +14,18 @@
 #include <lib/Attacks/attacks.hpp>
 
 extern uint64_t kingmovetables[64];
+#ifdef EXPERIMENTAL
+int32_t attacksCloseToKingEvals[] =
+{ 0, 0, 1, 2, 3, 4, 5, 6, 7, 9,
+ 11, 13, 16, 20, 24, 28, 32, 36, 40, 44,
+ 48, 52, 56, 60, 64, 68, 72, 76, 80, 85,
+ 91, 97, 103, 109, 115, 121, 127, 134, 142,
+ 152, 163, 175, 188, 202, 217, 232, 246, 260,
+ 273, 286, 299, 312, 324, 336, 348, 360, 372, 384,
+ 392, 400, 405, 410, 410, 410, 410, 410, 410, 410
+};
 
+#else
 int32_t attacksCloseToKingEvals[] =
 { 0, 0, 1, 2, 3,5,8,10,13,20,
  23,26,29,33,37,41,45,51,57,63,
@@ -25,10 +36,19 @@ int32_t attacksCloseToKingEvals[] =
  421,429,437,441,450,450,450,450,450,450
 
 };
+#endif
 
-
+#ifdef EXPERIMENTAL
+int32_t attackScores[6][5] = { {0,0,0,0,0},
+							   {1,3,3,4,6},
+							   {2,4,4,5,9},
+							   {2,5,5,7,11},
+							   {2,6,6,8,12},
+							   {0,0,0,0,0}
+};
+#else
 int32_t attackScores[] = {1,3,3,4,7};
-
+#endif
 
 
 //int32_t attacksCloseToKingEvals[] = {0, 10, 20, 40, 80, 150, 230, 350, 400, 500, 600};
@@ -83,21 +103,38 @@ static int32_t kingSafetySinglePlayer(const chessPosition* position, const uint8
 
 	uint64_t kingmoves = kingmovetables[kingField];
 	kingmoves = kingmoves | BIT64(kingField);
-
-
+#ifdef EXPERIMENTAL
+	if (playingSide == white) {
+		kingmoves = kingmoves | (kingmoves << 8);
+	} else {
+		kingmoves = kingmoves | (kingmoves >> 8);
+	}
+#endif
 	uint16_t kingAttackScore = 0;
 
 	for(uint16_t pieceType = 0; pieceType < 5; pieceType++ ) {
 		uint64_t attacks = opponentAttackTable->attackTables[pieceType] & kingmoves;
-		kingAttackScore = kingAttackScore+popcount(attacks)*attackScores[pieceType];
+
+#ifdef EXPERIMENTAL
+		uint16_t numAttacks = popcount(attacks);
+		if(numAttacks > 4) {
+			numAttacks = 4;
+		}
+		kingAttackScore = kingAttackScore+attackScores[numAttacks][pieceType];
+#else
+	kingAttackScore = kingAttackScore+popcount(attacks)*attackScores[pieceType];
+#endif
 	}
+
 
 	if(kingAttackScore >= 70) {
 		kingAttackScore = 69;
 	}
-
+#ifdef EXPERIMENTAL
+	ret = ret-(3*attacksCloseToKingEvals[kingAttackScore])/2;
+#else
 	ret = ret-attacksCloseToKingEvals[kingAttackScore];
-
+#endif
 
 	/*uint64_t attacks = opponentAttackTable->completeAttackTable & kingmoves;
 

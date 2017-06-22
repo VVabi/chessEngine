@@ -20,7 +20,7 @@
 #include <assert.h>
 #include <userInterface/UIlayer.hpp>
 #include <parameters/parameters.hpp>
-
+#include <fstream>
 static int32_t qindices[150] = {0};
 extern uint8_t searchId;
 void resetqIndices(){
@@ -62,8 +62,10 @@ void resetSortqCalled(){
 
 static moveStack mvStack;
 
+static int counter = 0;
+//std::ofstream quietData("/home/vabi/quiet.txt");
 
-int16_t negamaxQuiescence(chessPosition* position, uint16_t ply, int16_t alpha, int16_t beta, uint16_t depth) {
+int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, int16_t alpha, int16_t beta, uint16_t depth) {
 
 	assert(alpha < beta);
 
@@ -71,7 +73,7 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t ply, int16_t alpha, 
 	uint64_t ownKing = position->pieceTables[position->toMove][king];
 	if(isFieldAttacked(position, (playerColor) (1-position->toMove), findLSB(ownKing))) {
 		pvLine line;
-		return negamax(position, ply, ply+1, 1, alpha, beta, &line, false, false, false);
+		return negamax(position, ply, ply+1, qply, 1, alpha, beta, &line, false, false, false);
 	}
 #ifdef HASH
 	hashEntry hashVal      = getHashTableEntry(position->zobristHash);
@@ -130,6 +132,54 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t ply, int16_t alpha, 
 	uint16_t stackCounter = mvStack.getCounter();
 	vdt_vector<chessMove> moves = mvStack.getNext();
 	generateAllCaptureMoves(&moves, position);
+
+#ifdef DEBUG
+	vdt_vector<chessMove> allMoves = mvStack.getNext();
+	generateAllMoves(&allMoves, position);
+
+	uint32_t capturecnt = 0;
+
+	for(uint16_t ind=0; ind < allMoves.length; ind++) {
+		if (allMoves[ind].captureType != none) {
+			capturecnt++;
+		}
+	}
+
+	if(capturecnt != moves.length) {
+		logError("Capture move generation is wrong");
+		/*std::cout << "Capture move generation is wrong" << std::endl;
+		std::cout << chessPositionToFenString(*position) << std::endl;
+		std::cout << "capture move length " << moves.length << std::endl;
+		std::cout << "captures" << std::endl;
+		for (uint16_t ind = 0; ind < moves.length; ind++) {
+			std::cout << moveToString(moves[ind]) << std::endl;
+		}
+		std::cout << "captures in all moves " << capturecnt << std::endl;
+		for(uint16_t ind=0; ind < allMoves.length; ind++) {
+			if (allMoves[ind].captureType != none) {
+				std::cout << moveToString(allMoves[ind]) << std::endl;
+			}
+		}*/
+	}
+	mvStack.release();
+
+#endif
+
+	counter++;
+	if(qply < 1) {
+		generateChecks(&moves,position);
+
+		/*if(moves.length == 0) {
+			if(counter > 1000) {
+				quietData << chessPositionToFenString(*position) << std::endl;
+				counter = 0;
+			}
+		}*/
+	}
+
+
+
+
 	orderCaptureMoves(position, &moves, hashMove);
 	if(moves.length > 0){
 		qcalled++;
@@ -139,33 +189,17 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t ply, int16_t alpha, 
 
 	int16_t bestIndex = -1;
 	for(uint16_t ind=0; ind < moves.length; ind++){
-
-//#ifdef EXPERIMENTAL
 		if(ind == 1){
 			sortqCalled++;
 			std::stable_sort(moves.data, moves.data+moves.length);
 		}
-
 
 		//This has to be done AFTER sorting of course - that was a nasty bug
 		//-----------------------
 		if(moves[ind].sortEval < -50){
 			break; //SEE pruning
 		}
-/*#else
-		//This has to be done AFTER sorting of course - that was a nasty bug
-		//-----------------------
-		if(moves[ind].sortEval < -50){
-			break; //SEE pruning
-		}
 
-		if(ind == 1){
-			sortqCalled++;
-			std::stable_sort(moves.data, moves.data+moves.length);
-		}
-
-
-#endif*/
 		//delta pruning. TODO: make define
 		//----------------------------------------------------
 		int32_t gainValue = evalPars->figureValues[moves[ind].captureType];
@@ -181,7 +215,7 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t ply, int16_t alpha, 
 
 		} else {
 			nodes++;
-			int32_t value = -negamaxQuiescence(position, ply+1, -beta, -alpha, depth+1);
+			int32_t value = -negamaxQuiescence(position, qply+1, ply+1, -beta, -alpha, depth+1);
 			if(value > alpha){
 				alpha = value;
 				bestMove = moves[ind];
