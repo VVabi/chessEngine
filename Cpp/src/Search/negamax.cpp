@@ -174,11 +174,6 @@ static inline void get_extensions_reductions(chessPosition* position, uint16_t* 
 			*reduction = 0;
 		}
 
-
-
-
-
-
 		/*bool toSixthRank = false;
 
 		if(move->type == pawnMove) {
@@ -197,9 +192,6 @@ static inline void get_extensions_reductions(chessPosition* position, uint16_t* 
 				*extension = *extension+1;
 			}
 		}*/
-
-
-
 }
 
 static inline bool backtrack_position_for_repetition(chessPosition* position) {
@@ -373,23 +365,6 @@ uint64_t gotHashMove = 0;
 uint64_t noHashMove   = 0;
 int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, uint16_t qply, int16_t depth, int16_t alpha, int16_t beta, pvLine* PV, bool allowNullMove, bool doHashProbe, bool extendChecks) {
 
-	/*int16_t max_score = 30000-ply-1;
-
-	if(max_score < alpha) {
-		return alpha; //mate score somewhere above us in the tree which we will never surpass anyway.
-	}
-
-	int16_t min_score = -30000+ply;
-
-	if(min_score > beta) {
-		return beta;
-	}*/
-	/*std::string pos =chessPositionToFenString(*position);
-	plogger << pos << std::endl;
-
-	if(pos == "r3k2r/p1pp1pb1/Bn3np1/3pq3/1p2P3/2N2Q1P/PPPB1P1P/R3K2R w KQkq - 0 5") {
-		std::cout << "gotcha" << std::endl;
-	}*/
 	//check for timeout/interruption
 	//------------------------------
 	uint16_t numMoves = PV->numMoves;

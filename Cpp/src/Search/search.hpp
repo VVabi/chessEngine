@@ -8,6 +8,7 @@
 #ifndef SEARCH_SEARCH_HPP_
 #define SEARCH_SEARCH_HPP_
 #include <assert.h>
+#include <userInterface/interfaceStructs.hpp>
 #define HISTORY_CUTOFF (1ULL << 12)
 #define NO_REFUTATION 64
 void rescaleHistoryTable();
@@ -90,5 +91,5 @@ searchDebugData getSearchData();
 void resetSearchData();
 bool isSearchValid();
 void setTotalTime(uint32_t tTime, uint64_t start);
-
+uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t numMadeMoves, uint32_t* worst_case_time);
 #endif /* SEARCH_SEARCH_HPP_ */

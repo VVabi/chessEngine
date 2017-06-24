@@ -49,6 +49,8 @@ void initUserEvents() {
 	userEventList["see"] 			    = see;
 	userEventList["clear"] 			    = clear;
 	userEventList["info"] 			    = info;
+	userEventList["setevalparam"]       = setEvalParam;
+	userEventList["searchtest"]         = performanceTests;
 }
 
 userEvent getNextUserEvent() {

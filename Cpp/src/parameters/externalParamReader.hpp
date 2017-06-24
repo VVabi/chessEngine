@@ -16,4 +16,5 @@ class parameterReader {
 	public:
 		parameterReader();
 		bool readParameters(preParameters* pars, std::string filename);
+		bool changeValue(preParameters* pars, std::string key, int64_t value);
 };

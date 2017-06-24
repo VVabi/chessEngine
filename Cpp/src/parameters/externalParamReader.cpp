@@ -52,14 +52,21 @@ bool parameterReader::readParameters(preParameters* pars, std::string filename){
 				line_stream >> value;
 				*(ptr+pair->second) = value;
 			} else {
-
+				std::cout << "Wrong parameter key" << std::endl;
 			}
 
 		}
-
-
 		return true;
+}
 
-
+bool parameterReader::changeValue(preParameters* pars, std::string key, int64_t value) {
+	auto pair = parameterFields.find(key);
+	if(pair != parameterFields.end()) {
+		int64_t* ptr = (int64_t*) pars;
+		*(ptr+pair->second) = value;
+		return true;
+	} else {
+		return false;
+	}
 
 }

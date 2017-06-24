@@ -7,7 +7,7 @@
 
 #ifndef PARAMETERS_PARAMETERS_HPP_
 #define PARAMETERS_PARAMETERS_HPP_
-
+#include "parametersPrivate.hpp"
 
 struct staticPawnEvalParameters{
 	int16_t isolatedPawn;
@@ -36,5 +36,6 @@ inline const evalParameters* getEvalParameters() {
 }
 
 void initializeParameters();
-
+preParameters* getPreParameters();
+void initializeDependentParameters(preParameters par);
 #endif /* PARAMETERS_PARAMETERS_HPP_ */

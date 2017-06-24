@@ -4,7 +4,8 @@
  *  Created on: Feb 2, 2017
  *      Author: vabi
  */
-
+#ifndef PARAMETERS_PARAMETERS_PRIVATE_HPP_
+#define PARAMETERS_PARAMETERS_PRIVATE_HPP_
 #include <stdint.h>
 
 
@@ -27,3 +28,4 @@ struct preParameters{
 };
 
 
+#endif

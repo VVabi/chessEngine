@@ -108,30 +108,6 @@ uint64_t runSinglePositionPerformanceTest(std::string position, uint16_t depth, 
 
 }
 
-
-
-void outputTestResults() { //TODO: integrate properly so that we do not need the files
-	std::ifstream with("/home/vabi/deltapruning2.txt");
-	std::ifstream without("/home/vabi/deltapruning.txt");
-
-	int withAsp, withoutAsp;
-	int totalWith = 0;
-	int totalWithout = 0;
-	while(with >> withAsp){
-		without >> withoutAsp;
-		totalWith = totalWith+withAsp;
-		totalWithout = totalWithout+withoutAsp;
-		double ratio = ((double) withAsp)/((double) withoutAsp);
-		std::cout << withAsp << " " << withoutAsp << " " << ratio << std::endl;
-
-	}
-
-	double ratio = ((double) totalWith)/((double) totalWithout);
-	std::cout << totalWith << " " << totalWithout << " " << ratio << std::endl;
-
-
-}
-
 std::string chessPositionToString(const chessPosition position) {
 	//Not performance-critical
 	//---------------------------
@@ -731,9 +707,7 @@ bool checkAndMakeMove(chessPosition& position, std::string move){
 			if(isFieldAttacked(&position, position.toMove, kingField)){
 				//std::cout << "Illegal move!" << std::endl;
 				undoMove(&position);
-			} else {
-				std::string newPosition = chessPositionToString(position);
-				//userInterface->sendNewPosition(newPosition);
+				return false;
 			}
 		} else {
 			std::cout << "Invalid move!" << std::endl;
@@ -741,41 +715,9 @@ bool checkAndMakeMove(chessPosition& position, std::string move){
 
 		return found;
 }
-extern std::atomic<bool> continueSearch;
 
-void runPerformanceTests(){
-	continueSearch = true;
-	for(int depth = 3; depth < 11; depth++){
-		std::ifstream file;
-		file.open("chesspositionsfixed.txt");
-		std::string line;
-		uint64_t negamaxNodes = 0;
-		uint64_t qNodes = 0;
 
-		uint32_t nodes = 0;
-		while(std::getline(file, line)){
-			//std::cout << line << std::endl;
-			uint64_t nmNodes = 0;
-			uint64_t qn = 0;
-			uint64_t newNodes = runSinglePositionPerformanceTest(line, depth, &nmNodes, &qn, true);
-			if(newNodes != qn+nmNodes){
-				std::cout << "WTF???" << std::endl;
-			}
-			nodes = nodes + newNodes;
-			//std::cout << newNodes << std::endl;
-			//std::cout << nmNodes << std::endl;
-			//std::cout << qn << std::endl;
-			negamaxNodes = negamaxNodes+nmNodes;
-			qNodes = qNodes+qn;
 
-		}
-		std::cout << "Depth " << depth  << " Nodes " << nodes << std::endl;
-		std::cout << "negamaxnodes " <<  negamaxNodes << std::endl;
-		std::cout << "qnodes " <<  qNodes << std::endl;
-		file.close();
-
-	}
-}
 
 void outputUint64(uint64_t num) {
 	for(int16_t row = 7; row > -1; row--) {

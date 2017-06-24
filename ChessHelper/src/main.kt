@@ -26,14 +26,7 @@ fun main(args: Array<String>) {
             println(stockEval)
             println(vabiEval)
         }
-
-
-
     }
-
-
-
-
     launchGui()
 
 
