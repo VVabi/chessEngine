@@ -21,7 +21,7 @@ fun runEvalSymmetryTests(engine: ChessEngine, debugEngine: ChessEngine): Boolean
         engine.setPosition(mirror(fen), listOf())
         val eval3 = engine.getEval()
 
-        if (eval1 != eval2) {
+        if (eval1 != -eval2) {
             println("Unsymmetric black/white eval detected")
             println(fen)
             println(eval1)

@@ -428,6 +428,20 @@ void handleInfo() {
 #endif
 }
 
+void handleGetMoveOrdering() {
+	vdt_vector<chessMove> vec = vdt_vector<chessMove>(200);
+	chessPosition cposition = memoryLibrarianRetrievePosition();
+	generateAllMoves(&vec, &cposition);
+	calculateStandardSortEvals(&cposition, &vec, 0, 0, 0, 64);
+	std::stable_sort(vec.data, vec.data+vec.length);//stable sort makes the engine 100% predictable and comparable between different optimization levels
+
+	for(uint16_t ind=0; ind < vec.length; ind++) {
+		std::cout << moveToExtendedString(vec[ind]) << " " << vec[ind].sortEval << std::endl;
+	}
+
+	vec.free_array();
+}
+
 void UIloop() {
 	initUserEvents();
 	bool continueLoop = true;
@@ -502,6 +516,9 @@ void UIloop() {
 					break;
 				case performanceTests:
 					handleRunPerformanceTests(ev.data);
+					break;
+				case getMoveOrdering:
+					handleGetMoveOrdering();
 					break;
 				default:
 					putLine("Not yet implemented");

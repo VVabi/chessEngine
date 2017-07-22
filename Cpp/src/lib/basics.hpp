@@ -51,13 +51,8 @@ struct pathDependentPositionData{
 };
 
 struct chessPosition {
-#ifdef DEBUGAAAA
-	vdt_vector<uint64_t> pieces;
-	vdt_vector<vdt_vector<uint64_t>> pieceTables;
-#else
 	uint64_t pieces[2];
 	uint64_t pieceTables[2][NUM_DIFFERENT_PIECES+1]; //the +1 is a dummy allowing simpler move execution.
-#endif
 	playerColor toMove;
 	pathDependentPositionData data;
 	int16_t figureEval;

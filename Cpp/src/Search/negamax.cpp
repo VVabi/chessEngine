@@ -214,7 +214,7 @@ static uint8_t nullmoveReductions[40] = {0,1,2,2,2,3,3,3,
 										 3,3,3,3,3,3,3,3,
 };
 
-//std::ofstream badMoveLogger("/home/vabi/Tools/lateCutoffs.txt");
+std::ofstream badMoveLogger("/home/vabi/Tools/lateCutoffs.txt");
 /*#ifdef EXPERIMENTAL
 #define PREMARGIN 200
 #define MARGIN 300
@@ -397,6 +397,7 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, uint16_
 		}
 	}
 
+	//Interestingly, changing the order of the next two calls is a clear ELO loss - but why? I don't really get it.
 	//go to quiescence on depth 0.
 	//---------------------------
 	if(depth <= 0) {
@@ -413,7 +414,6 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, uint16_
 		PV->numMoves = 0;
 		return hashEval;
 	}
-
 
 	//try nullmove pruning
 	//-------------------------
@@ -611,9 +611,9 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, uint16_
 		//in case of beta cutoff, leave
 		//----------------------------------
 		if((alpha >= beta)) {
-			//if(ind > 0) {
-				//badMoveLogger << moveToExtendedString(PV->line[0]) << " index " << ind << " of " << moves.length << " " << chessPositionToFenString(*position) << std::endl;
-			//}
+			if(ind > 0) {
+				badMoveLogger << moveToExtendedString(PV->line[0]) << " index " << ind << " of " << moves.length << " " << chessPositionToFenString(*position) << std::endl;
+			}
 
 			handleBetaCutoff(&PV->line[0], position->zobristHash, beta, depth, ply, searchId);
 			if(bestIndex != -1){
@@ -660,6 +660,11 @@ int16_t negamax(chessPosition* position, uint16_t ply, uint16_t max_ply, uint16_
 	} else { //we failed low, remember as well
 		setHashEntry(FAILLOW, alpha, depth, searchId, 0, position->zobristHash);
 	}
+
+	if(bestIndex > 0) {
+		badMoveLogger << moveToExtendedString(PV->line[0]) << " index " << bestIndex << " of " << moves.length << " " << chessPositionToFenString(*position) << std::endl;
+	}
+
 	//return memory
 	//---------------------
 	qmvStack.release();

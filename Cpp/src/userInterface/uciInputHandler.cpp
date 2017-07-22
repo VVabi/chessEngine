@@ -51,6 +51,7 @@ void initUserEvents() {
 	userEventList["info"] 			    = info;
 	userEventList["setevalparam"]       = setEvalParam;
 	userEventList["searchtest"]         = performanceTests;
+	userEventList["getmoveordering"]    = getMoveOrdering;
 }
 
 userEvent getNextUserEvent() {

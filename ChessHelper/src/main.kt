@@ -3,6 +3,7 @@ import EngineHandling.getStockfishEval
 import GUI.launchGui
 import Tools.getLos
 import java.io.File
+import java.net.ServerSocket
 
 /**
  * Created by vabi on 29.05.17.
@@ -10,7 +11,12 @@ import java.io.File
 
 fun main(args: Array<String>) {
 
-    println(getStockfishEval("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"))
+
+    var s = ServerSocket(5000)
+    var sock = s.accept()
+    println("Connection received")
+
+   /* println(getStockfishEval("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"))
     val releaseEngine: ChessEngine = ChessEngine("/home/vabi/code/chessEngine/Cpp/Release/Vabi", "")
 
     val dataFile = File("/home/vabi/quiet.txt")
@@ -26,8 +32,8 @@ fun main(args: Array<String>) {
             println(stockEval)
             println(vabiEval)
         }
-    }
-    launchGui()
+    }*/
+    //launchGui()
 
 
     /*var defwins = 0

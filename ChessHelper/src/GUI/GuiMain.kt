@@ -20,7 +20,8 @@ class mainGuiApplication : Application() {
     override fun start(primaryStage: Stage) {
         val loader: FXMLLoader = FXMLLoader(javaClass.getResource("gui.fxml"))
         val root = loader.load<Parent>()
-        val scene = Scene(root, 640.0, 480.0)
+        val scene = Scene(root, 1024.0, 768.0)
+        //scene.stylesheets.add(mainGuiApplication::class.java!!.getResource("menuStyle.css").toExternalForm())
         primaryStage.scene = scene
         primaryStage.show()
     }

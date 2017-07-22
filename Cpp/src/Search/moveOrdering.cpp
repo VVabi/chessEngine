@@ -20,14 +20,10 @@
 #include <userInterface/UIlayer.hpp>
 #include <Search/search.hpp>
 
-extern uint64_t bishopFieldTable[];
-extern uint64_t rookFieldTable[];
 extern int32_t historyTable[2][64][64];
 extern int16_t pieceTables[7][2][64];
-
 extern uint16_t killerMoves[40][2];
-extern uint64_t bishopMoveTables[64][512];
-extern uint64_t rookMoveTables[64][4096];
+
 #define WHITEKINGCASTLECHESSFIELDS ((1ULL << 4) | (1ULL << 5) | (1ULL << 6))
 #define WHITEQUEENCASTLECHESSFIELDS ((1ULL << 4) | (1ULL << 3) | (1ULL << 2))
 #define BLACKKINGCASTLECHESSFIELDS ((1ULL << 60) | (1ULL << 61) | (1ULL << 62))
@@ -111,6 +107,7 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
 			return;
 		}
 	}*/
+
 	isInCheck = !isInCheck;
 
 
@@ -187,7 +184,7 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
 
 	if(targetAttacked  && (mv->captureType == none)){
 		sortEval = sortEval-100;
-		if(!targetCovered){ //TODO: same problem as above, this never happens.
+		if(!targetCovered){ //TODO: same problem as above, this never happens. But it still helps the ordering...
 			sortEval = sortEval-100;
 		}
 	}
@@ -232,6 +229,16 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
 		}*/
 
 	}
+
+	/*if(mv->type == pawnMove) {
+		uint16_t target = mv->targetField;
+		uint64_t ppMask = passedPawnMasks[position->toMove][target];
+		uint64_t oppPawns = position->pieceTables[1-position->toMove][pawn];
+		if((ppMask & oppPawns) == 0) {
+			sortEval = sortEval+50; //passed pawn push
+		}
+	}*/
+
 	if((position->madeMoves.length > 0) && (mv->captureType != none)){
 		chessMove previousMove = position->madeMoves[position->madeMoves.length-1];
 		if(previousMove.targetField == mv->targetField) { //recapture is usually good

@@ -95,9 +95,37 @@ void setSearchId(uint8_t searchId, uint64_t key, uint16_t index) {
 
 void setHashEntry(hashFlag flag, int16_t eval, uint8_t depth, uint8_t searchId, uint16_t bestMove, uint64_t key){
 	hashBucket* current = &moveOrderingHashTable[key & HASHSIZE];
+	//TODO: Better replacement scheme. Go through all four buckets and replace the least-likely useful one?
+	int8_t replace_index = -1;
+	int32_t target_score = ((int32_t) depth);
+
 
 	for(uint8_t ind=0; ind < 4; ind++){
-		hashEntry* entry = &current->hashData[ind]; //&current->hashData[permutations[permutationIndex][ind]];
+		hashEntry* entry = &current->hashData[ind];
+		uint8_t past_search = searchId-entry->index;
+		int32_t score = ((int32_t) entry->depth)-2*((int32_t) past_search);
+		//int32_t score = -((int32_t) past_search);
+		if(score < target_score) {
+			 target_score = score;
+			 replace_index = ind;
+		}
+	}
+
+	if(replace_index >= 0) {
+		hashEntry* entry = &current->hashData[replace_index];
+		entry->flag = flag;
+		entry->eval  = eval;
+		entry->depth = depth;
+		entry->searchId = searchId;
+		entry->bestMove = bestMove;
+		entry->hashHighBits = (uint32_t) (key >> 32);
+		entry->hashLower    = (uint16_t) (((uint32_t) (key & 0xFFFFFFFF)) >> 16);
+		entry->index        = replace_index;
+	}
+
+
+	/*for(uint8_t ind=0; ind < 4; ind++){
+		hashEntry* entry = &current->hashData[ind];
 		if((entry->depth <= depth) || (entry->searchId != searchId)) {
 			entry->flag = flag;
 			entry->eval  = eval;
@@ -106,11 +134,11 @@ void setHashEntry(hashFlag flag, int16_t eval, uint8_t depth, uint8_t searchId, 
 			entry->bestMove = bestMove;
 			entry->hashHighBits = (uint32_t) (key >> 32);
 			entry->hashLower    = (uint16_t) (((uint32_t) (key & 0xFFFFFFFF)) >> 16);
-			entry->index        = ind; //permutations[permutationIndex][ind];
+			entry->index        = ind;
 			break;
 		}
-	}
-	//permutationIndex = (permutationIndex+1) & 3;
+	}*/
+
 }
 
 uint16_t getHashMove(uint64_t zobristKey){
