@@ -11,9 +11,39 @@
 #include <userInterface/interfaceStructs.hpp>
 #define HISTORY_CUTOFF (1ULL << 12)
 #define NO_REFUTATION 64
+
+
+enum NullmoveSetting 			{nullmove_enabled, nullmove_disabled};
+enum HashprobeSetting 			{hashprobe_enabled, hashprobe_disabled};
+enum CheckextensionSetting 		{checkextension_enabled, checkextension_disabled};
+
+struct plyInfo {
+	uint16_t ply;
+	uint16_t max_ply;
+	uint16_t qply;
+	int16_t depth;
+
+	plyInfo increment(int16_t depth_adaption) {
+		return plyInfo(ply+1, max_ply, qply, depth-1+depth_adaption);
+	}
+
+	plyInfo(uint16_t p, uint16_t m, uint16_t q, uint16_t d): ply(p), max_ply(m), qply(q), depth(d) {};
+
+};
+
+
+struct searchSettings {
+	NullmoveSetting nullmoveSetting;
+	HashprobeSetting hashprobeSetting;
+	CheckextensionSetting checkextensionSetting;
+	searchSettings(NullmoveSetting nms, HashprobeSetting hps, CheckextensionSetting ces): nullmoveSetting(nms), hashprobeSetting(hps), checkextensionSetting(ces) {};
+	searchSettings():  nullmoveSetting(nullmove_enabled), hashprobeSetting(hashprobe_enabled), checkextensionSetting(checkextension_enabled){};
+
+};
+
 void rescaleHistoryTable();
 void clearHistoryTable();
-int16_t negamax(chessPosition* position,  uint16_t ply, uint16_t max_ply, uint16_t qply, int16_t depth, int16_t alpha, int16_t beta,  pvLine* PV, bool allowNullMove = true,  bool allowHashProbe = true, bool extendChecks = true);
+int16_t negamax(chessPosition* position, plyInfo ply, int16_t alpha, int16_t beta,  pvLine* PV, searchSettings settings);
 int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, int16_t alpha, int16_t beta, uint16_t depth);
 int16_t root_search(chessPosition* position, chessMove* bestMove, int16_t alpha, int16_t beta, int16_t depth, uint16_t max_ply, vdt_vector<chessMove>* moves, uint64_t* nodeCounts);
 void resetNodes();
