@@ -22,7 +22,7 @@
 #include <parameters/parameters.hpp>
 #include <fstream>
 static int32_t qindices[150] = {0};
-extern uint8_t searchId;
+
 void resetqIndices(){
 	memset(qindices, 0, 150*sizeof(int32_t));
 }
@@ -65,7 +65,7 @@ static moveStack mvStack;
 static int counter = 0;
 //std::ofstream quietData("/home/vabi/quiet.txt");
 
-int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, AlphaBeta alphabeta, uint16_t depth) {
+int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, AlphaBeta alphabeta, uint16_t depth, uint8_t searchId) {
 
 	alphabeta.sanityCheck();
 
@@ -73,7 +73,7 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, 
 	uint64_t ownKing = position->pieceTables[position->toMove][king];
 	if(isFieldAttacked(position, (playerColor) (1-position->toMove), findLSB(ownKing))) {
 		pvLine line;
-		return negamax(position, plyInfo(ply, ply+1, qply,1),  alphabeta, &line, searchSettings(nullmove_disabled, hashprobe_disabled, checkextension_disabled));
+		return negamax(position, plyInfo(ply, ply+1, qply,1),  alphabeta, &line, searchSettings(nullmove_disabled, hashprobe_disabled, checkextension_disabled, searchId));
 	}
 #ifdef HASH
 	hashEntry hashVal      = getHashTableEntry(position->zobristHash);
@@ -215,7 +215,7 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, 
 
 		} else {
 			nodes++;
-			int32_t value = -negamaxQuiescence(position, qply+1, ply+1, alphabeta.invert(), depth+1);
+			int32_t value = -negamaxQuiescence(position, qply+1, ply+1, alphabeta.invert(), depth+1, searchId);
 			if(alphabeta.update(value)){
 				bestMove = moves[ind];
 				bestIndex = ind;

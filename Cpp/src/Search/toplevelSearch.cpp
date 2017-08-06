@@ -132,11 +132,11 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 		try{
 			//std::cout << "Depth " << depth << std::endl;
 
-			*eval = negamax(position, plyInfo(0, depth+EXTENSIONS_ALLOWED, 0, depth), AlphaBeta(alpha, beta), &line, searchSettings(nullmove_enabled, hashprobe_disabled, checkextension_enabled));
+			*eval = negamax(position, plyInfo(0, depth+EXTENSIONS_ALLOWED, 0, depth), AlphaBeta(alpha, beta), &line, searchSettings(nullmove_enabled, hashprobe_disabled, checkextension_enabled, searchId));
 			if(doAspiration) {
 				if ((*eval <= alpha) || (*eval >= beta)) {
 
-					*eval = negamax(position, plyInfo(0, depth+EXTENSIONS_ALLOWED, 0, depth), AlphaBeta(-32000, 32000), &line, searchSettings(nullmove_enabled, hashprobe_disabled, checkextension_enabled));
+					*eval = negamax(position, plyInfo(0, depth+EXTENSIONS_ALLOWED, 0, depth), AlphaBeta(-32000, 32000), &line, searchSettings(nullmove_enabled, hashprobe_disabled, checkextension_enabled, searchId));
 				}
 
 				alpha = *eval-50;

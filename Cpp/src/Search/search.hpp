@@ -42,8 +42,9 @@ struct searchSettings {
 	NullmoveSetting nullmoveSetting;
 	HashprobeSetting hashprobeSetting;
 	CheckextensionSetting checkextensionSetting;
-	searchSettings(NullmoveSetting nms, HashprobeSetting hps, CheckextensionSetting ces): nullmoveSetting(nms), hashprobeSetting(hps), checkextensionSetting(ces) {};
-	searchSettings():  nullmoveSetting(nullmove_enabled), hashprobeSetting(hashprobe_enabled), checkextensionSetting(checkextension_enabled){};
+	uint8_t searchId;
+	searchSettings(NullmoveSetting nms, HashprobeSetting hps, CheckextensionSetting ces, uint8_t sid): nullmoveSetting(nms), hashprobeSetting(hps), checkextensionSetting(ces), searchId(sid) {};
+	searchSettings(uint8_t sid):  nullmoveSetting(nullmove_enabled), hashprobeSetting(hashprobe_enabled), checkextensionSetting(checkextension_enabled), searchId(sid){};
 };
 
 struct AlphaBeta {
@@ -100,11 +101,8 @@ struct searchLoopResults {
 	}
 };
 
-
-void rescaleHistoryTable();
-void clearHistoryTable();
 int16_t negamax(chessPosition* position, plyInfo ply, AlphaBeta alphabeta,  pvLine* PV, searchSettings settings);
-int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, AlphaBeta alphabeta, uint16_t depth);
+int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, AlphaBeta alphabeta, uint16_t depth, uint8_t searchId);
 int16_t root_search(chessPosition* position, chessMove* bestMove, int16_t alpha, int16_t beta, int16_t depth, uint16_t max_ply, vdt_vector<chessMove>* moves, uint64_t* nodeCounts);
 void resetNodes();
 bool calculateStandardSortEvals(chessPosition* position, vdt_vector<chessMove>* moves, uint16_t start_index, uint16_t ply, sortInfo sortinfo);

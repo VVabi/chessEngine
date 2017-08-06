@@ -65,8 +65,7 @@ uint64_t runSinglePositionPerformanceTest(std::string position, uint16_t depth, 
 
 		bool succeeded = false;
 		pvLine line;
-		int32_t eval = negamax(&c, plyInfo(0, depth+7, 0, searchdepth), AlphaBeta(alpha, beta), &line, searchSettings());
-
+		int16_t eval = negamax(&c, plyInfo(0, depth+7, 0, searchdepth), AlphaBeta(alpha, beta), &line, searchSettings(searchId));
 		if(useAspiration) {
 			if ((eval <= alpha)) {
 				alpha = alpha-100;

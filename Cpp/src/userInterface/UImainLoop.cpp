@@ -5,7 +5,7 @@
  *      Author: vabi
  */
 
-
+#include <Search/history.hpp>
 #include <lib/basics.hpp>
 #include <userInterface/userInterface.hpp>
 #include <userInterface/uciInterface.hpp>
@@ -142,7 +142,8 @@ void handleIsReady(std::ostream& stream) {
 void handleClear() {
 	memset(killerMoves,0, 40*2*sizeof(uint16_t));
 	clearHashTables();
-	clearHistoryTable();
+	HistoryTables* table = getHistoryTables();
+	table->clearHistoryTable();
 }
 
 void handleStop() {

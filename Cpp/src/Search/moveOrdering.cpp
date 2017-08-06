@@ -19,8 +19,8 @@
 #include <cmath>
 #include <userInterface/UIlayer.hpp>
 #include <Search/search.hpp>
+#include <Search/history.hpp>
 
-extern int32_t historyTable[2][64][64];
 extern int16_t pieceTables[7][2][64];
 extern uint16_t killerMoves[40][2];
 
@@ -280,7 +280,7 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
 	}
 
 	if(mv->captureType == none){
-		int32_t hist = historyTable[position->toMove][mv->sourceField][mv->targetField];
+		int32_t hist = getHistoryTables()->getHistoryEntry(position->toMove, mv->sourceField, mv->targetField);
 
 		int32_t historyValue = std::sqrt(std::abs(hist)); //TODO: this is absolutely NOT a good idea performance-wise
 		historyValue = (hist > 0 ? historyValue: -historyValue);
