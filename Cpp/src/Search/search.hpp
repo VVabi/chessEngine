@@ -71,12 +71,40 @@ struct AlphaBeta {
 		return alpha >= beta;
 	}
 
+	void sanityCheck(){
+		assert(alpha <= beta);
+	}
+
+	void stalemate() {
+		alpha = 0;
+	}
+
+	void mate(uint16_t ply) {
+		alpha = -30000+ply;
+	}
+
 };
+
+struct searchLoopResults {
+	AlphaBeta alphabeta;
+	int16_t bestIndex;
+	uint16_t numLegalMoves;
+	searchLoopResults(AlphaBeta ab, int16_t b, uint16_t n): alphabeta(ab), bestIndex(b), numLegalMoves(n) {};
+
+	bool noMovesAvailable(){
+		return numLegalMoves == 0;
+	}
+
+	bool foundGoodMove(){
+		return (bestIndex >= 0);
+	}
+};
+
 
 void rescaleHistoryTable();
 void clearHistoryTable();
 int16_t negamax(chessPosition* position, plyInfo ply, AlphaBeta alphabeta,  pvLine* PV, searchSettings settings);
-int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, int16_t alpha, int16_t beta, uint16_t depth);
+int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, AlphaBeta alphabeta, uint16_t depth);
 int16_t root_search(chessPosition* position, chessMove* bestMove, int16_t alpha, int16_t beta, int16_t depth, uint16_t max_ply, vdt_vector<chessMove>* moves, uint64_t* nodeCounts);
 void resetNodes();
 bool calculateStandardSortEvals(chessPosition* position, vdt_vector<chessMove>* moves, uint16_t start_index, uint16_t ply, sortInfo sortinfo);
@@ -116,7 +144,6 @@ struct searchDebugData{
 	uint64_t neededSort;
 	uint64_t nullMovePruningTried;
 	uint64_t nullMovePruningSuccessful;
-
 };
 
 
@@ -144,9 +171,6 @@ public:
 	void reset(){
 		counter = 0;
 	}
-
-
-
 };
 
 searchDebugData getSearchData();
