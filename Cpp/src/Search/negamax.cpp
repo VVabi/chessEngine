@@ -265,7 +265,7 @@ static inline bool check_nullmove(chessPosition* position, uint16_t* refutationM
 	pvLine dummy;
 	dummy.numMoves = 0;
 	dummy.line[0].targetField = NO_REFUTATION;
-	int32_t value = -negamax(position, plyInfo(ply+1, max_ply-nullmoveReductions[depth], 0, depth-1-nullmoveReductions[depth]), -beta, -beta+1, &dummy, searchSettings(nullmove_disabled, hashprobe_enabled, checkextension_enabled));
+	int32_t value = -negamax(position, plyInfo(ply+1, max_ply-nullmoveReductions[depth], 0, depth-1-nullmoveReductions[depth]), AlphaBeta(-beta, -beta+1), &dummy, searchSettings(nullmove_disabled, hashprobe_enabled, checkextension_enabled));
 	undoNullMove(position);
 	if(value < beta) {
 		*refutationMoveTarget = dummy.line[0].targetField;
@@ -361,24 +361,71 @@ static inline void checkTimeout() {
 
 #define DEFAULT_SORTEVAL 10000
 
+static inline bool get_next_move_to_front(chessPosition* position, sortState* currentState, vdt_vector<chessMove> moves, uint16_t ind, plyInfo plyinfo, sortInfo sortinfo) {
+	bool sortedNextMove = false;
+	switch(*currentState) {
+			case not_sorted:
+				assert(ind == 0);
+				if(getHashMoveToFront(&moves, sortinfo.hashMove, ind)) {
+					moves[ind].sortEval = DEFAULT_SORTEVAL;
+					sortedNextMove = true;
+				}
+				*currentState = hash_handled;
+				break;
+			case hash_handled:
+				if(getGoodCaptureToFront(&moves, ind)) {
+					moves[ind].sortEval = DEFAULT_SORTEVAL;
+					sortedNextMove = true;
+				} else {
+					*currentState = good_captures_handled;
+				}
+				break;
+			case good_captures_handled: {
+				uint16_t killerA = killerMoves[plyinfo.ply][0];
+				uint16_t killerB = killerMoves[plyinfo.ply][1];
+				if(getHashMoveToFront(&moves, killerA, ind)) {
+					moves[ind].sortEval = DEFAULT_SORTEVAL;
+					sortedNextMove = true;
+				} else if(getHashMoveToFront(&moves, killerB, ind)) {
+					moves[ind].sortEval = DEFAULT_SORTEVAL;
+					sortedNextMove = true;
+				} else {
+					*currentState = killers_handled;
+				}
+				break;
+			}
+			case killers_handled:
+				//first move didn't produce cutoff, now we need to sort
+				//------------------------------------------------------
+				calculateStandardSortEvals(position, &moves, ind, plyinfo.ply, sortinfo);
+				searchCounts.neededSort++;
+				std::stable_sort(moves.data+ind, moves.data+moves.length);//stable sort makes the engine 100% predictable and comparable between different optimization levels
+				*currentState = fully_sorted;
+				sortedNextMove = true;
+				break;
+			case fully_sorted:
+				sortedNextMove = true;
+				break;
+		}
+	return sortedNextMove;
+
+}
+
 uint64_t gotHashMove = 0;
 uint64_t noHashMove   = 0;
 
-static inline int16_t negamax_internal(chessPosition* position, plyInfo plyinfo, int16_t alpha, int16_t beta, pvLine* PV, uint16_t hashmove, uint16_t refutationTarget, CheckextensionSetting checkextensionSetting, bool movingSideInCheck) {
+static inline int16_t negamax_internal(chessPosition* position, plyInfo plyinfo, AlphaBeta alphabeta, pvLine* PV, CheckextensionSetting checkextensionSetting, sortInfo sortinfo) {
 	//generate moves
 	//------------------
 	uint16_t stackCounter = qmvStack.getCounter();
 	vdt_vector<chessMove> moves = qmvStack.getNext();
 	generateAllMoves(&moves, position);
 
-	if(hashmove == 0) {
+	if(sortinfo.hashMove == 0) {
 		noHashMove++;
 	} else {
 		gotHashMove++;
 	}
-
-	//calc sorteval
-	//------------------------
 
 	//init variables
 	//-----------------------------
@@ -395,56 +442,15 @@ static inline int16_t negamax_internal(chessPosition* position, plyInfo plyinfo,
 
 	sortState currentState = not_sorted;
 
-	if(movingSideInCheck) {
+	if(sortinfo.movingSideInCheck) {
 		currentState = killers_handled;
 	}
 
 	for(uint16_t ind=0; ind < moves.length; ind++){
-		switch(currentState) {
-		//TODO: get rid of the fallthroughs
-			case not_sorted:
-				assert(ind == 0);
-				currentState = hash_handled;
-				if(getHashMoveToFront(&moves, hashmove, ind)) {
-					moves[ind].sortEval = DEFAULT_SORTEVAL;
-					break;
-				}
-			case hash_handled:
-				if(getGoodCaptureToFront(&moves, ind)) {
-					moves[ind].sortEval = DEFAULT_SORTEVAL;
-					break;
-				}
-				currentState = good_captures_handled;
-			case good_captures_handled: {
-				uint16_t killerA = killerMoves[plyinfo.ply][0];
-				if(getHashMoveToFront(&moves, killerA, ind)) {
-					moves[ind].sortEval = DEFAULT_SORTEVAL;
-					break;
-				}
-				uint16_t killerB = killerMoves[plyinfo.ply][1];
-				if(getHashMoveToFront(&moves, killerB, ind)) {
-					moves[ind].sortEval = DEFAULT_SORTEVAL;
-					break;
-				}
-				currentState = killers_handled;
-			}
-			case killers_handled:
-				//first move didn't produce cutoff, now we need to sort
-				//------------------------------------------------------
-				calculateStandardSortEvals(position, &moves, ind, plyinfo.ply, hashmove, refutationTarget);
-				searchCounts.neededSort++;
-				std::stable_sort(moves.data+ind, moves.data+moves.length);//stable sort makes the engine 100% predictable and comparable between different optimization levels
-				currentState = fully_sorted;
-				break;
-			case fully_sorted:
-				break;
-
-		}
-
+		while(!get_next_move_to_front(position, &currentState, moves, ind, plyinfo, sortinfo));
 
 		//illegal move. Since list is sorted or, in case ind=0, best move is first, we can leave here: all further moves are also illegal.
 		//---------------------------------------------------------------------------------------------------------------------------------
-
 		if(moves[ind].sortEval < -10000){
 			break;
 		}
@@ -454,7 +460,7 @@ static inline int16_t negamax_internal(chessPosition* position, plyInfo plyinfo,
 		makeMove(&moves[ind], position);
 		uint16_t kingField = findLSB( position->pieceTables[1- position->toMove][king]);
 
-		if(movingSideInCheck || (BIT64(moves[ind].sourceField) & (rookFieldTable[kingField] | bishopFieldTable[kingField])) || (moves[ind].type == kingMove)) {
+		if(sortinfo.movingSideInCheck || (BIT64(moves[ind].sourceField) & (rookFieldTable[kingField] | bishopFieldTable[kingField])) || (moves[ind].type == kingMove)) {
 			if(isFieldAttacked( position,  position->toMove, kingField)){
 				/*if(moves[ind].type == kingMove) {
 					std::cout << chessPositionToFenString(*position) << std::endl;
@@ -489,7 +495,7 @@ static inline int16_t negamax_internal(chessPosition* position, plyInfo plyinfo,
 		uint16_t extension = 0;
 //#ifdef EXPERIMENTAL
 
-		get_extensions_reductions(position, &reduction, &extension, check, movingSideInCheck, plyinfo, plyinfo.depth, &moves[ind], ind);
+		get_extensions_reductions(position, &reduction, &extension, check, sortinfo.movingSideInCheck, plyinfo, plyinfo.depth, &moves[ind], ind);
 
 //#endif
 		if((checkextensionSetting == checkextension_disabled)){
@@ -500,8 +506,8 @@ static inline int16_t negamax_internal(chessPosition* position, plyInfo plyinfo,
 		//-------------------------------------------------
 		if(((ind > 3) || (bestIndex != -1)) && (plyinfo.depth > 2)) {
 
-			int32_t value = -negamax(position, plyinfo.increment(extension-reduction), -alpha-1, -alpha, &localPV, searchSettings());
-			if(value < alpha+1){
+			int32_t value = -negamax(position, plyinfo.increment(extension-reduction), alphabeta.zeroWindow().invert(), &localPV, searchSettings());
+			if(value < alphabeta.alpha+1){
 				undoMove(position);
 				continue;
 			}
@@ -509,12 +515,11 @@ static inline int16_t negamax_internal(chessPosition* position, plyInfo plyinfo,
 
 		//this is the real, full-fledged search now
 		//-------------------------------------------
-		int32_t value = -negamax(position, plyinfo.increment(extension), -beta, -alpha, &localPV, searchSettings());
+		int32_t value = -negamax(position, plyinfo.increment(extension), alphabeta.invert(), &localPV, searchSettings());
 
 		//in case move is better than previous, remember
 		//------------------------------------------------
-		if(value > alpha){
-			alpha = value;
+		if(alphabeta.update(value)){
 			PV->line[0] = moves[ind];
 			memcpy(PV->line+1, localPV.line, localPV.numMoves*sizeof(chessMove));
 			PV->numMoves =  localPV.numMoves+1;
@@ -526,12 +531,12 @@ static inline int16_t negamax_internal(chessPosition* position, plyInfo plyinfo,
 
 		//in case of beta cutoff, leave
 		//----------------------------------
-		if((alpha >= beta)) {
+		if(alphabeta.betacutoff()) {
 			/*if(ind > 0) {
 				badMoveLogger << moveToExtendedString(PV->line[0]) << " index " << ind << " of " << moves.length << " " << chessPositionToFenString(*position) << std::endl;
 			}*/
 
-			handleBetaCutoff(&PV->line[0], position->zobristHash, beta, plyinfo.depth, plyinfo.ply, searchId);
+			handleBetaCutoff(&PV->line[0], position->zobristHash, alphabeta.beta, plyinfo.depth, plyinfo.ply, searchId);
 			if(bestIndex != -1){
 				searchCounts.bestIndex[plyinfo.depth][bestIndex]++;
 				if(PV->line[0].captureType == none) {
@@ -541,7 +546,7 @@ static inline int16_t negamax_internal(chessPosition* position, plyInfo plyinfo,
 			qmvStack.release();
 			assert(stackCounter == qmvStack.getCounter());
 			PV->numMoves = 0;
-			return beta;
+			return alphabeta.beta;
 		}
 	}
 
@@ -551,10 +556,10 @@ static inline int16_t negamax_internal(chessPosition* position, plyInfo plyinfo,
 	//mate scores originate here!
 	//------------------------------
 	if(numlegalMoves == 0){
-		if(movingSideInCheck){
-			alpha = -30000+plyinfo.ply; //position is checkmate
+		if(sortinfo.movingSideInCheck){
+			alphabeta.alpha = -30000+plyinfo.ply; //position is checkmate
 		} else {
-			alpha = 0; //position is stalemate
+			alphabeta.alpha = 0; //position is stalemate
 		}
 	}
 
@@ -563,7 +568,7 @@ static inline int16_t negamax_internal(chessPosition* position, plyInfo plyinfo,
 	if(bestIndex != -1){
 		updateHistoryTables(&PV->line[0], plyinfo.depth, &moves, bestIndex, position->toMove);
 		searchCounts.bestIndex[plyinfo.depth][bestIndex]++;
-		setHashEntry(FULLSEARCH, alpha, plyinfo.depth, searchId, (PV->line[0].sourceField | (PV->line[0].targetField << 8)), position->zobristHash);
+		setHashEntry(FULLSEARCH, alphabeta.alpha, plyinfo.depth, searchId, (PV->line[0].sourceField | (PV->line[0].targetField << 8)), position->zobristHash);
 		if(PV->line[0].captureType == none){
 				uint16_t toRemember = (PV->line[0].sourceField | (PV->line[0].targetField << 8));
 				if ( (killerMoves[plyinfo.ply][0] != toRemember)) {
@@ -572,7 +577,7 @@ static inline int16_t negamax_internal(chessPosition* position, plyInfo plyinfo,
 				}
 			}
 	} else { //we failed low, remember as well
-		setHashEntry(FAILLOW, alpha, plyinfo.depth, searchId, 0, position->zobristHash);
+		setHashEntry(FAILLOW, alphabeta.alpha, plyinfo.depth, searchId, 0, position->zobristHash);
 	}
 
 	/*if(bestIndex > 0) {
@@ -586,12 +591,12 @@ static inline int16_t negamax_internal(chessPosition* position, plyInfo plyinfo,
 
 	//and finally return alpha
 	//--------------------------
-	return alpha;
+	return alphabeta.alpha;
 
 
 }
 
-int16_t negamax(chessPosition* position, plyInfo plyinfo, int16_t alpha, int16_t beta, pvLine* PV, searchSettings settings) {
+int16_t negamax(chessPosition* position, plyInfo plyinfo, AlphaBeta alphabeta, pvLine* PV, searchSettings settings) {
 
 	//check for timeout/interruption
 	//------------------------------
@@ -601,7 +606,7 @@ int16_t negamax(chessPosition* position, plyInfo plyinfo, int16_t alpha, int16_t
 		checkTimeout();
 	}
 	PV->numMoves = numMoves;
-	assert(alpha < beta);
+	assert(alphabeta.alpha < alphabeta.beta);
 	assert(plyinfo.ply+plyinfo.depth <= plyinfo.max_ply);
 
 	searchCounts.called++;
@@ -631,14 +636,14 @@ int16_t negamax(chessPosition* position, plyInfo plyinfo, int16_t alpha, int16_t
 	if(plyinfo.depth <= 0) {
 		searchCounts.wentToQuiescence++;
 		PV->numMoves = 0;
-		return negamaxQuiescence(position, plyinfo.qply, plyinfo.ply, alpha, beta, 0);
+		return negamaxQuiescence(position, plyinfo.qply, plyinfo.ply, alphabeta.alpha, alphabeta.beta, 0);
 	}
 
 	//check in hashtable for position value
 	//----------------------------------------
 	uint16_t hashmove = 0;
 	int16_t hashEval = 0;
-	if(checkHashTable(&hashEval, &hashmove, settings.hashprobeSetting, position->zobristHash, &alpha, &beta, plyinfo.depth)) {
+	if(checkHashTable(&hashEval, &hashmove, settings.hashprobeSetting, position->zobristHash, &alphabeta.alpha, &alphabeta.beta, plyinfo.depth)) {
 		PV->numMoves = 0;
 		return hashEval;
 	}
@@ -649,32 +654,30 @@ int16_t negamax(chessPosition* position, plyInfo plyinfo, int16_t alpha, int16_t
 	uint64_t ownKing = position->pieceTables[position->toMove][king];
 	bool movingSideInCheck = isFieldAttacked(position, (playerColor) (1-position->toMove), findLSB(ownKing));
 	if((settings.nullmoveSetting == nullmove_enabled) && !movingSideInCheck && (plyinfo.depth >= 2)){
-		if(check_nullmove(position, &refutationTarget, plyinfo.ply, plyinfo.max_ply, plyinfo.depth, beta)){
+		if(check_nullmove(position, &refutationTarget, plyinfo.ply, plyinfo.max_ply, plyinfo.depth, alphabeta.beta)){
 			PV->numMoves = 0;
-			return beta;
+			return alphabeta.beta;
 		}
 	}
 
 	//futility pruning
 	//-----------------
 	if(plyinfo.depth == 1) {
-		if(check_futility(movingSideInCheck, alpha, position, 100,150)) {
+		if(check_futility(movingSideInCheck, alphabeta.alpha, position, 100,150)) {
 			PV->numMoves = 0;
-			return  negamaxQuiescence(position, plyinfo.qply, plyinfo.ply, alpha, beta, 0);
+			return  negamaxQuiescence(position, plyinfo.qply, plyinfo.ply, alphabeta.alpha, alphabeta.beta, 0);
 		}
 	}
 
 	if(plyinfo.depth == 2) {
-		if(check_futility(movingSideInCheck, alpha, position, 500, 600)) {
+		if(check_futility(movingSideInCheck, alphabeta.alpha, position, 500, 600)) {
 			PV->numMoves = 0;
-			return  negamaxQuiescence(position, 0, plyinfo.ply, alpha, beta, 0);
+			return  negamaxQuiescence(position, 0, plyinfo.ply, alphabeta.alpha, alphabeta.beta, 0);
 		}
 	}
-
 
 	//------------------------------------------------------------------
 	//now we are out of tricks, we need to start the actual search.
 	//------------------------------------------------------------------
-	return negamax_internal(position, plyinfo, alpha, beta, PV, hashmove, refutationTarget, settings.checkextensionSetting, movingSideInCheck);
-
+	return negamax_internal(position, plyinfo, alphabeta, PV, settings.checkextensionSetting, sortInfo(movingSideInCheck, refutationTarget, hashmove));
 }

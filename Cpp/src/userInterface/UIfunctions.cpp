@@ -65,7 +65,7 @@ uint64_t runSinglePositionPerformanceTest(std::string position, uint16_t depth, 
 
 		bool succeeded = false;
 		pvLine line;
-		int32_t eval = negamax(&c, plyInfo(0, depth+7, 0, searchdepth), alpha, beta, &line, searchSettings());
+		int32_t eval = negamax(&c, plyInfo(0, depth+7, 0, searchdepth), AlphaBeta(alpha, beta), &line, searchSettings());
 
 		if(useAspiration) {
 			if ((eval <= alpha)) {
@@ -625,7 +625,7 @@ bool checkMove(chessPosition& position, std::string move, chessMove* out) {
 	vdt_vector<chessMove> moves = vdt_vector<chessMove>(100);
 			uint64_t mv = stringToMove(move);
 			generateAllMoves(&moves, &position);
-			calculateStandardSortEvals(&position, &moves, 0, 0, 0, NO_REFUTATION);
+			calculateStandardSortEvals(&position, &moves, 0, 0, sortInfo(false, NO_REFUTATION, 0));
 			std::sort(moves.data, moves.data+moves.length);
 			bool found = false;
 			chessMove m;

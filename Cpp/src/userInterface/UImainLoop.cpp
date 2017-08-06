@@ -432,7 +432,7 @@ void handleGetMoveOrdering() {
 	vdt_vector<chessMove> vec = vdt_vector<chessMove>(200);
 	chessPosition cposition = memoryLibrarianRetrievePosition();
 	generateAllMoves(&vec, &cposition);
-	calculateStandardSortEvals(&cposition, &vec, 0, 0, 0, 64);
+	calculateStandardSortEvals(&cposition, &vec, 0, 0, sortInfo(false, NO_REFUTATION, 0));
 	std::stable_sort(vec.data, vec.data+vec.length);//stable sort makes the engine 100% predictable and comparable between different optimization levels
 
 	for(uint16_t ind=0; ind < vec.length; ind++) {

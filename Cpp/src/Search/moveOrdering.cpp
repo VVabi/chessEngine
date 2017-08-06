@@ -311,7 +311,7 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
 	mv->sortEval = sortEval;
 }
 
-bool calculateStandardSortEvals(chessPosition* position,  vdt_vector<chessMove>* moves, uint16_t start_index, uint16_t ply, uint16_t hashedMove, uint16_t refutationTarget) {
+bool calculateStandardSortEvals(chessPosition* position,  vdt_vector<chessMove>* moves, uint16_t start_index, uint16_t ply, sortInfo sortinfo) {
 	AttackTable opponentAttackTable = makeAttackTable(position, (playerColor) (1-position->toMove), position->pieceTables[position->toMove][king]);
 	AttackTable ownAttackTable 		= makeAttackTable(position, position->toMove);
 	bool isInCheck      = ((opponentAttackTable.completeAttackTable & position->pieceTables[position->toMove][king]) != 0);
@@ -321,7 +321,7 @@ bool calculateStandardSortEvals(chessPosition* position,  vdt_vector<chessMove>*
 	uint16_t killerMoveB = killerMoves[ply][1];
 	const evalParameters* evalPars 						= getEvalParameters(); //TODO: move outside
 	for (uint16_t ind=start_index; ind < moves->length; ind++) {
-		calcSortEval(position, &(*moves)[ind], isInCheck, &opponentAttackTable, &ownAttackTable, hashedMove, killerMoveA, killerMoveB, refutationTarget, evalPars);
+		calcSortEval(position, &(*moves)[ind], isInCheck, &opponentAttackTable, &ownAttackTable, sortinfo.hashMove, killerMoveA, killerMoveB, sortinfo.refutationTarget, evalPars);
 		if((*moves)[ind].sortEval > bestEval){
 			bestEval = (*moves)[ind].sortEval;
 			//bestIndex = ind;

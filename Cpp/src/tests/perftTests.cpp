@@ -107,7 +107,7 @@ uint64_t perftNodes(chessPosition* position, uint16_t depth){
 					case killers_handled:
 						//first move didn't produce cutoff, now we need to sort
 						//------------------------------------------------------
-						calculateStandardSortEvals(position, &moves, ind, 0, 0, NO_REFUTATION);
+						calculateStandardSortEvals(position, &moves, ind, 0, sortInfo(false, NO_REFUTATION, 0));
 
 						std::stable_sort(moves.data+ind, moves.data+moves.length);//stable sort makes the engine 100% predictable and comparable between different optimization levels
 						currentState = fully_sorted;

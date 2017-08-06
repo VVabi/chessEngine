@@ -119,8 +119,8 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 	uint16_t madeMoves = position->madeMoves.length;
 	vdt_vector<chessMove> moves = vdt_vector<chessMove>(150);
 	generateAllMoves(&moves, position);
-	uint16_t refutationTarget = 0;
-	calculateStandardSortEvals(position, &moves, 0, 0, getHashMove(position->zobristHash), refutationTarget);
+	uint16_t refutationTarget = NO_REFUTATION;
+	calculateStandardSortEvals(position, &moves, 0, 0, sortInfo(false, refutationTarget, getHashMove(position->zobristHash)));
 	std::stable_sort(moves.data, moves.data+moves.length);
 	/*for(uint16_t ind=0; ind < moves.length; ind++) {
 		std::cout<< moveToString(moves[ind], *position) << " Eval " << moves[ind].sortEval << std::endl;
@@ -132,11 +132,11 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 		try{
 			//std::cout << "Depth " << depth << std::endl;
 
-			*eval = negamax(position, plyInfo(0, depth+EXTENSIONS_ALLOWED, 0, depth), alpha, beta, &line, searchSettings(nullmove_enabled, hashprobe_disabled, checkextension_enabled));
+			*eval = negamax(position, plyInfo(0, depth+EXTENSIONS_ALLOWED, 0, depth), AlphaBeta(alpha, beta), &line, searchSettings(nullmove_enabled, hashprobe_disabled, checkextension_enabled));
 			if(doAspiration) {
 				if ((*eval <= alpha) || (*eval >= beta)) {
 
-					*eval = negamax(position, plyInfo(0, depth+EXTENSIONS_ALLOWED, 0, depth), -32000, 32000, &line, searchSettings(nullmove_enabled, hashprobe_disabled, checkextension_enabled));
+					*eval = negamax(position, plyInfo(0, depth+EXTENSIONS_ALLOWED, 0, depth), AlphaBeta(-32000, 32000), &line, searchSettings(nullmove_enabled, hashprobe_disabled, checkextension_enabled));
 				}
 
 				alpha = *eval-50;

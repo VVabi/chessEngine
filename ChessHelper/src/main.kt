@@ -12,10 +12,6 @@ import java.net.ServerSocket
 fun main(args: Array<String>) {
 
 
-    var s = ServerSocket(5000)
-    var sock = s.accept()
-    println("Connection received")
-
    /* println(getStockfishEval("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"))
     val releaseEngine: ChessEngine = ChessEngine("/home/vabi/code/chessEngine/Cpp/Release/Vabi", "")
 
@@ -33,7 +29,7 @@ fun main(args: Array<String>) {
             println(vabiEval)
         }
     }*/
-    //launchGui()
+    launchGui()
 
 
     /*var defwins = 0
