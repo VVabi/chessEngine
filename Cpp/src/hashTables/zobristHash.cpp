@@ -19,8 +19,7 @@ ZobristHashData hashData;
 
 //uint64_t zobristHash[7][2][64];
 //uint64_t pawnHashValues[7][2][64];
-uint64_t castlingHash[16];
-uint64_t enpassantHash[9];
+
 
 #ifdef HASH
 //static uint16_t permutationIndex = 0;
@@ -197,11 +196,11 @@ void fillZobristHash() {
     }
 
     for (uint16_t ind = 0; ind <9; ind++) {
-        enpassantHash[ind]  = getRandUint64();
+        hashData.setEnPassantHash(ind, getRandUint64());
     }
 
     for (uint16_t ind = 0; ind <16; ind++) {
-        castlingHash[ind]  = getRandUint64();
+        hashData.setCastlingHash(ind, getRandUint64());
     }
 
 
@@ -246,8 +245,8 @@ uint64_t calcZobristHash(const chessPosition* position) {
         }
     }
 
-    hash = hash^enpassantHash[position->data.enPassantFile];
-    hash = hash^castlingHash[position->data.castlingRights];
+    hash = hash^getEnPassantHash(position->data.enPassantFile);
+    hash = hash^getCastlingHash(position->data.castlingRights);
     hash = hash^getMovingSideHash(position->toMove);
     return hash;
 }

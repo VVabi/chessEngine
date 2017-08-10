@@ -16,15 +16,13 @@
 #include <lib/Evaluation/PSQ.hpp>
 
 extern uint16_t repetitionData[16384];
-extern uint64_t castlingHash[16];
-extern uint64_t enpassantHash[9];
 
 void undoNullMove(chessPosition* position) {
-    position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
+    position->zobristHash = position->zobristHash^getEnPassantHash(position->data.enPassantFile);
     position->data = position->dataStack.pop();
     position->zobristHash = position->zobristHash^getMovingSideHash(white);
     position->toMove = (playerColor) (1-position->toMove);
-    position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
+    position->zobristHash = position->zobristHash^getEnPassantHash(position->data.enPassantFile);
     position->madeMoves.pop();
 }
 
@@ -134,11 +132,11 @@ void undoMove(chessPosition* position) {
     assert(repetitionData[position->zobristHash & 16383] != 0);
     repetitionData[position->zobristHash & 16383]--;
     chessMove move                      = position->madeMoves.pop();
-    position->zobristHash               = position->zobristHash^enpassantHash[position->data.enPassantFile];
-    position->zobristHash               = position->zobristHash^castlingHash[position->data.castlingRights];
+    position->zobristHash               = position->zobristHash^getEnPassantHash(position->data.enPassantFile);
+    position->zobristHash               = position->zobristHash^getCastlingHash(position->data.castlingRights);
     position->data                      = position->dataStack.pop();
-    position->zobristHash               = position->zobristHash^castlingHash[position->data.castlingRights];
-    position->zobristHash               = position->zobristHash^enpassantHash[position->data.enPassantFile];
+    position->zobristHash               = position->zobristHash^getCastlingHash(position->data.castlingRights);
+    position->zobristHash               = position->zobristHash^getEnPassantHash(position->data.enPassantFile);
     const evalParameters* evalPars      = getEvalParameters();
     position->figureEval                = position->figureEval+(1-2*position->toMove)*evalPars->figureValues[move.captureType];
     position->totalFigureEval           = position->totalFigureEval+evalPars->figureValues[move.captureType];

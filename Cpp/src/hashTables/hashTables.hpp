@@ -15,16 +15,48 @@ class ZobristHashData {
     uint64_t zobristHash[7][2][64];
     uint64_t pawnHashValues[7][2][64];
     uint64_t movingSideHash[2];
-
+    uint64_t castlingHash[16];
+    uint64_t enpassantHash[9];
  public:
+    void setCastlingHash(uint16_t index, uint64_t value) {
+    #ifdef DEBUG
+        assert(index < 16);
+    #endif
+        castlingHash[index] = value;
+    }
+
+    uint64_t getCastlingHash(uint16_t index) {
+    #ifdef DEBUG
+        assert(index < 16);
+    #endif
+        return castlingHash[index];
+    }
+
+    void setEnPassantHash(uint16_t index, uint64_t value) {
+    #ifdef DEBUG
+        assert(index < 9);
+    #endif
+        enpassantHash[index] = value;
+    }
+
+    uint64_t getEnPassantHash(uint16_t index) {
+    #ifdef DEBUG
+        assert(index < 9);
+    #endif
+        return enpassantHash[index];
+    }
+
     void setMovingSideHash(playerColor color, uint64_t value) {
+    #ifdef DEBUG
+            assert(color < 2);
+    #endif
         movingSideHash[color] = value;
     }
 
     uint64_t getMovingSideHash(playerColor color) {
-#ifdef DEBUG
-        assert(color < 2);
-#endif
+    #ifdef DEBUG
+            assert(color < 2);
+    #endif
         return movingSideHash[color];
     }
 
@@ -38,6 +70,11 @@ class ZobristHashData {
     }
 
     void setPawnZobristHashEntry(figureType type, playerColor color, uint16_t field, uint64_t value) {
+    #ifdef DEBUG
+        assert(type < 7);
+        assert(color < 2);
+        assert(field < 64);
+    #endif
         pawnHashValues[type][color][field] = value;
     }
 
@@ -51,6 +88,11 @@ class ZobristHashData {
     }
 
     void setZobristHashEntry(figureType type, playerColor color, uint16_t field, uint64_t value) {
+    #ifdef DEBUG
+        assert(type < 7);
+        assert(color < 2);
+        assert(field < 64);
+    #endif
         zobristHash[type][color][field] = value;
     }
 };
@@ -67,6 +109,14 @@ __attribute__((always_inline)) static inline uint64_t getPawnZobristHashEntry(fi
 
 __attribute__((always_inline)) static inline uint64_t getMovingSideHash(playerColor color) {
     return hashData.getMovingSideHash(color);
+}
+
+__attribute__((always_inline)) static inline uint64_t getCastlingHash(uint16_t index) {
+    return hashData.getCastlingHash(index);
+}
+
+__attribute__((always_inline)) static inline uint64_t getEnPassantHash(uint16_t index) {
+    return hashData.getEnPassantHash(index);
 }
 
 void fillZobristHash();

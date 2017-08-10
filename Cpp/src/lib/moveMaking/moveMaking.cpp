@@ -15,8 +15,6 @@
 #include <lib/Defines/figureValues.hpp>
 #include <lib/Evaluation/PSQ.hpp>
 
-extern uint64_t castlingHash[16];
-extern uint64_t enpassantHash[9];
 extern uint16_t repetitionData[16384];
 
 static int16_t figureValues[7] = {PAWNVALUE, KNIGHTVALUE, BISHOPVALUE, ROOKVALUE, QUEENVALUE, 10000, 0};
@@ -24,9 +22,9 @@ static int16_t figureValues[7] = {PAWNVALUE, KNIGHTVALUE, BISHOPVALUE, ROOKVALUE
 void makeNullMove(chessPosition* position) {
     position->data.hash = position->zobristHash;
     position->dataStack.add(&position->data);
-    position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
+    position->zobristHash = position->zobristHash^getEnPassantHash(position->data.enPassantFile);
     position->data.enPassantFile  = 8;
-    position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
+    position->zobristHash = position->zobristHash^getEnPassantHash(position->data.enPassantFile);
     position->data.fiftyMoveRuleCounter = 0;
     position->zobristHash = position->zobristHash^getMovingSideHash(white); //this is indeed correct since black hash is always 0 anyway. TODO: change? this is actually confusing.
     position->toMove = INVERTCOLOR(position->toMove);
@@ -146,18 +144,18 @@ void makeMove(chessMove* move, chessPosition* position) {
     }
 
     uint8_t castlingRights = position->data.castlingRights;
-    position->zobristHash = position->zobristHash^castlingHash[position->data.castlingRights];
+    position->zobristHash = position->zobristHash^getCastlingHash(position->data.castlingRights);
     uint64_t moveMask      = BIT64(move->sourceField) | BIT64(move->targetField);
     castlingRights = (moveMask & WHITEKINGSIDECASTLEMASK  ? (castlingRights & 14):castlingRights);
     castlingRights = (moveMask & WHITEQUEENSIDECASTLEMASK ? (castlingRights & 13):castlingRights);
     castlingRights = (moveMask & BLACKKINGSIDECASTLEMASK  ? (castlingRights & 11):castlingRights);
     castlingRights = (moveMask & BLACKQUEENSIDECASTLEMASK ? (castlingRights &  7):castlingRights);
     position->data.castlingRights = castlingRights;
-    position->zobristHash = position->zobristHash^castlingHash[position->data.castlingRights];
+    position->zobristHash = position->zobristHash^getCastlingHash(position->data.castlingRights);
     //const evalParameters* evalPars = getEvalParameters();
     position->figureEval     = position->figureEval+(1-2*position->toMove)*figureValues[move->captureType];
     position->totalFigureEval     = position->totalFigureEval-figureValues[move->captureType];
-    position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
+    position->zobristHash = position->zobristHash^getEnPassantHash(position->data.enPassantFile);
     position->data.enPassantFile  = 8;
 
     if ((move->type == pawnMove) && ((move->targetField-move->sourceField) & 15) == 0) { //pawn went two ahead
@@ -202,7 +200,7 @@ void makeMove(chessMove* move, chessPosition* position) {
         default:
             break;
     }
-    position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
+    position->zobristHash = position->zobristHash^getEnPassantHash(position->data.enPassantFile);
     position->madeMoves.add(move);
     position->toMove = INVERTCOLOR(position->toMove);
     position->zobristHash = position->zobristHash^getMovingSideHash(white); //this is indeed correct since black hash is always 0 anyway. TODO: change? this is actually confusing.
