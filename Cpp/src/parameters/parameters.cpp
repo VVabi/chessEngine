@@ -75,9 +75,7 @@ void initializeDependentParameters(preParameters par) {
     evaluationParameters.kingSafetyParameters       = initializeKingSafetyParameters(par);
 
     for (uint16_t type = 0; type < 6; type++) {
-
         for (uint16_t field = 0; field < 32; field++) {
-
             int16_t value = rawPieceTables[type][field];
             uint16_t file = field % 4;
             uint16_t row = field/4;
@@ -85,16 +83,11 @@ void initializeDependentParameters(preParameters par) {
             pieceTables[type][white][8*row+7-file] = value;
             pieceTables[type][black][8*(7-row)+file] = value;
             pieceTables[type][black][8*(7-row)+7-file] = value;
-
-
         }
-
     }
 
     for (uint16_t type = 0; type < 6; type++) {
-
         for (uint16_t field = 0; field < 32; field++) {
-
             int16_t value = endgameRawPieceTables[type][field];
             uint16_t file = field % 4;
             uint16_t row = field/4;
@@ -103,9 +96,7 @@ void initializeDependentParameters(preParameters par) {
             endGamepieceTables[type][black][8*(7-row)+file] = value;
             endGamepieceTables[type][black][8*(7-row)+7-file] = value;
         }
-
     }
-
 
     for (uint16_t ind = 0; ind < 2; ind++) {
         for (uint16_t field = 0; field < 64; field++) {
@@ -174,7 +165,6 @@ void initializeDependentParameters(preParameters par) {
                 }
             }
     }
-
 }
 
 void initializeParameters() {

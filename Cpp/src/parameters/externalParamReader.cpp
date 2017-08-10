@@ -6,7 +6,9 @@
  */
 
 
-
+#include <string>
+#include <utility>
+#include <map>
 #include "externalParamReader.hpp"
 #include <fstream>
 #include <iostream>
@@ -33,13 +35,12 @@ parameterReader::parameterReader() {
 
 
 bool parameterReader::readParameters(preParameters* pars, std::string filename) {
-
         std::ifstream input = std::ifstream(filename);
         if (!input.is_open()) {
             return false;
         }
         std::string line;
-        int64_t* ptr = (int64_t*) pars;
+        int64_t* ptr = reinterpret_cast<int64_t*>(pars);
         while (std::getline(input, line)) {
             std::stringstream line_stream(line);
             std::string key;
@@ -54,7 +55,6 @@ bool parameterReader::readParameters(preParameters* pars, std::string filename) 
             } else {
                 std::cout << "Wrong parameter key" << std::endl;
             }
-
         }
         return true;
 }
@@ -62,11 +62,10 @@ bool parameterReader::readParameters(preParameters* pars, std::string filename) 
 bool parameterReader::changeValue(preParameters* pars, std::string key, int64_t value) {
     auto pair = parameterFields.find(key);
     if (pair != parameterFields.end()) {
-        int64_t* ptr = (int64_t*) pars;
+        int64_t* ptr = reinterpret_cast<int64_t*>(pars);
         *(ptr+pair->second) = value;
         return true;
     } else {
         return false;
     }
-
 }

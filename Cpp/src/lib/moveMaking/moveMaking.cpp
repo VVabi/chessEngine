@@ -95,7 +95,6 @@ static inline void makeQueenSideCastle(chessPosition* position) {
         position->pieceTableEval             = position->pieceTableEval-(-completePieceTables[rook][black][56]+completePieceTables[rook][black][59]-completePieceTables[king][black][60]+completePieceTables[king][black][58]);
         position->zobristHash                = position->zobristHash^zobristHash[rook][black][56]^zobristHash[rook][black][59]^zobristHash[king][black][60]^zobristHash[king][black][58];
     }
-
 }
 
 static inline void makeEnPassant(chessMove* move, chessPosition* position) {

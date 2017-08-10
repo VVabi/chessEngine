@@ -5,13 +5,13 @@
  *      Author: vabi
  */
 
+#include <string>
 #include <lib/basics.hpp>
 #include <lib/moveMaking/moveMaking.hpp>
 #include <iostream>
 #include <tests/tests.hpp>
 #include <DataTypes/vdt_vector.hpp>
 #include <lib/moveGeneration/moveGeneration.hpp>
-#include <DataTypes/vdt_vector.hpp>
 #include <lib/Attacks/attacks.hpp>
 #include <lib/bitfiddling.h>
 #include <Search/search.hpp>
@@ -23,7 +23,6 @@ enum sortState {not_sorted, hash_handled, good_captures_handled, killers_handled
 static int16_t figureValues[7] = {PAWNVALUE, KNIGHTVALUE, BISHOPVALUE, ROOKVALUE, QUEENVALUE, 10000, 0};
 
 static inline bool getGoodCaptureToFront(vdt_vector<chessMove>* moves, uint16_t start_index) {
-
     int16_t best_index = -1;
 
     int16_t best = 0;
@@ -51,12 +50,10 @@ static inline bool getGoodCaptureToFront(vdt_vector<chessMove>* moves, uint16_t 
     }
 
     return false;
-
 }
 
 
 static inline bool getHashMoveToFront(vdt_vector<chessMove>* moves, uint16_t hashMove, uint16_t startIndex) {
-
     for (uint16_t ind = startIndex; ind < moves->length; ind++) {
         chessMove mv = (*moves)[ind];
         if ((((mv.sourceField) | (mv.targetField << 8)) == hashMove) && (mv.type != castlingKingside) && (mv.type != castlingQueenside)) {
@@ -65,7 +62,6 @@ static inline bool getHashMoveToFront(vdt_vector<chessMove>* moves, uint16_t has
              (*moves)[ind] = buffer;
              return true;
         }
-
     }
     return false;
 }
@@ -90,7 +86,6 @@ uint64_t perftNodes(chessPosition* position, uint16_t depth) {
 
 
     for (uint16_t ind = 0; ind < moves.length; ind++) {
-
         switch (currentState) {
                     case not_sorted:
                         assert(ind == 0);
@@ -114,7 +109,6 @@ uint64_t perftNodes(chessPosition* position, uint16_t depth) {
                         break;
                     case fully_sorted:
                         break;
-
                 }
 
 
@@ -137,7 +131,6 @@ uint64_t perftNodes(chessPosition* position, uint16_t depth) {
         uint32_t additional_nodes = 0;
 
         if (isFieldAttacked(position, position->toMove, kingField)) {
-
         } else {
             additional_nodes = perftNodes(position, depth-1);
 
@@ -190,9 +183,5 @@ testResult testPerftTestSuite() {
         return ret;
     }
     std::cout << nodes << std::endl;
-
-
-
     return ret;
-
 }

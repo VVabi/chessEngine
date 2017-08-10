@@ -32,7 +32,6 @@ extern uint64_t rookFieldTable[];
 extern uint16_t killerMoves[40][2];
 
 static inline void get_extensions_reductions(uint16_t* reduction, uint16_t* extension, bool check, bool movingSideInCheck, uint16_t ply, uint16_t max_ply, int16_t depth, chessMove* move, uint16_t ind) {
-
         if (!check && !movingSideInCheck && (move->captureType == none) && (depth > 2) && (ply > 0)) {
             if ((ind > 3)) {
                 *reduction = 1;
@@ -55,7 +54,6 @@ static inline void get_extensions_reductions(uint16_t* reduction, uint16_t* exte
             *extension = *extension+1;
             *reduction = 0;
         }
-
 }
 
 static inline void handleBetaCutoff(chessMove* bestMove, uint64_t zobristHash, int16_t beta, int16_t depth, uint16_t ply, uint8_t searchId) {
@@ -80,7 +78,6 @@ uint64_t getCurrentNodeCount() {
 }
 
 int16_t root_search(chessPosition* position, chessMove* bestMove, int16_t alpha, int16_t beta, int16_t depth, uint16_t max_ply, vdt_vector<chessMove>* moves, uint64_t* nodeCounts) {
-
     uint16_t ply = 0;
     assert(alpha < beta);
     assert(ply+depth <= max_ply);

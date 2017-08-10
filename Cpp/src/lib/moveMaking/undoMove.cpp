@@ -120,7 +120,6 @@ inline static void undoPromotion(chessPosition* position, chessMove move, figure
 
 
 void undoMove(chessPosition* position) {
-
     if (position->madeMoves.length == 0) {
         return;
     }

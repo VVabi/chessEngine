@@ -38,7 +38,6 @@ uint64_t getDoubledPawns(uint64_t in) {
     uint64_t pawnFill = northFill(stops);
     uint64_t frontDoubled =  pawnFill & in;
     return (in & (southFill(frontDoubled) | northFill(frontDoubled)));
-
 }
 
 uint64_t getIsolatedPawns(uint64_t in) {

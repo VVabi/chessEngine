@@ -5,7 +5,7 @@
  *      Author: vabi
  */
 
-
+#include <string>
 #include <iostream>
 #include <lib/basics.hpp>
 #include <magicNumberGeneration/magicNumberGeneration.hpp>
@@ -14,7 +14,6 @@
 #include <lib/bitfiddling.h>
 extern const uint64_t rookFieldTable[];
 extern const uint64_t rookMagicNumbers[];
-
 
 std::string generateRookMoveTablesString() {
     vdt_vector<vdt_vector<uint64_t> > vec =  generateRookMoveTables();
@@ -31,10 +30,7 @@ std::string generateRookMoveTablesString() {
             if (j < 4095) {
                 ss << " , ";
             }
-
         }
-
-
         ss << "}";
         if (i < 63) {
             ss << ", ";
@@ -42,9 +38,7 @@ std::string generateRookMoveTablesString() {
         ss << "\n";
     }
     ss << "};";
-
     return ss.str();
-
 }
 
 uint64_t generateRookMoveTable(uint16_t field, uint64_t blocker) {
@@ -103,7 +97,6 @@ vdt_vector<vdt_vector<uint64_t >> generateRookMoveTables() {
                 uint16_t cnt = 0;
                 for (uint16_t i = 0; i < 64; i++) {
                     if (rookFieldTable[field] & (1ULL << i)) {
-
                         if (ind & (1 << cnt)) {
                             blocker = blocker | (1ULL << i);
                         }
@@ -154,7 +147,6 @@ uint64_t generateRookMagicNumber(uint16_t fieldIndex) {
         uint16_t cnt = 0;
         for (uint16_t i = 0; i < 64; i++) {
             if (rookFieldTable[fieldIndex] & (1ULL << i)) {
-
                 if (ind & (1 << cnt)) {
                     blocker = blocker | (1ULL << i);
                 }
@@ -165,7 +157,6 @@ uint64_t generateRookMagicNumber(uint16_t fieldIndex) {
     }
 
     while (!foundMagic) {
-
         magicNumber = getRandUint64() & getRandUint64() & getRandUint64();
         bool indexCheck[4096] = {false};
         foundMagic = true;
@@ -177,7 +168,6 @@ uint64_t generateRookMagicNumber(uint16_t fieldIndex) {
                 break;
             }
             indexCheck[val] = true;
-
         }
     }
 

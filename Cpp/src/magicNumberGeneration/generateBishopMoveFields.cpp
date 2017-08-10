@@ -56,8 +56,6 @@ std::string generateBishopReachableFields() { //for magic number generation
                 ind_copy = ind_copy-7;
             }
         }
-
-
         //SOUTHWEST
         if (((ind) & 7) != 0) {
             ind_copy = ind-9;
@@ -72,12 +70,8 @@ std::string generateBishopReachableFields() { //for magic number generation
         if (ind < 63) {
             ss << " , ";
         }
-
     }
-
     ss << "}";
-
-
     return ss.str();
 }
 

@@ -27,15 +27,14 @@ struct plyInfo {
         return plyInfo(ply+1, max_ply, qply, depth-1+depth_adaption);
     }
 
-    plyInfo(uint16_t p, uint16_t m, uint16_t q, uint16_t d): ply(p), max_ply(m), qply(q), depth(d) {};
-
+    plyInfo(uint16_t p, uint16_t m, uint16_t q, uint16_t d): ply(p), max_ply(m), qply(q), depth(d) {}
 };
 
 struct sortInfo {
     bool movingSideInCheck;
     uint16_t refutationTarget;
     uint16_t hashMove;
-    sortInfo(bool m, uint16_t r, uint16_t h): movingSideInCheck(m), refutationTarget(r), hashMove(h) {};
+    sortInfo(bool m, uint16_t r, uint16_t h): movingSideInCheck(m), refutationTarget(r), hashMove(h) {}
 };
 
 struct searchSettings {
@@ -43,15 +42,15 @@ struct searchSettings {
     HashprobeSetting hashprobeSetting;
     CheckextensionSetting checkextensionSetting;
     uint8_t searchId;
-    searchSettings(NullmoveSetting nms, HashprobeSetting hps, CheckextensionSetting ces, uint8_t sid): nullmoveSetting(nms), hashprobeSetting(hps), checkextensionSetting(ces), searchId(sid) {};
-    explicit searchSettings(uint8_t sid):  nullmoveSetting(nullmove_enabled), hashprobeSetting(hashprobe_enabled), checkextensionSetting(checkextension_enabled), searchId(sid) {};
+    searchSettings(NullmoveSetting nms, HashprobeSetting hps, CheckextensionSetting ces, uint8_t sid): nullmoveSetting(nms), hashprobeSetting(hps), checkextensionSetting(ces), searchId(sid) {}
+    explicit searchSettings(uint8_t sid):  nullmoveSetting(nullmove_enabled), hashprobeSetting(hashprobe_enabled), checkextensionSetting(checkextension_enabled), searchId(sid) {}
 };
 
 struct AlphaBeta {
     int16_t alpha;
     int16_t beta;
-    AlphaBeta(): alpha(INT16_MIN), beta(INT16_MAX) {};
-    AlphaBeta(int16_t a, int16_t b): alpha(a), beta(b) {};
+    AlphaBeta(): alpha(INT16_MIN), beta(INT16_MAX) {}
+    AlphaBeta(int16_t a, int16_t b): alpha(a), beta(b) {}
     bool update(int16_t value) {
         bool ret = value > alpha? true: false;
         if (ret) {
@@ -83,14 +82,13 @@ struct AlphaBeta {
     void mate(uint16_t ply) {
         alpha = -30000+ply;
     }
-
 };
 
 struct searchLoopResults {
     AlphaBeta alphabeta;
     int16_t bestIndex;
     uint16_t numLegalMoves;
-    searchLoopResults(AlphaBeta ab, int16_t b, uint16_t n): alphabeta(ab), bestIndex(b), numLegalMoves(n) {};
+    searchLoopResults(AlphaBeta ab, int16_t b, uint16_t n): alphabeta(ab), bestIndex(b), numLegalMoves(n) {}
 
     bool noMovesAvailable() {
         return numLegalMoves == 0;

@@ -5,7 +5,7 @@
  *      Author: vabi
  */
 
-
+#include <string>
 #include <lib/basics.hpp>
 #include <lib/moveMaking/moveMaking.hpp>
 #include "tests.hpp"
@@ -23,7 +23,6 @@ testResult testMakeMove() {
     //non-captures
     //----------------
     for (uint8_t k = 0; k < 2; k++) {
-
         playerColor color = (playerColor) k;
 
         for (uint32_t ind = 0; ind < 1000; ind++) {
@@ -49,16 +48,13 @@ testResult testMakeMove() {
                 std::cout << "move making error!" << std::endl;
                 ret.passed = false;
             }
-
         }
     }
 
     //captures
     //----------------
     for (uint8_t k = 0; k < 2; k++) {
-
         playerColor color = (playerColor) k;
-
         for (uint32_t ind = 0; ind < 1000; ind++) {
             std::string randomPosition = getRandomPosition(color);
 
@@ -83,13 +79,9 @@ testResult testMakeMove() {
                 std::cout << "move making error!" << std::endl;
                 ret.passed = false;
             }
-
         }
     }
-
-
     return ret;
-
 }
 
 
@@ -104,7 +96,6 @@ testResult testUndoMove() {
     //non-captures
     //----------------
     for (uint8_t k = 0; k < 2; k++) {
-
         playerColor color = (playerColor) k;
 
         for (uint32_t ind = 0; ind < 1000; ind++) {
@@ -123,23 +114,17 @@ testResult testUndoMove() {
             makeMove(&move, &pos);
             undoMove(&pos);
             std::string newPosition = chessPositionToString(pos);
-
-
-
             if (randomPosition.compare(newPosition)) {
                 std::cout << "move making error!" << std::endl;
                 ret.passed = false;
             }
-
         }
     }
 
     //captures
     //----------------
     for (uint8_t k = 0; k < 2; k++) {
-
         playerColor color = (playerColor) k;
-
         for (uint32_t ind = 0; ind < 1000; ind++) {
             std::string randomPosition = getRandomPosition(color);
 
@@ -158,17 +143,12 @@ testResult testUndoMove() {
             undoMove(&pos);
             std::string newPosition = chessPositionToString(pos);
 
-
-
             if (randomPosition.compare(newPosition)) {
                 std::cout << "move making error!" << std::endl;
                 ret.passed = false;
             }
-
         }
     }
-
-
     return ret;
 }
 

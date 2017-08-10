@@ -7,7 +7,7 @@
 
 #ifndef MAGICNUMBERGENERATION_MAGICNUMBERGENERATION_HPP_
 #define MAGICNUMBERGENERATION_MAGICNUMBERGENERATION_HPP_
-
+#include <string>
 
 std::string generateRookReachableFields();
 std::string generateBishopReachableFields();

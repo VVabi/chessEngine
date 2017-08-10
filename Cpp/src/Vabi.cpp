@@ -7,7 +7,6 @@
 // ============================================================================
 
 #include <iostream>
-using namespace std;
 #include <lib/basics.hpp>
 #include <fstream>
 #include <tr1/memory>

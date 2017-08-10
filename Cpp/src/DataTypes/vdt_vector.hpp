@@ -41,11 +41,9 @@ template<typename T> class vdt_vector {
             }
         }
         return data[i];
-
     }
 
     void add(T* element) {
-
         if (length >= allocated_length) {
            std::cout << "vector is full" << std::endl;
            while (1) {

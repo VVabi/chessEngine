@@ -13,7 +13,7 @@
  *      Author: vabi
  */
 
-
+#include <string>
 #include <iostream>
 #include <lib/basics.hpp>
 #include <magicNumberGeneration/magicNumberGeneration.hpp>
@@ -24,11 +24,8 @@
 extern const uint64_t bishopFieldTable[];
 extern const uint64_t bishopMagicNumbers[];
 
-
-
 uint64_t generateBishopMoveTable(uint16_t field, uint64_t blocker) {
     uint64_t bishopMoveTable = 0;
-
     //NORTHEAST
     int16_t f_copy        = field+9;
     while ((f_copy < 64) && (!(BIT64(f_copy) & FILEA))) {
@@ -70,7 +67,6 @@ uint64_t generateBishopMoveTable(uint16_t field, uint64_t blocker) {
             f_copy = f_copy-9;
         }
     }
-
     return bishopMoveTable;
 }
 
@@ -90,7 +86,6 @@ vdt_vector<vdt_vector<uint64_t> > generateBishopMoveTables() {
                 uint16_t cnt = 0;
                 for (uint16_t i = 0; i < 64; i++) {
                     if (bishopFieldTable[field] & (1ULL << i)) {
-
                         if (ind & (1 << cnt)) {
                             blocker = blocker | (1ULL << i);
                         }
@@ -104,7 +99,6 @@ vdt_vector<vdt_vector<uint64_t> > generateBishopMoveTables() {
 
         ret.add(&fieldMoveTables);
     }
-
     return ret;
 }
 
@@ -123,10 +117,7 @@ std::string generateBishopMoveTablesString() {
             if (j < 511) {
                 ss << " , ";
             }
-
         }
-
-
         ss << "}";
         if (i < 63) {
             ss << ", ";
@@ -134,7 +125,6 @@ std::string generateBishopMoveTablesString() {
         ss << "\n";
     }
     ss << "};";
-
     return ss.str();
 }
 
@@ -156,7 +146,6 @@ uint64_t generateBishopMagicNumber(uint16_t fieldIndex) {
         uint16_t cnt = 0;
         for (uint16_t i = 0; i < 64; i++) {
             if (bishopFieldTable[fieldIndex] & (1ULL << i)) {
-
                 if (ind & (1 << cnt)) {
                     blocker = blocker | (1ULL << i);
                 }
@@ -172,13 +161,11 @@ uint64_t generateBishopMagicNumber(uint16_t fieldIndex) {
         foundMagic = true;
         for (uint16_t ind = 0; ind < numVariations; ind++) {
             uint16_t val = ((blockers[ind]*magicNumber) >> 55);
-
             if (indexCheck[val] == true) {
                 foundMagic = false;
                 break;
             }
             indexCheck[val] = true;
-
         }
     }
     return magicNumber;

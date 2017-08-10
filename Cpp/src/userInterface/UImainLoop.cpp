@@ -33,12 +33,12 @@
 #include <lib/bitfiddling.h>
 //necessary to get windows compile to run
 //----------------------------------------
-#include "mingw.thread.h"
-#include "mingw.mutex.h"
-#include <list>
+#include <userInterface/mingw.thread.h>
+#include <userInterface/mingw.mutex.h>
 #include <parameters/parameters.hpp>
 #include <parameters/parametersPrivate.hpp>
 #include <parameters/externalParamReader.hpp>
+#include <string>
 
 extern uint16_t killerMoves[40][2];
 
@@ -69,7 +69,7 @@ bool doContinueSearch() {
 }
 
 void sendSearchInfo(uint64_t nodes, uint32_t time, int32_t eval, uint32_t depth, const std::list<std::string>& PV) {
-    double nps = ((double) nodes)/((double) time)*1000.0;
+    double nps = (static_cast<double>(nodes))/(static_cast<double>(time))*1000.0;
     uint64_t npsInt = nps;
     std::stringstream out;
 
@@ -154,7 +154,6 @@ void handleStop() {
 }
 
 void handleGo(std::list<std::string> input) {
-
     searchParameters params;
     params.type = unknown;
     params.depth = 0;
@@ -252,14 +251,12 @@ void handleGo(std::list<std::string> input) {
             params.movesToGo = StringToNumber<int32_t>(togo);
             params.type = time_until_move;
         }
-
     }
 
     if (params.type != unknown) {
         setSearchParams(params);
         launchSearch();
     }
-
 }
 
 void handlePerft(std::list<std::string> input) {
@@ -300,7 +297,6 @@ void handlePosition(std::list<std::string> input) {
             }
             iterator++;
         }
-
     }
     std::vector<std::string> moveList;
     while (iterator != input.end()) {
@@ -314,7 +310,6 @@ void handlePosition(std::list<std::string> input) {
 }
 
 void handleEval() {
-
     chessPosition cposition = memoryLibrarianRetrievePosition();
     int32_t eval = evaluation(&cposition, -32000, 32000);
     evaluationResult res = getEvaluationResult();
@@ -356,7 +351,6 @@ void handleSEE(std::list<std::string> input) {
     } else {
         std::cout << "not a valid move" << std::endl;
     }
-
 }
 
 void handleSetEvalParam(std::list<std::string> input) {
@@ -374,7 +368,6 @@ void handleSetEvalParam(std::list<std::string> input) {
 
 
 void runPerformanceTests(uint32_t d) {
-
     for (uint16_t depth = 3; depth < d+1; depth++) {
         std::ifstream file;
         file.open("chesspositionsfixed.txt");
@@ -523,7 +516,6 @@ void UIloop() {
             }
         }
     }
-
 }
 
 

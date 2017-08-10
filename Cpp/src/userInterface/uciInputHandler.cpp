@@ -5,8 +5,7 @@
  *      Author: vabi
  */
 
-
-
+#include <string>
 #include <iostream>
 #include "userEvents.hpp"
 #include <sstream>

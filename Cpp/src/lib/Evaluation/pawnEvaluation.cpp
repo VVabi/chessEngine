@@ -5,7 +5,7 @@
  *      Author: vabi
  */
 
-
+#include <algorithm>
 #include <lib/basics.hpp>
 #include "evaluation.hpp"
 #include <lib/bitfiddling.h>
@@ -35,7 +35,6 @@ static int16_t const passedPawnEvalValues[2][64] = {
           16, 15, 14, 13, 13, 14, 15, 16,
           8, 7, 6, 5, 5, 6, 7, 8,
           0, 0, 0, 0, 0, 0, 0, 0 }
-
 };
 
 
@@ -76,14 +75,11 @@ static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint6
     while (whitePawnBuffer) {
         uint16_t field = popLSB(whitePawnBuffer);
         if ((passedPawnMasks[white][field] & blackPawns) == 0) {
-
             uint16_t promotionField  = FILE(field)+56;
             uint16_t distToPromotion = 7-ROW(field);
             uint16_t kingDist        = distBetweenFields(promotionField, blackKing);
             bool blocked = blackPieces & BIT64(field+8);
             if (distToPromotion <= 2) {
-
-
                 *untaperedEval = *untaperedEval+passedPawnEvalValues[white][field];
                                 if (blocked) {
                                     *untaperedEval = *untaperedEval-passedPawnEvalValues[white][field]/BLOCKEDDIVISOR;
@@ -117,22 +113,18 @@ static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint6
             }
 #endif*/
 
-            eval                     = eval-kingToPromotionFieldDistance[distToPromotion][kingDist];
-
-
+            eval = eval-kingToPromotionFieldDistance[distToPromotion][kingDist];
         }
     }
     uint64_t blackPawnBuffer = blackPawns;
     while (blackPawnBuffer) {
         uint16_t field = popLSB(blackPawnBuffer);
         if ((passedPawnMasks[black][field] & whitePawns) == 0) {
-
             uint16_t promotionField  = FILE(field);
             uint16_t distToPromotion = ROW(field);
             uint16_t kingDist        = distBetweenFields(promotionField, whiteKing);
             bool blocked = whitePieces & BIT64(field-8);
             if (distToPromotion <= 2) {
-
                 *untaperedEval = *untaperedEval-passedPawnEvalValues[black][field];
                 if (blocked) {
                     *untaperedEval = *untaperedEval+passedPawnEvalValues[black][field]/BLOCKEDDIVISOR;
@@ -142,9 +134,7 @@ static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint6
                     if (blocked) {
                         eval = eval+passedPawnEvalValues[black][field]/BLOCKEDDIVISOR;
                     }
-
             }
-
         /*#ifdef EXPERIMENTAL
             int16_t coverage = 0;
             if (distToPromotion < 3) {
@@ -169,14 +159,10 @@ static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint6
             }
             eval = eval+coverage;
             #endif*/
-
-                eval                     = eval+kingToPromotionFieldDistance[distToPromotion][kingDist];
-
+            eval  = eval+kingToPromotionFieldDistance[distToPromotion][kingDist];
         }
     }
-
     return eval;
-
 }
 
 int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOccupancy, const staticPawnEvalParameters* staticPawnParameters) { //all stuff depending only on own pawn structure, not the opponents

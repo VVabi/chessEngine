@@ -9,7 +9,6 @@
 
 
 int16_t rawPieceTables[6][32] = {
-
                 //pawns
                 {
 //#ifdef EXPERIMENTAL
@@ -35,7 +34,6 @@ int16_t rawPieceTables[6][32] = {
 
                 //knights
                 {
-
                         -30, -20, -15, -10,
                         -20, -15, -10, -5,
                         -15, -10, 5, 0,
@@ -89,13 +87,11 @@ int16_t rawPieceTables[6][32] = {
                         -25, -35, -35, -35,
                         -25, -35, -35, -35,
                 }
-
 };
 
 int16_t endgameRawPieceTables[6][32] = {
     //pawns
     {
-
 //#ifdef EXPERIMENTAL
             0, 0, 0, 0,
             0, 0, -2, -7,
@@ -139,7 +135,6 @@ int16_t endgameRawPieceTables[6][32] = {
             -20, -15, -10, -5,
             -30, -20, -15, -10
 //#endif
-
     } ,
 
     {//bishops
@@ -185,8 +180,6 @@ int16_t endgameRawPieceTables[6][32] = {
             -70, -50, -30, -10,
             -100, -70, -40, -25
     }
-
-
 };
 
 

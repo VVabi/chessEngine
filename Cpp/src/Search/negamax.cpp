@@ -51,11 +51,8 @@ enum sortState {not_sorted, hash_handled, good_captures_handled, killers_handled
 static moveStack qmvStack;
 
 static inline bool getGoodCaptureToFront(vdt_vector<chessMove>* moves, uint16_t start_index) {
-
     int16_t best_index = -1;
-
     int16_t best = 0;
-
     for (uint16_t ind = start_index; ind < moves->length; ind++) {
         chessMove mv = (*moves)[ind];
         if (mv.captureType == none) {
@@ -77,14 +74,10 @@ static inline bool getGoodCaptureToFront(vdt_vector<chessMove>* moves, uint16_t 
         (*moves)[best_index] = buffer;
         return true;
     }
-
     return false;
-
 }
 
-
 static inline bool getHashMoveToFront(vdt_vector<chessMove>* moves, uint16_t hashMove, uint16_t startIndex) {
-
     for (uint16_t ind = startIndex; ind < moves->length; ind++) {
         chessMove mv = (*moves)[ind];
         if ((((mv.sourceField) | (mv.targetField << 8)) == hashMove) && (mv.type != castlingKingside) && (mv.type != castlingQueenside)) {
@@ -93,7 +86,6 @@ static inline bool getHashMoveToFront(vdt_vector<chessMove>* moves, uint16_t has
              (*moves)[ind] = buffer;
              return true;
         }
-
     }
     return false;
 }
@@ -137,9 +129,9 @@ static inline void get_extensions_reductions(chessPosition* position, uint16_t* 
 static inline bool backtrack_position_for_repetition(chessPosition* position) {
     int16_t numMovesToCheck = position->data.fiftyMoveRuleCounter;
     uint64_t current_hash = position->zobristHash;
-    assert(((int) position->madeMoves.length)-((int) numMovesToCheck) >= 0);
+    assert(static_cast<int>(position->madeMoves.length)-static_cast<int>(numMovesToCheck) >= 0);
     assert(position->madeMoves.length == position->dataStack.length);
-    for (int16_t ind = ((int) position->madeMoves.length-1); ind >= ((int) position->madeMoves.length)-numMovesToCheck; ind--) {
+    for (int32_t ind = static_cast<int32_t>(position->madeMoves.length-1); ind >= static_cast<int32_t>(position->madeMoves.length)-numMovesToCheck; ind--) {
         if (position->dataStack[ind].hash == current_hash) {
             return true;
         }
@@ -155,7 +147,6 @@ static uint8_t nullmoveReductions[40] = {0, 1, 2, 2, 2, 3, 3, 3,
 };
 
 static inline bool check_futility(bool movingSideInCheck, int32_t alpha, chessPosition* position, int16_t premargin, int16_t margin) {
-
     if (!movingSideInCheck && (alpha > -2000)) {
         searchCounts.futility_tried++;
         int32_t simpleEval = evaluation(position, alpha-premargin-1, alpha, true);
@@ -173,7 +164,6 @@ static inline bool check_futility(bool movingSideInCheck, int32_t alpha, chessPo
 }
 
 static inline bool check_nullmove(chessPosition* position, uint16_t* refutationMoveTarget, uint16_t ply, uint16_t max_ply, int16_t depth, int32_t beta, searchSettings settings) {
-
     if (beta > 10000) { //TODO: more dynamic condition here?
         return false;
     }
@@ -332,7 +322,6 @@ static inline bool get_next_move_to_front(chessPosition* position, sortState* cu
                 break;
         }
     return sortedNextMove;
-
 }
 
 static inline searchLoopResults negamax_internal_move_loop(chessPosition* position, vdt_vector<chessMove> moves, AlphaBeta alphabeta, plyInfo plyinfo, sortInfo sortinfo, pvLine* PV, searchSettings settings) {
@@ -345,14 +334,12 @@ static inline searchLoopResults negamax_internal_move_loop(chessPosition* positi
     pvLine localPV;
     localPV.numMoves = 0;
 
-
     sortState currentState = not_sorted;
-
     if (sortinfo.movingSideInCheck) {
         currentState = killers_handled;
     }
     for (uint16_t ind = 0; ind < moves.length; ind++) {
-            while (!get_next_move_to_front(position, &currentState, moves, ind, plyinfo, sortinfo)) {};
+            while (!get_next_move_to_front(position, &currentState, moves, ind, plyinfo, sortinfo)) {}
 
             //illegal move. Since list is sorted or, in case ind = 0, best move is first, we can leave here: all further moves are also illegal.
             //---------------------------------------------------------------------------------------------------------------------------------
@@ -432,7 +419,6 @@ static inline searchLoopResults negamax_internal_move_loop(chessPosition* positi
                 break;
             }
         }
-
         return searchLoopResults(alphabeta, bestIndex, numlegalMoves);
 }
 
@@ -507,7 +493,7 @@ static inline int16_t negamax_internal(chessPosition* position, plyInfo plyinfo,
 }
 
 int16_t negamax(chessPosition* position, plyInfo plyinfo, AlphaBeta alphabeta, pvLine* PV, searchSettings settings) {
-
+    alphabeta.sanityCheck();
     //check for timeout/interruption
     //------------------------------
     uint16_t numMoves = PV->numMoves;

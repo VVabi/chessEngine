@@ -50,12 +50,8 @@ std::string generateRookReachableFields() { //for magic number generation
         if (ind < 63) {
             ss << " , ";
         }
-
     }
-
     ss << "}";
-
-
     return ss.str();
 }
 

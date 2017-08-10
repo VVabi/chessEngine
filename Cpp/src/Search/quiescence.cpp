@@ -66,7 +66,6 @@ static int counter = 0;
 //std::ofstream quietData("/home/vabi/quiet.txt");
 
 int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, AlphaBeta alphabeta, uint16_t depth, uint8_t searchId) {
-
     alphabeta.sanityCheck();
 
     const evalParameters* evalPars                      = getEvalParameters();
@@ -210,7 +209,6 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, 
         uint16_t kingField = findLSB(position->pieceTables[1- position->toMove][king]);
 
         if (isFieldAttacked(position,  position->toMove, kingField)) {
-
         } else {
             nodes++;
             int32_t value = -negamaxQuiescence(position, qply+1, ply+1, alphabeta.invert(), depth+1, searchId);

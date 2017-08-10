@@ -12,7 +12,6 @@ extern int16_t pieceTables[7][2][64];
 extern int16_t endGamepieceTables[7][2][64];
 
 int16_t calcPieceTableValue(const chessPosition* position) {
-
     int16_t val = 0;
     for (uint16_t ind = 0; ind < 6; ind++) {
         uint64_t whitePieces = position->pieceTables[white][ind];
@@ -31,7 +30,6 @@ int16_t calcPieceTableValue(const chessPosition* position) {
 
 
 int16_t calcEndGamePieceTableValue(const chessPosition* position) {
-
     int16_t val = 0;
     for (uint16_t ind = 0; ind < 6; ind++) {
         uint64_t whitePieces = position->pieceTables[white][ind];

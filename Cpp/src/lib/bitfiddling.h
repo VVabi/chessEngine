@@ -5,8 +5,8 @@
  *      Author: fabian
  */
 
-#ifndef BIT_FIDDLING_
-#define BIT_FIDDLING_
+#ifndef CPP_SRC_LIB_BITFIDDLING_H_
+#define CPP_SRC_LIB_BITFIDDLING_H_
 #include <stdint.h>
 #include <lib/Defines/boardParts.hpp>
 
@@ -19,7 +19,6 @@ inline uint16_t findLSB(const uint64_t a) {
 
 inline uint16_t findMSB(const uint64_t a) {
     return 63-__builtin_clzll(a); //TODO: replace by ctz?
-
 }
 
 inline uint16_t popLSB(uint64_t &a) {
@@ -61,4 +60,4 @@ inline uint8_t getColumnOcc(uint64_t in) {
     return in & 0xFF;
 }
 
-#endif /* HELPER_FUNC_H_ */
+#endif  // CPP_SRC_LIB_BITFIDDLING_H_

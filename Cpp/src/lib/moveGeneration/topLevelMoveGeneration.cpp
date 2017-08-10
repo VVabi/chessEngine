@@ -60,8 +60,6 @@ __attribute__((always_inline)) static inline void generateRookMoves(vdt_vector<c
         extractMoves(nextPiece, figure, potentialMoves, vec, position);
         pieces = pieces & (~nextPiece);
     }
-
-
 }
 
 __attribute__((always_inline)) static inline void generateBishopMoves(vdt_vector<chessMove>* vec, chessPosition* position, const figureType figure, const uint64_t targetMask) {
@@ -157,7 +155,6 @@ __attribute__((always_inline)) static inline void generatePawnMoves(vdt_vector<c
         #ifdef DEBUG
         if (captureType == none) {
             std::cout << "Pawn capture move generation is buggy" << std::endl;
-
         }
         #endif
         chessMove move;
@@ -255,7 +252,6 @@ __attribute__((always_inline)) static inline void generateCastling(vdt_vector<ch
 }
 
 __attribute__((always_inline)) static inline void generateEnPassant(vdt_vector<chessMove>* vec, chessPosition* position) {
-
     if (position->data.enPassantFile > 7) {
         return;
     }

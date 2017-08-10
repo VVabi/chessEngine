@@ -9,6 +9,7 @@
 #define USERINTERFACE_UILAYER_HPP_
 #include <lib/basics.hpp>
 #include <string>
+#include <list>
 #include <userInterface/interfaceStructs.hpp>
 #include <lib/Evaluation/evaluation.hpp>
 bool doContinueSearch();

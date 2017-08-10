@@ -19,7 +19,6 @@ extern uint64_t knightmovetables[];
 extern uint64_t kingmovetables[];
 
 bool isFieldAttacked(const chessPosition* position, playerColor attackingSide, uint16_t field) {
-
     //knights
     uint64_t knights = position->pieceTables[attackingSide][knight];
     if (knightmovetables[field] & knights) {
@@ -66,7 +65,6 @@ bool isFieldAttacked(const chessPosition* position, playerColor attackingSide, u
 
 
 AttackTable makeAttackTable(const chessPosition* position, playerColor attackingSide, uint64_t ignoreMask) {
-
     AttackTable retTable;
     //pawns
     uint64_t pawns = position->pieceTables[attackingSide][pawn];
@@ -216,8 +214,6 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
         uint64_t potentialMoves =  getPotentialRookMoves(nextPieceField, occupancy);
         queenAttackTable = queenAttackTable | potentialMoves;
         *mobilityScore = *mobilityScore+popcount(potentialMoves & ~ownPieces);
-
-
     }
 
     //TODO: this could be optimized by merging with the rook table and doing both at once
@@ -340,9 +336,7 @@ static inline bool getNextCapture(chessMove* nextCapture, const chessPosition* p
             return true;
         }
     }
-
     return false;
-
 }
 
 
@@ -383,12 +377,10 @@ int16_t see_internal(int16_t previous, chessPosition* position, uint16_t field, 
 
 
 int16_t SEE(chessPosition* position, chessMove* mv) {
-
     //TODO: SEE currently cannot handle promotions!!!!
     if (mv->type > 5) {
         return 0;
     }
-
     const evalParameters* evalPars = getEvalParameters();
     assert(evalPars->figureValues[none] == 0);
     uint16_t val = evalPars->figureValues[mv->captureType];

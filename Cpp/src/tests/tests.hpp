@@ -9,6 +9,7 @@
 #define TESTS_TESTS_HPP_
 
 #include <lib/basics.hpp>
+#include <string>
 
 struct testResult {
     bool passed;

@@ -5,7 +5,7 @@
  *      Author: vabi
  */
 
-
+#include <string>
 #include "logger.hpp"
 #include <lib/DebugFunctions/debugFunctions.hpp>
 #include <userInterface/UIlayer.hpp>

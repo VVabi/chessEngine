@@ -5,9 +5,6 @@
  *      Author: vabi
  */
 
-
-
-
 #include <lib/basics.hpp>
 #include "evaluation.hpp"
 #include <stdlib.h>     /* srand, rand */
@@ -18,7 +15,6 @@
 #include <fstream>
 #include <parameters/parameters.hpp>
 #include <logging/logger.hpp>
-#include <parameters/parameters.hpp>
 #include <lib/Defines/chessFields.hpp>
 
 evaluationResult result;
@@ -81,7 +77,6 @@ static int16_t outposts(const chessPosition* position) {
 
     ret = ret+OUTPOSTVALUE*popcount(wKnightOutposts);
     return ret;
-
 }
 
 
@@ -168,9 +163,7 @@ static int16_t trappedPieces(const chessPosition* position) {
             ret = ret-50;
         }
     }
-
     return ret;
-
 }
 
 
@@ -197,14 +190,11 @@ static int32_t rookOpenFiles(const chessPosition* position, uint8_t* pawnOccupan
         }
     }
     return ret;
-
 }
 
 //static uint32_t counter = 0;
 
 int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, bool PSQ_only) {
-
-
     if ((position->pieceTables[white][pawn] == 0) &&
         (position->pieceTables[black][pawn] == 0) &&
         position->totalFigureEval < 400) {
@@ -344,7 +334,5 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
             eval = eval/16;
         }
     }
-
     return (1-2*position->toMove)*eval;
-
 }

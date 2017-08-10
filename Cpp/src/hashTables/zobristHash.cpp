@@ -43,7 +43,6 @@ bool getPawnHashTableEntry(pawnHashEntry* entry, uint64_t key) {
     }
 
     return false;
-
 }
 
 void setPawnHashEntry(int16_t eval, uint8_t whiteColumns, uint8_t blackColumns, uint64_t key) {
@@ -138,7 +137,6 @@ void setHashEntry(hashFlag flag, int16_t eval, uint8_t depth, uint8_t searchId, 
             break;
         }
     }*/
-
 }
 
 uint16_t getHashMove(uint64_t zobristKey) {
@@ -152,7 +150,6 @@ uint16_t getHashMove(uint64_t zobristKey) {
         }
     }
     return 0;
-
 }
 
 

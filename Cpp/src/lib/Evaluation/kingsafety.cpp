@@ -34,7 +34,6 @@ int32_t attacksCloseToKingEvals[] =
  226, 236, 246, 256, 266, 276, 286, 296, 306, 316,
  326, 336, 346, 356, 366, 376, 386, 395, 404, 413,
  421, 429, 437, 441, 450, 450, 450, 450, 450, 450
-
 };
 //#endif
 
@@ -56,7 +55,6 @@ int32_t attackScores[] = {1, 3, 3, 4, 7};
 
 static int32_t kingSafetySinglePlayer(const chessPosition* position, const uint8_t* pawnColumnOccupancy,
         playerColor playingSide, const AttackTable* opponentAttackTable, const kingSafetyEvalParameters* par) {
-
     int32_t ret = 0;
     //pawn shield
     uint16_t kingField = findLSB(position->pieceTables[playingSide][king]);
@@ -141,17 +139,13 @@ static int32_t kingSafetySinglePlayer(const chessPosition* position, const uint8
     ret = ret-attacksCloseToKingEvals[popcount(attacks)];*/
 
     return (1-2*playingSide)*ret;
-
 }
 
 
 int32_t kingSafety(const chessPosition* position, const uint8_t* pawnColumnOccupancy,
-        const AttackTable* whiteAttackTable, const AttackTable* blackAttackTable, const kingSafetyEvalParameters* par) {
-
+    const AttackTable* whiteAttackTable, const AttackTable* blackAttackTable, const kingSafetyEvalParameters* par) {
     int32_t whiteSafety =  kingSafetySinglePlayer(position, pawnColumnOccupancy, white, blackAttackTable, par);
     int32_t blackSafety =  kingSafetySinglePlayer(position, pawnColumnOccupancy, black, whiteAttackTable, par);
     int32_t ret =  whiteSafety+blackSafety;
     return ret;
-
-
 }

@@ -5,8 +5,8 @@
  *      Author: fabian
  */
 
-#ifndef FS_ARRAY_H_
-#define FS_ARRAY_H_
+#ifndef CPP_SRC_DATATYPES_FSARRAY_H_
+#define CPP_SRC_DATATYPES_FSARRAY_H_
 #include <stdint.h>
 #include <stddef.h>
 #include <iostream>
@@ -37,13 +37,10 @@ template<typename T> class fsarray {
 
     void free_array() {
         if (data != NULL) {
-
             delete[] data;
             data = NULL;
             length = 0;
         }
-
-
     }
 
     fsarray<T> vdt_copy() {
@@ -60,4 +57,4 @@ template<typename T> class fsarray {
         return ret;
     }
 };
-#endif
+#endif  // CPP_SRC_DATATYPES_FSARRAY_H_

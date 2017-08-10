@@ -18,18 +18,12 @@
 
 inline figureType toFigureType(uint16_t num) {
 #ifdef DEBUG
-
     if (num > 5) {
         std::cout << "There are only 6 different figuretypes in chess..." << std::endl;
-        while (1) {
-
-        }
-
+        while (1) {}
     }
 #endif
-
     return (figureType) num;
-
 }
 
 
@@ -83,7 +77,6 @@ void zeroInitPosition(chessPosition* position) {
 
 
 void debug_incremental_calculations(const chessPosition* position) {
-
     int16_t eval = calcFigureEvaluation(position);
 
     /*if (eval != position->figureEval) {
@@ -120,7 +113,6 @@ void debug_incremental_calculations(const chessPosition* position) {
     if (pawnhash != position->pawnHash) {
         logError("zobrist pawn hash wrong after make move");
     }
-
 }
 
 void free_position(chessPosition* position) {
