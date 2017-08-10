@@ -39,6 +39,13 @@ class killerTable {
         }
     }
 
+    void shiftKillers(uint16_t amount) {
+        for (uint16_t ind = 0; ind < MAX_PLY-amount; ind++) {
+            killerMoves[ind].killers[0] =  killerMoves[ind+amount].killers[0];
+            killerMoves[ind].killers[1] =  killerMoves[ind+amount].killers[1];
+        }
+    }
+
     const singlePlyKillers getKillers(uint16_t ply) {
         return killerMoves[ply];
     }
