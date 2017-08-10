@@ -11,24 +11,24 @@
 #include <lib/basics.hpp>
 #include <userInterface/UIlayer.hpp>
 
-std::string currentPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-std::vector<std::string> moveList;
+static std::string currentPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+static std::vector<std::string> moveList;
 
 
 void memoryLibrarianAdd(std::string newPosition, std::vector<std::string> moves) {
-	moveList = moves;
-	currentPosition = newPosition;
+    moveList = moves;
+    currentPosition = newPosition;
 }
 
 chessPosition memoryLibrarianRetrievePosition() {
-	chessPosition cposition = FENtoChessPosition(currentPosition);
-	for(std::string seg: moveList){
-		//std::cout << seg << std::endl;
-		if(!checkAndMakeMove(cposition, seg)){
-			break;
-		}
-	}
-	return cposition;
+    chessPosition cposition = FENtoChessPosition(currentPosition);
+    for(std::string seg: moveList){
+        //std::cout << seg << std::endl;
+        if(!checkAndMakeMove(&cposition, seg)){
+            break;
+        }
+    }
+    return cposition;
 }
 
 

@@ -14,12 +14,12 @@
 enum searchType {unknown, fixed_time, time_until_move, fixed_depth, infinite};
 
 struct searchParameters {
-	searchType type;
-	int16_t depth;
-	int32_t fixedTime;
-	int32_t totalTime[2];
-	int32_t increment[2];
-	uint16_t movesToGo;
+    searchType type;
+    int16_t depth;
+    int32_t fixedTime;
+    int32_t totalTime[2];
+    int32_t increment[2];
+    uint16_t movesToGo;
 };
 
 #endif /* USERINTERFACE_INTERFACESTRUCTS_HPP_ */

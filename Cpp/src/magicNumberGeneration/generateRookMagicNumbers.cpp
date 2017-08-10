@@ -17,170 +17,170 @@ extern const uint64_t rookMagicNumbers[];
 
 
 std::string generateRookMoveTablesString(){
-	vdt_vector<vdt_vector<uint64_t> > vec =  generateRookMoveTables();
+    vdt_vector<vdt_vector<uint64_t> > vec =  generateRookMoveTables();
 
-	std::stringstream ss;
-	ss << std::hex;
-	ss << "uint64_t rookMoveTables[][] = {\n";
+    std::stringstream ss;
+    ss << std::hex;
+    ss << "uint64_t rookMoveTables[][] = {\n";
 
-	for(int i=0; i < 64; i++) {
-		ss << "{";
-		for(int j=0; j<4096; j++) {
-			ss << "0x" << vec[i][j];
+    for(int i=0; i < 64; i++) {
+        ss << "{";
+        for(int j=0; j<4096; j++) {
+            ss << "0x" << vec[i][j];
 
-			if(j < 4095){
-				ss << " ,";
-			}
+            if(j < 4095){
+                ss << " ,";
+            }
 
-		}
+        }
 
 
-		ss << "}";
-		if(i < 63) {
-			ss << ",";
-		}
-		ss << "\n";
-	}
-	ss << "};";
+        ss << "}";
+        if(i < 63) {
+            ss << ",";
+        }
+        ss << "\n";
+    }
+    ss << "};";
 
-	return ss.str();
+    return ss.str();
 
 }
 
 uint64_t generateRookMoveTable(uint16_t field, uint64_t blocker){
-	uint64_t rookMoveTable = 0;
-	int16_t f_copy        = field-8;
-	while(f_copy >= 0){
-		 rookMoveTable =  rookMoveTable | BIT64(f_copy);
-		 if(BIT64(f_copy) & blocker){
-			 break;
-		 }
-		 f_copy = f_copy-8;
-	}
-	f_copy = field+8;
-	while(f_copy < 64){
-		 rookMoveTable =  rookMoveTable | BIT64(f_copy);
-		 if(BIT64(f_copy) & blocker){
-			 break;
-		 }
-		 f_copy = f_copy+8;
-	}
-	f_copy = field+1;
-	while( (f_copy >> 3) == (field >> 3)) {
-		rookMoveTable =  rookMoveTable | BIT64(f_copy);
-		 if(BIT64(f_copy) & blocker){
-			 break;
-		 }
-		f_copy = f_copy+1;
-	}
-	f_copy = field-1;
-	if(f_copy >= 0) {
-		while( (f_copy >> 3) == (field >> 3)) {
-			rookMoveTable =  rookMoveTable | BIT64(f_copy);
-			 if(BIT64(f_copy) & blocker){
-				 break;
-			 }
-			f_copy = f_copy-1;
-		}
-	}
+    uint64_t rookMoveTable = 0;
+    int16_t f_copy        = field-8;
+    while(f_copy >= 0){
+         rookMoveTable =  rookMoveTable | BIT64(f_copy);
+         if(BIT64(f_copy) & blocker){
+             break;
+         }
+         f_copy = f_copy-8;
+    }
+    f_copy = field+8;
+    while(f_copy < 64){
+         rookMoveTable =  rookMoveTable | BIT64(f_copy);
+         if(BIT64(f_copy) & blocker){
+             break;
+         }
+         f_copy = f_copy+8;
+    }
+    f_copy = field+1;
+    while( (f_copy >> 3) == (field >> 3)) {
+        rookMoveTable =  rookMoveTable | BIT64(f_copy);
+         if(BIT64(f_copy) & blocker){
+             break;
+         }
+        f_copy = f_copy+1;
+    }
+    f_copy = field-1;
+    if(f_copy >= 0) {
+        while( (f_copy >> 3) == (field >> 3)) {
+            rookMoveTable =  rookMoveTable | BIT64(f_copy);
+             if(BIT64(f_copy) & blocker){
+                 break;
+             }
+            f_copy = f_copy-1;
+        }
+    }
 
-	return rookMoveTable;
+    return rookMoveTable;
 }
 
  vdt_vector<vdt_vector<uint64_t >> generateRookMoveTables(){
-	 vdt_vector<vdt_vector<uint64_t> > ret = vdt_vector<vdt_vector<uint64_t> >(64);
-	for(uint16_t field=0; field < 64; field++) {
-		uint64_t magicNumber = rookMagicNumbers[field];
-		vdt_vector<uint64_t> fieldMoveTables = vdt_vector<uint64_t>(4096);
-		uint64_t dummy = 0;
-		for(uint16_t ind=0; ind < 4096; ind++) {
-			fieldMoveTables.add(&dummy);
-		}
-		uint16_t numFieldsReachable = popcount(rookFieldTable[field]);
-		uint16_t numVariations      = (1 << numFieldsReachable);
-		for(uint16_t ind=0; ind < numVariations; ind++) {
-				uint64_t blocker = 0;
-				uint16_t cnt = 0;
-				for(uint16_t i=0; i < 64; i++){
-					if(rookFieldTable[field] & (1ULL << i)) {
+     vdt_vector<vdt_vector<uint64_t> > ret = vdt_vector<vdt_vector<uint64_t> >(64);
+    for(uint16_t field=0; field < 64; field++) {
+        uint64_t magicNumber = rookMagicNumbers[field];
+        vdt_vector<uint64_t> fieldMoveTables = vdt_vector<uint64_t>(4096);
+        uint64_t dummy = 0;
+        for(uint16_t ind=0; ind < 4096; ind++) {
+            fieldMoveTables.add(&dummy);
+        }
+        uint16_t numFieldsReachable = popcount(rookFieldTable[field]);
+        uint16_t numVariations      = (1 << numFieldsReachable);
+        for(uint16_t ind=0; ind < numVariations; ind++) {
+                uint64_t blocker = 0;
+                uint16_t cnt = 0;
+                for(uint16_t i=0; i < 64; i++){
+                    if(rookFieldTable[field] & (1ULL << i)) {
 
-						if(ind & (1 << cnt)){
-							blocker = blocker | (1ULL << i);
-						}
-						cnt++;
-					}
-				}
-				uint64_t hashValue = ((blocker*magicNumber) >> 52);
-				fieldMoveTables[hashValue] = generateRookMoveTable(field, blocker);
-			}
+                        if(ind & (1 << cnt)){
+                            blocker = blocker | (1ULL << i);
+                        }
+                        cnt++;
+                    }
+                }
+                uint64_t hashValue = ((blocker*magicNumber) >> 52);
+                fieldMoveTables[hashValue] = generateRookMoveTable(field, blocker);
+            }
 
 
-		ret.add(&fieldMoveTables);
-	}
+        ret.add(&fieldMoveTables);
+    }
 
-	return ret;
+    return ret;
 }
 
 
 
 std::string generateRookMagicNumbers(){
-	std::stringstream ss;
-	ss << std::hex;
-	ss << "uint64_t rookMagicNumbers[] = {";
-	for (uint16_t ind=0; ind < 64; ind++) {
-		std::cout << "Currently at " << ind << std::endl;
-		ss << "0x";
-		ss << generateRookMagicNumber(ind);
+    std::stringstream ss;
+    ss << std::hex;
+    ss << "uint64_t rookMagicNumbers[] = {";
+    for (uint16_t ind=0; ind < 64; ind++) {
+        std::cout << "Currently at " << ind << std::endl;
+        ss << "0x";
+        ss << generateRookMagicNumber(ind);
 
-		if(ind < 63) {
-			ss << " ,";
-		}
-	}
+        if(ind < 63) {
+            ss << " ,";
+        }
+    }
 
-	ss << "}";
-	return ss.str();
+    ss << "}";
+    return ss.str();
 }
 
 uint64_t generateRookMagicNumber(uint16_t fieldIndex) {
-	bool foundMagic = false;
-	uint64_t magicNumber = 0;
+    bool foundMagic = false;
+    uint64_t magicNumber = 0;
 
-	uint64_t blockers[4096];
+    uint64_t blockers[4096];
 
-	uint16_t numFieldsReachable = popcount(rookFieldTable[fieldIndex]);
-	uint16_t numVariations      = (1 << numFieldsReachable);
-	for (uint16_t ind=0; ind < numVariations; ind++) {
-		uint64_t blocker = 0;
-		uint16_t cnt = 0;
-		for(uint16_t i=0; i < 64; i++){
-			if(rookFieldTable[fieldIndex] & (1ULL << i)) {
+    uint16_t numFieldsReachable = popcount(rookFieldTable[fieldIndex]);
+    uint16_t numVariations      = (1 << numFieldsReachable);
+    for (uint16_t ind=0; ind < numVariations; ind++) {
+        uint64_t blocker = 0;
+        uint16_t cnt = 0;
+        for(uint16_t i=0; i < 64; i++){
+            if(rookFieldTable[fieldIndex] & (1ULL << i)) {
 
-				if(ind & (1 << cnt)){
-					blocker = blocker | (1ULL << i);
-				}
-				cnt++;
-			}
-		}
-		blockers[ind] = blocker;
-	}
+                if(ind & (1 << cnt)){
+                    blocker = blocker | (1ULL << i);
+                }
+                cnt++;
+            }
+        }
+        blockers[ind] = blocker;
+    }
 
-	while(!foundMagic) {
+    while(!foundMagic) {
 
-		magicNumber = getRandUint64() & getRandUint64() & getRandUint64();
-		bool indexCheck[4096] = {false};
-		foundMagic = true;
-		for(uint16_t ind=0; ind < numVariations; ind++) {
-			uint16_t val = ((blockers[ind]*magicNumber) >> 52);
+        magicNumber = getRandUint64() & getRandUint64() & getRandUint64();
+        bool indexCheck[4096] = {false};
+        foundMagic = true;
+        for(uint16_t ind=0; ind < numVariations; ind++) {
+            uint16_t val = ((blockers[ind]*magicNumber) >> 52);
 
-			if(indexCheck[val] == true){
-				foundMagic = false;
-				break;
-			}
-			indexCheck[val] = true;
+            if(indexCheck[val] == true){
+                foundMagic = false;
+                break;
+            }
+            indexCheck[val] = true;
 
-		}
-	}
+        }
+    }
 
 
-	return magicNumber;
+    return magicNumber;
 }

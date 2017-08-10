@@ -14,13 +14,13 @@ enum uciInput {invalid, uci, debug, isready, setoption, ucinewgame, position, go
 
 struct userEvent {
 public:
-	uciInput input;
-	std::list<std::string> data;
+    uciInput input;
+    std::list<std::string> data;
 
-	userEvent(uciInput in, std::list<std::string> d) {
-		input = in;
-		data =d;
-	}
+    userEvent(uciInput in, std::list<std::string> d) {
+        input = in;
+        data =d;
+    }
 };
 
 userEvent getNextUserEvent();

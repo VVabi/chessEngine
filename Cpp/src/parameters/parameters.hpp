@@ -10,29 +10,29 @@
 #include "parametersPrivate.hpp"
 
 struct staticPawnEvalParameters{
-	int16_t isolatedPawn;
-	int16_t isolatedDoublePawn;
-	int16_t nonIsolatedDoublePawn;
+    int16_t isolatedPawn;
+    int16_t isolatedDoublePawn;
+    int16_t nonIsolatedDoublePawn;
 };
 
 struct kingSafetyEvalParameters{
-	int16_t selfopenfiletoking;
-	int16_t selfopenfilenexttoking;
-	int16_t opponentopenfiletoking;
-	int16_t opponentopenfilenexttoking;
+    int16_t selfopenfiletoking;
+    int16_t selfopenfilenexttoking;
+    int16_t opponentopenfiletoking;
+    int16_t opponentopenfilenexttoking;
 };
 
 struct evalParameters{
-	int16_t figureValues[7];
-	int16_t bishoppair;
-	int16_t rookOnOpenFile;
-	staticPawnEvalParameters staticPawnParameters;
-	kingSafetyEvalParameters kingSafetyParameters;
+    int16_t figureValues[7];
+    int16_t bishoppair;
+    int16_t rookOnOpenFile;
+    staticPawnEvalParameters staticPawnParameters;
+    kingSafetyEvalParameters kingSafetyParameters;
 };
 
 extern evalParameters evaluationParameters;
 inline const evalParameters* getEvalParameters() {
-	return &evaluationParameters;
+    return &evaluationParameters;
 }
 
 void initializeParameters();

@@ -15,6 +15,6 @@ static HistoryTables historyTables;
 
 
 HistoryTables* getHistoryTables() {
-	return &historyTables;
+    return &historyTables;
 }
 

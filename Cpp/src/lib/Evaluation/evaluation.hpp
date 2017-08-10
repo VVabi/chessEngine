@@ -23,15 +23,15 @@ uint64_t getDoubledPawns(uint64_t in);
 uint64_t getIsolatedPawns(uint64_t in);
 int16_t staticPawnEvalComplete(const chessPosition* position, uint8_t* pawnOcc);
 struct evaluationResult {
-	int16_t PSQ;
-	int16_t staticPawn;
-	int16_t passedPawn;
-	int16_t kingSafety;
-	int16_t bishoppair;
-	int16_t mobility;
-	int16_t rookOpenFiles;
-	int16_t trappedPieces;
-	int16_t outPosts;
+    int16_t PSQ;
+    int16_t staticPawn;
+    int16_t passedPawn;
+    int16_t kingSafety;
+    int16_t bishoppair;
+    int16_t mobility;
+    int16_t rookOpenFiles;
+    int16_t trappedPieces;
+    int16_t outPosts;
 };
 
 evaluationResult getEvaluationResult();

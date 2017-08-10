@@ -12,25 +12,25 @@
 
 
 int16_t calcFigureEvaluation(const chessPosition* position) {
-	int16_t val = 0;
-	for(uint16_t ind=0; ind < 5; ind++) {
-		uint64_t whitePieces = position->pieceTables[white][ind];
-		uint64_t blackPieces = position->pieceTables[black][ind];
-		const evalParameters* evalPars 		= getEvalParameters();
-		val = val+evalPars->figureValues[ind]*(popcount(whitePieces)-popcount(blackPieces));
-	}
-	return val;
+    int16_t val = 0;
+    for(uint16_t ind=0; ind < 5; ind++) {
+        uint64_t whitePieces = position->pieceTables[white][ind];
+        uint64_t blackPieces = position->pieceTables[black][ind];
+        const evalParameters* evalPars      = getEvalParameters();
+        val = val+evalPars->figureValues[ind]*(popcount(whitePieces)-popcount(blackPieces));
+    }
+    return val;
 }
 
 
 uint16_t calcTotalFigureEvaluation(const chessPosition* position) {
-	uint16_t val = 0;
-	for(uint16_t ind=0; ind < 5; ind++) {
-		uint64_t whitePieces = position->pieceTables[white][ind];
-		uint64_t blackPieces = position->pieceTables[black][ind];
-		const evalParameters* evalPars 		= getEvalParameters();
-		val = val+evalPars->figureValues[ind]*(popcount(whitePieces)+popcount(blackPieces));
-	}
-	return val;
+    uint16_t val = 0;
+    for(uint16_t ind=0; ind < 5; ind++) {
+        uint64_t whitePieces = position->pieceTables[white][ind];
+        uint64_t blackPieces = position->pieceTables[black][ind];
+        const evalParameters* evalPars      = getEvalParameters();
+        val = val+evalPars->figureValues[ind]*(popcount(whitePieces)+popcount(blackPieces));
+    }
+    return val;
 }
 

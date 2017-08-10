@@ -40,11 +40,11 @@ int32_t attacksCloseToKingEvals[] =
 
 /*#ifdef EXPERIMENTAL
 int32_t attackScores[6][5] = { {0,0,0,0,0},
-							   {1,3,3,4,6},
-							   {2,4,4,5,9},
-							   {2,5,5,7,11},
-							   {2,6,6,8,12},
-							   {0,0,0,0,0}
+                               {1,3,3,4,6},
+                               {2,4,4,5,9},
+                               {2,5,5,7,11},
+                               {2,6,6,8,12},
+                               {0,0,0,0,0}
 };
 #else*/
 int32_t attackScores[] = {1,3,3,4,7};
@@ -55,103 +55,103 @@ int32_t attackScores[] = {1,3,3,4,7};
 
 
 static int32_t kingSafetySinglePlayer(const chessPosition* position, const uint8_t* pawnColumnOccupancy,
-		playerColor playingSide, const AttackTable* opponentAttackTable, const kingSafetyEvalParameters* par) {
+        playerColor playingSide, const AttackTable* opponentAttackTable, const kingSafetyEvalParameters* par) {
 
-	int32_t ret = 0;
-	//pawn shield
-	uint16_t kingField = findLSB(position->pieceTables[playingSide][king]);
-	uint16_t kingFile = FILE(kingField);
+    int32_t ret = 0;
+    //pawn shield
+    uint16_t kingField = findLSB(position->pieceTables[playingSide][king]);
+    uint16_t kingFile = FILE(kingField);
 
-	if( !((1 << kingFile) & pawnColumnOccupancy[playingSide])) { // no pawn in front of king. TODO: check for pawn really in FRONT of king
-		ret = ret+par->selfopenfiletoking;
-	}
+    if( !((1 << kingFile) & pawnColumnOccupancy[playingSide])) { // no pawn in front of king. TODO: check for pawn really in FRONT of king
+        ret = ret+par->selfopenfiletoking;
+    }
 
-	if( !((1 << kingFile) & pawnColumnOccupancy[1-playingSide])) { // no opponent pawn
-		ret = ret+par->opponentopenfiletoking;
-	}
+    if( !((1 << kingFile) & pawnColumnOccupancy[1-playingSide])) { // no opponent pawn
+        ret = ret+par->opponentopenfiletoking;
+    }
 
-	if(kingFile > 0) {
-		if( !((1 << (kingFile-1)) & pawnColumnOccupancy[playingSide])) { // no pawn in front of king. TODO: check for pawn really in FRONT of king
-				ret = ret+par->selfopenfilenexttoking;
-		}
-		if( !((1 << (kingFile-1)) & pawnColumnOccupancy[1-playingSide])) { // no opponent pawn
-			ret = ret+par->opponentopenfilenexttoking;
-		}
-	}
+    if(kingFile > 0) {
+        if( !((1 << (kingFile-1)) & pawnColumnOccupancy[playingSide])) { // no pawn in front of king. TODO: check for pawn really in FRONT of king
+                ret = ret+par->selfopenfilenexttoking;
+        }
+        if( !((1 << (kingFile-1)) & pawnColumnOccupancy[1-playingSide])) { // no opponent pawn
+            ret = ret+par->opponentopenfilenexttoking;
+        }
+    }
 
-	if(kingFile < 7) {
-		if( !((1 << (kingFile+1)) & pawnColumnOccupancy[playingSide])) { // no pawn in front of king. TODO: check for pawn really in FRONT of king
-			ret = ret+par->selfopenfilenexttoking;
-		}
-		if( !((1 << (kingFile+1)) & pawnColumnOccupancy[1-playingSide])) { // no opponent pawn
-			ret = ret+par->opponentopenfilenexttoking;
-		}
-	}
+    if(kingFile < 7) {
+        if( !((1 << (kingFile+1)) & pawnColumnOccupancy[playingSide])) { // no pawn in front of king. TODO: check for pawn really in FRONT of king
+            ret = ret+par->selfopenfilenexttoking;
+        }
+        if( !((1 << (kingFile+1)) & pawnColumnOccupancy[1-playingSide])) { // no opponent pawn
+            ret = ret+par->opponentopenfilenexttoking;
+        }
+    }
 
-	/*uint64_t relevant_files = files[FILE(kingField)];
-	if(kingFile > 0) {
-		relevant_files = relevant_files | files[FILE(kingField-1)];
-	}
+    /*uint64_t relevant_files = files[FILE(kingField)];
+    if(kingFile > 0) {
+        relevant_files = relevant_files | files[FILE(kingField-1)];
+    }
 
-	if(kingFile < 7) {
-		relevant_files = relevant_files | files[FILE(kingField+1)];
-	}*/
+    if(kingFile < 7) {
+        relevant_files = relevant_files | files[FILE(kingField+1)];
+    }*/
 
 
-	/*uint64_t opponentPieces = position->pieces[1-playingSide];
-	uint64_t opponentQueens = position->pieceTables[1-playingSide][queen];*/
+    /*uint64_t opponentPieces = position->pieces[1-playingSide];
+    uint64_t opponentQueens = position->pieceTables[1-playingSide][queen];*/
 
-	uint64_t kingmoves = kingmovetables[kingField];
-	kingmoves = kingmoves | BIT64(kingField);
+    uint64_t kingmoves = kingmovetables[kingField];
+    kingmoves = kingmoves | BIT64(kingField);
 /*#ifdef EXPERIMENTAL
-	if (playingSide == white) {
-		kingmoves = kingmoves | (kingmoves << 8);
-	} else {
-		kingmoves = kingmoves | (kingmoves >> 8);
-	}
+    if (playingSide == white) {
+        kingmoves = kingmoves | (kingmoves << 8);
+    } else {
+        kingmoves = kingmoves | (kingmoves >> 8);
+    }
 #endif*/
-	uint16_t kingAttackScore = 0;
+    uint16_t kingAttackScore = 0;
 
-	for(uint16_t pieceType = 0; pieceType < 5; pieceType++ ) {
-		uint64_t attacks = opponentAttackTable->attackTables[pieceType] & kingmoves;
+    for(uint16_t pieceType = 0; pieceType < 5; pieceType++ ) {
+        uint64_t attacks = opponentAttackTable->attackTables[pieceType] & kingmoves;
 
 /*#ifdef EXPERIMENTAL
-		uint16_t numAttacks = popcount(attacks);
-		if(numAttacks > 4) {
-			numAttacks = 4;
-		}
-		kingAttackScore = kingAttackScore+attackScores[numAttacks][pieceType];
+        uint16_t numAttacks = popcount(attacks);
+        if(numAttacks > 4) {
+            numAttacks = 4;
+        }
+        kingAttackScore = kingAttackScore+attackScores[numAttacks][pieceType];
 #else*/
-	kingAttackScore = kingAttackScore+popcount(attacks)*attackScores[pieceType];
+    kingAttackScore = kingAttackScore+popcount(attacks)*attackScores[pieceType];
 //#endif
-	}
+    }
 
 
-	if(kingAttackScore >= 70) {
-		kingAttackScore = 69;
-	}
+    if(kingAttackScore >= 70) {
+        kingAttackScore = 69;
+    }
 /*#ifdef EXPERIMENTAL
-	ret = ret-(3*attacksCloseToKingEvals[kingAttackScore])/2;
+    ret = ret-(3*attacksCloseToKingEvals[kingAttackScore])/2;
 #else*/
-	ret = ret-attacksCloseToKingEvals[kingAttackScore];
+    ret = ret-attacksCloseToKingEvals[kingAttackScore];
 //#endif
 
-	/*uint64_t attacks = opponentAttackTable->completeAttackTable & kingmoves;
+    /*uint64_t attacks = opponentAttackTable->completeAttackTable & kingmoves;
 
-	ret = ret-attacksCloseToKingEvals[popcount(attacks)];*/
+    ret = ret-attacksCloseToKingEvals[popcount(attacks)];*/
 
-	return (1-2*playingSide)*ret;
+    return (1-2*playingSide)*ret;
 
 }
 
 
 int32_t kingSafety(const chessPosition* position, const uint8_t* pawnColumnOccupancy,
-		const AttackTable* whiteAttackTable, const AttackTable* blackAttackTable, const kingSafetyEvalParameters* par) {
+        const AttackTable* whiteAttackTable, const AttackTable* blackAttackTable, const kingSafetyEvalParameters* par) {
 
-	int32_t whiteSafety =  kingSafetySinglePlayer(position, pawnColumnOccupancy, white, blackAttackTable, par);
-	int32_t blackSafety =  kingSafetySinglePlayer(position, pawnColumnOccupancy, black, whiteAttackTable, par);
-	int32_t ret =  whiteSafety+blackSafety;
-	return ret;
+    int32_t whiteSafety =  kingSafetySinglePlayer(position, pawnColumnOccupancy, white, blackAttackTable, par);
+    int32_t blackSafety =  kingSafetySinglePlayer(position, pawnColumnOccupancy, black, whiteAttackTable, par);
+    int32_t ret =  whiteSafety+blackSafety;
+    return ret;
 
 
 }

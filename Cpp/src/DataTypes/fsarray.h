@@ -12,55 +12,55 @@
 #include <iostream>
 #include <string.h>
 template<typename T> class fsarray{
-	public:
-		uint32_t length;
-		T* data;
-		fsarray(){
-			length = 0;
-			data = 0;
-		}
-		fsarray(int n){
-			length = n;
-			if(length > 0){
-				data = new T[length];
-			}
-			else{
-				data = 0;
-			}
-		}
+    public:
+        uint32_t length;
+        T* data;
+        fsarray(){
+            length = 0;
+            data = 0;
+        }
+        explicit fsarray(int n){
+            length = n;
+            if(length > 0){
+                data = new T[length];
+            }
+            else{
+                data = 0;
+            }
+        }
 
-		T &operator[](unsigned int i){
-			if(i > length){
+        T &operator[](unsigned int i){
+            if(i > length){
 
-			}
-			return data[i];
+            }
+            return data[i];
 
-		}
+        }
 
-		void free_array(){
-			if(data != NULL){
+        void free_array(){
+            if(data != NULL){
 
-				delete[] data;
-				data = NULL;
-				length = 0;
-			}
+                delete[] data;
+                data = NULL;
+                length = 0;
+            }
 
 
-		}
+        }
 
-		fsarray<T> vdt_copy() {
-			fsarray<T> ret = fsarray<T>(length);
-			for(uint32_t i=0; i<length; i++){
-				ret[i] = data[i].copy();
-			}
-			return ret;
-		}
+        fsarray<T> vdt_copy() {
+            fsarray<T> ret = fsarray<T>(length);
+            for(uint32_t i=0; i<length; i++){
+                ret[i] = data[i].copy();
+            }
+            return ret;
+        }
 
-		fsarray<T> shallow_copy() {
-			fsarray<T> ret = fsarray<T>(length);
-			memcpy(ret.data, data, length*sizeof(T));
-			return ret;
-		}
+        fsarray<T> shallow_copy() {
+            fsarray<T> ret = fsarray<T>(length);
+            memcpy(ret.data, data, length*sizeof(T));
+            return ret;
+        }
 
 
 };

@@ -25,197 +25,197 @@ extern uint16_t repetitionData[16384];
 static int16_t figureValues[7] = {PAWNVALUE,KNIGHTVALUE,BISHOPVALUE,ROOKVALUE,QUEENVALUE,10000,0};
 
 void makeNullMove(chessPosition* position){
-	position->data.hash = position->zobristHash;
-	position->dataStack.add(&position->data);
-	position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
-	position->data.enPassantFile  = 8;
-	position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
-	position->data.fiftyMoveRuleCounter = 0;
-	position->zobristHash = position->zobristHash^movingSideHash[0];
-	position->toMove = (playerColor) (1-position->toMove);
-	chessMove move;
-	move.sourceField = 0;
-	move.targetField = 0;
+    position->data.hash = position->zobristHash;
+    position->dataStack.add(&position->data);
+    position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
+    position->data.enPassantFile  = 8;
+    position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
+    position->data.fiftyMoveRuleCounter = 0;
+    position->zobristHash = position->zobristHash^movingSideHash[0];
+    position->toMove = (playerColor) (1-position->toMove);
+    chessMove move;
+    move.sourceField = 0;
+    move.targetField = 0;
 
-	if(position->madeMoves.length > 0) {
-		assert( !((position->madeMoves[position->madeMoves.length-1].sourceField == 0) && (position->madeMoves[position->madeMoves.length-1].targetField == 0)));
-	}
-	position->madeMoves.add(&move);
+    if(position->madeMoves.length > 0) {
+        assert( !((position->madeMoves[position->madeMoves.length-1].sourceField == 0) && (position->madeMoves[position->madeMoves.length-1].targetField == 0)));
+    }
+    position->madeMoves.add(&move);
 }
 
 static inline void makeNormalMove(chessMove* move, chessPosition* position) {
-	playerColor toMove 									= position->toMove;
-	uint64_t moveMask          							= BIT64(move->sourceField) | BIT64(move->targetField);
-	position->pieces[toMove] 							= position->pieces[toMove]^moveMask;
-	position->pieces[1-toMove] 							= position->pieces[1-toMove] & (~moveMask);
-	position->pieceTables[toMove][move->type] 			= position->pieceTables[toMove][move->type]^moveMask;
-	position->pieceTables[1-toMove][move->captureType] 	= position->pieceTables[1-toMove][move->captureType] & (~moveMask);
+    playerColor toMove                                  = position->toMove;
+    uint64_t moveMask                                   = BIT64(move->sourceField) | BIT64(move->targetField);
+    position->pieces[toMove]                            = position->pieces[toMove]^moveMask;
+    position->pieces[1-toMove]                          = position->pieces[1-toMove] & (~moveMask);
+    position->pieceTables[toMove][move->type]           = position->pieceTables[toMove][move->type]^moveMask;
+    position->pieceTables[1-toMove][move->captureType]  = position->pieceTables[1-toMove][move->captureType] & (~moveMask);
 
-	position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*(completePieceTables[move->type][toMove][move->targetField]-completePieceTables[move->type][toMove][move->sourceField]);
-	position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*completePieceTables[move->captureType][1-toMove][move->targetField];
+    position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*(completePieceTables[move->type][toMove][move->targetField]-completePieceTables[move->type][toMove][move->sourceField]);
+    position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*completePieceTables[move->captureType][1-toMove][move->targetField];
 
-	position->zobristHash    = position->zobristHash^zobristHash[move->type][toMove][move->targetField]^zobristHash[move->type][toMove][move->sourceField]^zobristHash[move->captureType][1-toMove][move->targetField];
-	position->pawnHash       = position->pawnHash^pawnHashValues[move->type][toMove][move->targetField]^pawnHashValues[move->type][toMove][move->sourceField]^pawnHashValues[move->captureType][1-toMove][move->targetField];
+    position->zobristHash    = position->zobristHash^zobristHash[move->type][toMove][move->targetField]^zobristHash[move->type][toMove][move->sourceField]^zobristHash[move->captureType][1-toMove][move->targetField];
+    position->pawnHash       = position->pawnHash^pawnHashValues[move->type][toMove][move->targetField]^pawnHashValues[move->type][toMove][move->sourceField]^pawnHashValues[move->captureType][1-toMove][move->targetField];
 }
 
 
 //TODO: get rid of the ifs
 static inline void makeKingSideCastle(chessPosition* position) {
-	playerColor toMove = position->toMove;
+    playerColor toMove = position->toMove;
 
-	if(toMove == white){
-		position->pieces[toMove] 		     = position->pieces[toMove]^(WHITEKINGSIDECASTLEOCCUPANCYCHANGE);
-		position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(WHITEKINGSIDECASTLEROOKMOVE);
-		position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(WHITEKINGSIDECASTLEKINGMOVE);
-		position->pieceTableEval             = position->pieceTableEval-completePieceTables[rook][white][7]+completePieceTables[rook][white][5]-completePieceTables[king][white][4]+completePieceTables[king][white][6];
-		position->zobristHash                = position->zobristHash^zobristHash[rook][white][7]^zobristHash[rook][white][5]^zobristHash[king][white][4]^zobristHash[king][white][6];
+    if(toMove == white){
+        position->pieces[toMove]             = position->pieces[toMove]^(WHITEKINGSIDECASTLEOCCUPANCYCHANGE);
+        position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(WHITEKINGSIDECASTLEROOKMOVE);
+        position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(WHITEKINGSIDECASTLEKINGMOVE);
+        position->pieceTableEval             = position->pieceTableEval-completePieceTables[rook][white][7]+completePieceTables[rook][white][5]-completePieceTables[king][white][4]+completePieceTables[king][white][6];
+        position->zobristHash                = position->zobristHash^zobristHash[rook][white][7]^zobristHash[rook][white][5]^zobristHash[king][white][4]^zobristHash[king][white][6];
 
-	} else {
-		position->pieces[toMove] 		     = position->pieces[toMove]^(BLACKKINGSIDECASTLEOCCUPANCYCHANGE);
-		position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(BLACKKINGSIDECASTLEROOKMOVE);
-		position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(BLACKKINGSIDECASTLEKINGMOVE);
-		position->pieceTableEval             = position->pieceTableEval-(-completePieceTables[rook][black][63]+completePieceTables[rook][black][61]-completePieceTables[king][black][60]+completePieceTables[king][black][62]);
-		position->zobristHash                = position->zobristHash^zobristHash[rook][black][63]^zobristHash[rook][black][61]^zobristHash[king][black][60]^zobristHash[king][black][62];
-	}
+    } else {
+        position->pieces[toMove]             = position->pieces[toMove]^(BLACKKINGSIDECASTLEOCCUPANCYCHANGE);
+        position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(BLACKKINGSIDECASTLEROOKMOVE);
+        position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(BLACKKINGSIDECASTLEKINGMOVE);
+        position->pieceTableEval             = position->pieceTableEval-(-completePieceTables[rook][black][63]+completePieceTables[rook][black][61]-completePieceTables[king][black][60]+completePieceTables[king][black][62]);
+        position->zobristHash                = position->zobristHash^zobristHash[rook][black][63]^zobristHash[rook][black][61]^zobristHash[king][black][60]^zobristHash[king][black][62];
+    }
 }
 
 
 static inline void makeQueenSideCastle(chessPosition* position) {
-	playerColor toMove = position->toMove;
-	if(toMove == white){
-		position->pieces[toMove] 		     = position->pieces[toMove]^(WHITEQUEENSIDECASTLEOCCUPANCYCHANGE);
-		position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(WHITEQUEENSIDECASTLEROOKMOVE);
-		position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(WHITEQUEENSIDECASTLEQUEENMOVE);
-		position->pieceTableEval             = position->pieceTableEval-completePieceTables[rook][white][0]+completePieceTables[rook][white][3]-completePieceTables[king][white][4]+completePieceTables[king][white][2];
-		position->zobristHash                = position->zobristHash^zobristHash[rook][white][0]^zobristHash[rook][white][3]^zobristHash[king][white][4]^zobristHash[king][white][2];
-	} else {
-		position->pieces[toMove] 		     = position->pieces[toMove]^(BLACKQUEENSIDECASTLEOCCUPANCYCHANGE);
-		position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(BLACKQUEENSIDECASTLEROOKMOVE);
-		position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(BLACKQUEENSIDECASTLEQUEENMOVE);
-		position->pieceTableEval             = position->pieceTableEval-(-completePieceTables[rook][black][56]+completePieceTables[rook][black][59]-completePieceTables[king][black][60]+completePieceTables[king][black][58]);
-		position->zobristHash                = position->zobristHash^zobristHash[rook][black][56]^zobristHash[rook][black][59]^zobristHash[king][black][60]^zobristHash[king][black][58];
-	}
+    playerColor toMove = position->toMove;
+    if(toMove == white){
+        position->pieces[toMove]             = position->pieces[toMove]^(WHITEQUEENSIDECASTLEOCCUPANCYCHANGE);
+        position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(WHITEQUEENSIDECASTLEROOKMOVE);
+        position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(WHITEQUEENSIDECASTLEQUEENMOVE);
+        position->pieceTableEval             = position->pieceTableEval-completePieceTables[rook][white][0]+completePieceTables[rook][white][3]-completePieceTables[king][white][4]+completePieceTables[king][white][2];
+        position->zobristHash                = position->zobristHash^zobristHash[rook][white][0]^zobristHash[rook][white][3]^zobristHash[king][white][4]^zobristHash[king][white][2];
+    } else {
+        position->pieces[toMove]             = position->pieces[toMove]^(BLACKQUEENSIDECASTLEOCCUPANCYCHANGE);
+        position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(BLACKQUEENSIDECASTLEROOKMOVE);
+        position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(BLACKQUEENSIDECASTLEQUEENMOVE);
+        position->pieceTableEval             = position->pieceTableEval-(-completePieceTables[rook][black][56]+completePieceTables[rook][black][59]-completePieceTables[king][black][60]+completePieceTables[king][black][58]);
+        position->zobristHash                = position->zobristHash^zobristHash[rook][black][56]^zobristHash[rook][black][59]^zobristHash[king][black][60]^zobristHash[king][black][58];
+    }
 
 }
 
 static inline void makeEnPassant(chessMove* move, chessPosition* position) {
-	playerColor toMove 									= position->toMove;
-	uint64_t moveMask          							= BIT64(move->sourceField) | BIT64(move->targetField);
-	position->pieces[toMove] 							= position->pieces[toMove]^moveMask;
-	position->pieceTables[toMove][pawn] 			    = position->pieceTables[toMove][pawn]^moveMask;
-	uint16_t shift 										= (toMove? move->targetField+8: move->targetField-8);
-	position->pieceTables[1-toMove][move->captureType] 	= position->pieceTables[1-toMove][pawn] ^ BIT64(shift);
-	position->pieces[1-toMove] 							= position->pieces[1-toMove] ^ BIT64(shift);
-	position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*(completePieceTables[pawn][toMove][move->targetField]-completePieceTables[pawn][toMove][move->sourceField]);
-	position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*completePieceTables[pawn][1-toMove][shift];
+    playerColor toMove                                  = position->toMove;
+    uint64_t moveMask                                   = BIT64(move->sourceField) | BIT64(move->targetField);
+    position->pieces[toMove]                            = position->pieces[toMove]^moveMask;
+    position->pieceTables[toMove][pawn]                 = position->pieceTables[toMove][pawn]^moveMask;
+    uint16_t shift                                      = (toMove? move->targetField+8: move->targetField-8);
+    position->pieceTables[1-toMove][move->captureType]  = position->pieceTables[1-toMove][pawn] ^ BIT64(shift);
+    position->pieces[1-toMove]                          = position->pieces[1-toMove] ^ BIT64(shift);
+    position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*(completePieceTables[pawn][toMove][move->targetField]-completePieceTables[pawn][toMove][move->sourceField]);
+    position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*completePieceTables[pawn][1-toMove][shift];
 
-	position->zobristHash = position->zobristHash^zobristHash[pawn][toMove][move->targetField]^zobristHash[pawn][toMove][move->sourceField]^zobristHash[pawn][1-toMove][shift];
-	position->pawnHash = position->pawnHash^pawnHashValues[pawn][toMove][move->targetField]^pawnHashValues[pawn][toMove][move->sourceField]^pawnHashValues[pawn][1-toMove][shift];
-	//position->totalFigureEval     = position->totalFigureEval-figureValues[pawn];
+    position->zobristHash = position->zobristHash^zobristHash[pawn][toMove][move->targetField]^zobristHash[pawn][toMove][move->sourceField]^zobristHash[pawn][1-toMove][shift];
+    position->pawnHash = position->pawnHash^pawnHashValues[pawn][toMove][move->targetField]^pawnHashValues[pawn][toMove][move->sourceField]^pawnHashValues[pawn][1-toMove][shift];
+    //position->totalFigureEval     = position->totalFigureEval-figureValues[pawn];
 }
 
 
 static inline void makePromotion(chessMove* move, chessPosition* position, figureType promotedFigure) {
-	playerColor toMove 									= position->toMove;
-	uint64_t moveMask          							= BIT64(move->sourceField) | BIT64(move->targetField);
-	position->pieces[toMove] 							= position->pieces[toMove]^moveMask;
-	position->pieces[1-toMove] 							= position->pieces[1-toMove] & (~moveMask);
-	position->pieceTables[toMove][pawn] 				= position->pieceTables[toMove][pawn]  ^ BIT64(move->sourceField);
-	position->pieceTables[toMove][promotedFigure] 		= position->pieceTables[toMove][promotedFigure] ^ BIT64(move->targetField);
-	position->pieceTables[1-toMove][move->captureType] 	= position->pieceTables[1-toMove][move->captureType] & (~moveMask);
+    playerColor toMove                                  = position->toMove;
+    uint64_t moveMask                                   = BIT64(move->sourceField) | BIT64(move->targetField);
+    position->pieces[toMove]                            = position->pieces[toMove]^moveMask;
+    position->pieces[1-toMove]                          = position->pieces[1-toMove] & (~moveMask);
+    position->pieceTables[toMove][pawn]                 = position->pieceTables[toMove][pawn]  ^ BIT64(move->sourceField);
+    position->pieceTables[toMove][promotedFigure]       = position->pieceTables[toMove][promotedFigure] ^ BIT64(move->targetField);
+    position->pieceTables[1-toMove][move->captureType]  = position->pieceTables[1-toMove][move->captureType] & (~moveMask);
 
-	position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*(completePieceTables[promotedFigure][toMove][move->targetField]-completePieceTables[pawn][toMove][move->sourceField]);
-	position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*completePieceTables[move->captureType][1-toMove][move->targetField];
-	position->zobristHash = position->zobristHash^zobristHash[promotedFigure][toMove][move->targetField]^zobristHash[pawn][toMove][move->sourceField]^zobristHash[move->captureType][1-toMove][move->targetField];
-	position->pawnHash = position->pawnHash^pawnHashValues[pawn][toMove][move->sourceField]^pawnHashValues[move->captureType][1-toMove][move->targetField];
-	//const evalParameters* evalPars = getEvalParameters();
-	position->figureEval     = position->figureEval+(1-2*toMove)*(figureValues[promotedFigure]-figureValues[pawn]);
-	position->totalFigureEval     = position->totalFigureEval+(figureValues[promotedFigure]-figureValues[pawn]);
+    position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*(completePieceTables[promotedFigure][toMove][move->targetField]-completePieceTables[pawn][toMove][move->sourceField]);
+    position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*completePieceTables[move->captureType][1-toMove][move->targetField];
+    position->zobristHash = position->zobristHash^zobristHash[promotedFigure][toMove][move->targetField]^zobristHash[pawn][toMove][move->sourceField]^zobristHash[move->captureType][1-toMove][move->targetField];
+    position->pawnHash = position->pawnHash^pawnHashValues[pawn][toMove][move->sourceField]^pawnHashValues[move->captureType][1-toMove][move->targetField];
+    //const evalParameters* evalPars = getEvalParameters();
+    position->figureEval     = position->figureEval+(1-2*toMove)*(figureValues[promotedFigure]-figureValues[pawn]);
+    position->totalFigureEval     = position->totalFigureEval+(figureValues[promotedFigure]-figureValues[pawn]);
 }
 
 static uint64_t movemakecalls = 0;
 
 void makeMove(chessMove* move, chessPosition* position) {
-	movemakecalls++;
-	assert(move->captureType != king);
-	position->data.hash = position->zobristHash;
-	position->dataStack.add(&position->data);
-	position->data.fiftyMoveRuleCounter = position->data.fiftyMoveRuleCounter+1;
+    movemakecalls++;
+    assert(move->captureType != king);
+    position->data.hash = position->zobristHash;
+    position->dataStack.add(&position->data);
+    position->data.fiftyMoveRuleCounter = position->data.fiftyMoveRuleCounter+1;
 
-	bool isPawn = (move->type == pawnMove) || (move->type == enpassant) || (move->type == promotionQueen) || (move->type == promotionRook) || (move->type == promotionBishop) || (move->type == promotionKnight);
-	bool isCapture = (move->captureType != none);
+    bool isPawn = (move->type == pawnMove) || (move->type == enpassant) || (move->type == promotionQueen) || (move->type == promotionRook) || (move->type == promotionBishop) || (move->type == promotionKnight);
+    bool isCapture = (move->captureType != none);
 
-	if(isPawn || isCapture){
-		position->data.fiftyMoveRuleCounter = 0;
-	}
+    if(isPawn || isCapture){
+        position->data.fiftyMoveRuleCounter = 0;
+    }
 
-	uint8_t castlingRights = position->data.castlingRights;
-	position->zobristHash = position->zobristHash^castlingHash[position->data.castlingRights];
-	uint64_t moveMask      = BIT64(move->sourceField) | BIT64(move->targetField);
-	castlingRights = (moveMask & WHITEKINGSIDECASTLEMASK  ? (castlingRights & 14):castlingRights);
-	castlingRights = (moveMask & WHITEQUEENSIDECASTLEMASK ? (castlingRights & 13):castlingRights);
-	castlingRights = (moveMask & BLACKKINGSIDECASTLEMASK  ? (castlingRights & 11):castlingRights);
-	castlingRights = (moveMask & BLACKQUEENSIDECASTLEMASK ? (castlingRights &  7):castlingRights);
-	position->data.castlingRights = castlingRights;
-	position->zobristHash = position->zobristHash^castlingHash[position->data.castlingRights];
-	//const evalParameters* evalPars = getEvalParameters();
-	position->figureEval     = position->figureEval+(1-2*position->toMove)*figureValues[move->captureType];
-	position->totalFigureEval     = position->totalFigureEval-figureValues[move->captureType];
-	position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
-	position->data.enPassantFile  = 8;
+    uint8_t castlingRights = position->data.castlingRights;
+    position->zobristHash = position->zobristHash^castlingHash[position->data.castlingRights];
+    uint64_t moveMask      = BIT64(move->sourceField) | BIT64(move->targetField);
+    castlingRights = (moveMask & WHITEKINGSIDECASTLEMASK  ? (castlingRights & 14):castlingRights);
+    castlingRights = (moveMask & WHITEQUEENSIDECASTLEMASK ? (castlingRights & 13):castlingRights);
+    castlingRights = (moveMask & BLACKKINGSIDECASTLEMASK  ? (castlingRights & 11):castlingRights);
+    castlingRights = (moveMask & BLACKQUEENSIDECASTLEMASK ? (castlingRights &  7):castlingRights);
+    position->data.castlingRights = castlingRights;
+    position->zobristHash = position->zobristHash^castlingHash[position->data.castlingRights];
+    //const evalParameters* evalPars = getEvalParameters();
+    position->figureEval     = position->figureEval+(1-2*position->toMove)*figureValues[move->captureType];
+    position->totalFigureEval     = position->totalFigureEval-figureValues[move->captureType];
+    position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
+    position->data.enPassantFile  = 8;
 
-	if((move->type == pawnMove) && ((move->targetField-move->sourceField) & 15) == 0) { //pawn went two ahead
-		position->data.enPassantFile = FILE(move->targetField);
-	}
+    if((move->type == pawnMove) && ((move->targetField-move->sourceField) & 15) == 0) { //pawn went two ahead
+        position->data.enPassantFile = FILE(move->targetField);
+    }
 
 
-	switch(move->type){
-		case pawnMove:
-		case knightMove:
-		case bishopMove:
-		case rookMove:
-		case queenMove:
-		case kingMove:
-		{
-			makeNormalMove(move, position);
-			break;
-		}
-		case castlingKingside:
-		{
-			makeKingSideCastle(position);
-			break;
-		}
-		case castlingQueenside:
-		{
-			makeQueenSideCastle(position);
-			break;
-		}
-		case enpassant:
-		{
-			makeEnPassant(move, position);
-			break;
-		}
-		case promotionQueen:
-		case promotionRook:
-		case promotionBishop:
-		case promotionKnight:
-		{
-			makePromotion(move, position, (figureType) (move->type-8));
-			break;
-		}
-		default:
-			break;
-	}
-	position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
-	position->madeMoves.add(move);
-	position->toMove = (playerColor) (1-position->toMove);
-	position->zobristHash = position->zobristHash^movingSideHash[0];
-	repetitionData[position->zobristHash & 16383]++;
-	#ifdef DEBUG
+    switch(move->type){
+        case pawnMove:
+        case knightMove:
+        case bishopMove:
+        case rookMove:
+        case queenMove:
+        case kingMove:
+        {
+            makeNormalMove(move, position);
+            break;
+        }
+        case castlingKingside:
+        {
+            makeKingSideCastle(position);
+            break;
+        }
+        case castlingQueenside:
+        {
+            makeQueenSideCastle(position);
+            break;
+        }
+        case enpassant:
+        {
+            makeEnPassant(move, position);
+            break;
+        }
+        case promotionQueen:
+        case promotionRook:
+        case promotionBishop:
+        case promotionKnight:
+        {
+            makePromotion(move, position, (figureType) (move->type-8));
+            break;
+        }
+        default:
+            break;
+    }
+    position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
+    position->madeMoves.add(move);
+    position->toMove = (playerColor) (1-position->toMove);
+    position->zobristHash = position->zobristHash^movingSideHash[0];
+    repetitionData[position->zobristHash & 16383]++;
+    #ifdef DEBUG
 
-	debug_incremental_calculations(position);
+    debug_incremental_calculations(position);
 
-	#endif
+    #endif
 }
 
 

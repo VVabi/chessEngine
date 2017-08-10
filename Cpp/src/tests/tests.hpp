@@ -11,8 +11,8 @@
 #include <lib/basics.hpp>
 
 struct testResult {
-	bool passed;
-	std::string testName;
+    bool passed;
+    std::string testName;
 };
 
 std::string getZeroPosition();

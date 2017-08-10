@@ -24,18 +24,18 @@ using namespace std;
 #include <parameters/parameters.hpp>
 
 int main() {
-	initializeParameters();
-	srand (get_timestamp());
-	fillZobristHash();
-	/*std::ofstream out("/home/vabi/TeX/Chess/positions.tex");
-	std::ifstream in("/home/vabi/code/chessEngine/chessGui/openingPositions.txt");
-	std::string line;
-	while(getline(in, line)){
-		if(line.at(0) == '%'){
-			continue;
-		}
-		latexOutput(line, out);
-	}*/
-	UIloop();
+    initializeParameters();
+    srand (get_timestamp());
+    fillZobristHash();
+    /*std::ofstream out("/home/vabi/TeX/Chess/positions.tex");
+    std::ifstream in("/home/vabi/code/chessEngine/chessGui/openingPositions.txt");
+    std::string line;
+    while(getline(in, line)){
+        if(line.at(0) == '%'){
+            continue;
+        }
+        latexOutput(line, out);
+    }*/
+    UIloop();
 }
 
