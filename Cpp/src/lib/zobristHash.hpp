@@ -9,10 +9,11 @@
 #define LIB_ZOBRISTHASH_HPP_
 
 #include <stdint.h>
+#include <lib/basics.hpp>
+
 
 
 //it may be actually faster to include the hash values into the chessposition struct? cache locality should be better
-uint64_t zobristHash[2][12][64];
-uint64_t toMoveHash[2];
+
 
 #endif /* LIB_ZOBRISTHASH_HPP_ */

@@ -11,6 +11,33 @@
 
 #define HASHSIZE 0x1FFFFF //needs to be a power of 2 -1!
 
+class ZobristHashData {
+    uint64_t zobristHash[7][2][64];
+ public:
+    uint64_t getZobristHashEntry(figureType type, playerColor color, uint16_t field) {
+    #ifdef DEBUG
+        assert(type < 7);
+        assert(color < 2);
+        assert(field < 64);
+    #endif
+        return zobristHash[type][color][field];
+    }
+
+    void setZobristHashEntry(figureType type, playerColor color, uint16_t field, uint64_t value) {
+        zobristHash[type][color][field] = value;
+    }
+
+};
+
+extern ZobristHashData hashData;
+
+__attribute__((always_inline)) static inline void setZobristHashEntry(figureType type, playerColor color, uint16_t field, uint64_t value) {
+    hashData.setZobristHashEntry(type, color, field, value);
+}
+__attribute__((always_inline)) static inline uint64_t getHashEntry(figureType type, playerColor color, uint16_t field) {
+    return hashData.getZobristHashEntry(type, color, field);
+}
+
 void fillZobristHash();
 uint64_t calcZobristHash(const chessPosition* position);
 uint64_t calcPawnHash(const chessPosition* position);
