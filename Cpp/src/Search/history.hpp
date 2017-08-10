@@ -15,7 +15,7 @@ class HistoryTables {
     int32_t historyTable[2][64][64];
     int32_t higherCutoff = (1 << 12);
     int32_t lowerCutoff  = -(1 << 12);
-public:
+ public:
     void clearHistoryTable() {
         for(uint16_t color=0; color < 2; color++) {
             for(uint16_t from=0; from < 64; from++) {

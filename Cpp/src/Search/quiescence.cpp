@@ -87,12 +87,10 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, 
             if( ((hashVal.flag == FAILHIGH) || (hashVal.flag == FULLSEARCH)) && (oldEval >= alphabeta.beta)) {
                 setSearchId(searchId, position->zobristHash, hashVal.index);
                 return alphabeta.beta;
-            }
-            else if( ((hashVal.flag == FAILLOW) || (hashVal.flag == FULLSEARCH)) && (oldEval <= alphabeta.alpha)) {
+            } else if( ((hashVal.flag == FAILLOW) || (hashVal.flag == FULLSEARCH)) && (oldEval <= alphabeta.alpha)) {
                 setSearchId(searchId, position->zobristHash, hashVal.index);
                 return alphabeta.alpha; //node will fail low
-            }
-            else if((hashVal.flag == FULLSEARCH)) { //TODO: this condition can be vastly improved
+            } else if((hashVal.flag == FULLSEARCH)) { //TODO: this condition can be vastly improved
                 setSearchId(searchId, position->zobristHash, hashVal.index);
                 if(oldEval <= alphabeta.alpha) {
                     return alphabeta.alpha;

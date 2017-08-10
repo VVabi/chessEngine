@@ -43,25 +43,22 @@ inline uint16_t popcount(uint64_t x) {
 
 
 inline uint64_t northFill(uint64_t gen) {
-   gen |= (gen <<  8);
-   gen |= (gen << 16);
-   gen |= (gen << 32);
-   return gen;
+    gen |= (gen <<  8);
+    gen |= (gen << 16);
+    gen |= (gen << 32);
+    return gen;
 }
 
 inline uint64_t southFill(uint64_t gen) {
-   gen |= (gen >>  8);
-   gen |= (gen >> 16);
-   gen |= (gen >> 32);
-   return gen;
+    gen |= (gen >>  8);
+    gen |= (gen >> 16);
+    gen |= (gen >> 32);
+    return gen;
 }
 
 inline uint8_t getColumnOcc(uint64_t in) {
     in = southFill(in) | northFill(in);
-
     return in & 0xFF;
-
-
 }
 
 #endif /* HELPER_FUNC_H_ */

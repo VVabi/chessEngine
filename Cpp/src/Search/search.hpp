@@ -149,7 +149,7 @@ class moveStack {
     chessMove moveArray[7500];
     uint16_t counter = 0;
 
-public:
+ public:
     vdt_vector<chessMove> getNext() {
         assert(counter < 45);
         counter++;

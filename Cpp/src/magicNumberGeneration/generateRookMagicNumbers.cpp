@@ -87,7 +87,7 @@ uint64_t generateRookMoveTable(uint16_t field, uint64_t blocker) {
     return rookMoveTable;
 }
 
- vdt_vector<vdt_vector<uint64_t >> generateRookMoveTables() {
+vdt_vector<vdt_vector<uint64_t >> generateRookMoveTables() {
      vdt_vector<vdt_vector<uint64_t> > ret = vdt_vector<vdt_vector<uint64_t> >(64);
     for(uint16_t field=0; field < 64; field++) {
         uint64_t magicNumber = rookMagicNumbers[field];

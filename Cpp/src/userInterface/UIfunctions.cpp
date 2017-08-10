@@ -71,9 +71,7 @@ uint64_t runSinglePositionPerformanceTest(std::string position, uint16_t depth, 
                 alpha = alpha-100;
             } else if(eval >= beta) {
                 beta = beta+100;
-            }
-
-            else {
+            } else {
                 succeeded = true;
             }
 

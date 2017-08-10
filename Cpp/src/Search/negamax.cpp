@@ -228,13 +228,11 @@ static inline bool checkHashTable(int16_t* eval, uint16_t* hashMove, HashprobeSe
                     setSearchId(searchId, zobristHash, hashVal.index);
                     *eval = *beta;
                     return true;
-                }
-                else if( ((hashVal.flag == FAILLOW) || (hashVal.flag == FULLSEARCH)) && (oldEval <= *alpha)) {
+                } else if( ((hashVal.flag == FAILLOW) || (hashVal.flag == FULLSEARCH)) && (oldEval <= *alpha)) {
                     setSearchId(searchId, zobristHash, hashVal.index);
                     *eval =  *alpha; //node will fail low
                     return true;
-                }
-                else if((hashVal.flag == FULLSEARCH)) { //TODO: this condition can be vastly improved
+                } else if((hashVal.flag == FULLSEARCH)) { //TODO: this condition can be vastly improved
                     setSearchId(searchId, zobristHash, hashVal.index);
                     *eval = oldEval;
                     return true;
@@ -354,7 +352,7 @@ static inline searchLoopResults negamax_internal_move_loop(chessPosition* positi
         currentState = killers_handled;
     }
     for(uint16_t ind=0; ind < moves.length; ind++) {
-            while(!get_next_move_to_front(position, &currentState, moves, ind, plyinfo, sortinfo));
+            while(!get_next_move_to_front(position, &currentState, moves, ind, plyinfo, sortinfo)) {};
 
             //illegal move. Since list is sorted or, in case ind=0, best move is first, we can leave here: all further moves are also illegal.
             //---------------------------------------------------------------------------------------------------------------------------------
