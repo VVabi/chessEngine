@@ -18,7 +18,7 @@ static pawnHashEntry pawnHashTable[8192];
 ZobristHashData hashData;
 
 //uint64_t zobristHash[7][2][64];
-uint64_t pawnHashValues[7][2][64];
+//uint64_t pawnHashValues[7][2][64];
 uint64_t movingSideHash[2];
 uint64_t castlingHash[16];
 uint64_t enpassantHash[9];
@@ -209,12 +209,12 @@ void fillZobristHash() {
     for (uint16_t cnt = 0; cnt < 2; cnt++) {
             for (uint16_t ind = 0; ind < 1; ind++) {
                 for (uint16_t field = 0; field < 64; field++) {
-                    pawnHashValues[ind][cnt][field] = getRandUint64();
+                    setPawnZobristHashEntry((figureType) ind, (playerColor) cnt, field, getRandUint64());
                 }
             }
             for (uint16_t ind = 1; ind < 7; ind++) {
                 for (uint16_t field = 0; field < 64; field++) {
-                    pawnHashValues[ind][cnt][field] = 0;
+                    setPawnZobristHashEntry((figureType) ind, (playerColor) cnt, field, 0);
                 }
             }
     }
@@ -224,11 +224,11 @@ void fillZobristHash() {
 uint64_t calcPawnHash(const chessPosition* position) {
     uint64_t hash = 0;
     for (uint16_t movingSide = 0; movingSide < 2; movingSide++) {
-        for (uint16_t figureType = 0; figureType < 6; figureType++) {
-            uint64_t pieces = position->pieceTables[movingSide][figureType];
+        for (uint16_t figuretype = 0; figuretype < 6; figuretype++) {
+            uint64_t pieces = position->pieceTables[movingSide][figuretype];
             while (pieces) {
                 uint16_t field = popLSB(pieces);
-                hash = hash^pawnHashValues[figureType][movingSide][field];
+                hash = hash^getPawnZobristHashEntry((figureType) figuretype, (playerColor) movingSide, field);
             }
         }
     }

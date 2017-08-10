@@ -15,7 +15,6 @@
 #include <lib/Defines/figureValues.hpp>
 #include <lib/Evaluation/PSQ.hpp>
 
-extern uint64_t pawnHashValues[7][2][64];
 extern uint64_t movingSideHash[2];
 extern uint64_t castlingHash[16];
 extern uint64_t enpassantHash[9];
@@ -54,7 +53,7 @@ static inline void makeNormalMove(chessMove* move, chessPosition* position) {
     position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*getPSQentry(move->captureType, (playerColor) (INVERTCOLOR(toMove)), move->targetField);
 
     position->zobristHash    = position->zobristHash^getHashEntry((figureType) move->type, toMove, move->targetField)^getHashEntry((figureType) move->type, toMove, move->sourceField)^getHashEntry((figureType) move->captureType, INVERTCOLOR(toMove), move->targetField);
-    position->pawnHash       = position->pawnHash^pawnHashValues[move->type][toMove][move->targetField]^pawnHashValues[move->type][toMove][move->sourceField]^pawnHashValues[move->captureType][INVERTCOLOR(toMove)][move->targetField];
+    position->pawnHash       = position->pawnHash^getPawnZobristHashEntry((figureType) move->type, toMove, move->targetField)^getPawnZobristHashEntry((figureType) move->type, toMove, move->sourceField)^getPawnZobristHashEntry(move->captureType, INVERTCOLOR(toMove), move->targetField);
 }
 
 
@@ -108,7 +107,7 @@ static inline void makeEnPassant(chessMove* move, chessPosition* position) {
     position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*getPSQentry(pawn, INVERTCOLOR(toMove), shift);
 
     position->zobristHash = position->zobristHash^getHashEntry(pawn, toMove, move->targetField)^getHashEntry(pawn, toMove, move->sourceField)^getHashEntry(pawn, INVERTCOLOR(toMove), shift);
-    position->pawnHash = position->pawnHash^pawnHashValues[pawn][toMove][move->targetField]^pawnHashValues[pawn][toMove][move->sourceField]^pawnHashValues[pawn][INVERTCOLOR(toMove)][shift];
+    position->pawnHash = position->pawnHash^getPawnZobristHashEntry(pawn, toMove, move->targetField)^getPawnZobristHashEntry(pawn, toMove, move->sourceField)^getPawnZobristHashEntry(pawn, INVERTCOLOR(toMove), shift);
     //position->totalFigureEval     = position->totalFigureEval-figureValues[pawn];
 }
 
@@ -125,7 +124,7 @@ static inline void makePromotion(chessMove* move, chessPosition* position, figur
     position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*(getPSQentry(promotedFigure, toMove, move->targetField)-getPSQentry(pawn, toMove, move->sourceField));
     position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*getPSQentry(move->captureType, (playerColor) (INVERTCOLOR(toMove)), move->targetField);
     position->zobristHash    = position->zobristHash^getHashEntry(promotedFigure, toMove, move->targetField)^getHashEntry(pawn, toMove, move->sourceField)^getHashEntry(move->captureType, INVERTCOLOR(toMove), move->targetField);
-    position->pawnHash       = position->pawnHash^pawnHashValues[pawn][toMove][move->sourceField]^pawnHashValues[move->captureType][INVERTCOLOR(toMove)][move->targetField];
+    position->pawnHash       = position->pawnHash^getPawnZobristHashEntry(pawn, toMove, move->sourceField)^getPawnZobristHashEntry(move->captureType, INVERTCOLOR(toMove), move->targetField);
     //const evalParameters* evalPars = getEvalParameters();
     position->figureEval     = position->figureEval+(1-2*toMove)*(figureValues[promotedFigure]-figureValues[pawn]);
     position->totalFigureEval     = position->totalFigureEval+(figureValues[promotedFigure]-figureValues[pawn]);

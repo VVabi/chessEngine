@@ -13,6 +13,8 @@
 
 class ZobristHashData {
     uint64_t zobristHash[7][2][64];
+    uint64_t pawnHashValues[7][2][64];
+
  public:
     uint64_t getZobristHashEntry(figureType type, playerColor color, uint16_t field) {
     #ifdef DEBUG
@@ -23,10 +25,22 @@ class ZobristHashData {
         return zobristHash[type][color][field];
     }
 
+    void setPawnZobristHashEntry(figureType type, playerColor color, uint16_t field, uint64_t value) {
+        pawnHashValues[type][color][field] = value;
+    }
+
+    uint64_t getPawnHashEntry(figureType type, playerColor color, uint16_t field) {
+    #ifdef DEBUG
+        assert(type < 7);
+        assert(color < 2);
+        assert(field < 64);
+    #endif
+        return pawnHashValues[type][color][field];
+    }
+
     void setZobristHashEntry(figureType type, playerColor color, uint16_t field, uint64_t value) {
         zobristHash[type][color][field] = value;
     }
-
 };
 
 extern ZobristHashData hashData;
@@ -36,6 +50,12 @@ __attribute__((always_inline)) static inline void setZobristHashEntry(figureType
 }
 __attribute__((always_inline)) static inline uint64_t getHashEntry(figureType type, playerColor color, uint16_t field) {
     return hashData.getZobristHashEntry(type, color, field);
+}
+__attribute__((always_inline)) static inline void setPawnZobristHashEntry(figureType type, playerColor color, uint16_t field, uint64_t value) {
+    hashData.setPawnZobristHashEntry(type, color, field, value);
+}
+__attribute__((always_inline)) static inline uint64_t getPawnZobristHashEntry(figureType type, playerColor color, uint16_t field) {
+    return hashData.getPawnHashEntry(type, color, field);
 }
 
 void fillZobristHash();

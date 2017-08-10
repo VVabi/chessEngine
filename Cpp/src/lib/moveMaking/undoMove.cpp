@@ -15,7 +15,6 @@
 #include <parameters/parameters.hpp>
 #include <lib/Evaluation/PSQ.hpp>
 
-extern uint64_t pawnHashValues[7][2][64];
 extern uint64_t movingSideHash[2];
 extern uint16_t repetitionData[16384];
 extern uint64_t castlingHash[16];
@@ -42,7 +41,7 @@ inline static void undoNormalMove(chessPosition* position, chessMove move) {
     position->pieceTableEval = position->pieceTableEval-(1-2*toMove)*(getPSQentry(move.type, toMove, move.targetField)-getPSQentry(move.type, toMove, move.sourceField));
     position->pieceTableEval = position->pieceTableEval-(1-2*toMove)*getPSQentry(move.captureType,  INVERTCOLOR(toMove), move.targetField);
     position->zobristHash    = position->zobristHash^getHashEntry((figureType) move.type, toMove, move.targetField)^getHashEntry((figureType) move.type, toMove, move.sourceField)^getHashEntry(move.captureType, INVERTCOLOR(toMove), move.targetField);
-    position->pawnHash    = position->pawnHash^pawnHashValues[move.type][toMove][move.targetField]^pawnHashValues[move.type][toMove][move.sourceField]^pawnHashValues[move.captureType][1-toMove][move.targetField];
+    position->pawnHash    = position->pawnHash^getPawnZobristHashEntry((figureType) move.type, toMove, move.targetField)^getPawnZobristHashEntry((figureType) move.type, toMove, move.sourceField)^getPawnZobristHashEntry((figureType) move.captureType, INVERTCOLOR(toMove), move.targetField);
 }
 
 inline static void undoKingSideCastling(chessPosition* position) {
@@ -95,7 +94,7 @@ inline static void undoEnPassant(chessPosition* position, chessMove move) {
     position->pieceTableEval                            = position->pieceTableEval-(1-2*toMove)*(getPSQentry(pawn, toMove, move.targetField)-getPSQentry(pawn, toMove, move.sourceField));
     position->pieceTableEval                            = position->pieceTableEval-(1-2*toMove)*getPSQentry(pawn, INVERTCOLOR(toMove), shift);
     position->zobristHash = position->zobristHash^getHashEntry(pawn, toMove, move.targetField)^getHashEntry(pawn, toMove, move.sourceField)^getHashEntry(pawn, INVERTCOLOR(toMove), shift);
-    position->pawnHash = position->pawnHash^pawnHashValues[pawn][toMove][move.targetField]^pawnHashValues[pawn][toMove][move.sourceField]^pawnHashValues[pawn][INVERTCOLOR(toMove)][shift];
+    position->pawnHash = position->pawnHash^getPawnZobristHashEntry(pawn, toMove, move.targetField)^getPawnZobristHashEntry(pawn, toMove, move.sourceField)^getPawnZobristHashEntry(pawn, INVERTCOLOR(toMove), shift);
 }
 
 inline static void undoPromotion(chessPosition* position, chessMove move, figureType promotedFigure) {
@@ -114,7 +113,7 @@ inline static void undoPromotion(chessPosition* position, chessMove move, figure
     position->figureEval                                = position->figureEval-(1-2*toMove)*(evalPars->figureValues[promotedFigure]-evalPars->figureValues[pawn]);
     position->totalFigureEval                           = position->totalFigureEval-(evalPars->figureValues[promotedFigure]-evalPars->figureValues[pawn]);
     position->zobristHash = position->zobristHash^getHashEntry(promotedFigure, toMove, move.targetField)^getHashEntry(pawn, toMove, move.sourceField)^getHashEntry(move.captureType, INVERTCOLOR(toMove), move.targetField);
-    position->pawnHash = position->pawnHash^pawnHashValues[pawn][toMove][move.sourceField]^pawnHashValues[move.captureType][INVERTCOLOR(toMove)][move.targetField];
+    position->pawnHash = position->pawnHash^getPawnZobristHashEntry(pawn, toMove, move.sourceField)^getPawnZobristHashEntry(move.captureType, INVERTCOLOR(toMove), move.targetField);
 }
 
 
