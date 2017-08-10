@@ -68,6 +68,9 @@ void logError(std::string msg) {
 searchParameters paramsToUse;
 std::atomic<bool> continueSearch;
 
+bool doContinueSearch(){
+	return continueSearch;
+}
 
 void sendSearchInfo(uint64_t nodes, uint32_t time, int32_t eval, uint32_t depth, std::list<std::string>& PV){
 	double nps = ((double) nodes)/((double) time)*1000.0;

@@ -22,12 +22,12 @@
 #include <userInterface/UIlayer.hpp>
 #include <atomic>
 #include <Search/history.hpp>
-
-extern std::atomic<bool> continueSearch;
+#include <lib/Defines/figureValues.hpp>
 searchDebugData searchCounts;
 
 extern uint64_t bishopFieldTable[];
 extern uint64_t rookFieldTable[];
+static int16_t figureValues[7] = {PAWNVALUE,KNIGHTVALUE,BISHOPVALUE,ROOKVALUE,QUEENVALUE,10000,0};
 
 searchDebugData getSearchData(){
 	return searchCounts;
@@ -40,14 +40,14 @@ void resetSearchData(){
 static uint32_t totalTime;
 static uint64_t start_ts;
 
-void setTotalTime(uint32_t tTime, uint64_t start){
+void setTotalTime(uint32_t tTime, uint64_t start){ //TODO: move to separate module which handles all timeouts/stops
 	totalTime = tTime;
 	start_ts = start;
 }
 
 
 enum sortState {not_sorted, hash_handled, good_captures_handled, killers_handled, fully_sorted};
-extern int16_t figureValues[7];
+
 static moveStack qmvStack;
 
 static inline bool getGoodCaptureToFront(vdt_vector<chessMove>* moves, uint16_t start_index) {
@@ -277,7 +277,7 @@ static inline void checkTimeout() {
 		//std::cout << "Total time " << totalTime << std::endl;
 		throw timeoutException();
 	}
-	if(!continueSearch) {
+	if(!doContinueSearch()) {
 		qmvStack.reset();
 		throw timeoutException();
 	}

@@ -11,6 +11,7 @@
 #include <string>
 #include <userInterface/interfaceStructs.hpp>
 #include <lib/Evaluation/evaluation.hpp>
+bool doContinueSearch();
 void UIloop();
 uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval, bool doAspiration, searchParameters params);
 std::string chessPositionToString(const chessPosition position);

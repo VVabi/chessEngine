@@ -17,10 +17,10 @@
 #include <Search/search.hpp>
 #include <userInterface/UIlayer.hpp>
 #include <algorithm>
-
+#include <lib/Defines/figureValues.hpp>
 
 enum sortState {not_sorted, hash_handled, good_captures_handled, killers_handled, fully_sorted};
-extern int16_t figureValues[7];
+static int16_t figureValues[7] = {PAWNVALUE,KNIGHTVALUE,BISHOPVALUE,ROOKVALUE,QUEENVALUE,10000,0};
 
 static inline bool getGoodCaptureToFront(vdt_vector<chessMove>* moves, uint16_t start_index) {
 

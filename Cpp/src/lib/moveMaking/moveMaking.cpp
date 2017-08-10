@@ -12,6 +12,7 @@
 #include <hashTables/hashTables.hpp>
 #include <assert.h>
 #include <parameters/parameters.hpp>
+#include <lib/Defines/figureValues.hpp>
 
 extern int32_t completePieceTables[7][2][64];
 extern uint64_t zobristHash[7][2][64];
@@ -21,7 +22,7 @@ extern uint64_t castlingHash[16];
 extern uint64_t enpassantHash[9];
 extern uint16_t repetitionData[16384];
 
-int16_t figureValues[7] = {100,320,330,500,975,10000,0};
+static int16_t figureValues[7] = {PAWNVALUE,KNIGHTVALUE,BISHOPVALUE,ROOKVALUE,QUEENVALUE,10000,0};
 
 void makeNullMove(chessPosition* position){
 	position->data.hash = position->zobristHash;
