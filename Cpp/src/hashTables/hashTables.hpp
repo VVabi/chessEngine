@@ -17,6 +17,7 @@ class ZobristHashData {
     uint64_t movingSideHash[2];
     uint64_t castlingHash[16];
     uint64_t enpassantHash[9];
+
  public:
     void setCastlingHash(uint16_t index, uint64_t value) {
     #ifdef DEBUG
