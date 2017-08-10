@@ -62,38 +62,38 @@ static int32_t kingSafetySinglePlayer(const chessPosition* position, const uint8
     uint16_t kingField = findLSB(position->pieceTables[playingSide][king]);
     uint16_t kingFile = FILE(kingField);
 
-    if( !((1 << kingFile) & pawnColumnOccupancy[playingSide])) { // no pawn in front of king. TODO: check for pawn really in FRONT of king
+    if (!((1 << kingFile) & pawnColumnOccupancy[playingSide])) { // no pawn in front of king. TODO: check for pawn really in FRONT of king
         ret = ret+par->selfopenfiletoking;
     }
 
-    if( !((1 << kingFile) & pawnColumnOccupancy[1-playingSide])) { // no opponent pawn
+    if (!((1 << kingFile) & pawnColumnOccupancy[1-playingSide])) { // no opponent pawn
         ret = ret+par->opponentopenfiletoking;
     }
 
-    if(kingFile > 0) {
-        if( !((1 << (kingFile-1)) & pawnColumnOccupancy[playingSide])) { // no pawn in front of king. TODO: check for pawn really in FRONT of king
+    if (kingFile > 0) {
+        if (!((1 << (kingFile-1)) & pawnColumnOccupancy[playingSide])) { // no pawn in front of king. TODO: check for pawn really in FRONT of king
                 ret = ret+par->selfopenfilenexttoking;
         }
-        if( !((1 << (kingFile-1)) & pawnColumnOccupancy[1-playingSide])) { // no opponent pawn
+        if (!((1 << (kingFile-1)) & pawnColumnOccupancy[1-playingSide])) { // no opponent pawn
             ret = ret+par->opponentopenfilenexttoking;
         }
     }
 
-    if(kingFile < 7) {
-        if( !((1 << (kingFile+1)) & pawnColumnOccupancy[playingSide])) { // no pawn in front of king. TODO: check for pawn really in FRONT of king
+    if (kingFile < 7) {
+        if (!((1 << (kingFile+1)) & pawnColumnOccupancy[playingSide])) { // no pawn in front of king. TODO: check for pawn really in FRONT of king
             ret = ret+par->selfopenfilenexttoking;
         }
-        if( !((1 << (kingFile+1)) & pawnColumnOccupancy[1-playingSide])) { // no opponent pawn
+        if (!((1 << (kingFile+1)) & pawnColumnOccupancy[1-playingSide])) { // no opponent pawn
             ret = ret+par->opponentopenfilenexttoking;
         }
     }
 
     /*uint64_t relevant_files = files[FILE(kingField)];
-    if(kingFile > 0) {
+    if (kingFile > 0) {
         relevant_files = relevant_files | files[FILE(kingField-1)];
     }
 
-    if(kingFile < 7) {
+    if (kingFile < 7) {
         relevant_files = relevant_files | files[FILE(kingField+1)];
     }*/
 
@@ -112,12 +112,12 @@ static int32_t kingSafetySinglePlayer(const chessPosition* position, const uint8
 #endif*/
     uint16_t kingAttackScore = 0;
 
-    for(uint16_t pieceType = 0; pieceType < 5; pieceType++ ) {
+    for (uint16_t pieceType = 0; pieceType < 5; pieceType++) {
         uint64_t attacks = opponentAttackTable->attackTables[pieceType] & kingmoves;
 
 /*#ifdef EXPERIMENTAL
         uint16_t numAttacks = popcount(attacks);
-        if(numAttacks > 4) {
+        if (numAttacks > 4) {
             numAttacks = 4;
         }
         kingAttackScore = kingAttackScore+attackScores[numAttacks][pieceType];
@@ -127,7 +127,7 @@ static int32_t kingSafetySinglePlayer(const chessPosition* position, const uint8
     }
 
 
-    if(kingAttackScore >= 70) {
+    if (kingAttackScore >= 70) {
         kingAttackScore = 69;
     }
 /*#ifdef EXPERIMENTAL

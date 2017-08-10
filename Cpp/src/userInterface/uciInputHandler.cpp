@@ -62,7 +62,7 @@ userEvent getNextUserEvent() {
     auto iterator = userEventList.find(commandType);
 
     uciInput inputType = invalid;
-    if(iterator == userEventList.end()) {
+    if (iterator == userEventList.end()) {
         std::cout << "Invalid user input" << std::endl;
     } else {
         inputType = iterator->second;

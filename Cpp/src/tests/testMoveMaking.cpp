@@ -22,7 +22,7 @@ testResult testMakeMove() {
 
     //non-captures
     //----------------
-    for(uint8_t k=0; k < 2; k++) {
+    for (uint8_t k = 0; k < 2; k++) {
 
         playerColor color = (playerColor) k;
 
@@ -55,7 +55,7 @@ testResult testMakeMove() {
 
     //captures
     //----------------
-    for(uint8_t k=0; k < 2; k++) {
+    for (uint8_t k = 0; k < 2; k++) {
 
         playerColor color = (playerColor) k;
 
@@ -103,7 +103,7 @@ testResult testUndoMove() {
 
     //non-captures
     //----------------
-    for(uint8_t k=0; k < 2; k++) {
+    for (uint8_t k = 0; k < 2; k++) {
 
         playerColor color = (playerColor) k;
 
@@ -136,7 +136,7 @@ testResult testUndoMove() {
 
     //captures
     //----------------
-    for(uint8_t k=0; k < 2; k++) {
+    for (uint8_t k = 0; k < 2; k++) {
 
         playerColor color = (playerColor) k;
 

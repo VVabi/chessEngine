@@ -44,7 +44,7 @@ void latexOutput(const chessPosition* pos, evaluationResult ev, int16_t eval, st
     out << "\\end {tabular}" << std::endl;
     out << "\\end {figure}" << std::endl;
     clearPageCounter++;
-    if(clearPageCounter == 3) {
+    if (clearPageCounter == 3) {
         out << "\\clearpage" << std::endl;
         clearPageCounter = 0;
     }

@@ -61,7 +61,7 @@
 -whitespace/line_length,\
 +whitespace/newline,\
 +whitespace/operators,\
--whitespace/parens,\
++whitespace/parens,\
 -whitespace/semicolon,\
 +whitespace/tab,\
 -whitespace/todo \

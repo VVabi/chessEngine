@@ -97,74 +97,74 @@ static int16_t trappedPieces(const chessPosition* position) {
     int16_t ret = 0;
 
 
-    if(wBishops & H7) {
-        if( (bPawns & G6) && (bPawns & F7)) {
+    if (wBishops & H7) {
+        if ((bPawns & G6) && (bPawns & F7)) {
             ret = ret-50;
         }
     }
 
-    if(wBishops & A7) {
-        if( (bPawns & B6) && (bPawns & C7)) {
+    if (wBishops & A7) {
+        if ((bPawns & B6) && (bPawns & C7)) {
             ret = ret-50;
         }
     }
 
-    if(bBishops & H2) {
-        if( (wPawns & G3) && (wPawns & F2)) {
+    if (bBishops & H2) {
+        if ((wPawns & G3) && (wPawns & F2)) {
             ret = ret+50;
         }
     }
 
-    if(bBishops & A2) {
-        if( (wPawns & B3) && (wPawns & C2)) {
+    if (bBishops & A2) {
+        if ((wPawns & B3) && (wPawns & C2)) {
             ret = ret+50;
         }
     }
 
-    if(wKnights & H8) {
-        if( (bPawns & (H7 | F7))) {
+    if (wKnights & H8) {
+        if ((bPawns & (H7 | F7))) {
             ret = ret-50;
         }
     }
 
-    if(wKnights & A8) {
-        if( (bPawns & (A7 | C7))) {
+    if (wKnights & A8) {
+        if ((bPawns & (A7 | C7))) {
             ret = ret-50;
         }
     }
 
-    if(bKnights & H1) {
-        if( (wPawns & (H2 | F2))) {
+    if (bKnights & H1) {
+        if ((wPawns & (H2 | F2))) {
             ret = ret+50;
         }
     }
 
-    if(bKnights & A1) {
-        if( (wPawns & (A2 | C2))) {
+    if (bKnights & A1) {
+        if ((wPawns & (A2 | C2))) {
             ret = ret+50;
         }
     }
 
-    if(bRooks & H8) {
-        if((bPawns & (H7 | H6)) && (position->pieceTables[black][king] & G8)) {
+    if (bRooks & H8) {
+        if ((bPawns & (H7 | H6)) && (position->pieceTables[black][king] & G8)) {
             ret = ret+50;
         }
     }
 
-    if(bRooks & A8) {
-        if((bPawns & (A7 | A6)) && (position->pieceTables[black][king] & B8)) {
+    if (bRooks & A8) {
+        if ((bPawns & (A7 | A6)) && (position->pieceTables[black][king] & B8)) {
             ret = ret+50;
         }
     }
 
-    if(wRooks & H1) {
-        if((wPawns & (H2 | H3)) && (position->pieceTables[white][king] & G1)) {
+    if (wRooks & H1) {
+        if ((wPawns & (H2 | H3)) && (position->pieceTables[white][king] & G1)) {
             ret = ret-50;
         }
     }
 
-    if(wRooks & A1) {
-        if((wPawns & (A2 | A3)) && (position->pieceTables[white][king] & B1)) {
+    if (wRooks & A1) {
+        if ((wPawns & (A2 | A3)) && (position->pieceTables[white][king] & B1)) {
             ret = ret-50;
         }
     }
@@ -177,20 +177,20 @@ static int16_t trappedPieces(const chessPosition* position) {
 static int32_t rookOpenFiles(const chessPosition* position, uint8_t* pawnOccupancy, const evalParameters* evalParams) {
     int32_t ret = 0;
 
-    for(uint8_t color=0; color<2; color++) {
+    for (uint8_t color = 0; color < 2; color++) {
         uint64_t rooks = position->pieceTables[color][rook];
-        while(rooks) {
+        while (rooks) {
             uint16_t field = popLSB(rooks);
             uint16_t file = FILE(field);
 /*#ifdef EXPERIMENTAL
-            if(((pawnOccupancy[color] | pawnOccupancy[1-color]) & (1 << file)) == 0) {
+            if (((pawnOccupancy[color] | pawnOccupancy[1-color]) & (1 << file)) == 0) {
                 ret = ret+(1-2*color)*evalParams->rookOnOpenFile;
             }
-            else if((pawnOccupancy[color] & (1 << file)) == 0) {
+            else if ((pawnOccupancy[color] & (1 << file)) == 0) {
                 ret = ret+(1-2*color)*5;
             }
 #else*/
-            if((pawnOccupancy[color] & (1 << file)) == 0) {
+            if ((pawnOccupancy[color] & (1 << file)) == 0) {
                 ret = ret+(1-2*color)*evalParams->rookOnOpenFile;
             }
 //#endif
@@ -205,7 +205,7 @@ static int32_t rookOpenFiles(const chessPosition* position, uint8_t* pawnOccupan
 int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, bool PSQ_only) {
 
 
-    if( (position->pieceTables[white][pawn] == 0) &&
+    if ((position->pieceTables[white][pawn] == 0) &&
         (position->pieceTables[black][pawn] == 0) &&
         position->totalFigureEval < 400) {
         return 0; //insufficent material
@@ -227,12 +227,12 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
     bufferEndgame  = bufferEndgame-(1 << 14);
     uint16_t phase = position->totalFigureEval/100;
 
-    if(position->pieceTables[white][queen] | position->pieceTables[black][queen]) {
+    if (position->pieceTables[white][queen] | position->pieceTables[black][queen]) {
         phase = phase+5;
     }
 
 
-    if(phase > 80) {
+    if (phase > 80) {
         phase = 80;
     }
 
@@ -240,14 +240,14 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
     int32_t pieceTableEval = ((256-taperingValues[phase])*bufferEndgame+taperingValues[phase]*bufferMidgame)/256; //division by 256
     eval = eval+pieceTableEval;
 
-    if(PSQ_only) {
+    if (PSQ_only) {
         return (1-2*position->toMove)*eval;
     }
     result.PSQ = pieceTableEval;
 
     int32_t evalsigned = (1-2*position->toMove)*eval;
 
-    if( (evalsigned < alpha - 500) || (evalsigned > beta+500)) {
+    if ((evalsigned < alpha - 500) || (evalsigned > beta+500)) {
         //std::cout << "Futility pruning in eval" << std::endl;
         return evalsigned;
     }
@@ -272,14 +272,14 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
     uint64_t numWhiteBishops = popcount(position->pieceTables[white][bishop]);
 
     result.bishoppair = 0;
-    if(numWhiteBishops > 1) {
+    if (numWhiteBishops > 1) {
         eval                    = eval+evalPars->bishoppair;
         result.bishoppair       = evalPars->bishoppair;
     }
 
     uint64_t numblackBishops = popcount(position->pieceTables[black][bishop]);
 
-    if(numblackBishops > 1) {
+    if (numblackBishops > 1) {
         eval = eval-evalPars->bishoppair;
         result.bishoppair = result.bishoppair-evalPars->bishoppair;
     }
@@ -297,7 +297,7 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
     eval = eval+oposts;
     result.outPosts = oposts;
 
-    if(position->toMove == white) {
+    if (position->toMove == white) {
         eval = eval+10;
     } else {
         eval = eval-10;
@@ -308,12 +308,12 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
     //-----------------
     uint64_t whiteRookAttack = whiteAttackTable.attackTables[rook];
     uint64_t whiteRooks      = position->pieceTables[white][rook];
-    if(whiteRookAttack & whiteRooks) {
+    if (whiteRookAttack & whiteRooks) {
         eval = eval+10;
     }
     uint64_t blackRookAttack = blackAttackTable.attackTables[rook];
     uint64_t blackRooks      = position->pieceTables[black][rook];
-    if(blackRookAttack & blackRooks) {
+    if (blackRookAttack & blackRooks) {
         eval = eval-10;
     }
 
@@ -326,21 +326,21 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
     /*static uint32_t counter = 0;
     counter++;
 
-    if((counter > 100000) && (std::abs(eval-position->figureEval) > 100)) {
+    if ((counter > 100000) && (std::abs(eval-position->figureEval) > 100)) {
         counter = 0;
         latexOutput(position, result, eval);
     }*/
 
 
-    if((position->pieceTables[white][pawn] == 0) && (eval > 0)) {
-        if((position->pieceTables[white][rook] | position->pieceTables[white][queen]) == 0) {
+    if ((position->pieceTables[white][pawn] == 0) && (eval > 0)) {
+        if ((position->pieceTables[white][rook] | position->pieceTables[white][queen]) == 0) {
             eval = eval/16;
         }
     }
 
 
-    if((position->pieceTables[black][pawn] == 0) && (eval < 0)) {
-        if((position->pieceTables[black][rook] | position->pieceTables[black][queen]) == 0) {
+    if ((position->pieceTables[black][pawn] == 0) && (eval < 0)) {
+        if ((position->pieceTables[black][rook] | position->pieceTables[black][queen]) == 0) {
             eval = eval/16;
         }
     }

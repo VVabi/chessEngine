@@ -103,11 +103,11 @@ int16_t staticPawnEvalComplete(const chessPosition* position, uint8_t* pawnOcc) 
     pawnOcc[1] = getColumnOcc(position->pieceTables[black][pawn]);
 
     uint64_t wDouble = doubledPawns[white];
-    while(wDouble) {
+    while (wDouble) {
         ev = ev-10;
         uint16_t field = popLSB(wDouble);
         //std::cout << "White double pawn on " << field << " " << ev <<  std::endl;
-        if(!(BIT64(field) & neighboringColumn[black])) { //no black pawn on an adjacent column
+        if (!(BIT64(field) & neighboringColumn[black])) { //no black pawn on an adjacent column
             ev = ev-5;
             //std::cout << "White double pawn unresolvable on " << field << " " << ev <<  std::endl;
         }
@@ -116,22 +116,22 @@ int16_t staticPawnEvalComplete(const chessPosition* position, uint8_t* pawnOcc) 
 
 
     uint64_t bDouble = doubledPawns[black];
-    while(bDouble) {
+    while (bDouble) {
         ev = ev+10;
         uint16_t field = popLSB(bDouble);
         //std::cout << "Black double pawn on " << field << " " << ev <<  std::endl;
-        if(!(BIT64(field) & neighboringColumn[white])) { //no black pawn on an adjacent column
+        if (!(BIT64(field) & neighboringColumn[white])) { //no black pawn on an adjacent column
             ev = ev+5;
             //std::cout << "Black double pawn unresolvable on " << field << " " << ev <<  std::endl;
         }
     }
 
     /*uint64_t wDouble = doubledPawns[white];
-        while(wDouble) {
+        while (wDouble) {
             ev = ev-10;
             uint16_t field = popLSB(wDouble);
             std::cout << "White double pawn on " << field << " " << ev <<  std::endl;
-            if(!(BIT64(field) & neighboringColumn[black])) { //no black pawn on an adjacent column
+            if (!(BIT64(field) & neighboringColumn[black])) { //no black pawn on an adjacent column
                 ev = ev-5;
                 std::cout << "White double pawn unresolvable on " << field << " " << ev <<  std::endl;
             }
@@ -140,11 +140,11 @@ int16_t staticPawnEvalComplete(const chessPosition* position, uint8_t* pawnOcc) 
 
 
         uint64_t bDouble = doubledPawns[black];
-        while(bDouble) {
+        while (bDouble) {
             ev = ev+10;
             uint16_t field = popLSB(bDouble);
             std::cout << "Black double pawn on " << field << " " << ev <<  std::endl;
-            if(!(BIT64(field) & neighboringColumn[white])) { //no black pawn on an adjacent column
+            if (!(BIT64(field) & neighboringColumn[white])) { //no black pawn on an adjacent column
                 ev = ev+5;
                 std::cout << "Black double pawn unresolvable on " << field << " " << ev <<  std::endl;
             }
@@ -152,33 +152,33 @@ int16_t staticPawnEvalComplete(const chessPosition* position, uint8_t* pawnOcc) 
 
 
     uint64_t wIso = isolatedPawns[white];
-    while(wIso) {
+    while (wIso) {
         uint16_t field = popLSB(wIso);
         ev = ev+isolatedPawnTable[field];
         //std::cout << "White iso pawn on " << field << " ev " << isolatedPawnTable[field]<< " " << ev <<  std::endl;
     }
 
     uint64_t bIso = isolatedPawns[black];
-    while(bIso) {
+    while (bIso) {
         uint16_t field = popLSB(bIso);
         ev = ev-isolatedPawnTable[field];
         //std::cout << "Black iso pawn on " << field << " ev " << isolatedPawnTable[field]<< " " << ev <<  std::endl;
     }
 
     uint64_t wBackwards = backwardsPawns[white];
-    while(wBackwards) {
+    while (wBackwards) {
         uint16_t field = popLSB(wBackwards);
-        if(!(BIT64(field) & frontColumnFill[black])) {
-            ev= ev-5;
+        if (!(BIT64(field) & frontColumnFill[black])) {
+            ev = ev-5;
             //std::cout << "White backwards pawn on " << field << " " << ev <<  std::endl;
         }
     }
 
     uint64_t bBackwards = backwardsPawns[black];
-    while(bBackwards) {
+    while (bBackwards) {
         uint16_t field = popLSB(bBackwards);
-        if(!(BIT64(field) & frontColumnFill[white])) {
-            ev= ev+5;
+        if (!(BIT64(field) & frontColumnFill[white])) {
+            ev = ev+5;
             //std::cout << "Black backwards pawn on " << field << " " << ev <<  std::endl;
         }
     }

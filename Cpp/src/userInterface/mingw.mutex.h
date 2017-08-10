@@ -67,7 +67,7 @@ public:
         InitializeCriticalSection(&mHandle);
     }
     recursive_mutex (const recursive_mutex&) = delete;
-    recursive_mutex& operator=(const recursive_mutex&) = delete;
+    recursive_mutex& operator = (const recursive_mutex&) = delete;
     ~recursive_mutex() noexcept
     {
         DeleteCriticalSection(&mHandle);
@@ -82,7 +82,7 @@ public:
     }
     bool try_lock()
     {
-        return (TryEnterCriticalSection(&mHandle)!=0);
+        return (TryEnterCriticalSection(&mHandle)!= 0);
     }
 };
 template <class B>
@@ -96,7 +96,7 @@ public:
     using base::native_handle;
     _NonRecursive() noexcept :base(), mOwnerThread(0) {}
     _NonRecursive (const _NonRecursive<B>&) = delete;
-    _NonRecursive& operator= (const _NonRecursive<B>&) = delete;
+    _NonRecursive& operator = (const _NonRecursive<B>&) = delete;
     void lock()
     {
         base::lock();
@@ -154,7 +154,7 @@ public:
     typedef HANDLE native_handle_type;
     native_handle_type native_handle() const {return mHandle;}
     recursive_timed_mutex(const recursive_timed_mutex&) = delete;
-    recursive_timed_mutex& operator=(const recursive_timed_mutex&) = delete;
+    recursive_timed_mutex& operator = (const recursive_timed_mutex&) = delete;
     recursive_timed_mutex(): mHandle(CreateMutex(NULL, FALSE, NULL)) {}
     ~recursive_timed_mutex()
     {
@@ -189,7 +189,7 @@ public:
             throw std::system_error(EPROTO, std::generic_category());
     }
     template <class Rep, class Period>
-    bool try_lock_for(const std::chrono::duration<Rep, Period>& dur)
+    bool try_lock_for (const std::chrono::duration<Rep, Period>& dur)
     {
         DWORD timeout = (DWORD)chrono::duration_cast<chrono::milliseconds>(dur).count();
 
@@ -206,7 +206,7 @@ public:
     template <class Clock, class Duration>
     bool try_lock_until(const std::chrono::time_point<Clock, Duration>& timeout_time)
     {
-        return try_lock_for(timeout_time - Clock::now());
+        return try_lock_for (timeout_time - Clock::now());
     }
 };
 
@@ -217,11 +217,11 @@ protected:
 public:
     using base::base;
     timed_mutex(const timed_mutex&) = delete;
-    timed_mutex& operator=(const timed_mutex&) = delete;
+    timed_mutex& operator = (const timed_mutex&) = delete;
     template <class Rep, class Period>
-    bool try_lock_for(const std::chrono::duration<Rep, Period>& dur)
+    bool try_lock_for (const std::chrono::duration<Rep, Period>& dur)
     {
-        bool ret = base::try_lock_for(dur);
+        bool ret = base::try_lock_for (dur);
 #ifndef STDMUTEX_NO_RECURSION_CHECKS
         if (ret)
             checkSetOwnerAfterLock();
@@ -267,7 +267,7 @@ protected:
 public:
     typedef M mutex_type;
     lock_guard(const lock_guard&) = delete;
-    lock_guard& operator=(const lock_guard&) = delete;
+    lock_guard& operator = (const lock_guard&) = delete;
     explicit lock_guard(mutex_type& m): mMutex(m) { mMutex.lock();  }
     lock_guard(mutex_type& m, std::adopt_lock_t):mMutex(m) {}
     ~lock_guard() {  mMutex.unlock();   }

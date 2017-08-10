@@ -13,7 +13,7 @@
 #include <parameters/parameters.hpp>
 
 
-int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, bool PSQ_only=false);
+int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, bool PSQ_only = false);
 int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupancy, uint16_t phase);
 int32_t staticPawnEval(uint64_t pawns, playerColor color, const staticPawnEvalParameters* evalPars);
 int32_t kingSafety(const chessPosition* position, const uint8_t* pawnColumnOccupancy, const AttackTable* whiteAttackTable, const AttackTable* blackAttackTable, const kingSafetyEvalParameters* par);

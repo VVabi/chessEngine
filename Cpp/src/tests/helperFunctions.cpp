@@ -22,11 +22,11 @@ static char randomTokens[] = {'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', 
 static char figures[2][6] = { {'P', 'N', 'B', 'R', 'Q', 'K'}, {'p', 'n', 'b', 'r', 'q', 'k'}};
 
 std::string getRandomPosition(playerColor color) {
-    srand (time(NULL));
+    srand(time(NULL));
 
     std::string ret = "";
 
-    for(uint8_t ind=0; ind < 64; ind++) {
+    for (uint8_t ind = 0; ind < 64; ind++) {
         uint32_t index  = rand() % 24;
         ret.push_back(randomTokens[index]);
     }
@@ -46,28 +46,21 @@ std::string getRandomPosition(playerColor color) {
 
 
 char getRandomPiece(playerColor color) {
-
-    srand (time(NULL));
+    srand(time(NULL));
     uint32_t index  = rand() % 6;
-
     return figures[color][index];
-
-
 }
 
 
 uint32_t getRandomField() {
-    srand (time(NULL));
+    srand(time(NULL));
     uint32_t index  = rand() % 64;
     return index;
 }
 
 figureType getFigureTypeFromChar(char piece) {
-
     figureType type = pawn;
-
-    switch(piece) {
-
+    switch (piece) {
         case 'P':
         case 'p':
             type = pawn;
@@ -96,8 +89,5 @@ figureType getFigureTypeFromChar(char piece) {
             std::cout << "Unknown chess piece - WTF?" << std::endl;
             break;
     }
-
-
     return type;
-
 }

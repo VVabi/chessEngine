@@ -21,7 +21,7 @@ template<typename T> class fsarray {
     }
     explicit fsarray(int n) {
         length = n;
-        if(length > 0) {
+        if (length > 0) {
             data = new T[length];
         } else {
             data = 0;
@@ -29,14 +29,14 @@ template<typename T> class fsarray {
     }
 
     T &operator[](unsigned int i) {
-        /*if(i > length) {
+        /*if (i > length) {
 
         }*/
         return data[i];
     }
 
     void free_array() {
-        if(data != NULL) {
+        if (data != NULL) {
 
             delete[] data;
             data = NULL;
@@ -48,7 +48,7 @@ template<typename T> class fsarray {
 
     fsarray<T> vdt_copy() {
         fsarray<T> ret = fsarray<T>(length);
-        for(uint32_t i=0; i<length; i++) {
+        for (uint32_t i = 0; i < length; i++) {
             ret[i] = data[i].copy();
         }
         return ret;

@@ -23,8 +23,8 @@
 #define SECONDROW ((1ULL << 8) | (1ULL << 9) |(1ULL << 10) |(1ULL << 11) |(1ULL << 12) |(1ULL << 13) |(1ULL << 14) |(1ULL << 15))
 #define SEVENTHROW ((1ULL << 48) | (1ULL << 49) |(1ULL << 50) |(1ULL << 51) |(1ULL << 52) |(1ULL << 53) |(1ULL << 54) |(1ULL << 55))
 
-#define NOTFILEA (~( (1ULL << 0) | (1ULL << 8) | (1ULL << 16) | (1ULL << 24) | (1ULL << 32) | (1ULL << 40) | (1ULL << 48) | (1ULL << 56)))
-#define NOTFILEH (~( (1ULL << 7) | (1ULL << 15) | (1ULL << 23) | (1ULL << 31) | (1ULL << 39) | (1ULL << 47) | (1ULL << 55) | (1ULL << 63)))
+#define NOTFILEA (~((1ULL << 0) | (1ULL << 8) | (1ULL << 16) | (1ULL << 24) | (1ULL << 32) | (1ULL << 40) | (1ULL << 48) | (1ULL << 56)))
+#define NOTFILEH (~((1ULL << 7) | (1ULL << 15) | (1ULL << 23) | (1ULL << 31) | (1ULL << 39) | (1ULL << 47) | (1ULL << 55) | (1ULL << 63)))
 
 
 #define WHITEKINGSIDECASTLEBLOCKINGFIELDS  ((1ULL << 5) | (1ULL << 6))

@@ -1,10 +1,10 @@
-//============================================================================
+// ============================================================================
 // Name        : Vabi.cpp
 // Author      : Fabian Lenhardt
 // Version     :
 // Copyright   : Your copyright notice
 // Description : Hello World in C++, Ansi-style
-//============================================================================
+// ============================================================================
 
 #include <iostream>
 using namespace std;
@@ -25,13 +25,13 @@ using namespace std;
 
 int main() {
     initializeParameters();
-    srand (get_timestamp());
+    srand(get_timestamp());
     fillZobristHash();
     /*std::ofstream out("/home/vabi/TeX/Chess/positions.tex");
     std::ifstream in("/home/vabi/code/chessEngine/chessGui/openingPositions.txt");
     std::string line;
-    while(getline(in, line)) {
-        if(line.at(0) == '%') {
+    while (getline(in, line)) {
+        if (line.at(0) == '%') {
             continue;
         }
         latexOutput(line, out);

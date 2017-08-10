@@ -37,8 +37,8 @@ void makeNullMove(chessPosition* position) {
     move.sourceField = 0;
     move.targetField = 0;
 
-    if(position->madeMoves.length > 0) {
-        assert( !((position->madeMoves[position->madeMoves.length-1].sourceField == 0) && (position->madeMoves[position->madeMoves.length-1].targetField == 0)));
+    if (position->madeMoves.length > 0) {
+        assert(!((position->madeMoves[position->madeMoves.length-1].sourceField == 0) && (position->madeMoves[position->madeMoves.length-1].targetField == 0)));
     }
     position->madeMoves.add(&move);
 }
@@ -63,7 +63,7 @@ static inline void makeNormalMove(chessMove* move, chessPosition* position) {
 static inline void makeKingSideCastle(chessPosition* position) {
     playerColor toMove = position->toMove;
 
-    if(toMove == white) {
+    if (toMove == white) {
         position->pieces[toMove]             = position->pieces[toMove]^(WHITEKINGSIDECASTLEOCCUPANCYCHANGE);
         position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(WHITEKINGSIDECASTLEROOKMOVE);
         position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(WHITEKINGSIDECASTLEKINGMOVE);
@@ -82,7 +82,7 @@ static inline void makeKingSideCastle(chessPosition* position) {
 
 static inline void makeQueenSideCastle(chessPosition* position) {
     playerColor toMove = position->toMove;
-    if(toMove == white) {
+    if (toMove == white) {
         position->pieces[toMove]             = position->pieces[toMove]^(WHITEQUEENSIDECASTLEOCCUPANCYCHANGE);
         position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(WHITEQUEENSIDECASTLEROOKMOVE);
         position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(WHITEQUEENSIDECASTLEQUEENMOVE);
@@ -145,7 +145,7 @@ void makeMove(chessMove* move, chessPosition* position) {
     bool isPawn = (move->type == pawnMove) || (move->type == enpassant) || (move->type == promotionQueen) || (move->type == promotionRook) || (move->type == promotionBishop) || (move->type == promotionKnight);
     bool isCapture = (move->captureType != none);
 
-    if(isPawn || isCapture) {
+    if (isPawn || isCapture) {
         position->data.fiftyMoveRuleCounter = 0;
     }
 
@@ -164,12 +164,12 @@ void makeMove(chessMove* move, chessPosition* position) {
     position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
     position->data.enPassantFile  = 8;
 
-    if((move->type == pawnMove) && ((move->targetField-move->sourceField) & 15) == 0) { //pawn went two ahead
+    if ((move->type == pawnMove) && ((move->targetField-move->sourceField) & 15) == 0) { //pawn went two ahead
         position->data.enPassantFile = FILE(move->targetField);
     }
 
 
-    switch(move->type) {
+    switch (move->type) {
         case pawnMove:
         case knightMove:
         case bishopMove:

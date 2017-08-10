@@ -28,18 +28,18 @@ extern uint16_t killerMoves[40][2];
 
 uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t numMadeMoves, uint32_t* worst_case_time) {
 
-    if(params.type == infinite) {
+    if (params.type == infinite) {
         *worst_case_time = UINT32_MAX;
         return UINT32_MAX;
     }
 
-    if(params.type == fixed_depth) {
+    if (params.type == fixed_depth) {
         *worst_case_time = UINT32_MAX;
         return UINT32_MAX;
     }
 
     //TODO: implement the movesToGo parameter handling - currently we play stuff like "40 moves in 40 min" extremely badly
-    if(params.totalTime[toMove] > 0) {
+    if (params.totalTime[toMove] > 0) {
         uint32_t total = params.totalTime[toMove];
         uint32_t increment = params.increment[toMove];
 
@@ -48,14 +48,14 @@ uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t n
 
         int16_t remainingMoves = totalExpectedMoves-numMadeMoves;
 
-        if(remainingMoves < 20) {
+        if (remainingMoves < 20) {
             remainingMoves = 20;
         }
 
         uint32_t completeExpectedTime = total+remainingMoves*increment;
         float timeAllotted = 2*completeExpectedTime/(3.0*remainingMoves);
 
-        if(timeAllotted > total/10.0) {
+        if (timeAllotted > total/10.0) {
             timeAllotted = total/10.0;
         }
         *worst_case_time = total/10.0;
@@ -68,23 +68,23 @@ uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t n
 
 bool checkContinue(searchParameters params, uint16_t depth, uint16_t passedTime, uint16_t allottedTime) {
 
-    if(depth > 27) {
+    if (depth > 27) {
         return false;
     }
 
-    if(params.type == infinite) {
+    if (params.type == infinite) {
         return true;
     }
 
-    if(params.type == fixed_depth) {
+    if (params.type == fixed_depth) {
         return (params.depth >= depth) || (depth <= 3);
     }
 
-    if(params.type == time_until_move) {
+    if (params.type == time_until_move) {
         return passedTime < allottedTime;
     }
 
-    if(params.type == fixed_time) {
+    if (params.type == fixed_time) {
         return passedTime < params.fixedTime;
     }
 
@@ -122,18 +122,18 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
     uint16_t refutationTarget = NO_REFUTATION;
     calculateStandardSortEvals(position, &moves, 0, 0, sortInfo(false, refutationTarget, getHashMove(position->zobristHash)));
     std::stable_sort(moves.data, moves.data+moves.length);
-    /*for(uint16_t ind=0; ind < moves.length; ind++) {
+    /*for (uint16_t ind = 0; ind < moves.length; ind++) {
         std::cout<< moveToString(moves[ind], *position) << " Eval " << moves[ind].sortEval << std::endl;
     }*/
 
     pvLine line;
     line.numMoves = 0;
-    while(checkContinue(params, depth, get_timestamp()-start_ts, totalTime)) {
+    while (checkContinue(params, depth, get_timestamp()-start_ts, totalTime)) {
         try {
             //std::cout << "Depth " << depth << std::endl;
 
             *eval = negamax(position, plyInfo(0, depth+EXTENSIONS_ALLOWED, 0, depth), AlphaBeta(alpha, beta), &line, searchSettings(nullmove_enabled, hashprobe_disabled, checkextension_enabled, searchId));
-            if(doAspiration) {
+            if (doAspiration) {
                 if ((*eval <= alpha) || (*eval >= beta)) {
 
                     *eval = negamax(position, plyInfo(0, depth+EXTENSIONS_ALLOWED, 0, depth), AlphaBeta(-32000, 32000), &line, searchSettings(nullmove_enabled, hashprobe_disabled, checkextension_enabled, searchId));
@@ -147,15 +147,15 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
             /*chessMove localBestMove;
 
             uint64_t* nodeCounts = new uint64_t[moves.length];
-            for(uint16_t ind=0; ind < moves.length; ind++) {
+            for (uint16_t ind = 0; ind < moves.length; ind++) {
                 nodeCounts[ind] = 0;
             }
 
 
             *eval =  root_search(position, &localBestMove, alpha, beta, depth, depth+3, &moves, nodeCounts);
-            if(doAspiration) {
+            if (doAspiration) {
                 if ((*eval <= alpha) || (*eval >= beta)) {
-                    for(uint16_t ind=0; ind < moves.length; ind++) {
+                    for (uint16_t ind = 0; ind < moves.length; ind++) {
                         nodeCounts[ind] = 0;
                     }
                     *eval = root_search(position, &localBestMove, -32000, 32000, depth, depth+3, &moves, nodeCounts);
@@ -169,29 +169,29 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 
             uint64_t maxCount = 0;
 
-            for(uint16_t ind=0; ind < moves.length; ind++) {
+            for (uint16_t ind = 0; ind < moves.length; ind++) {
 
-                if(nodeCounts[ind] > maxCount) {
+                if (nodeCounts[ind] > maxCount) {
                     maxCount = nodeCounts[ind];
                 }
 
             }
             uint32_t scaling = 1;
 
-            if(maxCount > INT16_MAX) {
+            if (maxCount > INT16_MAX) {
                 scaling = maxCount/10000+1;
             }
-            for(uint16_t ind=0; ind < moves.length; ind++) {
+            for (uint16_t ind = 0; ind < moves.length; ind++) {
 
-                if(nodeCounts[ind] > 0) {
+                if (nodeCounts[ind] > 0) {
                     moves[ind].sortEval = (nodeCounts[ind]/scaling);
                 } else {
-                    if(moves[ind].sortEval > 0) {
+                    if (moves[ind].sortEval > 0) {
                         moves[ind].sortEval = moves[ind].sortEval-500;
                     }
                 }
 
-                if(moves[ind].move == bestMove->move) {
+                if (moves[ind].move == bestMove->move) {
                     moves[ind].sortEval = INT16_MAX;
                 }
                 //std::cout << moves[ind].sortEval << std::endl;
@@ -201,7 +201,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 
             /*std::cout << "New move list" << std::endl;
 
-            for(uint16_t ind=0; ind < moves.length; ind++) {
+            for (uint16_t ind = 0; ind < moves.length; ind++) {
                 std::cout<< moveToString(moves[ind], *position) << " Eval " << moves[ind].sortEval << std::endl;
             }*/
 
@@ -214,9 +214,9 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
         }
 
         *mtime = get_timestamp()-start_ts;
-        uint64_t totalNodes=0;
+        uint64_t totalNodes = 0;
         searchDebugData data = getSearchData();
-        for(uint16_t ind=0; ind < 40; ind++) {
+        for (uint16_t ind = 0; ind < 40; ind++) {
             totalNodes = totalNodes+data.nodes[ind];
         }
 
@@ -224,7 +224,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 
         std::list<std::string> moveList;
 
-        for(uint16_t ind=0; ind < line.numMoves; ind++) {
+        for (uint16_t ind = 0; ind < line.numMoves; ind++) {
             std::string mv = moveToString(line.line[ind]);
             moveList.push_back(mv);
         }
@@ -234,17 +234,17 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
         line.numMoves = 0;
         depth++;
         searchedNodes = searchedNodes+*nodeCount;
-        if(*eval > 29000) {
+        if (*eval > 29000) {
             break;
         }
     }
 
     depth--;
     *mtime = get_timestamp()-start_ts;
-    while(position->madeMoves.length > madeMoves) {
+    while (position->madeMoves.length > madeMoves) {
         chessMove current = position->madeMoves[position->madeMoves.length-1];
 
-        if(current.sourceField == 0 && current.targetField == 0) {
+        if (current.sourceField == 0 && current.targetField == 0) {
             undoNullMove(position);
         } else {
             undoMove(position);

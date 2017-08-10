@@ -19,7 +19,7 @@ struct userEvent {
 
     userEvent(uciInput in, std::list<std::string> d) {
         input = in;
-        data =d;
+        data = d;
     }
 };
 

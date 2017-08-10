@@ -73,45 +73,45 @@ static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint6
     int32_t eval = 0;
     uint64_t whitePawnBuffer = whitePawns;
 
-    while(whitePawnBuffer) {
+    while (whitePawnBuffer) {
         uint16_t field = popLSB(whitePawnBuffer);
-        if((passedPawnMasks[white][field] & blackPawns) == 0) {
+        if ((passedPawnMasks[white][field] & blackPawns) == 0) {
 
             uint16_t promotionField  = FILE(field)+56;
             uint16_t distToPromotion = 7-ROW(field);
             uint16_t kingDist        = distBetweenFields(promotionField, blackKing);
             bool blocked = blackPieces & BIT64(field+8);
-            if(distToPromotion <= 2) {
+            if (distToPromotion <= 2) {
 
 
                 *untaperedEval = *untaperedEval+passedPawnEvalValues[white][field];
-                                if(blocked) {
+                                if (blocked) {
                                     *untaperedEval = *untaperedEval-passedPawnEvalValues[white][field]/BLOCKEDDIVISOR;
                                 }
                             } else {
                 eval = eval+passedPawnEvalValues[white][field];
-                    if(blocked) {
+                    if (blocked) {
                         eval = eval-passedPawnEvalValues[white][field]/BLOCKEDDIVISOR;
                     }
             }
 /*#ifdef EXPERIMENTAL
             int16_t coverage = 0;
-            if(distToPromotion < 3) {
-                if(whiteAttackTable->attackTables[bishop] & BIT64(promotionField)) {
+            if (distToPromotion < 3) {
+                if (whiteAttackTable->attackTables[bishop] & BIT64(promotionField)) {
                     coverage = coverage+15;
                 }
 
                 uint64_t minorAttacks = blackAttackTable->attackTables[bishop] | blackAttackTable->attackTables[knight];
 
-                if(minorAttacks & BIT64(promotionField)) {
+                if (minorAttacks & BIT64(promotionField)) {
                     coverage = coverage-15;
                 }
 
-                if(blackAttackTable->attackTables[rook] & BIT64(promotionField)) {
+                if (blackAttackTable->attackTables[rook] & BIT64(promotionField)) {
                     coverage = coverage-10;
                 }
 
-                if(blackAttackTable->attackTables[queen] & BIT64(promotionField)) {
+                if (blackAttackTable->attackTables[queen] & BIT64(promotionField)) {
                     coverage = coverage-5;
                 }
             }
@@ -123,23 +123,23 @@ static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint6
         }
     }
     uint64_t blackPawnBuffer = blackPawns;
-    while(blackPawnBuffer) {
+    while (blackPawnBuffer) {
         uint16_t field = popLSB(blackPawnBuffer);
-        if((passedPawnMasks[black][field] & whitePawns) == 0) {
+        if ((passedPawnMasks[black][field] & whitePawns) == 0) {
 
             uint16_t promotionField  = FILE(field);
             uint16_t distToPromotion = ROW(field);
             uint16_t kingDist        = distBetweenFields(promotionField, whiteKing);
             bool blocked = whitePieces & BIT64(field-8);
-            if(distToPromotion <= 2) {
+            if (distToPromotion <= 2) {
 
                 *untaperedEval = *untaperedEval-passedPawnEvalValues[black][field];
-                if(blocked) {
+                if (blocked) {
                     *untaperedEval = *untaperedEval+passedPawnEvalValues[black][field]/BLOCKEDDIVISOR;
                 }
             } else {
                 eval = eval-passedPawnEvalValues[black][field];
-                    if(blocked) {
+                    if (blocked) {
                         eval = eval+passedPawnEvalValues[black][field]/BLOCKEDDIVISOR;
                     }
 
@@ -147,22 +147,22 @@ static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint6
 
         /*#ifdef EXPERIMENTAL
             int16_t coverage = 0;
-            if(distToPromotion < 3) {
-                if(blackAttackTable->attackTables[bishop] & BIT64(promotionField)) {
+            if (distToPromotion < 3) {
+                if (blackAttackTable->attackTables[bishop] & BIT64(promotionField)) {
                     coverage = coverage-15;
                 }
 
                 uint64_t minorAttacks = whiteAttackTable->attackTables[bishop] | whiteAttackTable->attackTables[knight];
 
-                if(minorAttacks & BIT64(promotionField)) {
+                if (minorAttacks & BIT64(promotionField)) {
                     coverage = coverage+15;
                 }
 
-                if(whiteAttackTable->attackTables[rook] & BIT64(promotionField)) {
+                if (whiteAttackTable->attackTables[rook] & BIT64(promotionField)) {
                     coverage = coverage+10;
                 }
 
-                if(whiteAttackTable->attackTables[queen] & BIT64(promotionField)) {
+                if (whiteAttackTable->attackTables[queen] & BIT64(promotionField)) {
                     coverage = coverage+5;
                 }
 
@@ -183,12 +183,12 @@ int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOcc
     int32_t eval = 0;
     *pawnColumnOccupancy = 0;
     uint8_t doublePawns         = 0; //TODO: extend to triple pawns
-    for (uint16_t ind=0; ind <8; ind++) {
+    for (uint16_t ind = 0; ind <8; ind++) {
         uint64_t occ = pawns & files[ind];
-        if(occ) {
+        if (occ) {
             *pawnColumnOccupancy = *pawnColumnOccupancy | (1 << ind);
         }
-        if(popcount(occ) > 1) {
+        if (popcount(occ) > 1) {
             doublePawns = doublePawns | (1 << ind);
         }
     }
@@ -223,13 +223,13 @@ int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOcc
 extern evaluationResult result;
 
 int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupancy, uint16_t phase) {
-    uint32_t eval=0;
+    uint32_t eval = 0;
     uint64_t whitePawns = position->pieceTables[white][pawn];
     uint64_t blackPawns = position->pieceTables[black][pawn];
     int16_t staticPawn = 0;
 
     pawnHashEntry entry;
-    if(getPawnHashTableEntry(&entry, position->pawnHash)) {
+    if (getPawnHashTableEntry(&entry, position->pawnHash)) {
         staticPawn = entry.eval;
         staticpawnhashhits++;
         pawnColumnOccupancy[0] = entry.pawnColumnOcc[0];

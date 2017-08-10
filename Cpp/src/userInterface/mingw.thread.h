@@ -56,8 +56,8 @@ public:
         void clear() {mId = 0;}
         friend class thread;
     public:
-        explicit id(DWORD aId=0):mId(aId) {}
-        bool operator==(const id& other) const {return mId == other.mId;}
+        explicit id(DWORD aId = 0):mId(aId) {}
+        bool operator == (const id& other) const {return mId == other.mId;}
     };
 protected:
     HANDLE mHandle;
@@ -75,7 +75,7 @@ public:
         other.mThreadId.clear();
     }
 
-    thread(const thread &other)=delete;
+    thread(const thread &other) = delete;
 
     template<class Function, class... Args>
     explicit thread(Function&& f, Args&&... args)
@@ -118,8 +118,8 @@ public:
         if (joinable())
             std::terminate();
     }
-    thread& operator=(const thread&) = delete;
-    thread& operator=(thread&& other) noexcept
+    thread& operator = (const thread&) = delete;
+    thread& operator = (thread&& other) noexcept
     {
         if (joinable())
           std::terminate();
@@ -160,14 +160,14 @@ namespace this_thread
     inline thread::id get_id() {return thread::id(GetCurrentThreadId());}
     inline void yield() {Sleep(0);}
     template< class Rep, class Period >
-    void sleep_for( const std::chrono::duration<Rep, Period>& sleep_duration)
+    void sleep_for ( const std::chrono::duration<Rep, Period>& sleep_duration)
     {
         Sleep(std::chrono::duration_cast<std::chrono::milliseconds>(sleep_duration).count());
     }
     template <class Clock, class Duration>
     void sleep_until(const std::chrono::time_point<Clock, Duration>& sleep_time)
     {
-        sleep_for(sleep_time-Clock::now());
+        sleep_for (sleep_time-Clock::now());
     }
 }
 

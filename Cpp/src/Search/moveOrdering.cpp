@@ -51,7 +51,7 @@ void calcCaptureSortEval(chessPosition* position, chessMove* mv, uint16_t hashed
     int16_t sortEval = SEE(position, mv);
     //undoMove(position);
 
-    /*if(sortEvaln != sortEval) {
+    /*if (sortEvaln != sortEval) {
         std::cout << sortEval << std::endl;
         std::cout << sortEvaln << std::endl;
         std::cout << chessPositionToFenString(*position) << std::endl;
@@ -60,19 +60,19 @@ void calcCaptureSortEval(chessPosition* position, chessMove* mv, uint16_t hashed
 
     assert(sortEvaln == sortEval);*/
     /*int16_t sortEval = 0;
-    if( ((uint16_t) mv->type) < 6) {
+    if (((uint16_t) mv->type) < 6) {
         sortEval = sortEval+captureEvals[mv->type][mv->captureType];
     }*/
 
-    /*if(position->madeMoves.length > 0) {
+    /*if (position->madeMoves.length > 0) {
         chessMove previousMove = position->madeMoves[position->madeMoves.length-1];
-        if(previousMove.targetField == mv->sourceField) { //recapture is usually good
+        if (previousMove.targetField == mv->sourceField) { //recapture is usually good
             sortEval = sortEval + 200;
         }
     }*/
 
 
-    if( ((mv->sourceField) | (mv->targetField << 8)) == hashedMove) {
+    if (((mv->sourceField) | (mv->targetField << 8)) == hashedMove) {
         sortEval = sortEval+2000;
     }
     mv->sortEval = sortEval;
@@ -80,10 +80,10 @@ void calcCaptureSortEval(chessPosition* position, chessMove* mv, uint16_t hashed
 
 #define ILLEGAL -20000
 
-static inline void calcSortEval( chessPosition* position, chessMove* mv, bool isInCheck, AttackTable* opponentAttackTable, AttackTable* ownAttackTable, uint16_t hashedMove, uint16_t killerA, uint16_t killerB, uint16_t refutationTarget, const evalParameters* evalPars) {
+static inline void calcSortEval(chessPosition* position, chessMove* mv, bool isInCheck, AttackTable* opponentAttackTable, AttackTable* ownAttackTable, uint16_t hashedMove, uint16_t killerA, uint16_t killerB, uint16_t refutationTarget, const evalParameters* evalPars) {
     //this function is completely ridiculously expensive. Whats going on??
     //TODO: add bonus for pawn pushes to 6th/7th row!
-    /*if(isInCheck) {   //for some reason I don't fully understand, adding this here slows and changes the search?? Maybe because these moves then are not history-reduced? At least possible.
+    /*if (isInCheck) {   //for some reason I don't fully understand, adding this here slows and changes the search?? Maybe because these moves then are not history-reduced? At least possible.
         uint16_t kingField = findLSB(position->pieceTables[position->toMove][king]);
 
         uint64_t bishopmoves =  bishopMoveTables[kingField][0];
@@ -92,11 +92,11 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
 
         bool mayBlockCheck = BIT64(mv->targetField) & kingSliderAttackFields;
 
-        if(!mayBlockCheck && !(mv->captureType == knight) && !(mv->type == kingMove) && !(mv->type == enpassant)) {
+        if (!mayBlockCheck && !(mv->captureType == knight) && !(mv->type == kingMove) && !(mv->type == enpassant)) {
             mv->sortEval = ILLEGAL;
             makeMove(mv, position);
             kingField = findLSB(position->pieceTables[1-position->toMove][king]);
-            if(!isFieldAttacked(position, position->toMove, kingField)) {
+            if (!isFieldAttacked(position, position->toMove, kingField)) {
                 std::cout << chessPositionToFenString(*position) << std::endl;
                 std::cout << chessPositionToOutputString(*position) << std::endl;
                 undoMove(position);
@@ -115,13 +115,13 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
 
 
 
-    if( ((uint16_t) mv->type) < 6) {
+    if (((uint16_t) mv->type) < 6) {
         sortEval = sortEval+captureEvals[mv->type][mv->captureType];
     }
 
 
 
-    /*if(mv->captureType != none) {
+    /*if (mv->captureType != none) {
         makeMove(mv, position);
         sortEval = SEE(position, mv);
         undoMove(position);
@@ -131,7 +131,7 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
         sortEval = sortEval+(pieceTables[mv->type][position->toMove][mv->targetField]-pieceTables[mv->type][position->toMove][mv->sourceField])/2;
     }
 
-    if(mv->type == promotionQueen) {
+    if (mv->type == promotionQueen) {
         sortEval = sortEval+300;
     }
 
@@ -143,59 +143,59 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
 
 
 
-    if(BIT64(mv->sourceField) & ownAttackTable->completeAttackTable) {
+    if (BIT64(mv->sourceField) & ownAttackTable->completeAttackTable) {
         sourceCovered = true;
     }
-    if(BIT64(mv->targetField) & ownAttackTable->completeAttackTable) {
-        targetCovered= true; //hm that can ONLY be false for some pawn moves actually...
+    if (BIT64(mv->targetField) & ownAttackTable->completeAttackTable) {
+        targetCovered = true; //hm that can ONLY be false for some pawn moves actually...
     }
 
-    if(BIT64(mv->sourceField) & opponentAttackTable->completeAttackTable) {
+    if (BIT64(mv->sourceField) & opponentAttackTable->completeAttackTable) {
         sourceAttacked = true;
     }
-    if(BIT64(mv->targetField) & opponentAttackTable->completeAttackTable) {
+    if (BIT64(mv->targetField) & opponentAttackTable->completeAttackTable) {
         targetAttacked = true;
     }
 
 
 
-    if( (mv->captureType == none) && (mv->type > pawnMove) && (BIT64(mv->targetField) & opponentAttackTable->attackTables[pawn])) {
+    if ((mv->captureType == none) && (mv->type > pawnMove) && (BIT64(mv->targetField) & opponentAttackTable->attackTables[pawn])) {
         sortEval = sortEval-100;
     }
 
 
-    if(sourceCovered) {
+    if (sourceCovered) {
         sortEval = sortEval-30;
     }
 
-    if(targetCovered) {
+    if (targetCovered) {
         sortEval = sortEval+20;
     }
 
-    if(sourceAttacked) {
+    if (sourceAttacked) {
         sortEval = sortEval+100;
-        if(!sourceCovered) {
+        if (!sourceCovered) {
             sortEval = sortEval+100;
         }
-        if(mv->type == kingMove) {
+        if (mv->type == kingMove) {
             sortEval = sortEval+400;
         }
     }
 
-    if(targetAttacked  && (mv->captureType == none)) {
+    if (targetAttacked  && (mv->captureType == none)) {
         sortEval = sortEval-100;
-        if(!targetCovered) { //TODO: same problem as above, this never happens. But it still helps the ordering...
+        if (!targetCovered) { //TODO: same problem as above, this never happens. But it still helps the ordering...
             sortEval = sortEval-100;
         }
     }
 
-    if(targetAttacked && mv->type == kingMove) {
+    if (targetAttacked && mv->type == kingMove) {
         sortEval = ILLEGAL;
         mv->sortEval = sortEval;
         return;
     }
 
-    if( (mv->captureType != none)) {
+    if ((mv->captureType != none)) {
         if ((BIT64(mv->targetField) & opponentAttackTable->completeAttackTable) == 0) {
             sortEval = sortEval+evalPars->figureValues[mv->captureType];
         } else {
@@ -204,14 +204,14 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
     }
 
 
-    if(mv->type == rookMove) {
+    if (mv->type == rookMove) {
 
         uint16_t targetFile = FILE(mv->targetField);
         uint64_t pawns      = position->pieceTables[position->toMove][pawn];
         uint64_t opppawns      = position->pieceTables[1-position->toMove][pawn];
-        if((targetFile & pawns) == 0) {
+        if ((targetFile & pawns) == 0) {
             sortEval = sortEval+10;
-            if((targetFile & opppawns) == 0) {
+            if ((targetFile & opppawns) == 0) {
                 sortEval = sortEval+30;
             }
         }
@@ -219,10 +219,10 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
     }
 
 
-    if((mv->type == pawnMove)) {
-        if(BIT64(mv->targetField) & CENTER) {
+    if ((mv->type == pawnMove)) {
+        if (BIT64(mv->targetField) & CENTER) {
             sortEval = sortEval+50;
-        } else if(BIT64(mv->targetField) & WIDECENTER) {
+        } else if (BIT64(mv->targetField) & WIDECENTER) {
             sortEval = sortEval+30;
         } /*else {
             sortEval = sortEval+30;
@@ -230,18 +230,18 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
 
     }
 
-    /*if(mv->type == pawnMove) {
+    /*if (mv->type == pawnMove) {
         uint16_t target = mv->targetField;
         uint64_t ppMask = passedPawnMasks[position->toMove][target];
         uint64_t oppPawns = position->pieceTables[1-position->toMove][pawn];
-        if((ppMask & oppPawns) == 0) {
+        if ((ppMask & oppPawns) == 0) {
             sortEval = sortEval+50; //passed pawn push
         }
     }*/
 
-    if((position->madeMoves.length > 0) && (mv->captureType != none)) {
+    if ((position->madeMoves.length > 0) && (mv->captureType != none)) {
         chessMove previousMove = position->madeMoves[position->madeMoves.length-1];
-        if(previousMove.targetField == mv->targetField) { //recapture is usually good
+        if (previousMove.targetField == mv->targetField) { //recapture is usually good
             sortEval = sortEval + 200;
         }
     }
@@ -249,48 +249,48 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
 
     uint16_t moveHash = (mv->sourceField) | (mv->targetField << 8);
 
-    if(moveHash == killerA) {
+    if (moveHash == killerA) {
             sortEval = sortEval+120;
     }
 
-    if(moveHash == killerB) {
+    if (moveHash == killerB) {
             sortEval = sortEval+119;
     }
 
 
 
-    if(mv->type == castlingKingside) {
+    if (mv->type == castlingKingside) {
         sortEval  = 110;
-        if(kingBlockers[position->toMove] & opponentAttackTable->completeAttackTable) {
+        if (kingBlockers[position->toMove] & opponentAttackTable->completeAttackTable) {
             sortEval = ILLEGAL;
             mv->sortEval = sortEval;
             return;
         }
-    } else if(mv->type == castlingQueenside) {
+    } else if (mv->type == castlingQueenside) {
         sortEval  = 70;
-        if(queenBlockers[position->toMove] & opponentAttackTable->completeAttackTable) {
+        if (queenBlockers[position->toMove] & opponentAttackTable->completeAttackTable) {
             sortEval = ILLEGAL;
             mv->sortEval = sortEval;
             return;
         }
     }
 
-    if(mv->type == enpassant) {
+    if (mv->type == enpassant) {
         sortEval = 120;
     }
 
-    if(mv->captureType == none) {
+    if (mv->captureType == none) {
         int32_t hist = getHistoryTables()->getHistoryEntry(position->toMove, mv->sourceField, mv->targetField);
 
         int32_t historyValue = std::sqrt(std::abs(hist)); //TODO: this is absolutely NOT a good idea performance-wise
         historyValue = (hist > 0 ? historyValue: -historyValue);
 
 
-        if(historyValue > 128) {
+        if (historyValue > 128) {
             historyValue = 128;
         }
 
-        if(historyValue < -128) {
+        if (historyValue < -128) {
             historyValue = -128;
         }
 
@@ -299,12 +299,12 @@ static inline void calcSortEval( chessPosition* position, chessMove* mv, bool is
         //std::cout << (historyTable[position->toMove][mv->sourceField][mv->targetField] >> 6) << std::endl;
     }
 
-    if( mv->sourceField == refutationTarget) {
+    if (mv->sourceField == refutationTarget) {
         sortEval = sortEval+100;
     }
 
 
-    if( ((mv->sourceField) | (mv->targetField << 8)) == hashedMove) {
+    if (((mv->sourceField) | (mv->targetField << 8)) == hashedMove) {
             sortEval = sortEval+10000;
     }
 
@@ -320,9 +320,9 @@ bool calculateStandardSortEvals(chessPosition* position,  vdt_vector<chessMove>*
     uint16_t killerMoveA = killerMoves[ply][0];
     uint16_t killerMoveB = killerMoves[ply][1];
     const evalParameters* evalPars                      = getEvalParameters(); //TODO: move outside
-    for (uint16_t ind=start_index; ind < moves->length; ind++) {
+    for (uint16_t ind = start_index; ind < moves->length; ind++) {
         calcSortEval(position, &(*moves)[ind], isInCheck, &opponentAttackTable, &ownAttackTable, sortinfo.hashMove, killerMoveA, killerMoveB, sortinfo.refutationTarget, evalPars);
-        if((*moves)[ind].sortEval > bestEval) {
+        if ((*moves)[ind].sortEval > bestEval) {
             bestEval = (*moves)[ind].sortEval;
             //bestIndex = ind;
         }
@@ -338,16 +338,16 @@ bool calculateStandardSortEvals(chessPosition* position,  vdt_vector<chessMove>*
 
 void orderCaptureMoves(chessPosition* position, vdt_vector<chessMove>* moves, uint16_t hashedMove) {
 
-    if(moves->length == 0) {
+    if (moves->length == 0) {
         return;
     }
 
     int16_t bestEval = INT16_MIN;
     uint16_t bestIndex = 0;
 
-    for (uint16_t ind=0; ind < moves->length; ind++) {
+    for (uint16_t ind = 0; ind < moves->length; ind++) {
         calcCaptureSortEval(position, &(*moves)[ind], hashedMove);
-        if((*moves)[ind].sortEval > bestEval) {
+        if ((*moves)[ind].sortEval > bestEval) {
             bestEval = (*moves)[ind].sortEval;
             bestIndex = ind;
         }

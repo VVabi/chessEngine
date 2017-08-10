@@ -37,7 +37,7 @@ bool getPawnHashTableEntry(pawnHashEntry* entry, uint64_t key) {
 
     pawnHashEntry tentry = pawnHashTable[index];
 
-    if( (tentry.hashHighBits == zobristHigher) && (tentry.hashLower == zobristLower)) {
+    if ((tentry.hashHighBits == zobristHigher) && (tentry.hashLower == zobristLower)) {
         *entry = tentry;
         return true;
     }
@@ -79,9 +79,9 @@ hashEntry getHashTableEntry(uint64_t zobristKey) {
     uint16_t zobristLower  = (uint16_t) (((uint32_t) (zobristKey  & 0xFFFFFFFF)) >> 16);
     int16_t max_depth = -1;
 
-    for(uint8_t ind=0; ind < 4; ind++) {
+    for (uint8_t ind = 0; ind < 4; ind++) {
         hashEntry entry = current.hashData[ind];
-        if((entry.hashHighBits == zobristHigher) && (entry.hashLower == zobristLower) && (entry.depth > max_depth)) {
+        if ((entry.hashHighBits == zobristHigher) && (entry.hashLower == zobristLower) && (entry.depth > max_depth)) {
             ret = entry;
             max_depth = entry.depth;
         }
@@ -100,18 +100,18 @@ void setHashEntry(hashFlag flag, int16_t eval, uint8_t depth, uint8_t searchId, 
     int32_t target_score = ((int32_t) depth);
 
 
-    for(uint8_t ind=0; ind < 4; ind++) {
+    for (uint8_t ind = 0; ind < 4; ind++) {
         hashEntry* entry = &current->hashData[ind];
         uint8_t past_search = searchId-entry->index;
         int32_t score = ((int32_t) entry->depth)-2*((int32_t) past_search);
         //int32_t score = -((int32_t) past_search);
-        if(score < target_score) {
+        if (score < target_score) {
              target_score = score;
              replace_index = ind;
         }
     }
 
-    if(replace_index >= 0) {
+    if (replace_index >= 0) {
         hashEntry* entry = &current->hashData[replace_index];
         entry->flag = flag;
         entry->eval  = eval;
@@ -124,9 +124,9 @@ void setHashEntry(hashFlag flag, int16_t eval, uint8_t depth, uint8_t searchId, 
     }
 
 
-    /*for(uint8_t ind=0; ind < 4; ind++) {
+    /*for (uint8_t ind = 0; ind < 4; ind++) {
         hashEntry* entry = &current->hashData[ind];
-        if((entry->depth <= depth) || (entry->searchId != searchId)) {
+        if ((entry->depth <= depth) || (entry->searchId != searchId)) {
             entry->flag = flag;
             entry->eval  = eval;
             entry->depth = depth;
@@ -145,7 +145,7 @@ uint16_t getHashMove(uint64_t zobristKey) {
     hashBucket* current = &moveOrderingHashTable[zobristKey & HASHSIZE];
     uint32_t zobristHigher = (uint32_t) (zobristKey  >> 32);
     uint16_t zobristLower  = (uint16_t) (((uint32_t) (zobristKey  & 0xFFFFFFFF)) >> 16);
-    for(uint8_t ind=0; ind < 4; ind++) {
+    for (uint8_t ind = 0; ind < 4; ind++) {
         hashEntry* entry = &current->hashData[ind];
         if ((entry->hashHighBits == zobristHigher) && (entry->hashLower == zobristLower)) {
             return entry->bestMove;
@@ -160,7 +160,7 @@ void setHashMove(uint16_t move, uint64_t zobristKey, uint8_t searchId) {  //DEPR
     hashBucket* current = &moveOrderingHashTable[zobristKey & HASHSIZE];
     uint32_t zobristHigher = (uint32_t) (zobristKey  >> 32);
     uint16_t zobristLower  = (uint16_t) (((uint32_t) (zobristKey  & 0xFFFFFFFF)) >> 16);
-    for(uint8_t ind=0; ind < 4; ind++) {
+    for (uint8_t ind = 0; ind < 4; ind++) {
         hashEntry* entry = &current->hashData[ind]; //&current->hashData[permutations[permutationIndex][ind]];
         if ((entry->searchId != searchId)) {
             entry->searchId = searchId;
@@ -184,39 +184,39 @@ void clearHashTables() {
 }
 
 void fillZobristHash() {
-    assert(popcount(HASHSIZE+1)==1); //this needs to be a power of 2!
+    assert(popcount(HASHSIZE+1) == 1); //this needs to be a power of 2!
     moveOrderingHashTable = new hashBucket[HASHSIZE+1];
     clearHashTables();
     movingSideHash[0] = getRandUint64();
     movingSideHash[1] = 0;
-    for(uint16_t cnt=0; cnt < 2; cnt++) {
-        for(uint16_t ind=0; ind < 6; ind++) {
-            for(uint16_t field=0; field < 64; field++) {
+    for (uint16_t cnt = 0; cnt < 2; cnt++) {
+        for (uint16_t ind = 0; ind < 6; ind++) {
+            for (uint16_t field = 0; field < 64; field++) {
                 zobristHash[ind][cnt][field] = getRandUint64();
             }
         }
-        for(uint16_t field=0; field < 64; field++) {
+        for (uint16_t field = 0; field < 64; field++) {
             zobristHash[6][cnt][field] = 0;
         }
     }
 
-    for(uint16_t ind=0; ind <9; ind++) {
-        enpassantHash[ind]  =getRandUint64();
+    for (uint16_t ind = 0; ind <9; ind++) {
+        enpassantHash[ind]  = getRandUint64();
     }
 
-    for(uint16_t ind=0; ind <16; ind++) {
-        castlingHash[ind]  =getRandUint64();
+    for (uint16_t ind = 0; ind <16; ind++) {
+        castlingHash[ind]  = getRandUint64();
     }
 
 
-    for(uint16_t cnt=0; cnt < 2; cnt++) {
-            for(uint16_t ind=0; ind < 1; ind++) {
-                for(uint16_t field=0; field < 64; field++) {
+    for (uint16_t cnt = 0; cnt < 2; cnt++) {
+            for (uint16_t ind = 0; ind < 1; ind++) {
+                for (uint16_t field = 0; field < 64; field++) {
                     pawnHashValues[ind][cnt][field] = getRandUint64();
                 }
             }
-            for(uint16_t ind=1; ind < 7; ind++) {
-                for(uint16_t field=0; field < 64; field++) {
+            for (uint16_t ind = 1; ind < 7; ind++) {
+                for (uint16_t field = 0; field < 64; field++) {
                     pawnHashValues[ind][cnt][field] = 0;
                 }
             }
@@ -226,10 +226,10 @@ void fillZobristHash() {
 
 uint64_t calcPawnHash(const chessPosition* position) {
     uint64_t hash = 0;
-    for(uint16_t movingSide = 0; movingSide < 2; movingSide++) {
-        for(uint16_t figureType = 0; figureType < 6; figureType++) {
+    for (uint16_t movingSide = 0; movingSide < 2; movingSide++) {
+        for (uint16_t figureType = 0; figureType < 6; figureType++) {
             uint64_t pieces = position->pieceTables[movingSide][figureType];
-            while(pieces) {
+            while (pieces) {
                 uint16_t field = popLSB(pieces);
                 hash = hash^pawnHashValues[figureType][movingSide][field];
             }
@@ -240,10 +240,10 @@ uint64_t calcPawnHash(const chessPosition* position) {
 
 uint64_t calcZobristHash(const chessPosition* position) {
     uint64_t hash = 0;
-    for(uint16_t movingSide = 0; movingSide < 2; movingSide++) {
-        for(uint16_t figureType = 0; figureType < 6; figureType++) {
+    for (uint16_t movingSide = 0; movingSide < 2; movingSide++) {
+        for (uint16_t figureType = 0; figureType < 6; figureType++) {
             uint64_t pieces = position->pieceTables[movingSide][figureType];
-            while(pieces) {
+            while (pieces) {
                 uint16_t field = popLSB(pieces);
                 hash = hash^zobristHash[figureType][movingSide][field];
             }

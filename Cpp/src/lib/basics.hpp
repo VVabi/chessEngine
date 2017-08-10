@@ -22,10 +22,10 @@
 #define FILE(x) ((x) & 7)
 #define ROW(x)  ((x) >> 3)
 
-enum figureType: uint8_t {pawn=0, knight=1, bishop=2, rook=3, queen=4, king=5, none=6};
-enum moveType: uint8_t   {pawnMove=0, knightMove=1, bishopMove=2, rookMove=3, queenMove=4, kingMove=5,
-    castlingKingside=6, castlingQueenside=7, enpassant=8, promotionKnight=9, promotionBishop, promotionRook, promotionQueen};
-enum playerColor: uint16_t {white=0, black=1};
+enum figureType: uint8_t {pawn = 0, knight = 1, bishop = 2, rook = 3, queen = 4, king = 5, none = 6};
+enum moveType: uint8_t   {pawnMove = 0, knightMove = 1, bishopMove = 2, rookMove = 3, queenMove = 4, kingMove = 5,
+    castlingKingside = 6, castlingQueenside = 7, enpassant = 8, promotionKnight = 9, promotionBishop, promotionRook, promotionQueen};
+enum playerColor: uint16_t {white = 0, black = 1};
 
 struct chessMove {
     uint16_t sourceField;
@@ -64,7 +64,7 @@ struct chessPosition {
     vdt_vector<pathDependentPositionData> dataStack;
 };
 
-enum hashFlag: uint16_t {FULLSEARCH=0, FAILLOW=1, FAILHIGH=2};
+enum hashFlag: uint16_t {FULLSEARCH = 0, FAILLOW = 1, FAILHIGH = 2};
 
 
 

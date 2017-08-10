@@ -54,8 +54,8 @@ struct AlphaBeta {
     AlphaBeta(int16_t a, int16_t b): alpha(a), beta(b) {};
     bool update(int16_t value) {
         bool ret = value > alpha? true: false;
-        if(ret) {
-            alpha=value;
+        if (ret) {
+            alpha = value;
         }
         return ret;
     }

@@ -20,7 +20,7 @@ template<typename T> class vdt_vector {
     explicit vdt_vector(uint32_t n) {
         length = 0;
         allocated_length = n;
-        if(allocated_length > 0) {
+        if (allocated_length > 0) {
             data = new T[allocated_length];
         } else {
             data = 0;
@@ -34,9 +34,9 @@ template<typename T> class vdt_vector {
     }
 
     T &operator[](uint32_t i) {
-        if(i >= length) {
+        if (i >= length) {
             std::cout << "vector index out ouf bounds" << std::endl;
-            while(1) {
+            while (1) {
                 //add fatal
             }
         }
@@ -46,15 +46,15 @@ template<typename T> class vdt_vector {
 
     void add(T* element) {
 
-        if(length >=allocated_length) {
+        if (length >= allocated_length) {
            std::cout << "vector is full" << std::endl;
-           while(1) {
+           while (1) {
                //add fatal
            }
         }
-        /*if(length >= allocated_length) {
+        /*if (length >= allocated_length) {
             uint32_t new_length = 2*allocated_length;
-            if(allocated_length == 0) {
+            if (allocated_length == 0) {
                 new_length = 1;
             }
             T* buffer = new T[new_length];
@@ -74,7 +74,7 @@ template<typename T> class vdt_vector {
     }
 
     void free_array() {
-        if(data != NULL) {
+        if (data != NULL) {
             delete[] data;
             data = NULL;
             length = 0;

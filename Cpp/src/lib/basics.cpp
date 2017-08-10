@@ -19,9 +19,9 @@
 inline figureType toFigureType(uint16_t num) {
 #ifdef DEBUG
 
-    if(num > 5) {
+    if (num > 5) {
         std::cout << "There are only 6 different figuretypes in chess..." << std::endl;
-        while(1) {
+        while (1) {
 
         }
 
@@ -86,38 +86,38 @@ void debug_incremental_calculations(const chessPosition* position) {
 
     int16_t eval = calcFigureEvaluation(position);
 
-    /*if(eval != position->figureEval) {
+    /*if (eval != position->figureEval) {
         std::cout << "Figure evaluation is wrong after moveMake!" << std::endl;
     }*/
 
     uint16_t totalEval = calcTotalFigureEvaluation(position);
 
-    if(totalEval != position->totalFigureEval) {
-        logError( "Total figure evaluation is wrong after moveMake!" +chessPositionToFenString(*position));
+    if (totalEval != position->totalFigureEval) {
+        logError("Total figure evaluation is wrong after moveMake!" +chessPositionToFenString(*position));
     }
 
     int16_t pieceTableEval = calcPieceTableValue(position)+eval;
     int32_t buffer =  position->pieceTableEval & 0xFFFF;
     int32_t buffer2  = buffer-(1 << 15);
 
-    if(pieceTableEval !=  buffer2) {
+    if (pieceTableEval !=  buffer2) {
         logError("Piece table evaluation is wrong after moveMake!");
     }
 
     int16_t endgamepieceTableEval = calcEndGamePieceTableValue(position)+eval;
     buffer =  (position->pieceTableEval >> 16);
     buffer2  = buffer-(1 << 14);
-    if(endgamepieceTableEval !=  buffer2) {
+    if (endgamepieceTableEval !=  buffer2) {
         logError("endgame Piece table evaluation is wrong after moveMake!");
     }
 
     uint64_t hash = calcZobristHash(position);
-    if(hash != position->zobristHash) {
+    if (hash != position->zobristHash) {
         logError("zobrist hash wrong after make move");
     }
 
     uint64_t pawnhash = calcPawnHash(position);
-    if(pawnhash != position->pawnHash) {
+    if (pawnhash != position->pawnHash) {
         logError("zobrist pawn hash wrong after make move");
     }
 

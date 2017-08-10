@@ -71,7 +71,7 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, 
 
     const evalParameters* evalPars                      = getEvalParameters();
     uint64_t ownKing = position->pieceTables[position->toMove][king];
-    if(isFieldAttacked(position, (playerColor) (1-position->toMove), findLSB(ownKing))) {
+    if (isFieldAttacked(position, (playerColor) (1-position->toMove), findLSB(ownKing))) {
         pvLine line;
         return negamax(position, plyInfo(ply, ply+1, qply, 1),  alphabeta, &line, searchSettings(nullmove_disabled, hashprobe_disabled, checkextension_disabled, searchId));
     }
@@ -81,21 +81,21 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, 
     uint32_t zobristHigher = (uint32_t) (position->zobristHash >> 32);
     uint16_t zobristLower  = (uint16_t) (((uint32_t) (position->zobristHash & 0xFFFFFFFF)) >> 16);
     uint16_t hashMove = hashVal.bestMove;
-    if((zobristHigher == hashVal.hashHighBits) && (zobristLower == hashVal.hashLower)) { //TODO: assign bestMove - this can blow up in our face easily TODO: add proper checkmate handling
+    if ((zobristHigher == hashVal.hashHighBits) && (zobristLower == hashVal.hashLower)) { //TODO: assign bestMove - this can blow up in our face easily TODO: add proper checkmate handling
         int16_t oldEval  = hashVal.eval;
-        if( (oldEval > -10000) && (oldEval < 10000) && (oldEval != 0)) { //TODO: the != 0 is stupid, but somewhere something goes wrong with 3fold rep scores, so excluded ehre for safety
-            if( ((hashVal.flag == FAILHIGH) || (hashVal.flag == FULLSEARCH)) && (oldEval >= alphabeta.beta)) {
+        if ((oldEval > -10000) && (oldEval < 10000) && (oldEval != 0)) { //TODO: the != 0 is stupid, but somewhere something goes wrong with 3fold rep scores, so excluded ehre for safety
+            if (((hashVal.flag == FAILHIGH) || (hashVal.flag == FULLSEARCH)) && (oldEval >= alphabeta.beta)) {
                 setSearchId(searchId, position->zobristHash, hashVal.index);
                 return alphabeta.beta;
-            } else if( ((hashVal.flag == FAILLOW) || (hashVal.flag == FULLSEARCH)) && (oldEval <= alphabeta.alpha)) {
+            } else if (((hashVal.flag == FAILLOW) || (hashVal.flag == FULLSEARCH)) && (oldEval <= alphabeta.alpha)) {
                 setSearchId(searchId, position->zobristHash, hashVal.index);
                 return alphabeta.alpha; //node will fail low
-            } else if((hashVal.flag == FULLSEARCH)) { //TODO: this condition can be vastly improved
+            } else if ((hashVal.flag == FULLSEARCH)) { //TODO: this condition can be vastly improved
                 setSearchId(searchId, position->zobristHash, hashVal.index);
-                if(oldEval <= alphabeta.alpha) {
+                if (oldEval <= alphabeta.alpha) {
                     return alphabeta.alpha;
                 }
-                if(oldEval >= alphabeta.beta) {
+                if (oldEval >= alphabeta.beta) {
                     return alphabeta.beta;
                 }
                 return oldEval;
@@ -107,10 +107,10 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, 
 
     int32_t baseEval = evaluation(position, alphabeta.alpha, alphabeta.beta);
 
-    if(baseEval > alphabeta.alpha) {
+    if (baseEval > alphabeta.alpha) {
         alphabeta.alpha = baseEval;
     }
-    if(alphabeta.betacutoff()) {
+    if (alphabeta.betacutoff()) {
         return alphabeta.beta;
     }
     //delta pruning preparations
@@ -120,7 +120,7 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, 
 
     //position is truely hopeless.Note that this DOES NOT SAVE NODES - the individual checks below will also fail! But we save some processing time
     //------------------------------------
-    if(marginDifference > 1100) { //TODO: take promotions into account!
+    if (marginDifference > 1100) { //TODO: take promotions into account!
         return alphabeta.alpha;
     }
 
@@ -137,13 +137,13 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, 
 
     uint32_t capturecnt = 0;
 
-    for(uint16_t ind=0; ind < allMoves.length; ind++) {
+    for (uint16_t ind = 0; ind < allMoves.length; ind++) {
         if (allMoves[ind].captureType != none) {
             capturecnt++;
         }
     }
 
-    if(capturecnt != moves.length) {
+    if (capturecnt != moves.length) {
         logError("Capture move generation is wrong");
         /*std::cout << "Capture move generation is wrong" << std::endl;
         std::cout << chessPositionToFenString(*position) << std::endl;
@@ -153,7 +153,7 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, 
             std::cout << moveToString(moves[ind]) << std::endl;
         }
         std::cout << "captures in all moves " << capturecnt << std::endl;
-        for(uint16_t ind=0; ind < allMoves.length; ind++) {
+        for (uint16_t ind = 0; ind < allMoves.length; ind++) {
             if (allMoves[ind].captureType != none) {
                 std::cout << moveToString(allMoves[ind]) << std::endl;
             }
@@ -164,11 +164,11 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, 
 #endif
 
     counter++;
-    if(qply < 1) {
+    if (qply < 1) {
         generateChecks(&moves, position);
 
-        /*if(moves.length == 0) {
-            if(counter > 1000) {
+        /*if (moves.length == 0) {
+            if (counter > 1000) {
                 quietData << chessPositionToFenString(*position) << std::endl;
                 counter = 0;
             }
@@ -179,54 +179,54 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, 
 
 
     orderCaptureMoves(position, &moves, hashMove);
-    if(moves.length > 0) {
+    if (moves.length > 0) {
         qcalled++;
     }
 
 
 
     int16_t bestIndex = -1;
-    for(uint16_t ind=0; ind < moves.length; ind++) {
-        if(ind == 1) {
+    for (uint16_t ind = 0; ind < moves.length; ind++) {
+        if (ind == 1) {
             sortqCalled++;
             std::stable_sort(moves.data, moves.data+moves.length);
         }
 
         //This has to be done AFTER sorting of course - that was a nasty bug
         //-----------------------
-        if(moves[ind].sortEval < -50) {
+        if (moves[ind].sortEval < -50) {
             break; //SEE pruning
         }
 
         //delta pruning. TODO: make define
         //----------------------------------------------------
         int32_t gainValue = evalPars->figureValues[moves[ind].captureType];
-        if(gainValue < marginDifference-200) {
+        if (gainValue < marginDifference-200) {
             continue;
         }
 
 
         makeMove(&moves[ind], position);
-        uint16_t kingField = findLSB( position->pieceTables[1- position->toMove][king]);
+        uint16_t kingField = findLSB(position->pieceTables[1- position->toMove][king]);
 
-        if(isFieldAttacked( position,  position->toMove, kingField)) {
+        if (isFieldAttacked(position,  position->toMove, kingField)) {
 
         } else {
             nodes++;
             int32_t value = -negamaxQuiescence(position, qply+1, ply+1, alphabeta.invert(), depth+1, searchId);
-            if(alphabeta.update(value)) {
+            if (alphabeta.update(value)) {
                 bestMove = moves[ind];
                 bestIndex = ind;
             }
         }
         undoMove(position);
-        if(alphabeta.betacutoff()) {
+        if (alphabeta.betacutoff()) {
 #ifdef HASH
             //setHashEntry(FAILHIGH, alpha, 0, searchId, (bestMove.sourceField | (bestMove.targetField << 8)), position->zobristHash);
 #endif
             mvStack.release();
             assert(stackCounter == mvStack.getCounter());
-            if(bestIndex != -1) {
+            if (bestIndex != -1) {
                 qindices[bestIndex]++;
             }
             return alphabeta.beta;
@@ -234,7 +234,7 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, 
     }
 
 #ifdef HASH
-    /*if(bestIndex != -1) {
+    /*if (bestIndex != -1) {
         qindices[bestIndex]++;
         setHashEntry(FULLSEARCH, alpha, 0, searchId, (bestMove.sourceField | (bestMove.targetField << 8)), position->zobristHash);
     } else {

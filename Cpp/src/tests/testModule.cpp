@@ -17,10 +17,10 @@ static testFunction funcs[] = { testMakeMove, testUndoMove, testPerftTestSuite};
 int numTests = 3;
 
 void runTests() {
-    for(uint16_t ind=0; ind < numTests; ind++) {
+    for (uint16_t ind = 0; ind < numTests; ind++) {
         testResult ret = funcs[ind]();
         std::cout << "Test " << ret.testName << " ";
-        if(ret.passed) {
+        if (ret.passed) {
             std::cout << "PASSED" << std::endl;
         } else {
             std::cout << "FAILED" << std::endl;

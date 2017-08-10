@@ -22,13 +22,13 @@ bool isFieldAttacked(const chessPosition* position, playerColor attackingSide, u
 
     //knights
     uint64_t knights = position->pieceTables[attackingSide][knight];
-    if(knightmovetables[field] & knights) {
+    if (knightmovetables[field] & knights) {
         return true;
     }
 
     //kings
     uint64_t kings = position->pieceTables[attackingSide][king];
-    if(kingmovetables[field] & kings) {
+    if (kingmovetables[field] & kings) {
         return true;
     }
 
@@ -36,7 +36,7 @@ bool isFieldAttacked(const chessPosition* position, playerColor attackingSide, u
     //rooks+queens
     uint64_t potentialMoves = getPotentialRookMoves(field, occupancy);
 
-    if( potentialMoves & (position->pieceTables[attackingSide][rook] | position->pieceTables[attackingSide][queen])) {
+    if (potentialMoves & (position->pieceTables[attackingSide][rook] | position->pieceTables[attackingSide][queen])) {
         return true;
     }
 
@@ -44,19 +44,19 @@ bool isFieldAttacked(const chessPosition* position, playerColor attackingSide, u
 
     potentialMoves = getPotentialBishopMoves(field, occupancy);
 
-    if( potentialMoves & (position->pieceTables[attackingSide][bishop] | position->pieceTables[attackingSide][queen])) {
+    if (potentialMoves & (position->pieceTables[attackingSide][bishop] | position->pieceTables[attackingSide][queen])) {
         return true;
     }
 
     //pawns
     uint64_t potentialTakes;
-    if(attackingSide == white) {
+    if (attackingSide == white) {
         potentialTakes = ((BIT64(field) >> 9) & NOTFILEH)| ((BIT64(field) >> 7) & NOTFILEA);
     } else {
         potentialTakes = ((BIT64(field) << 9) & NOTFILEA) | ((BIT64(field) << 7) & NOTFILEH);
     }
 
-    if(potentialTakes & position->pieceTables[attackingSide][pawn]) {
+    if (potentialTakes & position->pieceTables[attackingSide][pawn]) {
         return true;
     }
 
@@ -78,7 +78,7 @@ AttackTable makeAttackTable(const chessPosition* position, playerColor attacking
     //knights
     uint64_t knights = position->pieceTables[attackingSide][knight];
     uint64_t knightAttackTable = 0;
-    while(knights) {
+    while (knights) {
         uint16_t nextKnight = popLSB(knights);
         knightAttackTable = knightAttackTable | knightmovetables[nextKnight];
     }
@@ -130,7 +130,7 @@ AttackTable makeAttackTable(const chessPosition* position, playerColor attacking
     //kings
     uint64_t kingField = position->pieceTables[attackingSide][king];
     uint64_t kingAttackTable = 0;
-    while(kingField) {
+    while (kingField) {
         uint16_t nextKing = popLSB(kingField);
         kingAttackTable = kingAttackTable | kingmovetables[nextKing];
     }
@@ -169,7 +169,7 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
     //knights
     uint64_t knights = position->pieceTables[attackingSide][knight];
     uint64_t knightAttackTable = 0;
-    while(knights) {
+    while (knights) {
         uint16_t nextKnight = popLSB(knights);
         knightAttackTable = knightAttackTable | knightmovetables[nextKnight];
         uint16_t legalMoves = popcount(knightmovetables[nextKnight] & ~ownPieces & ~opppawnTakes);
@@ -234,7 +234,7 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
     //kings
     uint64_t kingField = position->pieceTables[attackingSide][king];
     uint64_t kingAttackTable = 0;
-    while(kingField) {
+    while (kingField) {
         uint16_t nextKing = popLSB(kingField);
         kingAttackTable = kingAttackTable | kingmovetables[nextKing];
     }
@@ -250,15 +250,15 @@ static inline bool getNextCapture(chessMove* nextCapture, const chessPosition* p
     playerColor attackingSide = position->toMove;
     //pawns
     uint64_t potentialTakes;
-    if(attackingSide == white) {
+    if (attackingSide == white) {
         potentialTakes = ((BIT64(field) >> 9) & NOTFILEH)| ((BIT64(field) >> 7) & NOTFILEA);
     } else {
         potentialTakes = ((BIT64(field) << 9) & NOTFILEA) | ((BIT64(field) << 7) & NOTFILEH);
     }
     uint64_t toCheck = potentialTakes & position->pieceTables[attackingSide][pawn] & ~mask;
-    if(toCheck) {
+    if (toCheck) {
         uint16_t source = findLSB(toCheck);
-        //if(!(BIT64(source) & mask)) {
+        //if (!(BIT64(source) & mask)) {
         nextCapture->captureType = occ;
         nextCapture->sourceField = source;
         nextCapture->targetField = field;
@@ -270,7 +270,7 @@ static inline bool getNextCapture(chessMove* nextCapture, const chessPosition* p
 
     //knights
     uint64_t knights = position->pieceTables[attackingSide][knight] & ~mask;
-    if(knightmovetables[field] & knights) {
+    if (knightmovetables[field] & knights) {
         uint16_t source = findLSB(knightmovetables[field] & knights & ~mask);
         nextCapture->captureType = occ;
         nextCapture->sourceField = source;
@@ -283,7 +283,7 @@ static inline bool getNextCapture(chessMove* nextCapture, const chessPosition* p
     //bishops
     uint64_t potentialMoves = getPotentialBishopMoves(field, occupancy);
 
-    if(potentialMoves & (position->pieceTables[attackingSide][bishop] & ~mask)) {
+    if (potentialMoves & (position->pieceTables[attackingSide][bishop] & ~mask)) {
         uint16_t source = findLSB(potentialMoves & (position->pieceTables[attackingSide][bishop] & ~mask));
         nextCapture->captureType = occ;
         nextCapture->sourceField = source;
@@ -296,7 +296,7 @@ static inline bool getNextCapture(chessMove* nextCapture, const chessPosition* p
     //rooks
     potentialMoves =  getPotentialRookMoves(field, occupancy);
 
-    if( potentialMoves & (position->pieceTables[attackingSide][rook]  & ~mask)) {
+    if (potentialMoves & (position->pieceTables[attackingSide][rook]  & ~mask)) {
         uint16_t source = findLSB(potentialMoves & (position->pieceTables[attackingSide][rook] & ~mask));
         nextCapture->captureType = occ;
         nextCapture->sourceField = source;
@@ -305,12 +305,10 @@ static inline bool getNextCapture(chessMove* nextCapture, const chessPosition* p
         return true;
     }
 
-
-
     //queens
     potentialMoves =  getPotentialRookMoves(field, occupancy);
 
-    if( potentialMoves & (position->pieceTables[attackingSide][queen]  & ~mask)) {
+    if (potentialMoves & (position->pieceTables[attackingSide][queen]  & ~mask)) {
         uint16_t source = findLSB(potentialMoves & (position->pieceTables[attackingSide][queen] & ~mask));
         nextCapture->captureType = occ;
         nextCapture->sourceField = source;
@@ -322,7 +320,7 @@ static inline bool getNextCapture(chessMove* nextCapture, const chessPosition* p
 
     potentialMoves =  getPotentialBishopMoves(field, occupancy);
 
-    if(potentialMoves & position->pieceTables[attackingSide][queen]  & ~mask) {
+    if (potentialMoves & position->pieceTables[attackingSide][queen]  & ~mask) {
         uint16_t source = findLSB(potentialMoves & (position->pieceTables[attackingSide][queen] & ~mask));
         nextCapture->captureType = occ;
         nextCapture->sourceField = source;
@@ -332,9 +330,9 @@ static inline bool getNextCapture(chessMove* nextCapture, const chessPosition* p
     }
     //kings
     uint64_t kings = position->pieceTables[attackingSide][king]  & ~mask;
-    if(kingmovetables[field] & kings) {
+    if (kingmovetables[field] & kings) {
         uint16_t source = findLSB(kingmovetables[field] & kings & ~mask);
-        if(!(BIT64(source) & mask)) {
+        if (!(BIT64(source) & mask)) {
             nextCapture->captureType = occ;
             nextCapture->sourceField = source;
             nextCapture->targetField = field;
@@ -350,13 +348,13 @@ static inline bool getNextCapture(chessMove* nextCapture, const chessPosition* p
 
 int16_t see_internal(int16_t previous, chessPosition* position, uint16_t field, figureType lastCapturingPiece, const evalParameters* evalPars, uint64_t mask) {
     chessMove mv;
-    if(!getNextCapture(&mv, position, field, lastCapturingPiece, mask)) {
+    if (!getNextCapture(&mv, position, field, lastCapturingPiece, mask)) {
         //no more captures available
         //std::cout << "no further captures found, returning " << -previous << std::endl;
         return -previous; //from POV of player currently moving
     }
 
-    if(mv.captureType == king) { //best-case scenario for us
+    if (mv.captureType == king) { //best-case scenario for us
         return 10000;
     }
 
@@ -364,7 +362,7 @@ int16_t see_internal(int16_t previous, chessPosition* position, uint16_t field, 
     //makeMove(&mv, position);
 
 
-    /*if(-previous+evalPars->figureValues[mv.captureType] < -50) {
+    /*if (-previous+evalPars->figureValues[mv.captureType] < -50) {
         return standPat; //can't recover, and for < -50 we don't care for the value TODO: make parameter
     }*/
     position->toMove = (playerColor) (1-position->toMove);
@@ -377,7 +375,7 @@ int16_t see_internal(int16_t previous, chessPosition* position, uint16_t field, 
     std::cout << "Standpat score was " << standPat << std::endl;
     std::cout << "see score is "        << seeVal << std::endl;*/
 
-    if(seeVal > standPat) {
+    if (seeVal > standPat) {
         return seeVal;
     }
     return standPat;
@@ -387,7 +385,7 @@ int16_t see_internal(int16_t previous, chessPosition* position, uint16_t field, 
 int16_t SEE(chessPosition* position, chessMove* mv) {
 
     //TODO: SEE currently cannot handle promotions!!!!
-    if(mv->type > 5) {
+    if (mv->type > 5) {
         return 0;
     }
 

@@ -35,19 +35,19 @@ parameterReader::parameterReader() {
 bool parameterReader::readParameters(preParameters* pars, std::string filename) {
 
         std::ifstream input = std::ifstream(filename);
-        if(!input.is_open()) {
+        if (!input.is_open()) {
             return false;
         }
         std::string line;
         int64_t* ptr = (int64_t*) pars;
-        while(std::getline(input, line)) {
+        while (std::getline(input, line)) {
             std::stringstream line_stream(line);
             std::string key;
             line_stream >> key;
             //std::string lowercaseKey = std::transform(key.begin(), key.end(), key.begin(), ::tolower);
             auto pair = parameterFields.find(key);
 
-            if(pair != parameterFields.end()) {
+            if (pair != parameterFields.end()) {
                 int64_t value;
                 line_stream >> value;
                 *(ptr+pair->second) = value;
@@ -61,7 +61,7 @@ bool parameterReader::readParameters(preParameters* pars, std::string filename) 
 
 bool parameterReader::changeValue(preParameters* pars, std::string key, int64_t value) {
     auto pair = parameterFields.find(key);
-    if(pair != parameterFields.end()) {
+    if (pair != parameterFields.end()) {
         int64_t* ptr = (int64_t*) pars;
         *(ptr+pair->second) = value;
         return true;

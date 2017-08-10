@@ -51,7 +51,7 @@ inline static void undoKingSideCastling(chessPosition* position) {
     position->toMove = (playerColor) (1-position->toMove);
     playerColor toMove = position->toMove;
 
-    if(toMove == white) {
+    if (toMove == white) {
         position->pieces[toMove]             = position->pieces[toMove]^(WHITEKINGSIDECASTLEOCCUPANCYCHANGE);
         position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(WHITEKINGSIDECASTLEROOKMOVE);
         position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(WHITEKINGSIDECASTLEKINGMOVE);
@@ -69,7 +69,7 @@ inline static void undoKingSideCastling(chessPosition* position) {
 inline static void undoQueenSideCastling(chessPosition* position) {
     position->toMove = (playerColor) (1-position->toMove);
     playerColor toMove = position->toMove;
-    if(toMove == white) {
+    if (toMove == white) {
         position->pieces[toMove]             = position->pieces[toMove]^(WHITEQUEENSIDECASTLEOCCUPANCYCHANGE);
         position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(WHITEQUEENSIDECASTLEROOKMOVE);
         position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(WHITEQUEENSIDECASTLEQUEENMOVE);
@@ -121,15 +121,15 @@ inline static void undoPromotion(chessPosition* position, chessMove move, figure
 
 void undoMove(chessPosition* position) {
 
-    if(position->madeMoves.length == 0) {
+    if (position->madeMoves.length == 0) {
         return;
     }
 
-    /*if(repetitionData[position->zobristHash & 16383] == 0) {
+    /*if (repetitionData[position->zobristHash & 16383] == 0) {
         std::cout << position->madeMoves.length << std::endl;
         std::cout << chessPositionToOutputString(*position) << std::endl;
         std::cout << chessPositionToFenString(*position, false) << std::endl;
-        for(uint16_t ind=0; ind < position->madeMoves.length; ind++) {
+        for (uint16_t ind = 0; ind < position->madeMoves.length; ind++) {
             std::cout << position->madeMoves[ind].sourceField << " " << position->madeMoves[ind].targetField << std::endl;
         }
         std::cout << "WTF" << std::endl;
@@ -149,7 +149,7 @@ void undoMove(chessPosition* position) {
 
     //00000BNR00000PKQ00000NPR00000N0P000000000000000p0qpN0npnN000000kw0000
 
-    switch(move.type) {
+    switch (move.type) {
         case pawnMove:
         case knightMove:
         case bishopMove:
@@ -194,7 +194,7 @@ void undoMove(chessPosition* position) {
 
     #ifdef DEBUG
 
-    if(position->zobristHash != position->data.hash) {
+    if (position->zobristHash != position->data.hash) {
         std::cout << chessPositionToOutputString(*position) << std::endl;
         std::cout << "WTF???" << std::endl;
     }

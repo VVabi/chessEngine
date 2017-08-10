@@ -43,7 +43,7 @@
 extern uint16_t killerMoves[40][2];
 
 template <typename T>
-T StringToNumber (const std::string &Text) {
+T StringToNumber(const std::string &Text) {
     std::stringstream ss(Text);
     T result;
     return ss >> result ? result : 0;
@@ -74,17 +74,17 @@ void sendSearchInfo(uint64_t nodes, uint32_t time, int32_t eval, uint32_t depth,
     std::stringstream out;
 
 
-    if(eval > 29000) {
+    if (eval > 29000) {
         int16_t mate_in = (30000-eval+1)/2;
         out << "info depth " << depth << " score mate " << mate_in << " nps " << npsInt << " nodes " << nodes << " pv ";
-    } else if(eval < -29000) {
+    } else if (eval < -29000) {
         int16_t mate_in = (-30000-eval)/2;
         out << "info depth " << depth << " score mate " << mate_in << " nps " << npsInt << " nodes " << nodes << " pv ";
     } else {
         out << "info depth " << depth << " score cp " << eval << " nps " << npsInt << " nodes " << nodes << " pv ";
     }
 
-    for(auto iterator = PV.begin(); iterator != PV.end(); iterator++) {
+    for (auto iterator = PV.begin(); iterator != PV.end(); iterator++) {
         out << *iterator << " ";
     }
     putLine(out.str());
@@ -120,7 +120,7 @@ void search(chessPosition cposition, searchParameters params) {
 
 void launchSearch() {
     continueSearch = true;
-    if(engineThread.joinable()) {
+    if (engineThread.joinable()) {
         engineThread.join();
     }
     isSearching = true;
@@ -147,7 +147,7 @@ void handleClear() {
 
 void handleStop() {
     continueSearch = false;
-    if(engineThread.joinable()) {
+    if (engineThread.joinable()) {
         engineThread.join();
     }
     assert(!isSearching);
@@ -165,12 +165,12 @@ void handleGo(std::list<std::string> input) {
     params.increment[1] = 0;
     params.movesToGo = UINT16_MAX;
 
-    for(auto iterator = input.begin(), end = input.end(); iterator != end; ++iterator) {
+    for (auto iterator = input.begin(), end = input.end(); iterator != end; ++iterator) {
         std::string current = *iterator;
-        if("wtime" == current) {
+        if ("wtime" == current) {
             iterator++;
-            if(iterator == input.end()) {
-                putLine( "Missing parameter for " + current);
+            if (iterator == input.end()) {
+                putLine("Missing parameter for " + current);
                 params.type = unknown;
                 break;
             }
@@ -178,10 +178,10 @@ void handleGo(std::list<std::string> input) {
             params.totalTime[0] = StringToNumber<int32_t>(time);
             params.type = time_until_move;
         }
-        if("btime" == current) {
+        if ("btime" == current) {
             iterator++;
-            if(iterator == input.end()) {
-                putLine( "Missing parameter for " + current);
+            if (iterator == input.end()) {
+                putLine("Missing parameter for " + current);
                 params.type = unknown;
                 break;
             }
@@ -189,10 +189,10 @@ void handleGo(std::list<std::string> input) {
             params.totalTime[1] = StringToNumber<int32_t>(time);
             params.type = time_until_move;
         }
-        if("winc" == current) {
+        if ("winc" == current) {
             iterator++;
-            if(iterator == input.end()) {
-                putLine( "Missing parameter for " + current);
+            if (iterator == input.end()) {
+                putLine("Missing parameter for " + current);
                 params.type = unknown;
                 break;
             }
@@ -200,10 +200,10 @@ void handleGo(std::list<std::string> input) {
             params.increment[0] = StringToNumber<int32_t>(time);
             params.type = time_until_move;
         }
-        if("binc" == current) {
+        if ("binc" == current) {
             iterator++;
-            if(iterator == input.end()) {
-                putLine( "Missing parameter for " + current);
+            if (iterator == input.end()) {
+                putLine("Missing parameter for " + current);
                 params.type = unknown;
                 break;
             }
@@ -212,14 +212,14 @@ void handleGo(std::list<std::string> input) {
             params.type = time_until_move;
         }
 
-        if("infinite" == current) {
+        if ("infinite" == current) {
             params.type = infinite;
         }
 
-        if("movetime" == current) {
+        if ("movetime" == current) {
             iterator++;
-            if(iterator == input.end()) {
-                putLine( "Missing parameter for " + current);
+            if (iterator == input.end()) {
+                putLine("Missing parameter for " + current);
                 params.type = unknown;
                 break;
             }
@@ -228,10 +228,10 @@ void handleGo(std::list<std::string> input) {
             params.type = fixed_time;
         }
 
-        if("depth" == current) {
+        if ("depth" == current) {
             iterator++;
-            if(iterator == input.end()) {
-                putLine( "Missing parameter for " + current);
+            if (iterator == input.end()) {
+                putLine("Missing parameter for " + current);
                 params.type = unknown;
                 break;
             }
@@ -241,21 +241,21 @@ void handleGo(std::list<std::string> input) {
         }
 
 
-        if("movestogo" == current) {
+        if ("movestogo" == current) {
             iterator++;
-            if(iterator == input.end()) {
-                putLine( "Missing parameter for " + current);
+            if (iterator == input.end()) {
+                putLine("Missing parameter for " + current);
                 params.type = unknown;
                 break;
             }
-            std::string togo =*iterator;
+            std::string togo = *iterator;
             params.movesToGo = StringToNumber<int32_t>(togo);
             params.type = time_until_move;
         }
 
     }
 
-    if(params.type != unknown) {
+    if (params.type != unknown) {
         setSearchParams(params);
         launchSearch();
     }
@@ -264,7 +264,7 @@ void handleGo(std::list<std::string> input) {
 
 void handlePerft(std::list<std::string> input) {
         auto iterator = input.begin();
-        if(iterator != input.end()) {
+        if (iterator != input.end()) {
             uint16_t depth = StringToNumber<int32_t>(*iterator);
             chessPosition p = memoryLibrarianRetrievePosition();
             uint32_t perftret = perftNodes(&p, depth);
@@ -278,24 +278,24 @@ void handlePerft(std::list<std::string> input) {
 
 void handlePosition(std::list<std::string> input) {
     std::string fen = "";
-    if(input.empty()) {
+    if (input.empty()) {
         //std::cout << "Invalid position request" << std::endl;
         return;
     }
     auto iterator = input.begin();
-    if("startpos" == *iterator) {
+    if ("startpos" == *iterator) {
         fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         iterator++;
     } else {
-        if(*iterator != "fen") {
+        if (*iterator != "fen") {
             putLine("Invalid position request");
             return;
         }
         iterator++;
         fen = *iterator;
         iterator++;
-        while((iterator != input.end()) && ("moves" != *iterator)) {
-            if("fen" != *iterator) {
+        while ((iterator != input.end()) && ("moves" != *iterator)) {
+            if ("fen" != *iterator) {
             fen = fen+" "+*iterator;
             }
             iterator++;
@@ -303,8 +303,8 @@ void handlePosition(std::list<std::string> input) {
 
     }
     std::vector<std::string> moveList;
-    while(iterator != input.end()) {
-        if("moves" !=*iterator) {
+    while (iterator != input.end()) {
+        if ("moves" != *iterator) {
             moveList.push_back(*iterator);
         }
         iterator++;
@@ -319,7 +319,7 @@ void handleEval() {
     int32_t eval = evaluation(&cposition, -32000, 32000);
     evaluationResult res = getEvaluationResult();
     std::stringstream evalInfo;
-    if(cposition.toMove == black) {
+    if (cposition.toMove == black) {
         eval = -eval; //always from POV of white
     }
 
@@ -351,7 +351,7 @@ void handleSEE(std::list<std::string> input) {
     chessPosition cposition = memoryLibrarianRetrievePosition();
 
     chessMove m;
-    if(checkMove(&cposition, input.front(), &m)) {
+    if (checkMove(&cposition, input.front(), &m)) {
         std::cout << SEE(&cposition, &m) << std::endl;
     } else {
         std::cout << "not a valid move" << std::endl;
@@ -375,7 +375,7 @@ void handleSetEvalParam(std::list<std::string> input) {
 
 void runPerformanceTests(uint32_t d) {
 
-    for(uint16_t depth = 3; depth < d+1; depth++) {
+    for (uint16_t depth = 3; depth < d+1; depth++) {
         std::ifstream file;
         file.open("chesspositionsfixed.txt");
         std::string line;
@@ -383,12 +383,12 @@ void runPerformanceTests(uint32_t d) {
         uint64_t qNodes = 0;
 
         uint32_t nodes = 0;
-        while(std::getline(file, line)) {
+        while (std::getline(file, line)) {
             //std::cout << line << std::endl;
             uint64_t nmNodes = 0;
             uint64_t qn = 0;
             uint64_t newNodes = runSinglePositionPerformanceTest(line, depth, &nmNodes, &qn, true);
-            if(newNodes != qn+nmNodes) {
+            if (newNodes != qn+nmNodes) {
                 std::cout << "WTF???" << std::endl;
             }
             nodes = nodes + newNodes;
@@ -411,7 +411,7 @@ void handleRunPerformanceTests(std::list<std::string> input) {
     std::string valueStr = *iterator;
     int32_t value   = std::stoi(valueStr);
     continueSearch = true;
-    if(engineThread.joinable()) {
+    if (engineThread.joinable()) {
         engineThread.join();
     }
     isSearching = true;
@@ -433,7 +433,7 @@ void handleGetMoveOrdering() {
     calculateStandardSortEvals(&cposition, &vec, 0, 0, sortInfo(false, NO_REFUTATION, 0));
     std::stable_sort(vec.data, vec.data+vec.length);//stable sort makes the engine 100% predictable and comparable between different optimization levels
 
-    for(uint16_t ind=0; ind < vec.length; ind++) {
+    for (uint16_t ind = 0; ind < vec.length; ind++) {
         std::cout << moveToExtendedString(vec[ind]) << " " << vec[ind].sortEval << std::endl;
     }
 
@@ -444,13 +444,13 @@ void UIloop() {
     initUserEvents();
     bool continueLoop = true;
     handleClear();
-    while(continueLoop) {
+    while (continueLoop) {
         userEvent ev = getNextUserEvent();
 
         //restricted interface during search
         //------------------------------------
-        if(isSearching) {
-            switch(ev.input) {
+        if (isSearching) {
+            switch (ev.input) {
                 case isready:
                     handleIsReady(std::cout);
                     break;
@@ -468,7 +468,7 @@ void UIloop() {
         } else {
             //full interface otherwise
             //---------------------------
-            switch(ev.input) {
+            switch (ev.input) {
                 case uci:
                     handleUciInput(std::cout);
                     break;
