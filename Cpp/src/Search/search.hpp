@@ -44,7 +44,7 @@ struct searchSettings {
     CheckextensionSetting checkextensionSetting;
     uint8_t searchId;
     searchSettings(NullmoveSetting nms, HashprobeSetting hps, CheckextensionSetting ces, uint8_t sid): nullmoveSetting(nms), hashprobeSetting(hps), checkextensionSetting(ces), searchId(sid) {};
-    explicit searchSettings(uint8_t sid):  nullmoveSetting(nullmove_enabled), hashprobeSetting(hashprobe_enabled), checkextensionSetting(checkextension_enabled), searchId(sid){};
+    explicit searchSettings(uint8_t sid):  nullmoveSetting(nullmove_enabled), hashprobeSetting(hashprobe_enabled), checkextensionSetting(checkextension_enabled), searchId(sid) {};
 };
 
 struct AlphaBeta {
@@ -72,7 +72,7 @@ struct AlphaBeta {
         return alpha >= beta;
     }
 
-    void sanityCheck(){
+    void sanityCheck() {
         assert(alpha <= beta);
     }
 
@@ -92,11 +92,11 @@ struct searchLoopResults {
     uint16_t numLegalMoves;
     searchLoopResults(AlphaBeta ab, int16_t b, uint16_t n): alphabeta(ab), bestIndex(b), numLegalMoves(n) {};
 
-    bool noMovesAvailable(){
+    bool noMovesAvailable() {
         return numLegalMoves == 0;
     }
 
-    bool foundGoodMove(){
+    bool foundGoodMove() {
         return (bestIndex >= 0);
     }
 };
@@ -128,7 +128,7 @@ void resetqCalled();
 uint32_t getSortqCalled();
 void resetSortqCalled();
 
-struct searchDebugData{
+struct searchDebugData {
     uint64_t called;
     uint64_t wentToQuiescence;
     uint64_t fake_3fold_repetitions;
@@ -150,23 +150,23 @@ class moveStack {
     uint16_t counter = 0;
 
 public:
-    vdt_vector<chessMove> getNext(){
+    vdt_vector<chessMove> getNext() {
         assert(counter < 45);
         counter++;
         //std::cout << counter << std::endl;
-        return vdt_vector<chessMove>(moveArray+(counter-1)*150,150);
+        return vdt_vector<chessMove>(moveArray+(counter-1)*150, 150);
     }
 
-    void release(){
+    void release() {
         assert(counter > 0);
         counter--;
     }
 
-    uint16_t getCounter(){
+    uint16_t getCounter() {
         return counter;
     }
 
-    void reset(){
+    void reset() {
         counter = 0;
     }
 };

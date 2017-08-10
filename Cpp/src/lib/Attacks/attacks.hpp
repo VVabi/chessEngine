@@ -7,7 +7,7 @@
 
 #ifndef LIB_ATTACKS_ATTACKS_HPP_
 #define LIB_ATTACKS_ATTACKS_HPP_
-struct AttackTable{
+struct AttackTable {
     uint64_t attackTables[6];
     uint64_t completeAttackTable;
 };

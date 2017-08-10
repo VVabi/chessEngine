@@ -10,7 +10,7 @@
 
 
 
-struct preParameters{
+struct preParameters {
     int64_t pawnValue;
     int64_t knightValue;
     int64_t bishopValue;

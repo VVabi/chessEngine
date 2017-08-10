@@ -25,7 +25,7 @@ std::string generateBishopReachableFields() { //for magic number generation
     std::stringstream ss;
     ss << "uint64_t bishopFieldTable[] = {";
 
-    for(int16_t ind=0; ind < 64; ind++){
+    for(int16_t ind=0; ind < 64; ind++) {
         uint64_t bishopMoves = 0;
 
         int16_t ind_copy = 0;
@@ -70,7 +70,7 @@ std::string generateBishopReachableFields() { //for magic number generation
         ss << bishopMoves;
 
         if(ind < 63) {
-            ss << " ,";
+            ss << " , ";
         }
 
     }

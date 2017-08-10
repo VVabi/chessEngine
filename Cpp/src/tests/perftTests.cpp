@@ -20,7 +20,7 @@
 #include <lib/Defines/figureValues.hpp>
 
 enum sortState {not_sorted, hash_handled, good_captures_handled, killers_handled, fully_sorted};
-static int16_t figureValues[7] = {PAWNVALUE,KNIGHTVALUE,BISHOPVALUE,ROOKVALUE,QUEENVALUE,10000,0};
+static int16_t figureValues[7] = {PAWNVALUE, KNIGHTVALUE, BISHOPVALUE, ROOKVALUE, QUEENVALUE, 10000, 0};
 
 static inline bool getGoodCaptureToFront(vdt_vector<chessMove>* moves, uint16_t start_index) {
 
@@ -34,7 +34,7 @@ static inline bool getGoodCaptureToFront(vdt_vector<chessMove>* moves, uint16_t 
             continue;
         }
 
-        if( ((uint16_t) mv.captureType) >= ((uint16_t) mv.type)) { // || ((mv.captureType == knight) && (mv.type == bishopMove))){
+        if( ((uint16_t) mv.captureType) >= ((uint16_t) mv.type)) { // || ((mv.captureType == knight) && (mv.type == bishopMove))) {
             int16_t local_best = 5*figureValues[mv.captureType]/2-figureValues[mv.type];
             if(local_best > best) {
                 best = local_best;
@@ -59,7 +59,7 @@ static inline bool getHashMoveToFront(vdt_vector<chessMove>* moves, uint16_t has
 
     for(uint16_t ind=startIndex; ind < moves->length; ind++) {
         chessMove mv = (*moves)[ind];
-        if( (((mv.sourceField) | (mv.targetField << 8)) == hashMove) && (mv.type != castlingKingside) && (mv.type != castlingQueenside)){
+        if( (((mv.sourceField) | (mv.targetField << 8)) == hashMove) && (mv.type != castlingKingside) && (mv.type != castlingQueenside)) {
              chessMove buffer = (*moves)[startIndex];
              (*moves)[startIndex] = (*moves)[ind];
              (*moves)[ind] = buffer;
@@ -70,8 +70,8 @@ static inline bool getHashMoveToFront(vdt_vector<chessMove>* moves, uint16_t has
     return false;
 }
 
-uint64_t perftNodes(chessPosition* position, uint16_t depth){
-    if(depth == 0){
+uint64_t perftNodes(chessPosition* position, uint16_t depth) {
+    if(depth == 0) {
         return 1;
     }
     uint64_t nodes = 0;
@@ -89,7 +89,7 @@ uint64_t perftNodes(chessPosition* position, uint16_t depth){
 
 
 
-    for(uint16_t ind=0; ind < moves.length; ind++){
+    for(uint16_t ind=0; ind < moves.length; ind++) {
 
         switch(currentState) {
                     case not_sorted:
@@ -120,12 +120,12 @@ uint64_t perftNodes(chessPosition* position, uint16_t depth){
 
 
 
-        if(moves[ind].sortEval < -10000){
+        if(moves[ind].sortEval < -10000) {
             break;
         }
 
-        if(moves[ind].captureType != none){
-            if(moves[ind].captureType == king){
+        if(moves[ind].captureType != none) {
+            if(moves[ind].captureType == king) {
                 std::cout << "Taking the king should be impossible" << std::endl;
                 uint16_t kingField = findLSB(position->pieceTables[1-position->toMove][king]);
                 isFieldAttacked(position, position->toMove, kingField);
@@ -136,7 +136,7 @@ uint64_t perftNodes(chessPosition* position, uint16_t depth){
         uint16_t kingField = findLSB(position->pieceTables[1-position->toMove][king]);
         uint32_t additional_nodes = 0;
 
-        if(isFieldAttacked(position, position->toMove, kingField)){
+        if(isFieldAttacked(position, position->toMove, kingField)) {
 
         } else {
             additional_nodes = perftNodes(position, depth-1);
@@ -152,9 +152,9 @@ uint64_t perftNodes(chessPosition* position, uint16_t depth){
 }
 
 
-//uint32_t perftReference = {8902, 197281,4865609,119060324,3195901860};
+//uint32_t perftReference = {8902, 197281, 4865609, 119060324, 3195901860};
 
-testResult testPerftTestSuite(){
+testResult testPerftTestSuite() {
     testResult ret;
     ret.passed   = true;
     ret.testName = "perftTest";
@@ -162,7 +162,7 @@ testResult testPerftTestSuite(){
     std::string position = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwKQkq";
     chessPosition c = stringToChessPosition(position);
 
-    uint64_t nodes = perftNodes(&c,7);
+    uint64_t nodes = perftNodes(&c, 7);
     if(nodes != 3195901860) {
         std::cout <<"First position failed" <<std::endl;
         std::cout << nodes << std::endl;
@@ -182,7 +182,7 @@ testResult testPerftTestSuite(){
     std::cout << nodes << std::endl;
     position = "000000000000P0P0000000000R000p0kKP00000r000p000000p0000000000000w0000";
     c = stringToChessPosition(position);
-    nodes = perftNodes(&c,7);
+    nodes = perftNodes(&c, 7);
     if(nodes != 178633661) {
         std::cout << "3rd position failed" <<std::endl;
         std::cout << nodes << std::endl;

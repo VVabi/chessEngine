@@ -56,7 +56,7 @@ char getRandomPiece(playerColor color) {
 }
 
 
-uint32_t getRandomField(){
+uint32_t getRandomField() {
     srand (time(NULL));
     uint32_t index  = rand() % 64;
     return index;

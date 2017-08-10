@@ -23,7 +23,7 @@
 
 evaluationResult result;
 
-evaluationResult getEvaluationResult(){
+evaluationResult getEvaluationResult() {
     return result;
 }
 
@@ -32,12 +32,12 @@ uint16_t taperingValues[81] = {  0,  0,  0,  0,  0,  0,  0,  0,
                                  0,  0,  0,  0,  0,  0,  0,  0,
                                 0, 2, 7, 12, 17, 22, 27, 33,
                                 39, 45, 51, 57, 64, 71, 78, 85,
-                                92, 99, 106, 113, 120, 127,134,141,
-                               148,155,162,168,174,180,186,192,
-                               197,202,206,210,214,218,222,226,
-                               229,232,235,238,241,244,247,256,
-                               256,256,256,256,256,256,256,256,
-                               256,256,256,256,256,256,256,256,256
+                                92, 99, 106, 113, 120, 127, 134, 141,
+                               148, 155, 162, 168, 174, 180, 186, 192,
+                               197, 202, 206, 210, 214, 218, 222, 226,
+                               229, 232, 235, 238, 241, 244, 247, 256,
+                               256, 256, 256, 256, 256, 256, 256, 256,
+                               256, 256, 256, 256, 256, 256, 256, 256, 256
 };
 
 /*
@@ -45,12 +45,12 @@ uint16_t taperingValues[81] = {  0,  0,  0,  0,  0,  0,  0,  0,
                                  0,  0,  0,  0,  0,  0,  0,  0,
                                 0, 2, 7, 11, 14, 19, 24, 29,
                                 33, 37, 41, 48, 54, 60, 65, 70,
-                                75, 80,86,92,97,102,108,112,
-                               118,124,129,134,140,145,150,155,
-                               161,166,173,178,183,189,194,20,
-                               206,212,221,230,236,242,248,254,
-                               256,256,256,256,256,256,256,256,
-                               256,256,256,256,256,256,256,256,256
+                                75, 80, 86, 92, 97, 102, 108, 112,
+                               118, 124, 129, 134, 140, 145, 150, 155,
+                               161, 166, 173, 178, 183, 189, 194, 20,
+                               206, 212, 221, 230, 236, 242, 248, 254,
+                               256, 256, 256, 256, 256, 256, 256, 256,
+                               256, 256, 256, 256, 256, 256, 256, 256, 256
 };
 */
 
@@ -177,20 +177,20 @@ static int16_t trappedPieces(const chessPosition* position) {
 static int32_t rookOpenFiles(const chessPosition* position, uint8_t* pawnOccupancy, const evalParameters* evalParams) {
     int32_t ret = 0;
 
-    for(uint8_t color=0; color<2; color++){
+    for(uint8_t color=0; color<2; color++) {
         uint64_t rooks = position->pieceTables[color][rook];
         while(rooks) {
             uint16_t field = popLSB(rooks);
             uint16_t file = FILE(field);
 /*#ifdef EXPERIMENTAL
-            if(((pawnOccupancy[color] | pawnOccupancy[1-color]) & (1 << file)) == 0){
+            if(((pawnOccupancy[color] | pawnOccupancy[1-color]) & (1 << file)) == 0) {
                 ret = ret+(1-2*color)*evalParams->rookOnOpenFile;
             }
-            else if((pawnOccupancy[color] & (1 << file)) == 0){
+            else if((pawnOccupancy[color] & (1 << file)) == 0) {
                 ret = ret+(1-2*color)*5;
             }
 #else*/
-            if((pawnOccupancy[color] & (1 << file)) == 0){
+            if((pawnOccupancy[color] & (1 << file)) == 0) {
                 ret = ret+(1-2*color)*evalParams->rookOnOpenFile;
             }
 //#endif
@@ -202,7 +202,7 @@ static int32_t rookOpenFiles(const chessPosition* position, uint8_t* pawnOccupan
 
 //static uint32_t counter = 0;
 
-int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, bool PSQ_only){
+int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, bool PSQ_only) {
 
 
     if( (position->pieceTables[white][pawn] == 0) &&
@@ -227,12 +227,12 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
     bufferEndgame  = bufferEndgame-(1 << 14);
     uint16_t phase = position->totalFigureEval/100;
 
-    if(position->pieceTables[white][queen] | position->pieceTables[black][queen]){
+    if(position->pieceTables[white][queen] | position->pieceTables[black][queen]) {
         phase = phase+5;
     }
 
 
-    if(phase > 80){
+    if(phase > 80) {
         phase = 80;
     }
 
@@ -272,14 +272,14 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
     uint64_t numWhiteBishops = popcount(position->pieceTables[white][bishop]);
 
     result.bishoppair = 0;
-    if(numWhiteBishops > 1){
+    if(numWhiteBishops > 1) {
         eval                    = eval+evalPars->bishoppair;
         result.bishoppair       = evalPars->bishoppair;
     }
 
     uint64_t numblackBishops = popcount(position->pieceTables[black][bishop]);
 
-    if(numblackBishops > 1){
+    if(numblackBishops > 1) {
         eval = eval-evalPars->bishoppair;
         result.bishoppair = result.bishoppair-evalPars->bishoppair;
     }
@@ -326,7 +326,7 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
     /*static uint32_t counter = 0;
     counter++;
 
-    if((counter > 100000) && (std::abs(eval-position->figureEval) > 100)){
+    if((counter > 100000) && (std::abs(eval-position->figureEval) > 100)) {
         counter = 0;
         latexOutput(position, result, eval);
     }*/

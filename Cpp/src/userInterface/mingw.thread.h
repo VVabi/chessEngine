@@ -56,7 +56,7 @@ public:
         void clear() {mId = 0;}
         friend class thread;
     public:
-        explicit id(DWORD aId=0):mId(aId){}
+        explicit id(DWORD aId=0):mId(aId) {}
         bool operator==(const id& other) const {return mId == other.mId;}
     };
 protected:
@@ -66,7 +66,7 @@ public:
     typedef HANDLE native_handle_type;
     id get_id() const noexcept {return mThreadId;}
     native_handle_type native_handle() const {return mHandle;}
-    thread(): mHandle(_STD_THREAD_INVALID_HANDLE){}
+    thread(): mHandle(_STD_THREAD_INVALID_HANDLE) {}
 
     thread(thread&& other)
     :mHandle(other.mHandle), mThreadId(other.mThreadId)
@@ -160,12 +160,12 @@ namespace this_thread
     inline thread::id get_id() {return thread::id(GetCurrentThreadId());}
     inline void yield() {Sleep(0);}
     template< class Rep, class Period >
-    void sleep_for( const std::chrono::duration<Rep,Period>& sleep_duration)
+    void sleep_for( const std::chrono::duration<Rep, Period>& sleep_duration)
     {
         Sleep(std::chrono::duration_cast<std::chrono::milliseconds>(sleep_duration).count());
     }
     template <class Clock, class Duration>
-    void sleep_until(const std::chrono::time_point<Clock,Duration>& sleep_time)
+    void sleep_until(const std::chrono::time_point<Clock, Duration>& sleep_time)
     {
         sleep_for(sleep_time-Clock::now());
     }

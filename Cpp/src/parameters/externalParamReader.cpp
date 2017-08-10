@@ -32,7 +32,7 @@ parameterReader::parameterReader() {
 }
 
 
-bool parameterReader::readParameters(preParameters* pars, std::string filename){
+bool parameterReader::readParameters(preParameters* pars, std::string filename) {
 
         std::ifstream input = std::ifstream(filename);
         if(!input.is_open()) {

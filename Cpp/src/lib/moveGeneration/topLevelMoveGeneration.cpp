@@ -109,7 +109,7 @@ __attribute__((always_inline)) static inline void generatePawnMoves(vdt_vector<c
         move.sourceField = findLSB(source);
         move.targetField = findLSB(target);
         uint64_t promotionRow = promotionRows[position->toMove];
-        if(target & promotionRow){
+        if(target & promotionRow) {
             move.type = promotionQueen;
             vec->add(&move);
             move.type = promotionRook;
@@ -144,7 +144,7 @@ __attribute__((always_inline)) static inline void generatePawnMoves(vdt_vector<c
 
     uint64_t takesLeft = (toMove? pawns >> 9 : pawns << 7) & NOTFILEH & position->pieces[1-toMove] & mask;
 
-    while(takesLeft){
+    while(takesLeft) {
         uint64_t target     = LOWESTBITONLY(takesLeft);
         uint64_t source     = (toMove? target << 9: target >> 7);
         figureType captureType = none;
@@ -155,7 +155,7 @@ __attribute__((always_inline)) static inline void generatePawnMoves(vdt_vector<c
             }
         }
         #ifdef DEBUG
-        if(captureType == none){
+        if(captureType == none) {
             std::cout << "Pawn capture move generation is buggy" << std::endl;
 
         }
@@ -166,7 +166,7 @@ __attribute__((always_inline)) static inline void generatePawnMoves(vdt_vector<c
         move.sourceField = findLSB(source);
         move.targetField = findLSB(target);
         uint64_t promotionRow = promotionRows[position->toMove];
-        if(target & promotionRow){
+        if(target & promotionRow) {
             move.type = promotionQueen;
             vec->add(&move);
             move.type = promotionRook;
@@ -183,7 +183,7 @@ __attribute__((always_inline)) static inline void generatePawnMoves(vdt_vector<c
 
     uint64_t takesRight = (toMove? pawns >> 7 : pawns << 9) & NOTFILEA & position->pieces[1-toMove]& mask;
 
-    while(takesRight){
+    while(takesRight) {
         uint64_t target     = LOWESTBITONLY(takesRight);
         uint64_t source     = (toMove? target << 7: target >> 9);
         figureType captureType = none;
@@ -194,7 +194,7 @@ __attribute__((always_inline)) static inline void generatePawnMoves(vdt_vector<c
             }
         }
         #ifdef DEBUG
-        if(captureType == none){
+        if(captureType == none) {
             std::cout << "Pawn capture move generation is buggy" << std::endl;
         }
         #endif
@@ -204,7 +204,7 @@ __attribute__((always_inline)) static inline void generatePawnMoves(vdt_vector<c
         move.sourceField = findLSB(source);
         move.targetField = findLSB(target);
         uint64_t promotionRow = promotionRows[position->toMove];
-        if(target & promotionRow){
+        if(target & promotionRow) {
             move.type = promotionQueen;
             vec->add(&move);
             move.type = promotionRook;
@@ -225,16 +225,16 @@ __attribute__((always_inline)) static inline void generatePawnMoves(vdt_vector<c
 
 
 
-__attribute__((always_inline)) static inline void generateCastling(vdt_vector<chessMove>* vec, chessPosition* position){
+__attribute__((always_inline)) static inline void generateCastling(vdt_vector<chessMove>* vec, chessPosition* position) {
     playerColor toMove = position->toMove;
     uint8_t castlingMask = (toMove? 12: 3);
-    if(position->data.castlingRights & castlingMask){
+    if(position->data.castlingRights & castlingMask) {
         uint64_t occupancy = (position->pieces[white]) | (position->pieces[black]);
 
 
         uint8_t castlingOffset = (toMove? 2: 0);
 
-        if ((position->data.castlingRights & (1 << castlingOffset)) && ((occupancy & castlingBlockers[toMove][KINGSIDE]) == 0)){
+        if ((position->data.castlingRights & (1 << castlingOffset)) && ((occupancy & castlingBlockers[toMove][KINGSIDE]) == 0)) {
             chessMove mv;
             mv.captureType = none;
             mv.type        = castlingKingside;
@@ -243,7 +243,7 @@ __attribute__((always_inline)) static inline void generateCastling(vdt_vector<ch
             vec->add(&mv);
         }
 
-        if ((position->data.castlingRights & (1 << (castlingOffset+1))) && ((occupancy & castlingBlockers[toMove][QUEENSIDE]) == 0)){
+        if ((position->data.castlingRights & (1 << (castlingOffset+1))) && ((occupancy & castlingBlockers[toMove][QUEENSIDE]) == 0)) {
             chessMove mv;
             mv.captureType = none;
             mv.type        = castlingQueenside;
@@ -254,9 +254,9 @@ __attribute__((always_inline)) static inline void generateCastling(vdt_vector<ch
     }
 }
 
-__attribute__((always_inline)) static inline void generateEnPassant(vdt_vector<chessMove>* vec, chessPosition* position){
+__attribute__((always_inline)) static inline void generateEnPassant(vdt_vector<chessMove>* vec, chessPosition* position) {
 
-    if(position->data.enPassantFile > 7){
+    if(position->data.enPassantFile > 7) {
         return;
     }
 

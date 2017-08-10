@@ -30,8 +30,8 @@ int main() {
     /*std::ofstream out("/home/vabi/TeX/Chess/positions.tex");
     std::ifstream in("/home/vabi/code/chessEngine/chessGui/openingPositions.txt");
     std::string line;
-    while(getline(in, line)){
-        if(line.at(0) == '%'){
+    while(getline(in, line)) {
+        if(line.at(0) == '%') {
             continue;
         }
         latexOutput(line, out);

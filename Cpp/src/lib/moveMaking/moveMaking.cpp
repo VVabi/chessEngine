@@ -22,9 +22,9 @@ extern uint64_t castlingHash[16];
 extern uint64_t enpassantHash[9];
 extern uint16_t repetitionData[16384];
 
-static int16_t figureValues[7] = {PAWNVALUE,KNIGHTVALUE,BISHOPVALUE,ROOKVALUE,QUEENVALUE,10000,0};
+static int16_t figureValues[7] = {PAWNVALUE, KNIGHTVALUE, BISHOPVALUE, ROOKVALUE, QUEENVALUE, 10000, 0};
 
-void makeNullMove(chessPosition* position){
+void makeNullMove(chessPosition* position) {
     position->data.hash = position->zobristHash;
     position->dataStack.add(&position->data);
     position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
@@ -63,7 +63,7 @@ static inline void makeNormalMove(chessMove* move, chessPosition* position) {
 static inline void makeKingSideCastle(chessPosition* position) {
     playerColor toMove = position->toMove;
 
-    if(toMove == white){
+    if(toMove == white) {
         position->pieces[toMove]             = position->pieces[toMove]^(WHITEKINGSIDECASTLEOCCUPANCYCHANGE);
         position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(WHITEKINGSIDECASTLEROOKMOVE);
         position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(WHITEKINGSIDECASTLEKINGMOVE);
@@ -82,7 +82,7 @@ static inline void makeKingSideCastle(chessPosition* position) {
 
 static inline void makeQueenSideCastle(chessPosition* position) {
     playerColor toMove = position->toMove;
-    if(toMove == white){
+    if(toMove == white) {
         position->pieces[toMove]             = position->pieces[toMove]^(WHITEQUEENSIDECASTLEOCCUPANCYCHANGE);
         position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(WHITEQUEENSIDECASTLEROOKMOVE);
         position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(WHITEQUEENSIDECASTLEQUEENMOVE);
@@ -145,7 +145,7 @@ void makeMove(chessMove* move, chessPosition* position) {
     bool isPawn = (move->type == pawnMove) || (move->type == enpassant) || (move->type == promotionQueen) || (move->type == promotionRook) || (move->type == promotionBishop) || (move->type == promotionKnight);
     bool isCapture = (move->captureType != none);
 
-    if(isPawn || isCapture){
+    if(isPawn || isCapture) {
         position->data.fiftyMoveRuleCounter = 0;
     }
 
@@ -169,7 +169,7 @@ void makeMove(chessMove* move, chessPosition* position) {
     }
 
 
-    switch(move->type){
+    switch(move->type) {
         case pawnMove:
         case knightMove:
         case bishopMove:

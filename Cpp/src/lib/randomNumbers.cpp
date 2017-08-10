@@ -18,8 +18,7 @@ static std::mt19937_64 e2 = std::mt19937_64(4288670196);
 
 bool isInitialized = false;
 
-uint64_t getRandUint64()
-{
+uint64_t getRandUint64() {
    /*std::random_device rd;
    std::cout << rd() << std::endl;*/
    //std::mt19937_64 e2(rd());

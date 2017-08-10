@@ -22,7 +22,7 @@
 #include <lib/Evaluation/evaluation.hpp>
 #include <atomic>
 
-static char figureNames[2][6] = {{'P', 'N', 'B', 'R', 'Q', 'K'},
+static char figureNames[2][6] = { {'P', 'N', 'B', 'R', 'Q', 'K'},
         {'p', 'n', 'b', 'r', 'q', 'k'},
 };
 
@@ -34,7 +34,7 @@ static char figureNames[2][6] = {{'P', 'N', 'B', 'R', 'Q', 'K'},
 
 uint8_t searchId = 0;
 
-uint64_t get_timestamp(){
+uint64_t get_timestamp() {
     struct timeval start;
     uint64_t mtime, seconds, useconds;
     gettimeofday(&start, NULL);
@@ -69,7 +69,7 @@ uint64_t runSinglePositionPerformanceTest(std::string position, uint16_t depth, 
         if(useAspiration) {
             if ((eval <= alpha)) {
                 alpha = alpha-100;
-            } else if(eval >= beta){
+            } else if(eval >= beta) {
                 beta = beta+100;
             }
 
@@ -82,7 +82,7 @@ uint64_t runSinglePositionPerformanceTest(std::string position, uint16_t depth, 
             succeeded = true;
         }
 
-        if(succeeded){
+        if(succeeded) {
             searchdepth++;
             alpha = eval-50;
             beta  = eval+50;
@@ -167,7 +167,7 @@ std::string chessPositionToString(const chessPosition position) {
     return ret;
 }
 
-std::string chessPositionToOutputString(const chessPosition position){
+std::string chessPositionToOutputString(const chessPosition position) {
     //Not performance-critical
     //---------------------------
     std::string ret = "";
@@ -201,7 +201,7 @@ std::string chessPositionToOutputString(const chessPosition position){
 
 extern uint16_t repetitionData[16384];
 
-chessPosition FENtoChessPosition(std::string fen){
+chessPosition FENtoChessPosition(std::string fen) {
     memset(repetitionData, 0, 16384*sizeof(uint16_t)); //TODO: this is a hack
     //Not performance-critical
     //---------------------------
@@ -216,20 +216,20 @@ chessPosition FENtoChessPosition(std::string fen){
     while(fen.at(ind) != ' ') {
         char current = fen.at(ind);
 
-        if(current == '/'){
+        if(current == '/') {
             row--;
             file = 0;
             ind++;
             continue;
         }
 
-        if((current >= '0') && (current <='8')){
+        if((current >= '0') && (current <='8')) {
             uint8_t num = current-'0';
             file = file+num;
         } else {
             uint16_t field = 8*row+file;
             file++;
-            switch(current){
+            switch(current) {
                 case 'K':
                     position.pieces[white]                  |= (1ULL << field);
                     position.pieceTables[white][king]       |= (1ULL << field);
@@ -289,7 +289,7 @@ chessPosition FENtoChessPosition(std::string fen){
     }
 
     ind++;
-    if(fen.at(ind) == 'w'){
+    if(fen.at(ind) == 'w') {
         position.toMove = white;
     } else {
         position.toMove = black;
@@ -354,7 +354,7 @@ chessPosition stringToChessPosition(std::string strposition) {
 
     for (uint8_t ind=0; ind < 64; ind++) {
         char c = strposition.at(ind);
-            switch(c){
+            switch(c) {
                 case 'K':
                     position.pieces[white]                  |= (1ULL << ind);
                     position.pieceTables[white][king]       |= (1ULL << ind);
@@ -453,16 +453,16 @@ chessPosition stringToChessPosition(std::string strposition) {
 
 std::string moveToString(chessMove move) {
 
-    if(move.type == castlingKingside){
-            if(move.sourceField < 32){
+    if(move.type == castlingKingside) {
+            if(move.sourceField < 32) {
                 return "e1g1";
             } else {
                 return "e8g8";
             }
     }
 
-    if(move.type == castlingQueenside){
-            if(move.sourceField < 32){
+    if(move.type == castlingQueenside) {
+            if(move.sourceField < 32) {
                 return "e1c1";
             } else {
                 return "e8c8";
@@ -484,30 +484,30 @@ std::string moveToString(chessMove move) {
     retString.push_back(ret[2]);
     retString.push_back(ret[3]);
 
-    if(move.type == promotionBishop){
+    if(move.type == promotionBishop) {
         retString.push_back('b');
     }
-    if(move.type == promotionKnight){
+    if(move.type == promotionKnight) {
         retString.push_back('n');
     }
-    if(move.type == promotionRook){
+    if(move.type == promotionRook) {
         retString.push_back('r');
     }
-    if(move.type == promotionQueen){
+    if(move.type == promotionQueen) {
         retString.push_back('q');
     }
     return retString;
 
 }
 
-std::string moveToExtendedString(chessMove move){
+std::string moveToExtendedString(chessMove move) {
     std::string ret = moveToString(move);
     ret = ret+" "+std::to_string(((int) move.type))+" "+std::to_string(((int) move.captureType));
     return ret;
 }
 
 
-uint64_t stringToMove(std::string mv){
+uint64_t stringToMove(std::string mv) {
     char sourceColumn = mv[0]-'a';
     char sourceRow = mv[1]-'1';
     uint16_t sourceField = sourceRow*8+sourceColumn;
@@ -519,7 +519,7 @@ uint64_t stringToMove(std::string mv){
 }
 
 
-std::string chessPositionToFenString(const chessPosition position, bool EPD){
+std::string chessPositionToFenString(const chessPosition position, bool EPD) {
 
     std::string str = chessPositionToString(position);
     std::string FEN = "";
@@ -527,13 +527,13 @@ std::string chessPositionToFenString(const chessPosition position, bool EPD){
     for(int16_t row=7; row > -1; row--) {
         uint16_t empty = 0;
 
-        for(uint16_t column=0; column < 8; column++){
+        for(uint16_t column=0; column < 8; column++) {
             uint8_t field = 8*row+column;
             char current = str.at(field);
-            if(current == '0'){
+            if(current == '0') {
                 empty++;
             } else {
-                if(empty > 0){
+                if(empty > 0) {
                     FEN = FEN+std::to_string(empty);
                     empty = 0;
                 }
@@ -542,7 +542,7 @@ std::string chessPositionToFenString(const chessPosition position, bool EPD){
 
 
         }
-        if(empty > 0){
+        if(empty > 0) {
             FEN = FEN+std::to_string(empty);
         }
         if(row > 0) {
@@ -560,30 +560,30 @@ std::string chessPositionToFenString(const chessPosition position, bool EPD){
 
     uint8_t castling = position.data.castlingRights;
 
-    if(castling & 1){
+    if(castling & 1) {
         FEN.push_back('K');
     }
-    if(castling & 2){
+    if(castling & 2) {
         FEN.push_back('Q');
     }
-    if(castling & 4){
+    if(castling & 4) {
         FEN.push_back('k');
     }
-    if(castling & 8){
+    if(castling & 8) {
         FEN.push_back('q');
     }
-    if(!castling){
+    if(!castling) {
         FEN.push_back('-');
     }
 
     FEN.push_back(' ');
 
-    if(position.data.enPassantFile > 7){
+    if(position.data.enPassantFile > 7) {
         FEN.push_back('-');
     } else {
         if(position.toMove == white) { //BLACK made the ep move
             uint16_t field = 40+position.data.enPassantFile;
-            if(EPD){
+            if(EPD) {
                 char file = (field & 7)+'a';
                 char row  = (field/8)+'0';
                 FEN.push_back(file);
@@ -595,7 +595,7 @@ std::string chessPositionToFenString(const chessPosition position, bool EPD){
 
         } else { //WHITE made the ep move
             uint16_t field = 16+position.data.enPassantFile;
-            if(EPD){
+            if(EPD) {
                 char file = (field & 7)+'a';
                 char row  = (field/8)+'0';
                 FEN.push_back(file);
@@ -608,7 +608,7 @@ std::string chessPositionToFenString(const chessPosition position, bool EPD){
 
     }
 
-    if(!EPD){
+    if(!EPD) {
         FEN.push_back(' ');
         FEN.push_back('0');
         FEN.push_back(' ');
@@ -634,19 +634,19 @@ bool checkMove(chessPosition* position, std::string move, chessMove* out) {
                 }
 
                 uint64_t current = BIT64(moves[ind].sourceField) | BIT64(moves[ind].targetField);
-                if(current == mv){
+                if(current == mv) {
                     if( (moves[ind].type > 8)) { //its a promotion
                         char type = move.at(4);
-                        if((type == 'r') && moves[ind].type != promotionRook){
+                        if((type == 'r') && moves[ind].type != promotionRook) {
                             continue;
                         }
-                        if((type == 'q') && moves[ind].type != promotionQueen){
+                        if((type == 'q') && moves[ind].type != promotionQueen) {
                             continue;
                         }
-                        if((type == 'b') && moves[ind].type != promotionBishop){
+                        if((type == 'b') && moves[ind].type != promotionBishop) {
                             continue;
                         }
-                        if((type == 'n') && moves[ind].type != promotionKnight){
+                        if((type == 'n') && moves[ind].type != promotionKnight) {
                             continue;
                         }
                     }
@@ -654,32 +654,32 @@ bool checkMove(chessPosition* position, std::string move, chessMove* out) {
                     m = moves[ind];
                     break;
                 }
-                if(moves[ind].type == castlingKingside){
-                    if(position->toMove == white){
-                        if(move == "e1g1"){
+                if(moves[ind].type == castlingKingside) {
+                    if(position->toMove == white) {
+                        if(move == "e1g1") {
                             found = true;
                             m = moves[ind];
                             break;
                         }
                     }
-                    if(position->toMove == black){
-                        if(move == "e8g8"){
+                    if(position->toMove == black) {
+                        if(move == "e8g8") {
                             found = true;
                             m = moves[ind];
                             break;
                         }
                     }
                 }
-                if(moves[ind].type == castlingQueenside){
-                    if(position->toMove == white){
-                        if(move == "e1c1"){
+                if(moves[ind].type == castlingQueenside) {
+                    if(position->toMove == white) {
+                        if(move == "e1c1") {
                             found = true;
                             m = moves[ind];
                             break;
                         }
                     }
-                    if(position->toMove == black){
-                        if(move == "e8c8"){
+                    if(position->toMove == black) {
+                        if(move == "e8c8") {
                             found = true;
                             m = moves[ind];
                             break;
@@ -694,16 +694,16 @@ bool checkMove(chessPosition* position, std::string move, chessMove* out) {
 }
 
 
-bool checkAndMakeMove(chessPosition* position, std::string move){
+bool checkAndMakeMove(chessPosition* position, std::string move) {
 
     chessMove m;
     bool found = checkMove(position, move, &m);
 
-        if(found){
+        if(found) {
             std::cout << moveToString(m) << std::endl;
             makeMove(&m, position);
             uint16_t kingField = findLSB(position->pieceTables[1-position->toMove][king]);
-            if(isFieldAttacked(position, position->toMove, kingField)){
+            if(isFieldAttacked(position, position->toMove, kingField)) {
                 //std::cout << "Illegal move!" << std::endl;
                 undoMove(position);
                 return false;

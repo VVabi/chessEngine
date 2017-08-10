@@ -48,14 +48,14 @@ uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t n
 
         int16_t remainingMoves = totalExpectedMoves-numMadeMoves;
 
-        if(remainingMoves < 20){
+        if(remainingMoves < 20) {
             remainingMoves = 20;
         }
 
         uint32_t completeExpectedTime = total+remainingMoves*increment;
         float timeAllotted = 2*completeExpectedTime/(3.0*remainingMoves);
 
-        if(timeAllotted > total/10.0){
+        if(timeAllotted > total/10.0) {
             timeAllotted = total/10.0;
         }
         *worst_case_time = total/10.0;
@@ -103,7 +103,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 #endif*/
 
     //TODO: refactor this function
-    memset(killerMoves,0, 40*2*sizeof(uint16_t));
+    memset(killerMoves, 0, 40*2*sizeof(uint16_t));
     resetSearchData();
     resetQuiescenceNodes();
     uint64_t start_ts  = get_timestamp();
@@ -129,7 +129,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
     pvLine line;
     line.numMoves = 0;
     while(checkContinue(params, depth, get_timestamp()-start_ts, totalTime)) {
-        try{
+        try {
             //std::cout << "Depth " << depth << std::endl;
 
             *eval = negamax(position, plyInfo(0, depth+EXTENSIONS_ALLOWED, 0, depth), AlphaBeta(alpha, beta), &line, searchSettings(nullmove_enabled, hashprobe_disabled, checkextension_enabled, searchId));
@@ -171,7 +171,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 
             for(uint16_t ind=0; ind < moves.length; ind++) {
 
-                if(nodeCounts[ind] > maxCount){
+                if(nodeCounts[ind] > maxCount) {
                     maxCount = nodeCounts[ind];
                 }
 
@@ -216,7 +216,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
         *mtime = get_timestamp()-start_ts;
         uint64_t totalNodes=0;
         searchDebugData data = getSearchData();
-        for(uint16_t ind=0; ind < 40; ind++){
+        for(uint16_t ind=0; ind < 40; ind++) {
             totalNodes = totalNodes+data.nodes[ind];
         }
 
@@ -241,7 +241,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 
     depth--;
     *mtime = get_timestamp()-start_ts;
-    while(position->madeMoves.length > madeMoves){
+    while(position->madeMoves.length > madeMoves) {
         chessMove current = position->madeMoves[position->madeMoves.length-1];
 
         if(current.sourceField == 0 && current.targetField == 0) {

@@ -12,7 +12,7 @@
 #include <userInterface/UIlayer.hpp>
 #include <iostream>
 
-testResult testMakeMove(){
+testResult testMakeMove() {
     testResult ret;
     ret.passed   = true;
     ret.testName = "testMakeMove";

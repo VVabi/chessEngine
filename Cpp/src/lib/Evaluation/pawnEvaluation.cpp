@@ -24,12 +24,12 @@ static int16_t const passedPawnEvalValues[2][64] = {
           16, 15, 14, 13, 13, 14, 15, 16,
           31, 29, 27, 25, 25, 27, 29, 31,
           47, 44, 42, 40, 40, 42, 44, 47,
-          90,89, 84, 80, 80, 84, 89, 90,
-          135, 131, 128, 125,125,128, 131, 135,
-          0 ,0, 0, 0, 0, 0, 0, 0 },
+          90, 89, 84, 80, 80, 84, 89, 90,
+          135, 131, 128, 125, 125, 128, 131, 135,
+          0 , 0, 0, 0, 0, 0, 0, 0 },
         { 0, 0, 0, 0, 0, 0, 0, 0,
-         135, 131, 128, 125,125,128, 131, 135,
-         90,89, 84, 80, 80, 84, 89, 90,
+         135, 131, 128, 125, 125, 128, 131, 135,
+         90, 89, 84, 80, 80, 84, 89, 90,
           47, 44, 42, 40, 40, 42, 44, 47,
           31, 29, 27, 25, 25, 27, 29, 31,
           16, 15, 14, 13, 13, 14, 15, 16,
@@ -40,13 +40,13 @@ static int16_t const passedPawnEvalValues[2][64] = {
 
 
 static int16_t kingToPromotionFieldDistance[7][7] = {  // [dist to promotion][king distance from promotion field
-        {0,0,0,0,0,0,0 }, //never happens
-        {0,0,-10,-20,-30,-45,-60},
-        {0,0,-5,-10,-15,-25,-40 },
-        {0,0,0,-5,-10,-15,-25 },
-        {0,0,0,0,-5,-10,-15 },
-        {0,0,0,0,-5,-5,-10 },
-        {0,0,0,0,-5,-5,-10 },
+        {0, 0, 0, 0, 0, 0, 0 }, //never happens
+        {0, 0, -10, -20, -30, -45, -60},
+        {0, 0, -5, -10, -15, -25, -40 },
+        {0, 0, 0, -5, -10, -15, -25 },
+        {0, 0, 0, 0, -5, -10, -15 },
+        {0, 0, 0, 0, -5, -5, -10 },
+        {0, 0, 0, 0, -5, -5, -10 },
 };
 
 static uint16_t distBetweenFields(uint16_t a, uint16_t b) {
@@ -73,7 +73,7 @@ static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint6
     int32_t eval = 0;
     uint64_t whitePawnBuffer = whitePawns;
 
-    while(whitePawnBuffer){
+    while(whitePawnBuffer) {
         uint16_t field = popLSB(whitePawnBuffer);
         if((passedPawnMasks[white][field] & blackPawns) == 0) {
 
@@ -123,7 +123,7 @@ static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint6
         }
     }
     uint64_t blackPawnBuffer = blackPawns;
-    while(blackPawnBuffer){
+    while(blackPawnBuffer) {
         uint16_t field = popLSB(blackPawnBuffer);
         if((passedPawnMasks[black][field] & whitePawns) == 0) {
 
@@ -188,7 +188,7 @@ int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOcc
         if(occ) {
             *pawnColumnOccupancy = *pawnColumnOccupancy | (1 << ind);
         }
-        if(popcount(occ) > 1){
+        if(popcount(occ) > 1) {
             doublePawns = doublePawns | (1 << ind);
         }
     }
@@ -236,7 +236,7 @@ int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupan
         pawnColumnOccupancy[1] = entry.pawnColumnOcc[1];
 
 /*#ifdef DEBUG
-        int16_t staticPawnReal = staticPawnEval(whitePawns, white, pawnColumnOccupancy,&evalPars->staticPawnParameters)+staticPawnEval(blackPawns, black,  pawnColumnOccupancy+1,&evalPars->staticPawnParameters);
+        int16_t staticPawnReal = staticPawnEval(whitePawns, white, pawnColumnOccupancy, &evalPars->staticPawnParameters)+staticPawnEval(blackPawns, black,  pawnColumnOccupancy+1, &evalPars->staticPawnParameters);
         assert(staticPawnReal == staticPawn);
         assert(pawnColumnOccupancy[0] == entry.pawnColumnOcc[0]);
         assert(pawnColumnOccupancy[1] == entry.pawnColumnOcc[1]);

@@ -9,20 +9,20 @@
 #define PARAMETERS_PARAMETERS_HPP_
 #include "parametersPrivate.hpp"
 
-struct staticPawnEvalParameters{
+struct staticPawnEvalParameters {
     int16_t isolatedPawn;
     int16_t isolatedDoublePawn;
     int16_t nonIsolatedDoublePawn;
 };
 
-struct kingSafetyEvalParameters{
+struct kingSafetyEvalParameters {
     int16_t selfopenfiletoking;
     int16_t selfopenfilenexttoking;
     int16_t opponentopenfiletoking;
     int16_t opponentopenfilenexttoking;
 };
 
-struct evalParameters{
+struct evalParameters {
     int16_t figureValues[7];
     int16_t bishoppair;
     int16_t rookOnOpenFile;

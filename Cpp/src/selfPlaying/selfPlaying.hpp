@@ -10,7 +10,7 @@
 
 #include <lib/basics.hpp>
 
-struct selfPlayResult{
+struct selfPlayResult {
     uint32_t numGames;
     uint32_t engine1Wins;
     uint32_t engine2Wins;

@@ -33,8 +33,8 @@ extern uint16_t killerMoves[40][2];
 
 static inline void get_extensions_reductions(uint16_t* reduction, uint16_t* extension, bool check, bool movingSideInCheck, uint16_t ply, uint16_t max_ply, int16_t depth, chessMove* move, uint16_t ind) {
 
-        if(!check && !movingSideInCheck && (move->captureType == none) && (depth > 2) && (ply > 0)){
-            if((ind > 3)){
+        if(!check && !movingSideInCheck && (move->captureType == none) && (depth > 2) && (ply > 0)) {
+            if((ind > 3)) {
                 *reduction = 1;
                 if(move->sortEval < -50) {
                     *reduction = 2;
@@ -44,7 +44,7 @@ static inline void get_extensions_reductions(uint16_t* reduction, uint16_t* exte
 
 
 
-        if(check && ((ply+depth < max_ply-1) || ((depth == 1) && (ply+depth < max_ply)) )){
+        if(check && ((ply+depth < max_ply-1) || ((depth == 1) && (ply+depth < max_ply)) )) {
             *extension = 1;
             *reduction = 0;
         }
@@ -60,7 +60,7 @@ static inline void get_extensions_reductions(uint16_t* reduction, uint16_t* exte
 
 static inline void handleBetaCutoff(chessMove* bestMove, uint64_t zobristHash, int16_t beta, int16_t depth, uint16_t ply, uint8_t searchId) {
     setHashEntry(FAILHIGH, beta, depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), zobristHash);
-    if(bestMove->captureType == none){
+    if(bestMove->captureType == none) {
         uint16_t toRemember = (bestMove->sourceField | (bestMove->targetField << 8));
         if ( (killerMoves[ply][0] != toRemember)) {
             killerMoves[ply][1] = killerMoves[ply][0];
@@ -69,10 +69,10 @@ static inline void handleBetaCutoff(chessMove* bestMove, uint64_t zobristHash, i
     }
 }
 
-uint64_t getCurrentNodeCount(){
+uint64_t getCurrentNodeCount() {
     uint64_t totalNodes=0;
     searchDebugData data = getSearchData();
-    for(uint16_t ind=0; ind < 25; ind++){
+    for(uint16_t ind=0; ind < 25; ind++) {
         totalNodes = totalNodes+data.nodes[ind];
     }
 
@@ -98,10 +98,10 @@ int16_t root_search(chessPosition* position, chessMove* bestMove, int16_t alpha,
 
     uint64_t currentCount = getCurrentNodeCount();
 
-    for(uint16_t ind=0; ind < moves->length; ind++){
+    for(uint16_t ind=0; ind < moves->length; ind++) {
         //illegal move. Since list is sorted or, in case ind=0, best move is first, we can leave here: all further moves are also illegal.
         //---------------------------------------------------------------------------------------------------------------------------------
-        if((*moves)[ind].sortEval < -10000){
+        if((*moves)[ind].sortEval < -10000) {
             break;
         }
 
@@ -111,7 +111,7 @@ int16_t root_search(chessPosition* position, chessMove* bestMove, int16_t alpha,
         uint16_t kingField = findLSB( position->pieceTables[1- position->toMove][king]);
 
         if(movingSideInCheck || (BIT64((*moves)[ind].sourceField) & (rookFieldTable[kingField] | bishopFieldTable[kingField]))) {
-            if(isFieldAttacked( position,  position->toMove, kingField)){
+            if(isFieldAttacked( position,  position->toMove, kingField)) {
                 //move exposed our king, undo and continue
                 //---------------------------------------------
                 assert((*moves)[ind].type != kingMove); //all king moves moving into check should be found by move ordering!
@@ -149,7 +149,7 @@ int16_t root_search(chessPosition* position, chessMove* bestMove, int16_t alpha,
         //-------------------------------------------------
         if(((ind > 3) || foundGoodMove )&& (depth > 2)) {
             int32_t value = -negamax(position, ply+1, max_ply, depth-1-reduction+extension, -alpha-1, -alpha, &mv);
-            if(value < alpha+1){
+            if(value < alpha+1) {
                 undoMove(position);
                 uint64_t newCurrentNodes = getCurrentNodeCount();
                 nodeCounts[ind]  = newCurrentNodes-currentCount;
@@ -166,7 +166,7 @@ int16_t root_search(chessPosition* position, chessMove* bestMove, int16_t alpha,
 
         //in case move is better than previous, remember
         //------------------------------------------------
-        if(value > alpha){
+        if(value > alpha) {
             foundGoodMove = true;
             alpha = value;
             *bestMove = (*moves)[ind];
@@ -184,7 +184,7 @@ int16_t root_search(chessPosition* position, chessMove* bestMove, int16_t alpha,
         //----------------------------------
         if((alpha >= beta)) {
             handleBetaCutoff(bestMove, position->zobristHash, beta, depth, ply, searchId);
-            if(bestIndex != -1){
+            if(bestIndex != -1) {
                 searchCounts.bestIndex[depth][bestIndex]++;
             }
             uint64_t newCurrentNodes = getCurrentNodeCount();
@@ -196,15 +196,15 @@ int16_t root_search(chessPosition* position, chessMove* bestMove, int16_t alpha,
 
     //no cutoff. Check whether we found a good move, mate/stalemate handling accordingly. Then Cleanup/bookkeeping, then return alpha
     //-------------------------------------------------
-    /*if(bestIndex != -1){
+    /*if(bestIndex != -1) {
         updateHistoryTables(bestMove, depth, &moves, bestIndex, position->toMove);
         searchCounts.bestIndex[depth][bestIndex]++;
     }*/
 
     //mate scores originate here!
     //------------------------------
-    if(!legalMovesAvailable){
-        if(movingSideInCheck){
+    if(!legalMovesAvailable) {
+        if(movingSideInCheck) {
             alpha = -30000+ply;
         } else {
             alpha = 0;

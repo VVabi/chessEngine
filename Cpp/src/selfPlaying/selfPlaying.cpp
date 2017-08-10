@@ -39,13 +39,13 @@ bool enablePawnEval;
 
 }
 
-int16_t playSingleGameSelf(uint16_t depth1, uint16_t depth2, bool switchColors){
+int16_t playSingleGameSelf(uint16_t depth1, uint16_t depth2, bool switchColors) {
     std::string positionStr = "RNBQKBNRPPPPPPPP00000000000000000000000000000000pppppppprnbqkbnrwKQkq";
     chessPosition position = stringToChessPosition(positionStr);
 
     uint16_t whitedepth, blackdepth;
 
-    if(switchColors){
+    if(switchColors) {
         whitedepth = depth2;
         blackdepth = depth1;
     } else {
@@ -64,16 +64,16 @@ int16_t playSingleGameSelf(uint16_t depth1, uint16_t depth2, bool switchColors){
             break;
         }
 
-        if(currentEval < -90000){
+        if(currentEval < -90000) {
             ret = -1;
             break;
         }
 
         if(position.madeMoves.length > 200) {
             std::cout << "Eval " << currentEval << std::endl;
-            if(currentEval > 300){
+            if(currentEval > 300) {
                 ret = 1;
-            } else if(currentEval < -300){
+            } else if(currentEval < -300) {
                 ret = -1;
             } else {
                 ret = 0;
@@ -85,7 +85,7 @@ int16_t playSingleGameSelf(uint16_t depth1, uint16_t depth2, bool switchColors){
     }
 
 
-    if(switchColors){
+    if(switchColors) {
         ret = -ret;
     }
     position.dataStack.free_array();
@@ -106,18 +106,18 @@ selfPlayResult playSelf(uint16_t depth1, uint16_t depth2, uint32_t numGames) {
     bool switchColors = false;
 
 
-    for(uint32_t ind=0; ind <numGames; ind++){
+    for(uint32_t ind=0; ind <numGames; ind++) {
         enablePawnEval = switchColors;
         std::cout << "GAME " << ind << std::endl;
         int16_t result = playSingleGameSelf(depth1, depth2, switchColors);
         switchColors = !switchColors;
-        if(result == 1){
+        if(result == 1) {
             ret.engine1Wins++;
         }
-        if(result == -1){
+        if(result == -1) {
             ret.engine2Wins++;
         }
-        if(result == 0){
+        if(result == 0) {
             ret.draws++;
         }
     }

@@ -11,34 +11,34 @@
 #include <stddef.h>
 #include <iostream>
 #include <string.h>
-template<typename T> class fsarray{
+template<typename T> class fsarray {
     public:
         uint32_t length;
         T* data;
-        fsarray(){
+        fsarray() {
             length = 0;
             data = 0;
         }
-        explicit fsarray(int n){
+        explicit fsarray(int n) {
             length = n;
-            if(length > 0){
+            if(length > 0) {
                 data = new T[length];
             }
-            else{
+            else {
                 data = 0;
             }
         }
 
-        T &operator[](unsigned int i){
-            if(i > length){
+        T &operator[](unsigned int i) {
+            if(i > length) {
 
             }
             return data[i];
 
         }
 
-        void free_array(){
-            if(data != NULL){
+        void free_array() {
+            if(data != NULL) {
 
                 delete[] data;
                 data = NULL;
@@ -50,7 +50,7 @@ template<typename T> class fsarray{
 
         fsarray<T> vdt_copy() {
             fsarray<T> ret = fsarray<T>(length);
-            for(uint32_t i=0; i<length; i++){
+            for(uint32_t i=0; i<length; i++) {
                 ret[i] = data[i].copy();
             }
             return ret;

@@ -22,9 +22,9 @@ void memoryLibrarianAdd(std::string newPosition, std::vector<std::string> moves)
 
 chessPosition memoryLibrarianRetrievePosition() {
     chessPosition cposition = FENtoChessPosition(currentPosition);
-    for(std::string seg: moveList){
+    for(std::string seg: moveList) {
         //std::cout << seg << std::endl;
-        if(!checkAndMakeMove(&cposition, seg)){
+        if(!checkAndMakeMove(&cposition, seg)) {
             break;
         }
     }

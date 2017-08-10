@@ -40,14 +40,10 @@
 #include <parameters/parametersPrivate.hpp>
 #include <parameters/externalParamReader.hpp>
 
-extern uint8_t searchId;
 extern uint16_t killerMoves[40][2];
 
-
-
 template <typename T>
-T StringToNumber ( const std::string &Text )//Text not by const reference so that the function can be used with a
-{                               //character array as argument
+T StringToNumber (const std::string &Text) {
     std::stringstream ss(Text);
     T result;
     return ss >> result ? result : 0;
@@ -68,11 +64,11 @@ void logError(std::string msg) {
 searchParameters paramsToUse;
 std::atomic<bool> continueSearch;
 
-bool doContinueSearch(){
+bool doContinueSearch() {
     return continueSearch;
 }
 
-void sendSearchInfo(uint64_t nodes, uint32_t time, int32_t eval, uint32_t depth, const std::list<std::string>& PV){
+void sendSearchInfo(uint64_t nodes, uint32_t time, int32_t eval, uint32_t depth, const std::list<std::string>& PV) {
     double nps = ((double) nodes)/((double) time)*1000.0;
     uint64_t npsInt = nps;
     std::stringstream out;
@@ -111,12 +107,12 @@ void setSearchParams(searchParameters params) {
 std::thread engineThread;
 std::atomic<bool> isSearching(false);
 
-void search(chessPosition cposition, searchParameters params){
+void search(chessPosition cposition, searchParameters params) {
     chessMove bestMove;
     uint32_t nodeCount = 0;
     uint64_t mtime = 0;
     int32_t eval = 0;
-    searchMove(&cposition, &bestMove,&nodeCount, &mtime, &eval, false, params);
+    searchMove(&cposition, &bestMove, &nodeCount, &mtime, &eval, false, params);
     putLine("bestmove " + moveToString(bestMove));
     free_position(&cposition);
     isSearching = false;
@@ -143,7 +139,7 @@ void handleIsReady(std::ostream& stream) {
 }
 
 void handleClear() {
-    memset(killerMoves,0, 40*2*sizeof(uint16_t));
+    memset(killerMoves, 0, 40*2*sizeof(uint16_t));
     clearHashTables();
     HistoryTables* table = getHistoryTables();
     table->clearHistoryTable();
@@ -266,7 +262,7 @@ void handleGo(std::list<std::string> input) {
 
 }
 
-void handlePerft(std::list<std::string> input){
+void handlePerft(std::list<std::string> input) {
         auto iterator = input.begin();
         if(iterator != input.end()) {
             uint16_t depth = StringToNumber<int32_t>(*iterator);
@@ -287,7 +283,7 @@ void handlePosition(std::list<std::string> input) {
         return;
     }
     auto iterator = input.begin();
-    if("startpos" == *iterator){
+    if("startpos" == *iterator) {
         fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         iterator++;
     } else {
@@ -377,9 +373,9 @@ void handleSetEvalParam(std::list<std::string> input) {
 
 
 
-void runPerformanceTests(uint32_t d){
+void runPerformanceTests(uint32_t d) {
 
-    for(uint16_t depth = 3; depth < d+1; depth++){
+    for(uint16_t depth = 3; depth < d+1; depth++) {
         std::ifstream file;
         file.open("chesspositionsfixed.txt");
         std::string line;
@@ -387,12 +383,12 @@ void runPerformanceTests(uint32_t d){
         uint64_t qNodes = 0;
 
         uint32_t nodes = 0;
-        while(std::getline(file, line)){
+        while(std::getline(file, line)) {
             //std::cout << line << std::endl;
             uint64_t nmNodes = 0;
             uint64_t qn = 0;
             uint64_t newNodes = runSinglePositionPerformanceTest(line, depth, &nmNodes, &qn, true);
-            if(newNodes != qn+nmNodes){
+            if(newNodes != qn+nmNodes) {
                 std::cout << "WTF???" << std::endl;
             }
             nodes = nodes + newNodes;

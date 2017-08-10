@@ -27,13 +27,13 @@ enum moveType: uint8_t   {pawnMove=0, knightMove=1, bishopMove=2, rookMove=3, qu
     castlingKingside=6, castlingQueenside=7, enpassant=8, promotionKnight=9, promotionBishop, promotionRook, promotionQueen};
 enum playerColor: uint16_t {white=0, black=1};
 
-struct chessMove{
+struct chessMove {
     uint16_t sourceField;
     uint16_t targetField;
     moveType type;
     figureType captureType;
     int16_t sortEval;
-    bool operator<(chessMove move) const{
+    bool operator<(chessMove move) const {
             return sortEval > move.sortEval;
     }
 };
@@ -43,7 +43,7 @@ struct pvLine {
     chessMove line[40];
 };
 
-struct pathDependentPositionData{
+struct pathDependentPositionData {
     uint8_t castlingRights;
     uint8_t enPassantFile; //the file of the CAPTURED pawn
     uint8_t fiftyMoveRuleCounter;
@@ -64,11 +64,11 @@ struct chessPosition {
     vdt_vector<pathDependentPositionData> dataStack;
 };
 
-enum hashFlag: uint16_t {FULLSEARCH=0,FAILLOW=1,FAILHIGH=2};
+enum hashFlag: uint16_t {FULLSEARCH=0, FAILLOW=1, FAILHIGH=2};
 
 
 
-struct hashEntry{
+struct hashEntry {
     uint32_t hashHighBits;
     uint16_t hashLower;
     uint16_t bestMove;
@@ -84,17 +84,15 @@ struct hashBucket {
 }; //__attribute__((aligned(64)));
 
 
-struct pawnHashEntry{
+struct pawnHashEntry {
     uint32_t hashHighBits;
     uint16_t hashLower;
     int16_t  eval;
     uint8_t pawnColumnOcc[2];
 };
 
-class timeoutException: public std::exception
-{
-  virtual const char* what() const throw()
-  {
+class timeoutException: public std::exception {
+  virtual const char* what() const throw() {
     return "Timeout";
   }
 };

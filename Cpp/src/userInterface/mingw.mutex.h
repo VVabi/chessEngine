@@ -155,7 +155,7 @@ public:
     native_handle_type native_handle() const {return mHandle;}
     recursive_timed_mutex(const recursive_timed_mutex&) = delete;
     recursive_timed_mutex& operator=(const recursive_timed_mutex&) = delete;
-    recursive_timed_mutex(): mHandle(CreateMutex(NULL, FALSE, NULL)){}
+    recursive_timed_mutex(): mHandle(CreateMutex(NULL, FALSE, NULL)) {}
     ~recursive_timed_mutex()
     {
         CloseHandle(mHandle);
@@ -189,7 +189,7 @@ public:
             throw std::system_error(EPROTO, std::generic_category());
     }
     template <class Rep, class Period>
-    bool try_lock_for(const std::chrono::duration<Rep,Period>& dur)
+    bool try_lock_for(const std::chrono::duration<Rep, Period>& dur)
     {
         DWORD timeout = (DWORD)chrono::duration_cast<chrono::milliseconds>(dur).count();
 
@@ -204,7 +204,7 @@ public:
             throw std::system_error(EPROTO, std::generic_category());
     }
     template <class Clock, class Duration>
-    bool try_lock_until(const std::chrono::time_point<Clock,Duration>& timeout_time)
+    bool try_lock_until(const std::chrono::time_point<Clock, Duration>& timeout_time)
     {
         return try_lock_for(timeout_time - Clock::now());
     }
@@ -219,7 +219,7 @@ public:
     timed_mutex(const timed_mutex&) = delete;
     timed_mutex& operator=(const timed_mutex&) = delete;
     template <class Rep, class Period>
-    bool try_lock_for(const std::chrono::duration<Rep,Period>& dur)
+    bool try_lock_for(const std::chrono::duration<Rep, Period>& dur)
     {
         bool ret = base::try_lock_for(dur);
 #ifndef STDMUTEX_NO_RECURSION_CHECKS
@@ -230,7 +230,7 @@ public:
     }
 public:
     template <class Clock, class Duration>
-    bool try_lock_until(const std::chrono::time_point<Clock,Duration>& timeout_time)
+    bool try_lock_until(const std::chrono::time_point<Clock, Duration>& timeout_time)
     {
         bool ret = base::try_lock_until(timeout_time);
 #ifndef STDMUTEX_NO_RECURSION_CHECKS
@@ -269,7 +269,7 @@ public:
     lock_guard(const lock_guard&) = delete;
     lock_guard& operator=(const lock_guard&) = delete;
     explicit lock_guard(mutex_type& m): mMutex(m) { mMutex.lock();  }
-    lock_guard(mutex_type& m, std::adopt_lock_t):mMutex(m){}
+    lock_guard(mutex_type& m, std::adopt_lock_t):mMutex(m) {}
     ~lock_guard() {  mMutex.unlock();   }
 };
 

@@ -17,7 +17,7 @@ extern uint64_t bishopFieldTable[];
 extern uint64_t bishopMoveTables[64][512];
 extern uint64_t bishopMagicNumbers[];
 
-__attribute__((always_inline)) static inline uint64_t getPotentialRookMoves(uint16_t rookField, uint64_t occupancy){
+__attribute__((always_inline)) static inline uint64_t getPotentialRookMoves(uint16_t rookField, uint64_t occupancy) {
     uint64_t magicNumber = rookMagicNumbers[rookField];
     uint64_t blocker = occupancy & rookFieldTable[rookField];
     uint16_t hashValue = (blocker*magicNumber) >> 52;
@@ -25,7 +25,7 @@ __attribute__((always_inline)) static inline uint64_t getPotentialRookMoves(uint
     return potentialMoves;
 }
 
-__attribute__((always_inline)) static inline uint64_t getPotentialBishopMoves(uint16_t bishopField, uint64_t occupancy){
+__attribute__((always_inline)) static inline uint64_t getPotentialBishopMoves(uint16_t bishopField, uint64_t occupancy) {
     uint64_t magicNumber = bishopMagicNumbers[bishopField];
     uint64_t blocker = occupancy & bishopFieldTable[bishopField];
     uint16_t hashValue = (blocker*magicNumber) >> 55;
