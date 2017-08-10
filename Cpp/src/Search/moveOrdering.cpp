@@ -20,9 +20,9 @@
 #include <userInterface/UIlayer.hpp>
 #include <Search/search.hpp>
 #include <Search/history.hpp>
+#include <Search/killerMoves.hpp>
 
 extern int16_t pieceTables[7][2][64];
-extern uint16_t killerMoves[40][2];
 
 #define WHITEKINGCASTLECHESSFIELDS ((1ULL << 4) | (1ULL << 5) | (1ULL << 6))
 #define WHITEQUEENCASTLECHESSFIELDS ((1ULL << 4) | (1ULL << 3) | (1ULL << 2))
@@ -233,8 +233,6 @@ static inline void calcSortEval(chessPosition* position, chessMove* mv, bool isI
             sortEval = sortEval+119;
     }
 
-
-
     if (mv->type == castlingKingside) {
         sortEval  = 110;
         if (kingBlockers[position->toMove] & opponentAttackTable->completeAttackTable) {
@@ -293,11 +291,11 @@ bool calculateStandardSortEvals(chessPosition* position,  vdt_vector<chessMove>*
     bool isInCheck      = ((opponentAttackTable.completeAttackTable & position->pieceTables[position->toMove][king]) != 0);
     int16_t bestEval = INT16_MIN;
     //uint16_t bestIndex = 0;
-    uint16_t killerMoveA = killerMoves[ply][0];
-    uint16_t killerMoveB = killerMoves[ply][1];
+    killerTable* table = getKillerTable();
+    singlePlyKillers killers = table->getKillers(ply);
     const evalParameters* evalPars                      = getEvalParameters(); //TODO: move outside
     for (uint16_t ind = start_index; ind < moves->length; ind++) {
-        calcSortEval(position, &(*moves)[ind], isInCheck, &opponentAttackTable, &ownAttackTable, sortinfo.hashMove, killerMoveA, killerMoveB, sortinfo.refutationTarget, evalPars);
+        calcSortEval(position, &(*moves)[ind], isInCheck, &opponentAttackTable, &ownAttackTable, sortinfo.hashMove, killers.killers[0], killers.killers[1], sortinfo.refutationTarget, evalPars);
         if ((*moves)[ind].sortEval > bestEval) {
             bestEval = (*moves)[ind].sortEval;
             //bestIndex = ind;

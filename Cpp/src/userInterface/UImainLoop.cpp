@@ -39,8 +39,7 @@
 #include <parameters/parametersPrivate.hpp>
 #include <parameters/externalParamReader.hpp>
 #include <string>
-
-extern uint16_t killerMoves[40][2];
+#include <Search/killerMoves.hpp>
 
 template <typename T>
 T StringToNumber(const std::string &Text) {
@@ -139,7 +138,8 @@ void handleIsReady(std::ostream& stream) {
 }
 
 void handleClear() {
-    memset(killerMoves, 0, 40*2*sizeof(uint16_t));
+    killerTable* ktable = getKillerTable();
+    ktable->clear();
     clearHashTables();
     HistoryTables* table = getHistoryTables();
     table->clearHistoryTable();

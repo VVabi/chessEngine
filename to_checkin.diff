@@ -1,0 +1,158 @@
+diff --git a/Cpp/src/Search/moveOrdering.cpp b/Cpp/src/Search/moveOrdering.cpp
+index 60a419c..f016274 100644
+--- a/Cpp/src/Search/moveOrdering.cpp
++++ b/Cpp/src/Search/moveOrdering.cpp
+@@ -20,9 +20,9 @@
+ #include <userInterface/UIlayer.hpp>
+ #include <Search/search.hpp>
+ #include <Search/history.hpp>
++#include <Search/killerMoves.hpp>
+ 
+ extern int16_t pieceTables[7][2][64];
+-extern uint16_t killerMoves[40][2];
+ 
+ #define WHITEKINGCASTLECHESSFIELDS ((1ULL << 4) | (1ULL << 5) | (1ULL << 6))
+ #define WHITEQUEENCASTLECHESSFIELDS ((1ULL << 4) | (1ULL << 3) | (1ULL << 2))
+@@ -233,8 +233,6 @@ static inline void calcSortEval(chessPosition* position, chessMove* mv, bool isI
+             sortEval = sortEval+119;
+     }
+ 
+-
+-
+     if (mv->type == castlingKingside) {
+         sortEval  = 110;
+         if (kingBlockers[position->toMove] & opponentAttackTable->completeAttackTable) {
+@@ -293,11 +291,11 @@ bool calculateStandardSortEvals(chessPosition* position,  vdt_vector<chessMove>*
+     bool isInCheck      = ((opponentAttackTable.completeAttackTable & position->pieceTables[position->toMove][king]) != 0);
+     int16_t bestEval = INT16_MIN;
+     //uint16_t bestIndex = 0;
+-    uint16_t killerMoveA = killerMoves[ply][0];
+-    uint16_t killerMoveB = killerMoves[ply][1];
++    killerTable* table = getKillerTable();
++    singlePlyKillers killers = table->getKillers(ply);
+     const evalParameters* evalPars                      = getEvalParameters(); //TODO: move outside
+     for (uint16_t ind = start_index; ind < moves->length; ind++) {
+-        calcSortEval(position, &(*moves)[ind], isInCheck, &opponentAttackTable, &ownAttackTable, sortinfo.hashMove, killerMoveA, killerMoveB, sortinfo.refutationTarget, evalPars);
++        calcSortEval(position, &(*moves)[ind], isInCheck, &opponentAttackTable, &ownAttackTable, sortinfo.hashMove, killers.killers[0], killers.killers[1], sortinfo.refutationTarget, evalPars);
+         if ((*moves)[ind].sortEval > bestEval) {
+             bestEval = (*moves)[ind].sortEval;
+             //bestIndex = ind;
+diff --git a/Cpp/src/Search/negamax.cpp b/Cpp/src/Search/negamax.cpp
+index e610199..c7455ed 100644
+--- a/Cpp/src/Search/negamax.cpp
++++ b/Cpp/src/Search/negamax.cpp
+@@ -23,6 +23,8 @@
+ #include <atomic>
+ #include <Search/history.hpp>
+ #include <lib/Defines/figureValues.hpp>
++#include <Search/killerMoves.hpp>
++
+ searchDebugData searchCounts;
+ 
+ extern uint64_t bishopFieldTable[];
+@@ -90,7 +92,6 @@ static inline bool getHashMoveToFront(vdt_vector<chessMove>* moves, uint16_t has
+     return false;
+ }
+ 
+-uint16_t killerMoves[50][2];
+ uint16_t repetitionData[16384] = {0};
+ 
+ static inline void get_extensions_reductions(chessPosition* position, uint16_t* reduction, uint16_t* extension, bool check, bool movingSideInCheck, plyInfo plyinfo, int16_t depth, chessMove* move, uint16_t ind) {
+@@ -251,10 +252,8 @@ static inline void handleBetaCutoff(chessMove* bestMove, uint64_t zobristHash, i
+     setHashEntry(FAILHIGH, beta, depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), zobristHash);
+     if (bestMove->captureType == none) {
+         uint16_t toRemember = (bestMove->sourceField | (bestMove->targetField << 8));
+-        if ((killerMoves[ply][0] != toRemember)) {
+-            killerMoves[ply][1] = killerMoves[ply][0];
+-            killerMoves[ply][0] = toRemember;
+-        }
++        killerTable* table = getKillerTable();
++        table->setKillerMove(ply, toRemember);
+     }
+ }
+ 
+@@ -295,12 +294,11 @@ static inline bool get_next_move_to_front(chessPosition* position, sortState* cu
+                 }
+                 break;
+             case good_captures_handled: {
+-                uint16_t killerA = killerMoves[plyinfo.ply][0];
+-                uint16_t killerB = killerMoves[plyinfo.ply][1];
+-                if (getHashMoveToFront(&moves, killerA, ind)) {
++                killerTable* table = getKillerTable();
++                if (getHashMoveToFront(&moves, table->getKillers(plyinfo.ply).killers[0], ind)) {
+                     moves[ind].sortEval = DEFAULT_SORTEVAL;
+                     sortedNextMove = true;
+-                } else if (getHashMoveToFront(&moves, killerB, ind)) {
++                } else if (getHashMoveToFront(&moves, table->getKillers(plyinfo.ply).killers[1], ind)) {
+                     moves[ind].sortEval = DEFAULT_SORTEVAL;
+                     sortedNextMove = true;
+                 } else {
+@@ -473,10 +471,8 @@ static inline int16_t negamax_internal(chessPosition* position, plyInfo plyinfo,
+         setHashEntry(FULLSEARCH, alphabeta.alpha, plyinfo.depth, settings.searchId, (PV->line[0].sourceField | (PV->line[0].targetField << 8)), position->zobristHash);
+         if (PV->line[0].captureType == none) {
+                 uint16_t toRemember = (PV->line[0].sourceField | (PV->line[0].targetField << 8));
+-                if ((killerMoves[plyinfo.ply][0] != toRemember)) {
+-                    killerMoves[plyinfo.ply][1] = killerMoves[plyinfo.ply][0];
+-                    killerMoves[plyinfo.ply][0] = toRemember;
+-                }
++                killerTable* table = getKillerTable();
++                table->setKillerMove(plyinfo.ply, toRemember);
+             }
+     } else { //we failed low, remember as well
+         setHashEntry(FAILLOW, alphabeta.alpha, plyinfo.depth, settings.searchId, 0, position->zobristHash);
+diff --git a/Cpp/src/Search/toplevelSearch.cpp b/Cpp/src/Search/toplevelSearch.cpp
+index 1bd37db..0c411bd 100644
+--- a/Cpp/src/Search/toplevelSearch.cpp
++++ b/Cpp/src/Search/toplevelSearch.cpp
+@@ -23,8 +23,10 @@
+ #include <lib/bitfiddling.h>
+ #include <algorithm>
+ #include <userInterface/UIlayer.hpp>
++#include <Search/killerMoves.hpp>
++
++
+ extern uint8_t searchId;
+-extern uint16_t killerMoves[40][2];
+ 
+ uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t numMadeMoves, uint32_t* worst_case_time) {
+     if (params.type == infinite) {
+@@ -101,7 +103,8 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
+ #endif*/
+ 
+     //TODO: refactor this function
+-    memset(killerMoves, 0, 40*2*sizeof(uint16_t));
++    killerTable* table = getKillerTable();
++    table->clear();
+     resetSearchData();
+     resetQuiescenceNodes();
+     uint64_t start_ts  = get_timestamp();
+diff --git a/Cpp/src/userInterface/UImainLoop.cpp b/Cpp/src/userInterface/UImainLoop.cpp
+index b5061f8..d11e11a 100644
+--- a/Cpp/src/userInterface/UImainLoop.cpp
++++ b/Cpp/src/userInterface/UImainLoop.cpp
+@@ -39,8 +39,7 @@
+ #include <parameters/parametersPrivate.hpp>
+ #include <parameters/externalParamReader.hpp>
+ #include <string>
+-
+-extern uint16_t killerMoves[40][2];
++#include <Search/killerMoves.hpp>
+ 
+ template <typename T>
+ T StringToNumber(const std::string &Text) {
+@@ -139,7 +138,8 @@ void handleIsReady(std::ostream& stream) {
+ }
+ 
+ void handleClear() {
+-    memset(killerMoves, 0, 40*2*sizeof(uint16_t));
++    killerTable* ktable = getKillerTable();
++    ktable->clear();
+     clearHashTables();
+     HistoryTables* table = getHistoryTables();
+     table->clearHistoryTable();
+diff --git a/lint/styleguide b/lint/styleguide
+--- a/lint/styleguide
++++ b/lint/styleguide
+@@ -1 +1 @@
+-Subproject commit 77f7f28d314862754877bf19a8b032158522f7aa
++Subproject commit 77f7f28d314862754877bf19a8b032158522f7aa-dirty

@@ -23,8 +23,10 @@
 #include <lib/bitfiddling.h>
 #include <algorithm>
 #include <userInterface/UIlayer.hpp>
+#include <Search/killerMoves.hpp>
+
+
 extern uint8_t searchId;
-extern uint16_t killerMoves[40][2];
 
 uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t numMadeMoves, uint32_t* worst_case_time) {
     if (params.type == infinite) {
@@ -101,7 +103,8 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 #endif*/
 
     //TODO: refactor this function
-    memset(killerMoves, 0, 40*2*sizeof(uint16_t));
+    killerTable* table = getKillerTable();
+    table->clear();
     resetSearchData();
     resetQuiescenceNodes();
     uint64_t start_ts  = get_timestamp();

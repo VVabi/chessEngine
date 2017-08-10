@@ -23,6 +23,8 @@
 #include <atomic>
 #include <Search/history.hpp>
 #include <lib/Defines/figureValues.hpp>
+#include <Search/killerMoves.hpp>
+
 searchDebugData searchCounts;
 
 extern uint64_t bishopFieldTable[];
@@ -90,7 +92,6 @@ static inline bool getHashMoveToFront(vdt_vector<chessMove>* moves, uint16_t has
     return false;
 }
 
-uint16_t killerMoves[50][2];
 uint16_t repetitionData[16384] = {0};
 
 static inline void get_extensions_reductions(chessPosition* position, uint16_t* reduction, uint16_t* extension, bool check, bool movingSideInCheck, plyInfo plyinfo, int16_t depth, chessMove* move, uint16_t ind) {
@@ -251,10 +252,8 @@ static inline void handleBetaCutoff(chessMove* bestMove, uint64_t zobristHash, i
     setHashEntry(FAILHIGH, beta, depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), zobristHash);
     if (bestMove->captureType == none) {
         uint16_t toRemember = (bestMove->sourceField | (bestMove->targetField << 8));
-        if ((killerMoves[ply][0] != toRemember)) {
-            killerMoves[ply][1] = killerMoves[ply][0];
-            killerMoves[ply][0] = toRemember;
-        }
+        killerTable* table = getKillerTable();
+        table->setKillerMove(ply, toRemember);
     }
 }
 
@@ -295,12 +294,11 @@ static inline bool get_next_move_to_front(chessPosition* position, sortState* cu
                 }
                 break;
             case good_captures_handled: {
-                uint16_t killerA = killerMoves[plyinfo.ply][0];
-                uint16_t killerB = killerMoves[plyinfo.ply][1];
-                if (getHashMoveToFront(&moves, killerA, ind)) {
+                killerTable* table = getKillerTable();
+                if (getHashMoveToFront(&moves, table->getKillers(plyinfo.ply).killers[0], ind)) {
                     moves[ind].sortEval = DEFAULT_SORTEVAL;
                     sortedNextMove = true;
-                } else if (getHashMoveToFront(&moves, killerB, ind)) {
+                } else if (getHashMoveToFront(&moves, table->getKillers(plyinfo.ply).killers[1], ind)) {
                     moves[ind].sortEval = DEFAULT_SORTEVAL;
                     sortedNextMove = true;
                 } else {
@@ -473,10 +471,8 @@ static inline int16_t negamax_internal(chessPosition* position, plyInfo plyinfo,
         setHashEntry(FULLSEARCH, alphabeta.alpha, plyinfo.depth, settings.searchId, (PV->line[0].sourceField | (PV->line[0].targetField << 8)), position->zobristHash);
         if (PV->line[0].captureType == none) {
                 uint16_t toRemember = (PV->line[0].sourceField | (PV->line[0].targetField << 8));
-                if ((killerMoves[plyinfo.ply][0] != toRemember)) {
-                    killerMoves[plyinfo.ply][1] = killerMoves[plyinfo.ply][0];
-                    killerMoves[plyinfo.ply][0] = toRemember;
-                }
+                killerTable* table = getKillerTable();
+                table->setKillerMove(plyinfo.ply, toRemember);
             }
     } else { //we failed low, remember as well
         setHashEntry(FAILLOW, alphabeta.alpha, plyinfo.depth, settings.searchId, 0, position->zobristHash);
