@@ -19,7 +19,6 @@ ZobristHashData hashData;
 
 //uint64_t zobristHash[7][2][64];
 //uint64_t pawnHashValues[7][2][64];
-uint64_t movingSideHash[2];
 uint64_t castlingHash[16];
 uint64_t enpassantHash[9];
 
@@ -184,16 +183,16 @@ void fillZobristHash() {
     assert(popcount(HASHSIZE+1) == 1); //this needs to be a power of 2!
     moveOrderingHashTable = new hashBucket[HASHSIZE+1];
     clearHashTables();
-    movingSideHash[0] = getRandUint64();
-    movingSideHash[1] = 0;
+    hashData.setMovingSideHash(white, getRandUint64());
+    hashData.setMovingSideHash(black, 0);
     for (uint16_t cnt = 0; cnt < 2; cnt++) {
         for (uint16_t ind = 0; ind < 6; ind++) {
             for (uint16_t field = 0; field < 64; field++) {
-                setZobristHashEntry((figureType) ind, (playerColor) cnt, field, getRandUint64());
+                hashData.setZobristHashEntry((figureType) ind, (playerColor) cnt, field, getRandUint64());
             }
         }
         for (uint16_t field = 0; field < 64; field++) {
-            setZobristHashEntry(none, (playerColor) cnt, field, 0);
+            hashData.setZobristHashEntry(none, (playerColor) cnt, field, 0);
         }
     }
 
@@ -209,12 +208,12 @@ void fillZobristHash() {
     for (uint16_t cnt = 0; cnt < 2; cnt++) {
             for (uint16_t ind = 0; ind < 1; ind++) {
                 for (uint16_t field = 0; field < 64; field++) {
-                    setPawnZobristHashEntry((figureType) ind, (playerColor) cnt, field, getRandUint64());
+                    hashData.setPawnZobristHashEntry((figureType) ind, (playerColor) cnt, field, getRandUint64());
                 }
             }
             for (uint16_t ind = 1; ind < 7; ind++) {
                 for (uint16_t field = 0; field < 64; field++) {
-                    setPawnZobristHashEntry((figureType) ind, (playerColor) cnt, field, 0);
+                    hashData.setPawnZobristHashEntry((figureType) ind, (playerColor) cnt, field, 0);
                 }
             }
     }
@@ -249,7 +248,7 @@ uint64_t calcZobristHash(const chessPosition* position) {
 
     hash = hash^enpassantHash[position->data.enPassantFile];
     hash = hash^castlingHash[position->data.castlingRights];
-    hash = hash^movingSideHash[position->toMove];
+    hash = hash^getMovingSideHash(position->toMove);
     return hash;
 }
 

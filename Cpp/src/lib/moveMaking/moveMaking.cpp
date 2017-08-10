@@ -15,7 +15,6 @@
 #include <lib/Defines/figureValues.hpp>
 #include <lib/Evaluation/PSQ.hpp>
 
-extern uint64_t movingSideHash[2];
 extern uint64_t castlingHash[16];
 extern uint64_t enpassantHash[9];
 extern uint16_t repetitionData[16384];
@@ -29,8 +28,8 @@ void makeNullMove(chessPosition* position) {
     position->data.enPassantFile  = 8;
     position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
     position->data.fiftyMoveRuleCounter = 0;
-    position->zobristHash = position->zobristHash^movingSideHash[0];
-    position->toMove = (playerColor) (1-position->toMove);
+    position->zobristHash = position->zobristHash^getMovingSideHash(white); //this is indeed correct since black hash is always 0 anyway. TODO: change? this is actually confusing.
+    position->toMove = INVERTCOLOR(position->toMove);
     chessMove move;
     move.sourceField = 0;
     move.targetField = 0;
@@ -206,7 +205,7 @@ void makeMove(chessMove* move, chessPosition* position) {
     position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
     position->madeMoves.add(move);
     position->toMove = INVERTCOLOR(position->toMove);
-    position->zobristHash = position->zobristHash^movingSideHash[0];
+    position->zobristHash = position->zobristHash^getMovingSideHash(white); //this is indeed correct since black hash is always 0 anyway. TODO: change? this is actually confusing.
     repetitionData[position->zobristHash & 16383]++;
 
     #ifdef DEBUG

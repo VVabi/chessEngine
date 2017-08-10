@@ -15,7 +15,6 @@
 #include <parameters/parameters.hpp>
 #include <lib/Evaluation/PSQ.hpp>
 
-extern uint64_t movingSideHash[2];
 extern uint16_t repetitionData[16384];
 extern uint64_t castlingHash[16];
 extern uint64_t enpassantHash[9];
@@ -23,7 +22,7 @@ extern uint64_t enpassantHash[9];
 void undoNullMove(chessPosition* position) {
     position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
     position->data = position->dataStack.pop();
-    position->zobristHash = position->zobristHash^movingSideHash[0];
+    position->zobristHash = position->zobristHash^getMovingSideHash(white);
     position->toMove = (playerColor) (1-position->toMove);
     position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
     position->madeMoves.pop();
@@ -183,7 +182,7 @@ void undoMove(chessPosition* position) {
                 break;
     }
 
-    position->zobristHash = position->zobristHash^movingSideHash[0];
+    position->zobristHash = position->zobristHash^getMovingSideHash(white);
 
 
 
