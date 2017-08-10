@@ -7,9 +7,7 @@
 
 #include <lib/basics.hpp>
 #include <lib/bitfiddling.h>
-
-extern int16_t pieceTables[7][2][64];
-extern int16_t endGamepieceTables[7][2][64];
+#include <lib/Evaluation/PSQ.hpp>
 
 int16_t calcPieceTableValue(const chessPosition* position) {
     int16_t val = 0;
@@ -17,12 +15,12 @@ int16_t calcPieceTableValue(const chessPosition* position) {
         uint64_t whitePieces = position->pieceTables[white][ind];
         while (whitePieces) {
             uint16_t field = popLSB(whitePieces);
-            val = val+pieceTables[ind][white][field];
+            val = val+getEarlyGamePSQentry((figureType) ind, white, field);;
         }
         uint64_t blackPieces = position->pieceTables[black][ind];
         while (blackPieces) {
             uint16_t field = popLSB(blackPieces);
-            val = val-pieceTables[ind][black][field];
+            val = val-getEarlyGamePSQentry((figureType) ind, black, field);
         }
     }
     return val;
@@ -35,12 +33,12 @@ int16_t calcEndGamePieceTableValue(const chessPosition* position) {
         uint64_t whitePieces = position->pieceTables[white][ind];
         while (whitePieces) {
             uint16_t field = popLSB(whitePieces);
-            val = val+endGamepieceTables[ind][white][field];
+            val = val+getEndgameGamePSQentry((figureType) ind, white, field);
         }
         uint64_t blackPieces = position->pieceTables[black][ind];
         while (blackPieces) {
             uint16_t field = popLSB(blackPieces);
-            val = val-endGamepieceTables[ind][black][field];
+            val = val-getEndgameGamePSQentry((figureType) ind, black, field);
         }
     }
     return val;

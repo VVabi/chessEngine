@@ -1,158 +1,337 @@
-diff --git a/Cpp/src/Search/moveOrdering.cpp b/Cpp/src/Search/moveOrdering.cpp
-index 60a419c..f016274 100644
---- a/Cpp/src/Search/moveOrdering.cpp
-+++ b/Cpp/src/Search/moveOrdering.cpp
-@@ -20,9 +20,9 @@
- #include <userInterface/UIlayer.hpp>
- #include <Search/search.hpp>
- #include <Search/history.hpp>
-+#include <Search/killerMoves.hpp>
+diff --git a/Cpp/src/lib/Defines/pieceTables.cpp b/Cpp/src/lib/Defines/pieceTables.cpp
+index 6be3078..dbb9046 100644
+--- a/Cpp/src/lib/Defines/pieceTables.cpp
++++ b/Cpp/src/lib/Defines/pieceTables.cpp
+@@ -188,4 +188,4 @@ int16_t pieceTables[7][2][64];
  
- extern int16_t pieceTables[7][2][64];
--extern uint16_t killerMoves[40][2];
+ int16_t endGamepieceTables[7][2][64];
  
- #define WHITEKINGCASTLECHESSFIELDS ((1ULL << 4) | (1ULL << 5) | (1ULL << 6))
- #define WHITEQUEENCASTLECHESSFIELDS ((1ULL << 4) | (1ULL << 3) | (1ULL << 2))
-@@ -233,8 +233,6 @@ static inline void calcSortEval(chessPosition* position, chessMove* mv, bool isI
-             sortEval = sortEval+119;
-     }
+-int32_t completePieceTables[7][2][64];
++
+diff --git a/Cpp/src/lib/basics.hpp b/Cpp/src/lib/basics.hpp
+index b6e3508..2fd653c 100644
+--- a/Cpp/src/lib/basics.hpp
++++ b/Cpp/src/lib/basics.hpp
+@@ -22,11 +22,15 @@
+ #define FILE(x) ((x) & 7)
+ #define ROW(x)  ((x) >> 3)
  
--
--
-     if (mv->type == castlingKingside) {
-         sortEval  = 110;
-         if (kingBlockers[position->toMove] & opponentAttackTable->completeAttackTable) {
-@@ -293,11 +291,11 @@ bool calculateStandardSortEvals(chessPosition* position,  vdt_vector<chessMove>*
-     bool isInCheck      = ((opponentAttackTable.completeAttackTable & position->pieceTables[position->toMove][king]) != 0);
-     int16_t bestEval = INT16_MIN;
-     //uint16_t bestIndex = 0;
--    uint16_t killerMoveA = killerMoves[ply][0];
--    uint16_t killerMoveB = killerMoves[ply][1];
-+    killerTable* table = getKillerTable();
-+    singlePlyKillers killers = table->getKillers(ply);
-     const evalParameters* evalPars                      = getEvalParameters(); //TODO: move outside
-     for (uint16_t ind = start_index; ind < moves->length; ind++) {
--        calcSortEval(position, &(*moves)[ind], isInCheck, &opponentAttackTable, &ownAttackTable, sortinfo.hashMove, killerMoveA, killerMoveB, sortinfo.refutationTarget, evalPars);
-+        calcSortEval(position, &(*moves)[ind], isInCheck, &opponentAttackTable, &ownAttackTable, sortinfo.hashMove, killers.killers[0], killers.killers[1], sortinfo.refutationTarget, evalPars);
-         if ((*moves)[ind].sortEval > bestEval) {
-             bestEval = (*moves)[ind].sortEval;
-             //bestIndex = ind;
-diff --git a/Cpp/src/Search/negamax.cpp b/Cpp/src/Search/negamax.cpp
-index e610199..c7455ed 100644
---- a/Cpp/src/Search/negamax.cpp
-+++ b/Cpp/src/Search/negamax.cpp
-@@ -23,6 +23,8 @@
- #include <atomic>
- #include <Search/history.hpp>
++
+ enum figureType: uint8_t {pawn = 0, knight = 1, bishop = 2, rook = 3, queen = 4, king = 5, none = 6};
+ enum moveType: uint8_t   {pawnMove = 0, knightMove = 1, bishopMove = 2, rookMove = 3, queenMove = 4, kingMove = 5,
+     castlingKingside = 6, castlingQueenside = 7, enpassant = 8, promotionKnight = 9, promotionBishop, promotionRook, promotionQueen};
+ enum playerColor: uint16_t {white = 0, black = 1};
+ 
++#define INVERTCOLOR(c) ((playerColor) (1-(c)))
++
++
+ struct chessMove {
+     uint16_t sourceField;
+     uint16_t targetField;
+diff --git a/Cpp/src/lib/moveMaking/moveMaking.cpp b/Cpp/src/lib/moveMaking/moveMaking.cpp
+index ab1fead..1427f86 100644
+--- a/Cpp/src/lib/moveMaking/moveMaking.cpp
++++ b/Cpp/src/lib/moveMaking/moveMaking.cpp
+@@ -13,8 +13,8 @@
+ #include <assert.h>
+ #include <parameters/parameters.hpp>
  #include <lib/Defines/figureValues.hpp>
-+#include <Search/killerMoves.hpp>
-+
- searchDebugData searchCounts;
++#include <lib/Evaluation/PSQ.hpp>
  
- extern uint64_t bishopFieldTable[];
-@@ -90,7 +92,6 @@ static inline bool getHashMoveToFront(vdt_vector<chessMove>* moves, uint16_t has
-     return false;
+-extern int32_t completePieceTables[7][2][64];
+ extern uint64_t zobristHash[7][2][64];
+ extern uint64_t pawnHashValues[7][2][64];
+ extern uint64_t movingSideHash[2];
+@@ -47,15 +47,15 @@ static inline void makeNormalMove(chessMove* move, chessPosition* position) {
+     playerColor toMove                                  = position->toMove;
+     uint64_t moveMask                                   = BIT64(move->sourceField) | BIT64(move->targetField);
+     position->pieces[toMove]                            = position->pieces[toMove]^moveMask;
+-    position->pieces[1-toMove]                          = position->pieces[1-toMove] & (~moveMask);
++    position->pieces[INVERTCOLOR(toMove)]                          = position->pieces[INVERTCOLOR(toMove)] & (~moveMask);
+     position->pieceTables[toMove][move->type]           = position->pieceTables[toMove][move->type]^moveMask;
+-    position->pieceTables[1-toMove][move->captureType]  = position->pieceTables[1-toMove][move->captureType] & (~moveMask);
++    position->pieceTables[INVERTCOLOR(toMove)][move->captureType]  = position->pieceTables[INVERTCOLOR(toMove)][move->captureType] & (~moveMask);
+ 
+-    position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*(completePieceTables[move->type][toMove][move->targetField]-completePieceTables[move->type][toMove][move->sourceField]);
+-    position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*completePieceTables[move->captureType][1-toMove][move->targetField];
++    position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*(getPSQentry(move->type, toMove, move->targetField)-getPSQentry(move->type, toMove, move->sourceField));
++    position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*getPSQentry(move->captureType, (playerColor) (INVERTCOLOR(toMove)), move->targetField);
+ 
+-    position->zobristHash    = position->zobristHash^zobristHash[move->type][toMove][move->targetField]^zobristHash[move->type][toMove][move->sourceField]^zobristHash[move->captureType][1-toMove][move->targetField];
+-    position->pawnHash       = position->pawnHash^pawnHashValues[move->type][toMove][move->targetField]^pawnHashValues[move->type][toMove][move->sourceField]^pawnHashValues[move->captureType][1-toMove][move->targetField];
++    position->zobristHash    = position->zobristHash^zobristHash[move->type][toMove][move->targetField]^zobristHash[move->type][toMove][move->sourceField]^zobristHash[move->captureType][INVERTCOLOR(toMove)][move->targetField];
++    position->pawnHash       = position->pawnHash^pawnHashValues[move->type][toMove][move->targetField]^pawnHashValues[move->type][toMove][move->sourceField]^pawnHashValues[move->captureType][INVERTCOLOR(toMove)][move->targetField];
  }
  
--uint16_t killerMoves[50][2];
- uint16_t repetitionData[16384] = {0};
  
- static inline void get_extensions_reductions(chessPosition* position, uint16_t* reduction, uint16_t* extension, bool check, bool movingSideInCheck, plyInfo plyinfo, int16_t depth, chessMove* move, uint16_t ind) {
-@@ -251,10 +252,8 @@ static inline void handleBetaCutoff(chessMove* bestMove, uint64_t zobristHash, i
-     setHashEntry(FAILHIGH, beta, depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), zobristHash);
-     if (bestMove->captureType == none) {
-         uint16_t toRemember = (bestMove->sourceField | (bestMove->targetField << 8));
--        if ((killerMoves[ply][0] != toRemember)) {
--            killerMoves[ply][1] = killerMoves[ply][0];
--            killerMoves[ply][0] = toRemember;
--        }
-+        killerTable* table = getKillerTable();
-+        table->setKillerMove(ply, toRemember);
+@@ -67,14 +67,14 @@ static inline void makeKingSideCastle(chessPosition* position) {
+         position->pieces[toMove]             = position->pieces[toMove]^(WHITEKINGSIDECASTLEOCCUPANCYCHANGE);
+         position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(WHITEKINGSIDECASTLEROOKMOVE);
+         position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(WHITEKINGSIDECASTLEKINGMOVE);
+-        position->pieceTableEval             = position->pieceTableEval-completePieceTables[rook][white][7]+completePieceTables[rook][white][5]-completePieceTables[king][white][4]+completePieceTables[king][white][6];
++        position->pieceTableEval             = position->pieceTableEval-getPSQentry(rook, white, 7)+getPSQentry(rook, white, 5)-getPSQentry(king, white, 4)+getPSQentry(king, white, 6);
+         position->zobristHash                = position->zobristHash^zobristHash[rook][white][7]^zobristHash[rook][white][5]^zobristHash[king][white][4]^zobristHash[king][white][6];
+ 
+     } else {
+         position->pieces[toMove]             = position->pieces[toMove]^(BLACKKINGSIDECASTLEOCCUPANCYCHANGE);
+         position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(BLACKKINGSIDECASTLEROOKMOVE);
+         position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(BLACKKINGSIDECASTLEKINGMOVE);
+-        position->pieceTableEval             = position->pieceTableEval-(-completePieceTables[rook][black][63]+completePieceTables[rook][black][61]-completePieceTables[king][black][60]+completePieceTables[king][black][62]);
++        position->pieceTableEval             = position->pieceTableEval-(-getPSQentry(rook, black, 3)+getPSQentry(rook, black, 1)-getPSQentry(king, black, 0)+getPSQentry(king, black, 2));
+         position->zobristHash                = position->zobristHash^zobristHash[rook][black][63]^zobristHash[rook][black][61]^zobristHash[king][black][60]^zobristHash[king][black][62];
      }
  }
+@@ -86,13 +86,13 @@ static inline void makeQueenSideCastle(chessPosition* position) {
+         position->pieces[toMove]             = position->pieces[toMove]^(WHITEQUEENSIDECASTLEOCCUPANCYCHANGE);
+         position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(WHITEQUEENSIDECASTLEROOKMOVE);
+         position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(WHITEQUEENSIDECASTLEQUEENMOVE);
+-        position->pieceTableEval             = position->pieceTableEval-completePieceTables[rook][white][0]+completePieceTables[rook][white][3]-completePieceTables[king][white][4]+completePieceTables[king][white][2];
++        position->pieceTableEval             = position->pieceTableEval-getPSQentry(rook, white, 0)+getPSQentry(rook, white, 3)-getPSQentry(king, white, 4)+getPSQentry(king, white, 2);
+         position->zobristHash                = position->zobristHash^zobristHash[rook][white][0]^zobristHash[rook][white][3]^zobristHash[king][white][4]^zobristHash[king][white][2];
+     } else {
+         position->pieces[toMove]             = position->pieces[toMove]^(BLACKQUEENSIDECASTLEOCCUPANCYCHANGE);
+         position->pieceTables[toMove][rook]  = position->pieceTables[toMove][rook]^(BLACKQUEENSIDECASTLEROOKMOVE);
+         position->pieceTables[toMove][king]  = position->pieceTables[toMove][king]^(BLACKQUEENSIDECASTLEQUEENMOVE);
+-        position->pieceTableEval             = position->pieceTableEval-(-completePieceTables[rook][black][56]+completePieceTables[rook][black][59]-completePieceTables[king][black][60]+completePieceTables[king][black][58]);
++        position->pieceTableEval             = position->pieceTableEval-(-getPSQentry(rook, black, 6)+getPSQentry(rook, black, 9)-getPSQentry(king, black, 0)+getPSQentry(king, black, 8));
+         position->zobristHash                = position->zobristHash^zobristHash[rook][black][56]^zobristHash[rook][black][59]^zobristHash[king][black][60]^zobristHash[king][black][58];
+     }
+ }
+@@ -103,13 +103,13 @@ static inline void makeEnPassant(chessMove* move, chessPosition* position) {
+     position->pieces[toMove]                            = position->pieces[toMove]^moveMask;
+     position->pieceTables[toMove][pawn]                 = position->pieceTables[toMove][pawn]^moveMask;
+     uint16_t shift                                      = (toMove? move->targetField+8: move->targetField-8);
+-    position->pieceTables[1-toMove][move->captureType]  = position->pieceTables[1-toMove][pawn] ^ BIT64(shift);
+-    position->pieces[1-toMove]                          = position->pieces[1-toMove] ^ BIT64(shift);
+-    position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*(completePieceTables[pawn][toMove][move->targetField]-completePieceTables[pawn][toMove][move->sourceField]);
+-    position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*completePieceTables[pawn][1-toMove][shift];
++    position->pieceTables[INVERTCOLOR(toMove)][move->captureType]  = position->pieceTables[INVERTCOLOR(toMove)][pawn] ^ BIT64(shift);
++    position->pieces[INVERTCOLOR(toMove)]                          = position->pieces[INVERTCOLOR(toMove)] ^ BIT64(shift);
++    position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*(getPSQentry(pawn, toMove, move->targetField)-getPSQentry(pawn, toMove, move->sourceField));
++    position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*getPSQentry(pawn, INVERTCOLOR(toMove), shift);
  
-@@ -295,12 +294,11 @@ static inline bool get_next_move_to_front(chessPosition* position, sortState* cu
-                 }
-                 break;
-             case good_captures_handled: {
--                uint16_t killerA = killerMoves[plyinfo.ply][0];
--                uint16_t killerB = killerMoves[plyinfo.ply][1];
--                if (getHashMoveToFront(&moves, killerA, ind)) {
-+                killerTable* table = getKillerTable();
-+                if (getHashMoveToFront(&moves, table->getKillers(plyinfo.ply).killers[0], ind)) {
-                     moves[ind].sortEval = DEFAULT_SORTEVAL;
-                     sortedNextMove = true;
--                } else if (getHashMoveToFront(&moves, killerB, ind)) {
-+                } else if (getHashMoveToFront(&moves, table->getKillers(plyinfo.ply).killers[1], ind)) {
-                     moves[ind].sortEval = DEFAULT_SORTEVAL;
-                     sortedNextMove = true;
-                 } else {
-@@ -473,10 +471,8 @@ static inline int16_t negamax_internal(chessPosition* position, plyInfo plyinfo,
-         setHashEntry(FULLSEARCH, alphabeta.alpha, plyinfo.depth, settings.searchId, (PV->line[0].sourceField | (PV->line[0].targetField << 8)), position->zobristHash);
-         if (PV->line[0].captureType == none) {
-                 uint16_t toRemember = (PV->line[0].sourceField | (PV->line[0].targetField << 8));
--                if ((killerMoves[plyinfo.ply][0] != toRemember)) {
--                    killerMoves[plyinfo.ply][1] = killerMoves[plyinfo.ply][0];
--                    killerMoves[plyinfo.ply][0] = toRemember;
--                }
-+                killerTable* table = getKillerTable();
-+                table->setKillerMove(plyinfo.ply, toRemember);
-             }
-     } else { //we failed low, remember as well
-         setHashEntry(FAILLOW, alphabeta.alpha, plyinfo.depth, settings.searchId, 0, position->zobristHash);
-diff --git a/Cpp/src/Search/toplevelSearch.cpp b/Cpp/src/Search/toplevelSearch.cpp
-index 1bd37db..0c411bd 100644
---- a/Cpp/src/Search/toplevelSearch.cpp
-+++ b/Cpp/src/Search/toplevelSearch.cpp
-@@ -23,8 +23,10 @@
- #include <lib/bitfiddling.h>
- #include <algorithm>
- #include <userInterface/UIlayer.hpp>
-+#include <Search/killerMoves.hpp>
-+
-+
- extern uint8_t searchId;
--extern uint16_t killerMoves[40][2];
- 
- uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t numMadeMoves, uint32_t* worst_case_time) {
-     if (params.type == infinite) {
-@@ -101,7 +103,8 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
- #endif*/
- 
-     //TODO: refactor this function
--    memset(killerMoves, 0, 40*2*sizeof(uint16_t));
-+    killerTable* table = getKillerTable();
-+    table->clear();
-     resetSearchData();
-     resetQuiescenceNodes();
-     uint64_t start_ts  = get_timestamp();
-diff --git a/Cpp/src/userInterface/UImainLoop.cpp b/Cpp/src/userInterface/UImainLoop.cpp
-index b5061f8..d11e11a 100644
---- a/Cpp/src/userInterface/UImainLoop.cpp
-+++ b/Cpp/src/userInterface/UImainLoop.cpp
-@@ -39,8 +39,7 @@
- #include <parameters/parametersPrivate.hpp>
- #include <parameters/externalParamReader.hpp>
- #include <string>
--
--extern uint16_t killerMoves[40][2];
-+#include <Search/killerMoves.hpp>
- 
- template <typename T>
- T StringToNumber(const std::string &Text) {
-@@ -139,7 +138,8 @@ void handleIsReady(std::ostream& stream) {
+-    position->zobristHash = position->zobristHash^zobristHash[pawn][toMove][move->targetField]^zobristHash[pawn][toMove][move->sourceField]^zobristHash[pawn][1-toMove][shift];
+-    position->pawnHash = position->pawnHash^pawnHashValues[pawn][toMove][move->targetField]^pawnHashValues[pawn][toMove][move->sourceField]^pawnHashValues[pawn][1-toMove][shift];
++    position->zobristHash = position->zobristHash^zobristHash[pawn][toMove][move->targetField]^zobristHash[pawn][toMove][move->sourceField]^zobristHash[pawn][INVERTCOLOR(toMove)][shift];
++    position->pawnHash = position->pawnHash^pawnHashValues[pawn][toMove][move->targetField]^pawnHashValues[pawn][toMove][move->sourceField]^pawnHashValues[pawn][INVERTCOLOR(toMove)][shift];
+     //position->totalFigureEval     = position->totalFigureEval-figureValues[pawn];
  }
  
- void handleClear() {
--    memset(killerMoves, 0, 40*2*sizeof(uint16_t));
-+    killerTable* ktable = getKillerTable();
-+    ktable->clear();
-     clearHashTables();
-     HistoryTables* table = getHistoryTables();
-     table->clearHistoryTable();
+@@ -118,15 +118,15 @@ static inline void makePromotion(chessMove* move, chessPosition* position, figur
+     playerColor toMove                                  = position->toMove;
+     uint64_t moveMask                                   = BIT64(move->sourceField) | BIT64(move->targetField);
+     position->pieces[toMove]                            = position->pieces[toMove]^moveMask;
+-    position->pieces[1-toMove]                          = position->pieces[1-toMove] & (~moveMask);
++    position->pieces[INVERTCOLOR(toMove)]                          = position->pieces[INVERTCOLOR(toMove)] & (~moveMask);
+     position->pieceTables[toMove][pawn]                 = position->pieceTables[toMove][pawn]  ^ BIT64(move->sourceField);
+     position->pieceTables[toMove][promotedFigure]       = position->pieceTables[toMove][promotedFigure] ^ BIT64(move->targetField);
+-    position->pieceTables[1-toMove][move->captureType]  = position->pieceTables[1-toMove][move->captureType] & (~moveMask);
++    position->pieceTables[INVERTCOLOR(toMove)][move->captureType]  = position->pieceTables[INVERTCOLOR(toMove)][move->captureType] & (~moveMask);
+ 
+-    position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*(completePieceTables[promotedFigure][toMove][move->targetField]-completePieceTables[pawn][toMove][move->sourceField]);
+-    position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*completePieceTables[move->captureType][1-toMove][move->targetField];
+-    position->zobristHash = position->zobristHash^zobristHash[promotedFigure][toMove][move->targetField]^zobristHash[pawn][toMove][move->sourceField]^zobristHash[move->captureType][1-toMove][move->targetField];
+-    position->pawnHash = position->pawnHash^pawnHashValues[pawn][toMove][move->sourceField]^pawnHashValues[move->captureType][1-toMove][move->targetField];
++    position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*(getPSQentry(promotedFigure, toMove, move->targetField)-getPSQentry(pawn, toMove, move->sourceField));
++    position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*getPSQentry(move->captureType, (playerColor) (INVERTCOLOR(toMove)), move->targetField);
++    position->zobristHash = position->zobristHash^zobristHash[promotedFigure][toMove][move->targetField]^zobristHash[pawn][toMove][move->sourceField]^zobristHash[move->captureType][INVERTCOLOR(toMove)][move->targetField];
++    position->pawnHash = position->pawnHash^pawnHashValues[pawn][toMove][move->sourceField]^pawnHashValues[move->captureType][INVERTCOLOR(toMove)][move->targetField];
+     //const evalParameters* evalPars = getEvalParameters();
+     position->figureEval     = position->figureEval+(1-2*toMove)*(figureValues[promotedFigure]-figureValues[pawn]);
+     position->totalFigureEval     = position->totalFigureEval+(figureValues[promotedFigure]-figureValues[pawn]);
+@@ -207,13 +207,12 @@ void makeMove(chessMove* move, chessPosition* position) {
+     }
+     position->zobristHash = position->zobristHash^enpassantHash[position->data.enPassantFile];
+     position->madeMoves.add(move);
+-    position->toMove = (playerColor) (1-position->toMove);
++    position->toMove = INVERTCOLOR(position->toMove);
+     position->zobristHash = position->zobristHash^movingSideHash[0];
+     repetitionData[position->zobristHash & 16383]++;
+-    #ifdef DEBUG
+ 
++    #ifdef DEBUG
+     debug_incremental_calculations(position);
+-
+     #endif
+ }
+ 
 diff --git a/lint/styleguide b/lint/styleguide
 --- a/lint/styleguide
 +++ b/lint/styleguide
 @@ -1 +1 @@
 -Subproject commit 77f7f28d314862754877bf19a8b032158522f7aa
 +Subproject commit 77f7f28d314862754877bf19a8b032158522f7aa-dirty
+diff --git a/lint/test.cpp b/lint/test.cpp
+index 7cbd39c..bf8e78b 100644
+--- a/lint/test.cpp
++++ b/lint/test.cpp
+@@ -1,5 +1,5 @@
+ int main(something){
+-
++    position->pieceTableEval = position->pieceTableEval+(1-2*toMove)*(getPSQentry(pawn, toMove, d)-getPSQentry(pawn, toMove, d));
+ \\ ....    \\dsdsdsd
+     a = b
+ if(false == true ){
+diff --git a/to_checkin.diff b/to_checkin.diff
+index ff2e2e6..4d44244 100644
+--- a/to_checkin.diff
++++ b/to_checkin.diff
+@@ -1,158 +0,0 @@
+-diff --git a/Cpp/src/Search/moveOrdering.cpp b/Cpp/src/Search/moveOrdering.cpp
+-index 60a419c..f016274 100644
+---- a/Cpp/src/Search/moveOrdering.cpp
+-+++ b/Cpp/src/Search/moveOrdering.cpp
+-@@ -20,9 +20,9 @@
+- #include <userInterface/UIlayer.hpp>
+- #include <Search/search.hpp>
+- #include <Search/history.hpp>
+-+#include <Search/killerMoves.hpp>
+- 
+- extern int16_t pieceTables[7][2][64];
+--extern uint16_t killerMoves[40][2];
+- 
+- #define WHITEKINGCASTLECHESSFIELDS ((1ULL << 4) | (1ULL << 5) | (1ULL << 6))
+- #define WHITEQUEENCASTLECHESSFIELDS ((1ULL << 4) | (1ULL << 3) | (1ULL << 2))
+-@@ -233,8 +233,6 @@ static inline void calcSortEval(chessPosition* position, chessMove* mv, bool isI
+-             sortEval = sortEval+119;
+-     }
+- 
+--
+--
+-     if (mv->type == castlingKingside) {
+-         sortEval  = 110;
+-         if (kingBlockers[position->toMove] & opponentAttackTable->completeAttackTable) {
+-@@ -293,11 +291,11 @@ bool calculateStandardSortEvals(chessPosition* position,  vdt_vector<chessMove>*
+-     bool isInCheck      = ((opponentAttackTable.completeAttackTable & position->pieceTables[position->toMove][king]) != 0);
+-     int16_t bestEval = INT16_MIN;
+-     //uint16_t bestIndex = 0;
+--    uint16_t killerMoveA = killerMoves[ply][0];
+--    uint16_t killerMoveB = killerMoves[ply][1];
+-+    killerTable* table = getKillerTable();
+-+    singlePlyKillers killers = table->getKillers(ply);
+-     const evalParameters* evalPars                      = getEvalParameters(); //TODO: move outside
+-     for (uint16_t ind = start_index; ind < moves->length; ind++) {
+--        calcSortEval(position, &(*moves)[ind], isInCheck, &opponentAttackTable, &ownAttackTable, sortinfo.hashMove, killerMoveA, killerMoveB, sortinfo.refutationTarget, evalPars);
+-+        calcSortEval(position, &(*moves)[ind], isInCheck, &opponentAttackTable, &ownAttackTable, sortinfo.hashMove, killers.killers[0], killers.killers[1], sortinfo.refutationTarget, evalPars);
+-         if ((*moves)[ind].sortEval > bestEval) {
+-             bestEval = (*moves)[ind].sortEval;
+-             //bestIndex = ind;
+-diff --git a/Cpp/src/Search/negamax.cpp b/Cpp/src/Search/negamax.cpp
+-index e610199..c7455ed 100644
+---- a/Cpp/src/Search/negamax.cpp
+-+++ b/Cpp/src/Search/negamax.cpp
+-@@ -23,6 +23,8 @@
+- #include <atomic>
+- #include <Search/history.hpp>
+- #include <lib/Defines/figureValues.hpp>
+-+#include <Search/killerMoves.hpp>
+-+
+- searchDebugData searchCounts;
+- 
+- extern uint64_t bishopFieldTable[];
+-@@ -90,7 +92,6 @@ static inline bool getHashMoveToFront(vdt_vector<chessMove>* moves, uint16_t has
+-     return false;
+- }
+- 
+--uint16_t killerMoves[50][2];
+- uint16_t repetitionData[16384] = {0};
+- 
+- static inline void get_extensions_reductions(chessPosition* position, uint16_t* reduction, uint16_t* extension, bool check, bool movingSideInCheck, plyInfo plyinfo, int16_t depth, chessMove* move, uint16_t ind) {
+-@@ -251,10 +252,8 @@ static inline void handleBetaCutoff(chessMove* bestMove, uint64_t zobristHash, i
+-     setHashEntry(FAILHIGH, beta, depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), zobristHash);
+-     if (bestMove->captureType == none) {
+-         uint16_t toRemember = (bestMove->sourceField | (bestMove->targetField << 8));
+--        if ((killerMoves[ply][0] != toRemember)) {
+--            killerMoves[ply][1] = killerMoves[ply][0];
+--            killerMoves[ply][0] = toRemember;
+--        }
+-+        killerTable* table = getKillerTable();
+-+        table->setKillerMove(ply, toRemember);
+-     }
+- }
+- 
+-@@ -295,12 +294,11 @@ static inline bool get_next_move_to_front(chessPosition* position, sortState* cu
+-                 }
+-                 break;
+-             case good_captures_handled: {
+--                uint16_t killerA = killerMoves[plyinfo.ply][0];
+--                uint16_t killerB = killerMoves[plyinfo.ply][1];
+--                if (getHashMoveToFront(&moves, killerA, ind)) {
+-+                killerTable* table = getKillerTable();
+-+                if (getHashMoveToFront(&moves, table->getKillers(plyinfo.ply).killers[0], ind)) {
+-                     moves[ind].sortEval = DEFAULT_SORTEVAL;
+-                     sortedNextMove = true;
+--                } else if (getHashMoveToFront(&moves, killerB, ind)) {
+-+                } else if (getHashMoveToFront(&moves, table->getKillers(plyinfo.ply).killers[1], ind)) {
+-                     moves[ind].sortEval = DEFAULT_SORTEVAL;
+-                     sortedNextMove = true;
+-                 } else {
+-@@ -473,10 +471,8 @@ static inline int16_t negamax_internal(chessPosition* position, plyInfo plyinfo,
+-         setHashEntry(FULLSEARCH, alphabeta.alpha, plyinfo.depth, settings.searchId, (PV->line[0].sourceField | (PV->line[0].targetField << 8)), position->zobristHash);
+-         if (PV->line[0].captureType == none) {
+-                 uint16_t toRemember = (PV->line[0].sourceField | (PV->line[0].targetField << 8));
+--                if ((killerMoves[plyinfo.ply][0] != toRemember)) {
+--                    killerMoves[plyinfo.ply][1] = killerMoves[plyinfo.ply][0];
+--                    killerMoves[plyinfo.ply][0] = toRemember;
+--                }
+-+                killerTable* table = getKillerTable();
+-+                table->setKillerMove(plyinfo.ply, toRemember);
+-             }
+-     } else { //we failed low, remember as well
+-         setHashEntry(FAILLOW, alphabeta.alpha, plyinfo.depth, settings.searchId, 0, position->zobristHash);
+-diff --git a/Cpp/src/Search/toplevelSearch.cpp b/Cpp/src/Search/toplevelSearch.cpp
+-index 1bd37db..0c411bd 100644
+---- a/Cpp/src/Search/toplevelSearch.cpp
+-+++ b/Cpp/src/Search/toplevelSearch.cpp
+-@@ -23,8 +23,10 @@
+- #include <lib/bitfiddling.h>
+- #include <algorithm>
+- #include <userInterface/UIlayer.hpp>
+-+#include <Search/killerMoves.hpp>
+-+
+-+
+- extern uint8_t searchId;
+--extern uint16_t killerMoves[40][2];
+- 
+- uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t numMadeMoves, uint32_t* worst_case_time) {
+-     if (params.type == infinite) {
+-@@ -101,7 +103,8 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
+- #endif*/
+- 
+-     //TODO: refactor this function
+--    memset(killerMoves, 0, 40*2*sizeof(uint16_t));
+-+    killerTable* table = getKillerTable();
+-+    table->clear();
+-     resetSearchData();
+-     resetQuiescenceNodes();
+-     uint64_t start_ts  = get_timestamp();
+-diff --git a/Cpp/src/userInterface/UImainLoop.cpp b/Cpp/src/userInterface/UImainLoop.cpp
+-index b5061f8..d11e11a 100644
+---- a/Cpp/src/userInterface/UImainLoop.cpp
+-+++ b/Cpp/src/userInterface/UImainLoop.cpp
+-@@ -39,8 +39,7 @@
+- #include <parameters/parametersPrivate.hpp>
+- #include <parameters/externalParamReader.hpp>
+- #include <string>
+--
+--extern uint16_t killerMoves[40][2];
+-+#include <Search/killerMoves.hpp>
+- 
+- template <typename T>
+- T StringToNumber(const std::string &Text) {
+-@@ -139,7 +138,8 @@ void handleIsReady(std::ostream& stream) {
+- }
+- 
+- void handleClear() {
+--    memset(killerMoves, 0, 40*2*sizeof(uint16_t));
+-+    killerTable* ktable = getKillerTable();
+-+    ktable->clear();
+-     clearHashTables();
+-     HistoryTables* table = getHistoryTables();
+-     table->clearHistoryTable();
+-diff --git a/lint/styleguide b/lint/styleguide
+---- a/lint/styleguide
+-+++ b/lint/styleguide
+-@@ -1 +1 @@
+--Subproject commit 77f7f28d314862754877bf19a8b032158522f7aa
+-+Subproject commit 77f7f28d314862754877bf19a8b032158522f7aa-dirty

@@ -21,8 +21,7 @@
 #include <Search/search.hpp>
 #include <Search/history.hpp>
 #include <Search/killerMoves.hpp>
-
-extern int16_t pieceTables[7][2][64];
+#include <lib/Evaluation/PSQ.hpp>
 
 #define WHITEKINGCASTLECHESSFIELDS ((1ULL << 4) | (1ULL << 5) | (1ULL << 6))
 #define WHITEQUEENCASTLECHESSFIELDS ((1ULL << 4) | (1ULL << 3) | (1ULL << 2))
@@ -111,7 +110,8 @@ static inline void calcSortEval(chessPosition* position, chessMove* mv, bool isI
     }*/
 
     if (((uint16_t) mv->type) < 6) {
-        sortEval = sortEval+(pieceTables[mv->type][position->toMove][mv->targetField]-pieceTables[mv->type][position->toMove][mv->sourceField])/2;
+        //TODO: check this for endgames!!
+        sortEval = sortEval+(getEarlyGamePSQentry(mv->type, position->toMove, mv->targetField)-getEarlyGamePSQentry(mv->type, position->toMove, mv->sourceField))/2;
     }
 
     if (mv->type == promotionQueen) {

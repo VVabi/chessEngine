@@ -182,10 +182,3 @@ int16_t endgameRawPieceTables[6][32] = {
     }
 };
 
-
-int16_t pieceTables[7][2][64];
-
-
-int16_t endGamepieceTables[7][2][64];
-
-int32_t completePieceTables[7][2][64];
