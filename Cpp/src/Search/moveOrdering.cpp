@@ -292,7 +292,7 @@ bool calculateStandardSortEvals(chessPosition* position,  vdt_vector<chessMove>*
     int16_t bestEval = INT16_MIN;
     //uint16_t bestIndex = 0;
     killerTable* table = getKillerTable();
-    singlePlyKillers killers = table->getKillers(ply);
+    const singlePlyKillers killers = table->getKillers(ply);
     const evalParameters* evalPars                      = getEvalParameters(); //TODO: move outside
     for (uint16_t ind = start_index; ind < moves->length; ind++) {
         calcSortEval(position, &(*moves)[ind], isInCheck, &opponentAttackTable, &ownAttackTable, sortinfo.hashMove, killers.killers[0], killers.killers[1], sortinfo.refutationTarget, evalPars);

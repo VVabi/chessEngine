@@ -103,8 +103,8 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 #endif*/
 
     //TODO: refactor this function
-    killerTable* table = getKillerTable();
-    table->clear();
+    /*killerTable* table = getKillerTable();
+    table->clear();*/
     resetSearchData();
     resetQuiescenceNodes();
     uint64_t start_ts  = get_timestamp();

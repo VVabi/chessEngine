@@ -32,14 +32,14 @@ class killerTable {
         assert(ply < MAX_PLY);
         assert(toRemember != 0);
         if (killerMoves[ply].killers[0] != toRemember) {
-            for (uint16_t ind = MAX_PLY-1; ind > 0; ind--) {
+            for (uint16_t ind = NUM_KILLERS_PER_PLY-1; ind > 0; ind--) {
                 killerMoves[ply].killers[ind] = killerMoves[ply].killers[ind-1];
             }
             killerMoves[ply].killers[0] = toRemember;
         }
     }
 
-    singlePlyKillers getKillers(uint16_t ply) {
+    const singlePlyKillers getKillers(uint16_t ply) {
         return killerMoves[ply];
     }
 };
