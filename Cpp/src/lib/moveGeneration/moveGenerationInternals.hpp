@@ -7,8 +7,7 @@
 
 #ifndef LIB_MOVEGENERATION_MOVEGENERATIONINTERNALS_HPP_
 #define LIB_MOVEGENERATION_MOVEGENERATIONINTERNALS_HPP_
-extern uint64_t knightmovetables[];
-extern uint64_t kingmovetables[];
+
 extern uint64_t rookFieldTable[];
 extern uint64_t rookMoveTables[64][4096];
 extern uint64_t rookMagicNumbers[];

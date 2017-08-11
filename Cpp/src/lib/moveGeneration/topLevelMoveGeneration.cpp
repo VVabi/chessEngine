@@ -13,10 +13,7 @@
 #include <lib/Defines/boardParts.hpp>
 #include <lib/bitfiddling.h>
 #include "moveGenerationInternals.hpp"
-
-//TODO: for debug purposes I want these rangechecked!
-extern uint64_t knightmovetables[];
-extern uint64_t kingmovetables[];
+#include <lib/moveGeneration/nonSliderMoveTables.hpp>
 
 extern uint64_t castlingBlockers[2][2];
 extern uint64_t enPassantMoveTable[2][8];
@@ -76,13 +73,13 @@ __attribute__((always_inline)) static inline void generateBishopMoves(vdt_vector
     }
 }
 
-__attribute__((always_inline)) static inline void generateNonSliderMoves(vdt_vector<chessMove>* vec, chessPosition* position, const uint64_t* moveTable, const figureType figure, const uint64_t targetMask) {
+__attribute__((always_inline)) static inline void generateNonSliderMoves(vdt_vector<chessMove>* vec, chessPosition* position, const figureType figure, const uint64_t targetMask) {
     playerColor toMove = position->toMove;
     uint64_t pieces    = position->pieceTables[toMove][figure];
     while (pieces != 0) {
         uint64_t nextPiece = LOWESTBITONLY(pieces);
         uint16_t nextPieceField = popLSB(pieces);
-        uint64_t potentialMoves = moveTable[nextPieceField];
+        uint64_t potentialMoves = getNonSliderMoves(nextPieceField, figure);
         potentialMoves = potentialMoves & (~position->pieces[toMove]) & targetMask;
         extractMoves(nextPiece, figure, potentialMoves, vec, position);
         pieces = pieces & (~nextPiece);
@@ -274,8 +271,8 @@ __attribute__((always_inline)) static inline void generateEnPassant(vdt_vector<c
 
 void generateAllMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
     generateCastling(vec, position);
-    generateNonSliderMoves(vec, position, knightmovetables, knight, UINT64_MAX);
-    generateNonSliderMoves(vec, position, kingmovetables, king, UINT64_MAX);
+    generateNonSliderMoves(vec, position, knight, UINT64_MAX);
+    generateNonSliderMoves(vec, position, king, UINT64_MAX);
     generateRookMoves(vec, position, rook, UINT64_MAX);
     generateRookMoves(vec, position, queen, UINT64_MAX);
     generateBishopMoves(vec, position, bishop, UINT64_MAX);
@@ -291,8 +288,8 @@ void generateChecks(vdt_vector<chessMove>* vec, chessPosition* position) {
     uint64_t nonCaptures = ~position->pieces[1-toMove];
     uint64_t oppKing = position->pieceTables[1-toMove][king];
     uint16_t oppKingField = findLSB(oppKing);
-    uint64_t knightChecks = knightmovetables[oppKingField];
-    generateNonSliderMoves(vec, position, knightmovetables, knight, knightChecks & nonCaptures);
+    uint64_t knightChecks =getKnightMoves(oppKingField);
+    generateNonSliderMoves(vec, position, knight, knightChecks & nonCaptures);
     uint64_t occupancy = position->pieces[white] | position->pieces[black];
     uint64_t rookChecks = getPotentialRookMoves(oppKingField, occupancy);
     generateRookMoves(vec, position, rook, rookChecks & nonCaptures);
@@ -305,8 +302,8 @@ void generateChecks(vdt_vector<chessMove>* vec, chessPosition* position) {
 void generateAllCaptureMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
     playerColor toMove = position->toMove;
     uint64_t captures = position->pieces[1-toMove];
-    generateNonSliderMoves(vec, position, knightmovetables, knight, captures);
-    generateNonSliderMoves(vec, position, kingmovetables, king, captures);
+    generateNonSliderMoves(vec, position, knight, captures);
+    generateNonSliderMoves(vec, position, king, captures);
     generateRookMoves(vec, position, rook, captures);
     generateRookMoves(vec, position, queen, captures);
     generateBishopMoves(vec, position, bishop, captures);

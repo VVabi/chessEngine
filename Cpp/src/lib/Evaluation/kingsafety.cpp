@@ -12,8 +12,8 @@
 #include <lib/bitfiddling.h>
 #include <lib/Defines/boardParts.hpp>
 #include <lib/Attacks/attacks.hpp>
+#include <lib/moveGeneration/nonSliderMoveTables.hpp>
 
-extern uint64_t kingmovetables[64];
 /*#ifdef EXPERIMENTAL
 int32_t attacksCloseToKingEvals[] =
 { 0, 0, 1, 2, 3, 4, 5, 6, 7, 9,
@@ -99,7 +99,7 @@ static int32_t kingSafetySinglePlayer(const chessPosition* position, const uint8
     /*uint64_t opponentPieces = position->pieces[1-playingSide];
     uint64_t opponentQueens = position->pieceTables[1-playingSide][queen];*/
 
-    uint64_t kingmoves = kingmovetables[kingField];
+    uint64_t kingmoves = getKingMoves(kingField);
     kingmoves = kingmoves | BIT64(kingField);
 /*#ifdef EXPERIMENTAL
     if (playingSide == white) {

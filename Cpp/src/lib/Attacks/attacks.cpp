@@ -14,20 +14,18 @@
 #include <assert.h>
 #include <parameters/parameters.hpp>
 #include <lib/moveGeneration/moveGenerationInternals.hpp>
-
-extern uint64_t knightmovetables[];
-extern uint64_t kingmovetables[];
+#include <lib/moveGeneration/nonSliderMoveTables.hpp>
 
 bool isFieldAttacked(const chessPosition* position, playerColor attackingSide, uint16_t field) {
     //knights
     uint64_t knights = position->pieceTables[attackingSide][knight];
-    if (knightmovetables[field] & knights) {
+    if (getKnightMoves(field) & knights) {
         return true;
     }
 
     //kings
     uint64_t kings = position->pieceTables[attackingSide][king];
-    if (kingmovetables[field] & kings) {
+    if (getKingMoves(field) & kings) {
         return true;
     }
 
@@ -78,7 +76,7 @@ AttackTable makeAttackTable(const chessPosition* position, playerColor attacking
     uint64_t knightAttackTable = 0;
     while (knights) {
         uint16_t nextKnight = popLSB(knights);
-        knightAttackTable = knightAttackTable | knightmovetables[nextKnight];
+        knightAttackTable = knightAttackTable |getKnightMoves(nextKnight);
     }
     retTable.attackTables[knight] = knightAttackTable;
 
@@ -130,7 +128,7 @@ AttackTable makeAttackTable(const chessPosition* position, playerColor attacking
     uint64_t kingAttackTable = 0;
     while (kingField) {
         uint16_t nextKing = popLSB(kingField);
-        kingAttackTable = kingAttackTable | kingmovetables[nextKing];
+        kingAttackTable = kingAttackTable | getKingMoves(nextKing);
     }
     retTable.attackTables[king] = kingAttackTable;
     retTable.completeAttackTable = retTable.attackTables[king] | retTable.attackTables[pawn] | retTable.attackTables[knight] | retTable.attackTables[bishop] | retTable.attackTables[rook] | retTable.attackTables[queen];
@@ -169,8 +167,8 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
     uint64_t knightAttackTable = 0;
     while (knights) {
         uint16_t nextKnight = popLSB(knights);
-        knightAttackTable = knightAttackTable | knightmovetables[nextKnight];
-        uint16_t legalMoves = popcount(knightmovetables[nextKnight] & ~ownPieces & ~opppawnTakes);
+        knightAttackTable = knightAttackTable | getKnightMoves(nextKnight);
+        uint16_t legalMoves = popcount(getKnightMoves(nextKnight) & ~ownPieces & ~opppawnTakes);
         assert(legalMoves < 9);
         *mobilityScore = *mobilityScore+knightMobility[legalMoves];
     }
@@ -232,7 +230,7 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
     uint64_t kingAttackTable = 0;
     while (kingField) {
         uint16_t nextKing = popLSB(kingField);
-        kingAttackTable = kingAttackTable | kingmovetables[nextKing];
+        kingAttackTable = kingAttackTable | getKingMoves(nextKing);
     }
     retTable.attackTables[king] = kingAttackTable;
     retTable.completeAttackTable = retTable.attackTables[king] | retTable.attackTables[pawn] | retTable.attackTables[knight] | retTable.attackTables[bishop] | retTable.attackTables[rook] | retTable.attackTables[queen];
@@ -266,8 +264,8 @@ static inline bool getNextCapture(chessMove* nextCapture, const chessPosition* p
 
     //knights
     uint64_t knights = position->pieceTables[attackingSide][knight] & ~mask;
-    if (knightmovetables[field] & knights) {
-        uint16_t source = findLSB(knightmovetables[field] & knights & ~mask);
+    if (getKnightMoves(field) & knights) {
+        uint16_t source = findLSB(getKnightMoves(field) & knights & ~mask);
         nextCapture->captureType = occ;
         nextCapture->sourceField = source;
         nextCapture->targetField = field;
@@ -326,8 +324,8 @@ static inline bool getNextCapture(chessMove* nextCapture, const chessPosition* p
     }
     //kings
     uint64_t kings = position->pieceTables[attackingSide][king]  & ~mask;
-    if (kingmovetables[field] & kings) {
-        uint16_t source = findLSB(kingmovetables[field] & kings & ~mask);
+    if (getKingMoves(field) & kings) {
+        uint16_t source = findLSB(getKingMoves(field) & kings & ~mask);
         if (!(BIT64(source) & mask)) {
             nextCapture->captureType = occ;
             nextCapture->sourceField = source;
