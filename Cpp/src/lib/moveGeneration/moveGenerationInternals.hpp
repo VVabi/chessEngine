@@ -39,14 +39,14 @@ __attribute__((always_inline)) static inline uint64_t getPotentialBishopMoves(ui
     return potentialMoves;
 }
 
-__attribute__((always_inline)) static inline uint64_t getBishopMoves(uint16_t field){
+__attribute__((always_inline)) static inline uint64_t getBishopMoves(uint16_t field) {
 #ifdef DEBUG
     assert(field < 64);
 #endif
     return bishopFieldTable[field];
 }
 
-__attribute__((always_inline)) static inline uint64_t getRookMoves(uint16_t field){
+__attribute__((always_inline)) static inline uint64_t getRookMoves(uint16_t field) {
 #ifdef DEBUG
     assert(field < 64);
 #endif

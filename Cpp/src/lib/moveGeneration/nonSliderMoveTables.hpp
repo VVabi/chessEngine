@@ -19,20 +19,19 @@ class nonSliderMoveTables {
     uint64_t kingmovetables[64] = { KINGMOVES0, KINGMOVES1, KINGMOVES2, KINGMOVES3, KINGMOVES4, KINGMOVES5, KINGMOVES6, KINGMOVES7, KINGMOVES8, KINGMOVES9, KINGMOVES10, KINGMOVES11, KINGMOVES12, KINGMOVES13, KINGMOVES14, KINGMOVES15, KINGMOVES16, KINGMOVES17, KINGMOVES18, KINGMOVES19, KINGMOVES20, KINGMOVES21, KINGMOVES22, KINGMOVES23, KINGMOVES24, KINGMOVES25, KINGMOVES26, KINGMOVES27, KINGMOVES28, KINGMOVES29, KINGMOVES30, KINGMOVES31, KINGMOVES32, KINGMOVES33, KINGMOVES34, KINGMOVES35, KINGMOVES36, KINGMOVES37, KINGMOVES38, KINGMOVES39, KINGMOVES40, KINGMOVES41, KINGMOVES42, KINGMOVES43, KINGMOVES44, KINGMOVES45, KINGMOVES46, KINGMOVES47, KINGMOVES48, KINGMOVES49, KINGMOVES50, KINGMOVES51, KINGMOVES52, KINGMOVES53, KINGMOVES54, KINGMOVES55, KINGMOVES56, KINGMOVES57, KINGMOVES58, KINGMOVES59, KINGMOVES60, KINGMOVES61, KINGMOVES62, KINGMOVES63 };
 
  public:
-    uint64_t getKingMove(uint16_t field) const{
+    uint64_t getKingMove(uint16_t field) const {
     #ifdef DEBUG
           assert(field < 64);
     #endif
           return kingmovetables[field];
     }
 
-    uint64_t getKnightMove(uint16_t field) const{
+    uint64_t getKnightMove(uint16_t field) const {
     #ifdef DEBUG
           assert(field < 64);
     #endif
           return knightmovetables[field];
     }
-
 };
 
 extern const nonSliderMoveTables moveTables;
@@ -46,7 +45,7 @@ __attribute__((always_inline)) static inline uint64_t getKnightMoves(uint16_t fi
 }
 
 __attribute__((always_inline)) static inline uint64_t getNonSliderMoves(uint16_t field, figureType type) {
-    if(king == type) {
+    if (king == type) {
         return getKingMoves(field);
     } else {
 #ifdef DEBUG

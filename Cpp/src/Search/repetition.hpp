@@ -14,7 +14,8 @@
 
 class RepetitionData {
     uint16_t repetitionData[REPTABLESIZE] = {0};
-public:
+
+ public:
     void reset() {
         memset(repetitionData, 0, REPTABLESIZE*sizeof(uint16_t));
     }

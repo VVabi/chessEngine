@@ -299,7 +299,7 @@ void generateChecks(vdt_vector<chessMove>* vec, chessPosition* position) {
     uint64_t nonCaptures = ~position->pieces[1-toMove];
     uint64_t oppKing = position->pieceTables[1-toMove][king];
     uint16_t oppKingField = findLSB(oppKing);
-    uint64_t knightChecks =getKnightMoves(oppKingField);
+    uint64_t knightChecks = getKnightMoves(oppKingField);
     generateNonSliderMoves(vec, position, knight, knightChecks & nonCaptures);
     uint64_t occupancy = position->pieces[white] | position->pieces[black];
     uint64_t rookChecks = getPotentialRookMoves(oppKingField, occupancy);

@@ -59,21 +59,21 @@ class ZobristHashData {
  public:
     ZobristHashData();
 
-    uint64_t getCastlingHash(uint16_t index) const{
+    uint64_t getCastlingHash(uint16_t index) const {
     #ifdef DEBUG
         assert(index < 16);
     #endif
         return castlingHash[index];
     }
 
-    uint64_t getEnPassantHash(uint16_t index) const{
+    uint64_t getEnPassantHash(uint16_t index) const {
     #ifdef DEBUG
         assert(index < 9);
     #endif
         return enpassantHash[index];
     }
 
-    uint64_t getMovingSideHash(playerColor color) const{
+    uint64_t getMovingSideHash(playerColor color) const {
     #ifdef DEBUG
             assert(color < 2);
     #endif
@@ -89,7 +89,7 @@ class ZobristHashData {
         return zobristHash[type][color][field];
     }
 
-    uint64_t getPawnHashEntry(figureType type, playerColor color, uint16_t field) const{
+    uint64_t getPawnHashEntry(figureType type, playerColor color, uint16_t field) const {
     #ifdef DEBUG
         assert(type < 7);
         assert(color < 2);
@@ -97,8 +97,6 @@ class ZobristHashData {
     #endif
         return pawnHashValues[type][color][field];
     }
-
-
 };
 
 extern const ZobristHashData hashData;
