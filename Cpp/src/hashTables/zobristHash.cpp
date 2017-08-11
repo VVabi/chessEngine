@@ -15,7 +15,7 @@
 static hashBucket* moveOrderingHashTable = NULL;
 static pawnHashEntry pawnHashTable[8192];
 
-ZobristHashData hashData;
+const ZobristHashData hashData;
 
 //uint64_t zobristHash[7][2][64];
 //uint64_t pawnHashValues[7][2][64];
@@ -178,44 +178,47 @@ void clearHashTables() {
     memset(moveOrderingHashTable, 0, sizeof(hashBucket)*(HASHSIZE+1));
 }
 
-void fillZobristHash() {
+ZobristHashData::ZobristHashData() {
+    setMovingSideHash(white, getRandUint64());
+        setMovingSideHash(black, 0);
+        for (uint16_t cnt = 0; cnt < 2; cnt++) {
+            for (uint16_t ind = 0; ind < 6; ind++) {
+                for (uint16_t field = 0; field < 64; field++) {
+                    setZobristHashEntry((figureType) ind, (playerColor) cnt, field, getRandUint64());
+                }
+            }
+            for (uint16_t field = 0; field < 64; field++) {
+                setZobristHashEntry(none, (playerColor) cnt, field, 0);
+            }
+        }
+
+        for (uint16_t ind = 0; ind <9; ind++) {
+            setEnPassantHash(ind, getRandUint64());
+        }
+
+        for (uint16_t ind = 0; ind <16; ind++) {
+            setCastlingHash(ind, getRandUint64());
+        }
+
+
+        for (uint16_t cnt = 0; cnt < 2; cnt++) {
+                for (uint16_t ind = 0; ind < 1; ind++) {
+                    for (uint16_t field = 0; field < 64; field++) {
+                        setPawnZobristHashEntry((figureType) ind, (playerColor) cnt, field, getRandUint64());
+                    }
+                }
+                for (uint16_t ind = 1; ind < 7; ind++) {
+                    for (uint16_t field = 0; field < 64; field++) {
+                        setPawnZobristHashEntry((figureType) ind, (playerColor) cnt, field, 0);
+                    }
+                }
+        }
+}
+
+void initHashTables() {
     assert(popcount(HASHSIZE+1) == 1); //this needs to be a power of 2!
     moveOrderingHashTable = new hashBucket[HASHSIZE+1];
     clearHashTables();
-    hashData.setMovingSideHash(white, getRandUint64());
-    hashData.setMovingSideHash(black, 0);
-    for (uint16_t cnt = 0; cnt < 2; cnt++) {
-        for (uint16_t ind = 0; ind < 6; ind++) {
-            for (uint16_t field = 0; field < 64; field++) {
-                hashData.setZobristHashEntry((figureType) ind, (playerColor) cnt, field, getRandUint64());
-            }
-        }
-        for (uint16_t field = 0; field < 64; field++) {
-            hashData.setZobristHashEntry(none, (playerColor) cnt, field, 0);
-        }
-    }
-
-    for (uint16_t ind = 0; ind <9; ind++) {
-        hashData.setEnPassantHash(ind, getRandUint64());
-    }
-
-    for (uint16_t ind = 0; ind <16; ind++) {
-        hashData.setCastlingHash(ind, getRandUint64());
-    }
-
-
-    for (uint16_t cnt = 0; cnt < 2; cnt++) {
-            for (uint16_t ind = 0; ind < 1; ind++) {
-                for (uint16_t field = 0; field < 64; field++) {
-                    hashData.setPawnZobristHashEntry((figureType) ind, (playerColor) cnt, field, getRandUint64());
-                }
-            }
-            for (uint16_t ind = 1; ind < 7; ind++) {
-                for (uint16_t field = 0; field < 64; field++) {
-                    hashData.setPawnZobristHashEntry((figureType) ind, (playerColor) cnt, field, 0);
-                }
-            }
-    }
 }
 
 

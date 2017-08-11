@@ -25,7 +25,7 @@
 int main() {
     initializeParameters();
     srand(get_timestamp());
-    fillZobristHash();
+    initHashTables();
     /*std::ofstream out("/home/vabi/TeX/Chess/positions.tex");
     std::ifstream in("/home/vabi/code/chessEngine/chessGui/openingPositions.txt");
     std::string line;

@@ -27,7 +27,7 @@ static char figureNames[2][6] = { {'P', 'N', 'B', 'R', 'Q', 'K'},
         {'p', 'n', 'b', 'r', 'q', 'k'},
 };
 
-uint8_t searchId = 0;
+static uint8_t searchId = 0;
 
 uint64_t get_timestamp() {
     struct timeval start;

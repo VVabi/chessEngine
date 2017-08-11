@@ -18,19 +18,19 @@ class ZobristHashData {
     uint64_t castlingHash[16];
     uint64_t enpassantHash[9];
 
- public:
+    void setZobristHashEntry(figureType type, playerColor color, uint16_t field, uint64_t value) {
+    #ifdef DEBUG
+        assert(type < 7);
+        assert(color < 2);
+        assert(field < 64);
+    #endif
+        zobristHash[type][color][field] = value;
+    }
     void setCastlingHash(uint16_t index, uint64_t value) {
     #ifdef DEBUG
         assert(index < 16);
     #endif
         castlingHash[index] = value;
-    }
-
-    uint64_t getCastlingHash(uint16_t index) {
-    #ifdef DEBUG
-        assert(index < 16);
-    #endif
-        return castlingHash[index];
     }
 
     void setEnPassantHash(uint16_t index, uint64_t value) {
@@ -40,34 +40,11 @@ class ZobristHashData {
         enpassantHash[index] = value;
     }
 
-    uint64_t getEnPassantHash(uint16_t index) {
-    #ifdef DEBUG
-        assert(index < 9);
-    #endif
-        return enpassantHash[index];
-    }
-
     void setMovingSideHash(playerColor color, uint64_t value) {
     #ifdef DEBUG
             assert(color < 2);
     #endif
         movingSideHash[color] = value;
-    }
-
-    uint64_t getMovingSideHash(playerColor color) {
-    #ifdef DEBUG
-            assert(color < 2);
-    #endif
-        return movingSideHash[color];
-    }
-
-    uint64_t getZobristHashEntry(figureType type, playerColor color, uint16_t field) {
-    #ifdef DEBUG
-        assert(type < 7);
-        assert(color < 2);
-        assert(field < 64);
-    #endif
-        return zobristHash[type][color][field];
     }
 
     void setPawnZobristHashEntry(figureType type, playerColor color, uint16_t field, uint64_t value) {
@@ -79,7 +56,40 @@ class ZobristHashData {
         pawnHashValues[type][color][field] = value;
     }
 
-    uint64_t getPawnHashEntry(figureType type, playerColor color, uint16_t field) {
+ public:
+    ZobristHashData();
+
+    uint64_t getCastlingHash(uint16_t index) const{
+    #ifdef DEBUG
+        assert(index < 16);
+    #endif
+        return castlingHash[index];
+    }
+
+    uint64_t getEnPassantHash(uint16_t index) const{
+    #ifdef DEBUG
+        assert(index < 9);
+    #endif
+        return enpassantHash[index];
+    }
+
+    uint64_t getMovingSideHash(playerColor color) const{
+    #ifdef DEBUG
+            assert(color < 2);
+    #endif
+        return movingSideHash[color];
+    }
+
+    uint64_t getZobristHashEntry(figureType type, playerColor color, uint16_t field) const {
+    #ifdef DEBUG
+        assert(type < 7);
+        assert(color < 2);
+        assert(field < 64);
+    #endif
+        return zobristHash[type][color][field];
+    }
+
+    uint64_t getPawnHashEntry(figureType type, playerColor color, uint16_t field) const{
     #ifdef DEBUG
         assert(type < 7);
         assert(color < 2);
@@ -88,17 +98,10 @@ class ZobristHashData {
         return pawnHashValues[type][color][field];
     }
 
-    void setZobristHashEntry(figureType type, playerColor color, uint16_t field, uint64_t value) {
-    #ifdef DEBUG
-        assert(type < 7);
-        assert(color < 2);
-        assert(field < 64);
-    #endif
-        zobristHash[type][color][field] = value;
-    }
+
 };
 
-extern ZobristHashData hashData;
+extern const ZobristHashData hashData;
 
 __attribute__((always_inline)) static inline uint64_t getHashEntry(figureType type, playerColor color, uint16_t field) {
     return hashData.getZobristHashEntry(type, color, field);
@@ -120,7 +123,7 @@ __attribute__((always_inline)) static inline uint64_t getEnPassantHash(uint16_t 
     return hashData.getEnPassantHash(index);
 }
 
-void fillZobristHash();
+void initHashTables();
 uint64_t calcZobristHash(const chessPosition* position);
 uint64_t calcPawnHash(const chessPosition* position);
 hashEntry getHashTableEntry(uint64_t zobristKey);

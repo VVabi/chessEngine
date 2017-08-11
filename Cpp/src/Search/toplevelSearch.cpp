@@ -26,7 +26,7 @@
 #include <Search/killerMoves.hpp>
 
 
-extern uint8_t searchId;
+static uint8_t searchId;
 
 uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t numMadeMoves, uint32_t* worst_case_time) {
     if (params.type == infinite) {
