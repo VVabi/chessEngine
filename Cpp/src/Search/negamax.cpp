@@ -24,11 +24,10 @@
 #include <Search/history.hpp>
 #include <lib/Defines/figureValues.hpp>
 #include <Search/killerMoves.hpp>
+#include <lib/moveGeneration/moveGenerationInternals.hpp>
 
 searchDebugData searchCounts;
 
-extern uint64_t bishopFieldTable[];
-extern uint64_t rookFieldTable[];
 static int16_t figureValues[7] = {PAWNVALUE, KNIGHTVALUE, BISHOPVALUE, ROOKVALUE, QUEENVALUE, 10000, 0};
 
 searchDebugData getSearchData() {
@@ -350,7 +349,7 @@ static inline searchLoopResults negamax_internal_move_loop(chessPosition* positi
             makeMove(&moves[ind], position);
             uint16_t kingField = findLSB(position->pieceTables[1- position->toMove][king]);
 
-            if (sortinfo.movingSideInCheck || (BIT64(moves[ind].sourceField) & (rookFieldTable[kingField] | bishopFieldTable[kingField])) || (moves[ind].type == kingMove)) {
+            if (sortinfo.movingSideInCheck || (BIT64(moves[ind].sourceField) & (getRookMoves(kingField) | getBishopMoves(kingField))) || (moves[ind].type == kingMove)) {
                 if (isFieldAttacked(position,  position->toMove, kingField)) {
                     /*if (moves[ind].type == kingMove) {
                         std::cout << chessPositionToFenString(*position) << std::endl;

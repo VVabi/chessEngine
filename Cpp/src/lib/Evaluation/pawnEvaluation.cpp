@@ -12,11 +12,10 @@
 #include <lib/Defines/boardParts.hpp>
 #include <parameters/parameters.hpp>
 #include <hashTables/hashTables.hpp>
+#include <lib/Defines/passedPawns.hpp>
+#include <lib/Evaluation/tapering.hpp>
 
-extern uint64_t files[];
-extern uint64_t  passedPawnMasks[2][64];
-extern uint16_t taperingValues[81];
-
+uint64_t files[] = {FILEA, FILEB, FILEC, FILED, FILEE, FILEF, FILEG, FILEH};
 
 static int16_t const passedPawnEvalValues[2][64] = {
         { 0, 0, 0, 0, 0, 0, 0, 0,
@@ -74,7 +73,7 @@ static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint6
 
     while (whitePawnBuffer) {
         uint16_t field = popLSB(whitePawnBuffer);
-        if ((passedPawnMasks[white][field] & blackPawns) == 0) {
+        if ((getPassedPawnMask(white, field) & blackPawns) == 0) {
             uint16_t promotionField  = FILE(field)+56;
             uint16_t distToPromotion = 7-ROW(field);
             uint16_t kingDist        = distBetweenFields(promotionField, blackKing);
@@ -119,7 +118,7 @@ static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint6
     uint64_t blackPawnBuffer = blackPawns;
     while (blackPawnBuffer) {
         uint16_t field = popLSB(blackPawnBuffer);
-        if ((passedPawnMasks[black][field] & whitePawns) == 0) {
+        if ((getPassedPawnMask(black, field) & whitePawns) == 0) {
             uint16_t promotionField  = FILE(field);
             uint16_t distToPromotion = ROW(field);
             uint16_t kingDist        = distBetweenFields(promotionField, whiteKing);
@@ -242,7 +241,7 @@ int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupan
 
 //#endif
     int16_t passedPawnPhase = std::max((int32_t) phase, 0);
-    passedPawns = ((256-taperingValues[passedPawnPhase])*passedPawns)/256;
+    passedPawns = ((256-getTaperingValue(passedPawnPhase))*passedPawns)/256;
     eval = eval+passedPawns+untapered;
     result.passedPawn = passedPawns+untapered;
 

@@ -16,6 +16,7 @@
 #include <parameters/parameters.hpp>
 #include <logging/logger.hpp>
 #include <lib/Defines/chessFields.hpp>
+#include <lib/Evaluation/tapering.hpp>
 
 evaluationResult result;
 
@@ -24,17 +25,7 @@ evaluationResult getEvaluationResult() {
 }
 
 
-uint16_t taperingValues[81] = {  0,  0,  0,  0,  0,  0,  0,  0,
-                                 0,  0,  0,  0,  0,  0,  0,  0,
-                                0, 2, 7, 12, 17, 22, 27, 33,
-                                39, 45, 51, 57, 64, 71, 78, 85,
-                                92, 99, 106, 113, 120, 127, 134, 141,
-                               148, 155, 162, 168, 174, 180, 186, 192,
-                               197, 202, 206, 210, 214, 218, 222, 226,
-                               229, 232, 235, 238, 241, 244, 247, 256,
-                               256, 256, 256, 256, 256, 256, 256, 256,
-                               256, 256, 256, 256, 256, 256, 256, 256, 256
-};
+
 
 /*
 uint16_t taperingValues[81] = {  0,  0,  0,  0,  0,  0,  0,  0,
@@ -221,13 +212,8 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
         phase = phase+5;
     }
 
-
-    if (phase > 80) {
-        phase = 80;
-    }
-
-
-    int32_t pieceTableEval = ((256-taperingValues[phase])*bufferEndgame+taperingValues[phase]*bufferMidgame)/256; //division by 256
+    uint16_t tapering = getTaperingValue(phase);
+    int32_t pieceTableEval = ((256-tapering)*bufferEndgame+tapering*bufferMidgame)/256; //division by 256
     eval = eval+pieceTableEval;
 
     if (PSQ_only) {
@@ -275,7 +261,7 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
     }
 
     int32_t kingSafetyComplete = kingSafety(position, pawnColumnOccupancy, &whiteAttackTable, &blackAttackTable, &evalPars->kingSafetyParameters);
-    int32_t kingSafetyTapered = (taperingValues[phase]*kingSafetyComplete)/256;
+    int32_t kingSafetyTapered = (tapering*kingSafetyComplete)/256;
     eval = eval+kingSafetyTapered;
     result.kingSafety = kingSafetyTapered;
 
