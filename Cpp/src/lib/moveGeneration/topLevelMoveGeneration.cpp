@@ -14,10 +14,21 @@
 #include <lib/bitfiddling.h>
 #include "moveGenerationInternals.hpp"
 #include <lib/moveGeneration/nonSliderMoveTables.hpp>
+#include <lib/Defines/enPassantTables.hpp>
 
-extern uint64_t castlingBlockers[2][2];
-extern uint64_t enPassantMoveTable[2][8];
-extern uint16_t enPassantTargetFields[2][8];
+static uint16_t enPassantTargetFields[2][8] = {
+        {40, 41, 42, 43, 44, 45, 46, 47},
+        {16, 17, 18, 19, 20, 21, 22, 23}
+};
+static uint64_t castlingBlockers[2][2] = {
+        {WHITEKINGSIDECASTLEBLOCKINGFIELDS, WHITEQUEENSIDECASTLEBLOCKINGFIELDS},
+        {BLACKKINGSIDECASTLEBLOCKINGFIELDS, BLACKQUEENSIDECASTLEBLOCKINGFIELDS}
+};
+static uint64_t enPassantMoveTable[2][8] = {
+        {WHITEFILEA, WHITEFILEB, WHITEFILEC, WHITEFILED, WHITEFILEE, WHITEFILEF, WHITEFILEG, WHITEFILEH},
+        {BLACKFILEA, BLACKFILEB, BLACKFILEC, BLACKFILED, BLACKFILEE, BLACKFILEF, BLACKFILEG, BLACKFILEH}
+};
+
 
 static uint64_t promotionRows[] = {LASTROW, FIRSTROW};
 
