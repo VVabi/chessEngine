@@ -6,7 +6,7 @@
  */
 
 #include <stdint.h>
-
+#include <assert.h>
 
 int16_t rawPieceTables[6][32] = {
                 //pawns
@@ -182,3 +182,14 @@ int16_t endgameRawPieceTables[6][32] = {
     }
 };
 
+int16_t getEndgameRawPieceTableEntry(uint16_t type, uint16_t field) {
+    assert(type < 6);
+    assert(field < 32);
+    return endgameRawPieceTables[type][field];
+}
+
+int16_t getRawPieceTableEntry(uint16_t type, uint16_t field) {
+    assert(type < 6);
+    assert(field < 32);
+    return rawPieceTables[type][field];
+}

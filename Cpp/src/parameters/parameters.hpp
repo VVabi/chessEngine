@@ -38,4 +38,6 @@ inline const evalParameters* getEvalParameters() {
 void initializeParameters();
 preParameters* getPreParameters();
 void initializeDependentParameters(preParameters par);
+int16_t getEndgameRawPieceTableEntry(uint16_t type, uint16_t field);
+int16_t getRawPieceTableEntry(uint16_t type, uint16_t field);
 #endif /* PARAMETERS_PARAMETERS_HPP_ */

@@ -18,8 +18,6 @@
 evalParameters evaluationParameters;
 preParameters par;
 
-extern int16_t rawPieceTables[6][32];
-extern int16_t endgameRawPieceTables[6][32];
 
 void paramDefaultInit(preParameters* par) {
     par->pawnValue      = PAWNVALUE;
@@ -75,7 +73,7 @@ void initializeDependentParameters(preParameters par) {
 
     for (uint16_t type = 0; type < 6; type++) {
         for (uint16_t field = 0; field < 32; field++) {
-            int16_t value = rawPieceTables[type][field];
+            int16_t value = getRawPieceTableEntry(type, field);
             uint16_t file = field % 4;
             uint16_t row = field/4;
             setEarlygamePSQEntry((figureType) type, white, 8*row+file, value);
@@ -87,7 +85,7 @@ void initializeDependentParameters(preParameters par) {
 
     for (uint16_t type = 0; type < 6; type++) {
         for (uint16_t field = 0; field < 32; field++) {
-            int16_t value = endgameRawPieceTables[type][field];
+            int16_t value = getEndgameRawPieceTableEntry(type, field);
             uint16_t file = field % 4;
             uint16_t row = field/4;
             setEndgamePSQEntry((figureType) type, white, 8*row+file, value);
