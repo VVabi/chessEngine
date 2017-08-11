@@ -14,8 +14,7 @@
 #include <parameters/parameters.hpp>
 #include <lib/Defines/figureValues.hpp>
 #include <lib/Evaluation/PSQ.hpp>
-
-extern uint16_t repetitionData[16384];
+#include <Search/repetition.hpp>
 
 static int16_t figureValues[7] = {PAWNVALUE, KNIGHTVALUE, BISHOPVALUE, ROOKVALUE, QUEENVALUE, 10000, 0};
 
@@ -204,7 +203,7 @@ void makeMove(chessMove* move, chessPosition* position) {
     position->madeMoves.add(move);
     position->toMove = INVERTCOLOR(position->toMove);
     position->zobristHash = position->zobristHash^getMovingSideHash(white); //this is indeed correct since black hash is always 0 anyway. TODO: change? this is actually confusing.
-    repetitionData[position->zobristHash & 16383]++;
+    repetitionIncrement(position->zobristHash);
 
     #ifdef DEBUG
     debug_incremental_calculations(position);

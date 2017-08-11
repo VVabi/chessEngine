@@ -14,8 +14,8 @@
 #include <userInterface/UIlayer.hpp>
 #include <parameters/parameters.hpp>
 #include <lib/Evaluation/PSQ.hpp>
+#include <Search/repetition.hpp>
 
-extern uint16_t repetitionData[16384];
 
 void undoNullMove(chessPosition* position) {
     position->zobristHash = position->zobristHash^getEnPassantHash(position->data.enPassantFile);
@@ -129,8 +129,7 @@ void undoMove(chessPosition* position) {
         std::cout << "WTF" << std::endl;
     }*/
 
-    assert(repetitionData[position->zobristHash & 16383] != 0);
-    repetitionData[position->zobristHash & 16383]--;
+    repetitionDecrement(position->zobristHash);
     chessMove move                      = position->madeMoves.pop();
     position->zobristHash               = position->zobristHash^getEnPassantHash(position->data.enPassantFile);
     position->zobristHash               = position->zobristHash^getCastlingHash(position->data.castlingRights);

@@ -22,6 +22,7 @@
 #include <lib/Evaluation/evaluation.hpp>
 #include <atomic>
 #include <string>
+#include <Search/repetition.hpp>
 
 static char figureNames[2][6] = { {'P', 'N', 'B', 'R', 'Q', 'K'},
         {'p', 'n', 'b', 'r', 'q', 'k'},
@@ -183,10 +184,8 @@ std::string chessPositionToOutputString(const chessPosition position) {
     return ret;
 }
 
-extern uint16_t repetitionData[16384];
-
 chessPosition FENtoChessPosition(std::string fen) {
-    memset(repetitionData, 0, 16384*sizeof(uint16_t)); //TODO: this is a hack
+    repetitionData.reset(); //TODO: I dont like this.
     //Not performance-critical
     //---------------------------
     chessPosition position;
@@ -321,7 +320,7 @@ chessPosition FENtoChessPosition(std::string fen) {
 }
 
 chessPosition stringToChessPosition(std::string strposition) {
-    memset(repetitionData, 0, 16384*sizeof(uint16_t));
+    repetitionData.reset(); //TODO: this is a hack
     //Not performance-critical
     //---------------------------
     chessPosition position;

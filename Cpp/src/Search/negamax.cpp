@@ -25,6 +25,7 @@
 #include <lib/Defines/figureValues.hpp>
 #include <Search/killerMoves.hpp>
 #include <lib/moveGeneration/moveGenerationInternals.hpp>
+#include <Search/repetition.hpp>
 
 searchDebugData searchCounts;
 
@@ -90,8 +91,6 @@ static inline bool getHashMoveToFront(vdt_vector<chessMove>* moves, uint16_t has
     }
     return false;
 }
-
-uint16_t repetitionData[16384] = {0};
 
 static inline void get_extensions_reductions(chessPosition* position, uint16_t* reduction, uint16_t* extension, bool check, bool movingSideInCheck, plyInfo plyinfo, int16_t depth, chessMove* move, uint16_t ind) {
 //#ifdef EXPERIMENTAL
@@ -511,7 +510,7 @@ int16_t negamax(chessPosition* position, plyInfo plyinfo, AlphaBeta alphabeta, p
 
     //repetition check. don't check repetition in root to avoid stupid losses. TODO: this is a quickfix and may have unintended consequences!
     //------------------------------------------------------------------------------------------
-    if ((plyinfo.ply > 0) && (repetitionData[position->zobristHash & 16383] > 1)) {
+    if ((plyinfo.ply > 0) && (isRepetitionCandidate(position->zobristHash))) {
         if (backtrack_position_for_repetition(position)) {
             searchCounts.threefold_repetitions++;
             PV->numMoves = 0;
