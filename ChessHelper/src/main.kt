@@ -1,6 +1,7 @@
 import EngineHandling.ChessEngine
 import EngineHandling.getStockfishEval
 import GUI.launchGui
+import PositionHelper.PositionDescriptor
 import Tools.getLos
 import java.io.File
 import java.net.ServerSocket
@@ -11,7 +12,8 @@ import java.net.ServerSocket
 
 fun main(args: Array<String>) {
 
-
+   /* var p = PositionDescriptor("r2qkbnr/pppppppp/8/8/8/8/PP5P/RNBQKBNR w - - 0 1")
+    println(p.toFen())*/
    /* println(getStockfishEval("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"))
     val releaseEngine: ChessEngine = ChessEngine("/home/vabi/code/chessEngine/Cpp/Release/Vabi", "")
 

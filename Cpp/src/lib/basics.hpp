@@ -110,4 +110,7 @@ void free_position(chessPosition* position);
 inline figureType toFigureType(uint16_t num);
 void zeroInitPosition(chessPosition* position);
 
+
+#define INLINE __attribute__((always_inline)) static inline
+
 #endif /* LIB_BASICS_HPP_ */

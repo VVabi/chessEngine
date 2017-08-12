@@ -5,6 +5,8 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TextArea?>
 <GridPane fx:controller="EditorGUI.EditorController"
           xmlns:fx="http://javafx.com/fxml" alignment="center" hgap="10" vgap="10">
     <padding><Insets top="25" right="25" bottom="10" left="25"/></padding>
@@ -12,7 +14,9 @@
             xmlns:fx="http://javafx.com/fxml" spacing="20">
         <padding><Insets top="0" right="25" bottom="0" left="25"/></padding>
         <Button text="Clear"  prefWidth="160" prefHeight="20" onAction="#handleClear"></Button>
-        <Button text="Play"  prefWidth="160" prefHeight="20" onAction="#handlePlay"></Button>
+        <Button text="Eval"  prefWidth="160" prefHeight="20" onAction="#handleGetEval"></Button>
+        <Button text="Analyze"  prefWidth="160" prefHeight="20" onAction="#handleAnalyze"></Button>
+        <Button text="Update"  prefWidth="160" prefHeight="20" onAction="#handleUpdate"></Button>
         <CheckBox fx:id="wkcastle" text="White kingside" prefWidth="160" prefHeight="20"></CheckBox>
         <CheckBox fx:id="wqcastle" text="White queenside" prefWidth="160" prefHeight="20"></CheckBox>
         <CheckBox fx:id="bkcastle" text="Black kingside" prefWidth="160" prefHeight="20"></CheckBox>
@@ -26,6 +30,10 @@
 
     <FigureChooser fx:id="chooser" onAction="#handleChooserClicked"
                    GridPane.columnIndex="2" GridPane.rowIndex="0"/>
-
-
+    <TextField fx:id="fentext"
+                   GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+    <TextArea fx:id="engineoutput" prefRowCount="5"
+              GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+    <TextArea fx:id="evaltext" prefRowCount="5" prefColumnCount="15"
+              GridPane.columnIndex="0" GridPane.rowIndex="2"/>
 </GridPane>

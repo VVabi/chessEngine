@@ -1,5 +1,6 @@
 package ChessBoard;
 
+import PositionHelper.PositionDescriptor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -45,77 +46,59 @@ public class figuresCanvas extends Canvas {
     }
 
 
-    public void draw(boolean whitesidedown, String position) {
-        int row = 0;
+    public void draw(boolean whitesidedown, PositionDescriptor descriptor) {
+        int row = -1;
         int column = 0;
         GraphicsContext gc = getGraphicsContext2D();
 
         gc.clearRect(0, 0, 8 * fieldsize, 8 * fieldsize);
 
-        for (char c : position.toCharArray()) {
-            if (c == '/') {
+        for (int field = 0; field < 64; field++) {
+            column++;
+            if ((field % 8) == 0) {
                 column = 0;
                 row++;
                 if (row == -1) {
                     break;
                 }
-
-                continue;
             }
 
-            if (c >= '0' && c <= '8') {
-                column = column + c - '0';
-                continue;
-            }
-
-            switch (c) {
+            switch (descriptor.pieceAt(field)) {
                 case 'k':
                     gc.drawImage(blackking, column * fieldsize, row * fieldsize, fieldsize, fieldsize);
-                    column++;
                     break;
                 case 'q':
                     gc.drawImage(blackqueen, column * fieldsize, row * fieldsize, fieldsize, fieldsize);
-                    column++;
                     break;
                 case 'r':
                     gc.drawImage(blackrook, column * fieldsize, row * fieldsize, fieldsize, fieldsize);
-                    column++;
                     break;
                 case 'b':
                     gc.drawImage(blackbishop, column * fieldsize, row * fieldsize, fieldsize, fieldsize);
-                    column++;
                     break;
                 case 'n':
                     gc.drawImage(blackknight, column * fieldsize, row * fieldsize, fieldsize, fieldsize);
-                    column++;
                     break;
                 case 'p':
                     gc.drawImage(blackpawn, column * fieldsize, row * fieldsize, fieldsize, fieldsize);
-                    column++;
                     break;
                 case 'K':
                     gc.drawImage(whiteking, column * fieldsize, row * fieldsize, fieldsize, fieldsize);
-                    column++;
                     break;
                 case 'Q':
                     gc.drawImage(whitequeen, column * fieldsize, row * fieldsize, fieldsize, fieldsize);
-                    column++;
                     break;
                 case 'R':
                     gc.drawImage(whiterook, column * fieldsize, row * fieldsize, fieldsize, fieldsize);
-                    column++;
                     break;
                 case 'B':
                     gc.drawImage(whitebishop, column * fieldsize, row * fieldsize, fieldsize, fieldsize);
-                    column++;
                     break;
                 case 'N':
                     gc.drawImage(whiteknight, column * fieldsize, row * fieldsize, fieldsize, fieldsize);
-                    column++;
                     break;
                 case 'P':
                     gc.drawImage(whitepawn, column * fieldsize, row * fieldsize, fieldsize, fieldsize);
-                    column++;
                     break;
                 default:
                     break;

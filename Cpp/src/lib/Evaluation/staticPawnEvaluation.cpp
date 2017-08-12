@@ -5,8 +5,6 @@
  *      Author: vabi
  */
 
-
-
 #include <lib/basics.hpp>
 #include "evaluation.hpp"
 #include <lib/bitfiddling.h>

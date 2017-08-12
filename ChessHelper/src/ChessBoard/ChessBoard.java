@@ -1,5 +1,6 @@
 package ChessBoard;
 
+import PositionHelper.PositionDescriptor;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -13,7 +14,7 @@ import javafx.scene.layout.Pane;
  */
 public class ChessBoard extends Pane {
 
-    String fenPosition = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -";
+    PositionDescriptor descriptor = new PositionDescriptor("r2qkbnr/pppppppp/8/8/8/8/PP5P/RNBQKBNR w KQkq - 0 1");
     boolean whitesidedown = true;
     int fieldsize = 60;
     fieldCanvas fieldcanvas;
@@ -32,20 +33,28 @@ public class ChessBoard extends Pane {
         setMouseclickedEvents();
     }
 
+    public void setCastling(String castling) {
+        descriptor.setCastling(castling);
+    }
+
+    public void addPiece(int field, char piece){
+        descriptor.addPiece(piece, field);
+        drawFigures();
+    }
+
     public void toggleSideDown(){
         whitesidedown = !whitesidedown;
         drawFigures();
     }
 
     public String getPosition(){
-        return fenPosition;
+        return descriptor.toFen();
     }
 
 
     public void setPosition(String newposition){
-        fenPosition = newposition;
+        descriptor = new PositionDescriptor(newposition);
         drawFigures();
-
     }
 
     private void drawFigures(){
@@ -53,7 +62,7 @@ public class ChessBoard extends Pane {
         Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                    figurescanvas.draw(whitesidedown, fenPosition);
+                    figurescanvas.draw(whitesidedown, descriptor);
             }
         });
 
@@ -88,19 +97,13 @@ public class ChessBoard extends Pane {
 
     public void clearColors(){
         coloredfieldcanvas.clear();
-
-
     }
 
     public void colorField(int field){
         coloredfieldcanvas.colorField(whitesidedown, field);
-
-
     }
 
-    public char getPieceOnField(int field){
-        return fenPosition.charAt(field);
-    }
+
 
     public int getField(double xcoord, double ycoord){
         int x = (int) xcoord;
@@ -109,12 +112,16 @@ public class ChessBoard extends Pane {
         x = x/fieldsize;
         y = y/fieldsize;
         if(whitesidedown){
-            field = 8*(7-y)+x;
+            field = 8*(y)+x;
         }
         else{
-            field = 8*y+(7-x);
+            field = 8*(7-y)+(7-x);
         }
         return field;
+    }
+
+    public void updateMovingSide(char c) {
+        descriptor.updateMovingSide(c);
     }
 
 

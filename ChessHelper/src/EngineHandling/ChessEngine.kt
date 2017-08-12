@@ -23,6 +23,22 @@ class ChessEngine(path: String, workingDirectory: String) {
         uciEngine.put(putString)
     }
 
+    fun stop() {
+        uciEngine.put("stop")
+    }
+
+    fun analyze(depth:Int, callback: (m: String) -> Unit) {
+        uciEngine.put("go depth "+depth)
+        while(true) {
+            val answer = uciEngine.readAnswer()
+            callback(answer)
+            val parts = answer.split(" ")
+            if ("bestmove" == parts[0]) {
+                break
+            }
+        }
+    }
+
     fun search(depth: Int): SearchResult {
         uciEngine.put("go depth "+depth)
         var eval = 0
@@ -94,4 +110,9 @@ class ChessEngine(path: String, workingDirectory: String) {
         return Integer.parseInt(parts[1])
     }
 
+    fun getEvalDetails(): String {
+        uciEngine.put("eval")
+        val answer = uciEngine.readAnswer()
+        return answer
+    }
 }
