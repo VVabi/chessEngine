@@ -193,7 +193,13 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, 
 
         //This has to be done AFTER sorting of course - that was a nasty bug
         //-----------------------
+
         if (moves[ind].sortEval < -50) {
+        #ifdef DEBUG
+            for(uint16_t cnt=ind+1; cnt < moves.length; cnt++) {
+                assert(moves[cnt].sortEval < -50);
+            }
+        #endif
             break; //SEE pruning
         }
 

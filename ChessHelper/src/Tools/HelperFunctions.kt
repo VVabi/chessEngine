@@ -10,7 +10,7 @@ import java.io.InputStreamReader
 data class LOSdata(val numGames: Int, val winningFraction: Double, val eloDifference: Double, val los: Double)
 
 fun getLos(wins: Int, draws: Int, losses: Int): LOSdata {
-    val pb = ProcessBuilder("/home/vabi/Tools/workspace/LOS/Debug/LOS", Integer.toString(wins), Integer.toString(losses), Integer.toString(draws))
+    /*val pb = ProcessBuilder("/home/vabi/Tools/workspace/LOS/Debug/LOS", Integer.toString(wins), Integer.toString(losses), Integer.toString(draws))
     val process: Process
     val reader: BufferedReader
     process = pb.start()
@@ -20,5 +20,6 @@ fun getLos(wins: Int, draws: Int, losses: Int): LOSdata {
     val eloDifference   = reader.readLine().toDouble()
     val los             = reader.readLine().toDouble()
     process.destroy()
-    return LOSdata(numGames, winningFraction, eloDifference, los)
+    return LOSdata(numGames, winningFraction, eloDifference, los)*/
+    return LOSdata(0,0.0,0.0,0.0)
 }

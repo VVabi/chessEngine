@@ -40,7 +40,7 @@ int16_t captureEvals[6][7] = {
         {0,     200,    200,    300,    700,    10000,  0},
 };
 
-void calcCaptureSortEval(chessPosition* position, chessMove* mv, uint16_t hashedMove) {
+static void calcCaptureSortEval(chessPosition* position, chessMove* mv, uint16_t hashedMove) {
     int16_t sortEval = SEE(position, mv);
     /*int16_t sortEval = 0;
     if (((uint16_t) mv->type) < 6) {

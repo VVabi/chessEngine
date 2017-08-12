@@ -24,24 +24,6 @@ evaluationResult getEvaluationResult() {
     return result;
 }
 
-
-
-
-/*
-uint16_t taperingValues[81] = {  0,  0,  0,  0,  0,  0,  0,  0,
-                                 0,  0,  0,  0,  0,  0,  0,  0,
-                                0, 2, 7, 11, 14, 19, 24, 29,
-                                33, 37, 41, 48, 54, 60, 65, 70,
-                                75, 80, 86, 92, 97, 102, 108, 112,
-                               118, 124, 129, 134, 140, 145, 150, 155,
-                               161, 166, 173, 178, 183, 189, 194, 20,
-                               206, 212, 221, 230, 236, 242, 248, 254,
-                               256, 256, 256, 256, 256, 256, 256, 256,
-                               256, 256, 256, 256, 256, 256, 256, 256, 256
-};
-*/
-
-
 #define OUTPOSTVALUE 15
 
 static int16_t outposts(const chessPosition* position) {
@@ -228,7 +210,6 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
         return evalsigned;
     }
 
-
     int16_t mobilityScore = 0;
     AttackTable whiteAttackTable = makeAttackTableWithMobility(position, white, &mobilityScore);
     eval = eval+mobilityScore;
@@ -237,7 +218,6 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
     AttackTable blackAttackTable = makeAttackTableWithMobility(position, black, &mobilityScore);
     eval = eval-mobilityScore;
     result.mobility = result.mobility-mobilityScore;
-
     uint8_t pawnColumnOccupancy[2];
     eval = eval+pawnEvaluation(position, pawnColumnOccupancy, phase);
 
