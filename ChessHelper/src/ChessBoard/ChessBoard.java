@@ -14,7 +14,7 @@ import javafx.scene.layout.Pane;
  */
 public class ChessBoard extends Pane {
 
-    PositionDescriptor descriptor = new PositionDescriptor("r2qkbnr/pppppppp/8/8/8/8/PP5P/RNBQKBNR w KQkq - 0 1");
+    PositionDescriptor descriptor = new PositionDescriptor("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     boolean whitesidedown = true;
     int fieldsize = 60;
     fieldCanvas fieldcanvas;
