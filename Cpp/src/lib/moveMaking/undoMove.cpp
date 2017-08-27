@@ -111,6 +111,8 @@ inline static void undoPromotion(chessPosition* position, chessMove move, figure
     position->totalFigureEval                           = position->totalFigureEval-(evalPars->figureValues[promotedFigure]-evalPars->figureValues[pawn]);
     position->zobristHash = position->zobristHash^getHashEntry(promotedFigure, toMove, move.targetField)^getHashEntry(pawn, toMove, move.sourceField)^getHashEntry(move.captureType, INVERTCOLOR(toMove), move.targetField);
     position->pawnHash = position->pawnHash^getPawnZobristHashEntry(pawn, toMove, move.sourceField)^getPawnZobristHashEntry(move.captureType, INVERTCOLOR(toMove), move.targetField);
+    position->presentPieces.addPiece(toMove, pawn);
+    position->presentPieces.removePiece(toMove, promotedFigure);
 }
 
 
@@ -139,8 +141,7 @@ void undoMove(chessPosition* position) {
     const evalParameters* evalPars      = getEvalParameters();
     position->figureEval                = position->figureEval+(1-2*position->toMove)*evalPars->figureValues[move.captureType];
     position->totalFigureEval           = position->totalFigureEval+evalPars->figureValues[move.captureType];
-
-    //00000BNR00000PKQ00000NPR00000N0P000000000000000p0qpN0npnN000000kw0000
+    position->presentPieces.addPiece(position->toMove, move.captureType);
 
     switch (move.type) {
         case pawnMove:

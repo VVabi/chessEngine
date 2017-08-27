@@ -107,13 +107,13 @@ static inline void get_extensions_reductions(chessPosition* position, uint16_t* 
         }
 //#ifdef EXPERIMENTAL
         if (check) {
-        	*reduction = 0; //TODO: A check should NEVER be reduced, independent of the ply/depth stuff
-        	if (((plyinfo.ply+depth < plyinfo.max_ply-1) || ((depth == 1) && (plyinfo.ply+depth < plyinfo.max_ply)) )) {
-				if (SEE(position, move) > -50) {
-					*extension = 1;
-				}
-        	}
-		}
+            *reduction = 0; //TODO: A check should NEVER be reduced, independent of the ply/depth stuff
+            if (((plyinfo.ply+depth < plyinfo.max_ply-1) || ((depth == 1) && (plyinfo.ply+depth < plyinfo.max_ply)) )) {
+                if (SEE(position, move) > -50) {
+                    *extension = 1;
+                }
+            }
+        }
 /*#else
         if (check && ((plyinfo.ply+depth < plyinfo.max_ply-1) || ((depth == 1) && (plyinfo.ply+depth < plyinfo.max_ply)) )) {
             *reduction = 0; //TODO: A check should NEVER be reduced, independent of the ply/depth stuff

@@ -315,7 +315,7 @@ chessPosition FENtoChessPosition(std::string fen) {
     position.zobristHash    = calcZobristHash(&position);
     position.pawnHash       = calcPawnHash(&position);
     position.data.hash = position.zobristHash;
-
+    position.presentPieces = calcPresentPieces(&position);
     return position;
 }
 

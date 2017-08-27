@@ -1,4 +1,4 @@
- python styleguide/cpplint/cpplint.py --filter=-,\
+ python styleguide/cpplint.py --filter=-,\
 +build/class,\
 -build/c++11,\
 -build/c++14,\

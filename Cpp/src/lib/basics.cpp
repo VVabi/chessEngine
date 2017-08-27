@@ -29,48 +29,14 @@ inline figureType toFigureType(uint16_t num) {
 
 
 void zeroInitPosition(chessPosition* position) {
-#ifdef DEBUGAAA
-    position->toMove = white;
-    position->pieces = vdt_vector<uint64_t>(2);
-    uint64_t dummy = 0;
-    position->pieces.add(&dummy);
-    position->pieces.add(&dummy);
-
-    vdt_vector<uint64_t> whiteTable = vdt_vector<uint64_t>(NUM_DIFFERENT_PIECES+1);
-    whiteTable.add(&dummy);
-    whiteTable.add(&dummy);
-    whiteTable.add(&dummy);
-    whiteTable.add(&dummy);
-    whiteTable.add(&dummy);
-    whiteTable.add(&dummy);
-    whiteTable.add(&dummy);
-
-    vdt_vector<uint64_t> blackTable = vdt_vector<uint64_t>(NUM_DIFFERENT_PIECES+1);
-    blackTable.add(&dummy);
-    blackTable.add(&dummy);
-    blackTable.add(&dummy);
-    blackTable.add(&dummy);
-    blackTable.add(&dummy);
-    blackTable.add(&dummy);
-    blackTable.add(&dummy);
-
-    position->pieceTables =  vdt_vector<vdt_vector<uint64_t>>(2);
-    position->pieceTables.add(&whiteTable);
-    position->pieceTables.add(&blackTable);
-
-    position->enPassantFile = 0;
-    position->madeMoves = vdt_vector<chessMove>(300);
-    position->castlingAndEpStack = vdt_vector<uint16_t>(300);
-    position->figureEval    = 0;
-#else
     memset(position, 0, sizeof(chessPosition));
     position->madeMoves = vdt_vector<chessMove>(600);
     position->dataStack = vdt_vector<pathDependentPositionData>(600);
-#endif
     position->zobristHash    = calcZobristHash(position);
     position->data.castlingRights = 0;
     position->data.fiftyMoveRuleCounter  = 0;
     position->data.enPassantFile = 8;
+    position->presentPieces.reset();
 }
 
 
@@ -112,6 +78,27 @@ void debug_incremental_calculations(const chessPosition* position) {
     uint64_t pawnhash = calcPawnHash(position);
     if (pawnhash != position->pawnHash) {
         logError("zobrist pawn hash wrong after make move");
+    }
+
+    PresentPieces p = calcPresentPieces(position);
+
+    if (p.getInternalValue() != position->presentPieces.getInternalValue()) {
+        logError("Present pieces table is wrong");
+    }
+    const evalParameters* evalPars      = getEvalParameters();
+    uint32_t totalFigureEval = 0;
+    uint64_t val = position->presentPieces.getInternalValue();
+    for (uint16_t side=0; side < 2; side++) {
+        for (uint16_t figure=0; figure < 5; figure++) {
+            uint16_t offset = 32*side+4*figure;
+            uint64_t mask = BIT64(offset) | BIT64(offset+1) | BIT64(offset+2) | BIT64(offset+3);
+            uint64_t pieces = mask & val;
+            totalFigureEval += (pieces >> offset)*evalPars->figureValues[figure];
+        }
+    }
+
+    if (totalFigureEval != position->totalFigureEval) {
+        logError("Present pieces table disagrees with total figures eval??");
     }
 }
 

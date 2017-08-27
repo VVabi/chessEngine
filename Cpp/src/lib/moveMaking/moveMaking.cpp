@@ -124,6 +124,8 @@ static inline void makePromotion(chessMove* move, chessPosition* position, figur
     //const evalParameters* evalPars = getEvalParameters();
     position->figureEval     = position->figureEval+(1-2*toMove)*(figureValues[promotedFigure]-figureValues[pawn]);
     position->totalFigureEval     = position->totalFigureEval+(figureValues[promotedFigure]-figureValues[pawn]);
+    position->presentPieces.removePiece(toMove, pawn);
+    position->presentPieces.addPiece(toMove, promotedFigure);
 }
 
 static uint64_t movemakecalls = 0;
@@ -156,7 +158,7 @@ void makeMove(chessMove* move, chessPosition* position) {
     position->totalFigureEval     = position->totalFigureEval-figureValues[move->captureType];
     position->zobristHash = position->zobristHash^getEnPassantHash(position->data.enPassantFile);
     position->data.enPassantFile  = 8;
-
+    position->presentPieces.removePiece(INVERTCOLOR(position->toMove), move->captureType);
     if ((move->type == pawnMove) && ((move->targetField-move->sourceField) & 15) == 0) { //pawn went two ahead
         position->data.enPassantFile = FILE(move->targetField);
     }

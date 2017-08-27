@@ -17,6 +17,7 @@
 #include <logging/logger.hpp>
 #include <lib/Defines/chessFields.hpp>
 #include <lib/Evaluation/tapering.hpp>
+#include <lib/Evaluation/endgames/endgameEvals.hpp>
 
 evaluationResult result;
 
@@ -25,6 +26,20 @@ evaluationResult getEvaluationResult() {
 }
 
 #define OUTPOSTVALUE 15
+
+#define KINGSPRESENT (BIT64(20) | BIT64(32+20))
+
+#define WHITEROOKENDGAME (KINGSPRESENT | BIT64(12))
+#define BLACKROOKENDGAME (KINGSPRESENT | BIT64(12+32))
+
+#define WHITEKBBK (KINGSPRESENT | BIT64(9))
+#define BLACKKBBK (KINGSPRESENT | BIT64(9+32))
+
+#define WHITEKBPK (KINGSPRESENT | BIT64(8) | BIT64(0))
+#define BLACKKBPK (KINGSPRESENT | BIT64(8+32) | BIT64(32))
+
+#define WHITEKPK (KINGSPRESENT |  BIT64(0))
+#define BLACKKPK (KINGSPRESENT | BIT64(32))
 
 static int16_t outposts(const chessPosition* position) {
     uint64_t wPawns = position->pieceTables[white][pawn];
@@ -174,6 +189,28 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
         return 0; //insufficent material
     }
 
+    //specific endgames
+    //----------------------
+    if (position->totalFigureEval < 700) {
+        if (position->presentPieces.compare(WHITEROOKENDGAME) || position->presentPieces.compare(BLACKROOKENDGAME)) {
+            return COLORSIGN(position->toMove)*KRK_endgame(position);
+        }
+
+        if (position->presentPieces.compare(WHITEKBBK) || position->presentPieces.compare(BLACKKBBK)) {
+            return COLORSIGN(position->toMove)*KBBK_endgame(position);
+        }
+
+        if (position->presentPieces.compare(WHITEKBPK) || position->presentPieces.compare(BLACKKBPK)) {
+            return COLORSIGN(position->toMove)*KBPK_endgame(position);
+        }
+
+        if (position->presentPieces.compare(WHITEKPK) || position->presentPieces.compare(BLACKKPK)) {
+            return COLORSIGN(position->toMove)*KPK_endgame(position);
+        }
+    }
+
+    //now normal eval
+    //-----------------
     const evalParameters* evalPars = getEvalParameters();
 
     /*uint16_t blackkingField = findLSB(position->pieceTables[black][king]);
@@ -302,5 +339,5 @@ if (position->totalFigureEval < 500) {
     }
 }
 
-    return (1-2*position->toMove)*eval;
+    return COLORSIGN(position->toMove)*eval;
 }

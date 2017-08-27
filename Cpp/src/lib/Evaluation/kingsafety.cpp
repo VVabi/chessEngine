@@ -137,20 +137,20 @@ static int32_t kingSafetySinglePlayer(const chessPosition* position, const uint8
     ret = ret-attacksCloseToKingEvals[popcount(attacks)];*/
 /*#ifdef EXPERIMENTAL
     if ((FILE(kingField) != 3) && FILE(kingField) != 4) {
-		uint64_t oppPawns = position->pieceTables[INVERTCOLOR(playingSide)][pawn];
+        uint64_t oppPawns = position->pieceTables[INVERTCOLOR(playingSide)][pawn];
 
-		uint64_t mask = kingmoves;
-		int16_t shifted = 0;
-		if (playingSide == white) {
-			shifted = kingField+16;
-		} else {
-			shifted = kingField-16;
-		}
-		if ((shifted < 64) && (shifted > -1)) {
-			mask = mask | getKingMoves(shifted);
-		}
-		uint16_t numPawns = popcount(mask & oppPawns);
-		ret = ret-numPawns;
+        uint64_t mask = kingmoves;
+        int16_t shifted = 0;
+        if (playingSide == white) {
+            shifted = kingField+16;
+        } else {
+            shifted = kingField-16;
+        }
+        if ((shifted < 64) && (shifted > -1)) {
+            mask = mask | getKingMoves(shifted);
+        }
+        uint16_t numPawns = popcount(mask & oppPawns);
+        ret = ret-numPawns;
     }
 #endif*/
     return (1-2*playingSide)*ret;

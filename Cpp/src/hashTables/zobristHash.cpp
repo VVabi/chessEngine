@@ -21,7 +21,7 @@ ZobristHashData hashData;
 //uint64_t pawnHashValues[7][2][64];
 
 void initZobristHashValues() {
-	hashData.init();
+    hashData.init();
 }
 
 
@@ -258,3 +258,18 @@ uint64_t calcZobristHash(const chessPosition* position) {
     return hash;
 }
 
+PresentPieces calcPresentPieces(const chessPosition* position) {
+    PresentPieces p;
+    p.reset();
+
+    for (uint16_t movingSide = 0; movingSide < 2; movingSide ++) {
+          for (uint16_t figuretype = 0; figuretype < 6; figuretype++) {
+                uint64_t pieces = position->pieceTables[movingSide][figuretype];
+                while (pieces) {
+                    popLSB(pieces);
+                    p.addPiece((playerColor) movingSide, (figureType) figuretype);
+                }
+            }
+    }
+    return p;
+}
