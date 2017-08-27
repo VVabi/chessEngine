@@ -57,7 +57,7 @@ class ZobristHashData {
     }
 
  public:
-    ZobristHashData();
+    void init();
 
     uint64_t getCastlingHash(uint16_t index) const {
     #ifdef DEBUG
@@ -99,7 +99,7 @@ class ZobristHashData {
     }
 };
 
-extern const ZobristHashData hashData;
+extern ZobristHashData hashData;
 
 __attribute__((always_inline)) static inline uint64_t getHashEntry(figureType type, playerColor color, uint16_t field) {
     return hashData.getZobristHashEntry(type, color, field);
@@ -121,6 +121,7 @@ __attribute__((always_inline)) static inline uint64_t getEnPassantHash(uint16_t 
     return hashData.getEnPassantHash(index);
 }
 
+void initZobristHashValues();
 void initHashTables();
 uint64_t calcZobristHash(const chessPosition* position);
 uint64_t calcPawnHash(const chessPosition* position);

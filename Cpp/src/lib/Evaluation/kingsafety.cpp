@@ -47,6 +47,7 @@ int32_t attackScores[6][5] = { {0, 0, 0, 0, 0},
 };
 #else*/
 int32_t attackScores[] = {1, 3, 3, 4, 7};
+
 //#endif
 
 
@@ -59,7 +60,6 @@ static int32_t kingSafetySinglePlayer(const chessPosition* position, const uint8
     //pawn shield
     uint16_t kingField = findLSB(position->pieceTables[playingSide][king]);
     uint16_t kingFile = FILE(kingField);
-
     if (!((1 << kingFile) & pawnColumnOccupancy[playingSide])) { // no pawn in front of king. TODO: check for pawn really in FRONT of king
         ret = ret+par->selfopenfiletoking;
     }
@@ -85,7 +85,6 @@ static int32_t kingSafetySinglePlayer(const chessPosition* position, const uint8
             ret = ret+par->opponentopenfilenexttoking;
         }
     }
-
     /*uint64_t relevant_files = files[FILE(kingField)];
     if (kingFile > 0) {
         relevant_files = relevant_files | files[FILE(kingField-1)];
@@ -135,9 +134,25 @@ static int32_t kingSafetySinglePlayer(const chessPosition* position, const uint8
 //#endif
 
     /*uint64_t attacks = opponentAttackTable->completeAttackTable & kingmoves;
-
     ret = ret-attacksCloseToKingEvals[popcount(attacks)];*/
+/*#ifdef EXPERIMENTAL
+    if ((FILE(kingField) != 3) && FILE(kingField) != 4) {
+		uint64_t oppPawns = position->pieceTables[INVERTCOLOR(playingSide)][pawn];
 
+		uint64_t mask = kingmoves;
+		int16_t shifted = 0;
+		if (playingSide == white) {
+			shifted = kingField+16;
+		} else {
+			shifted = kingField-16;
+		}
+		if ((shifted < 64) && (shifted > -1)) {
+			mask = mask | getKingMoves(shifted);
+		}
+		uint16_t numPawns = popcount(mask & oppPawns);
+		ret = ret-numPawns;
+    }
+#endif*/
     return (1-2*playingSide)*ret;
 }
 

@@ -98,7 +98,6 @@ int16_t staticPawnEvalComplete(const chessPosition* position, uint8_t* pawnOcc) 
 
     pawnOcc[0] = getColumnOcc(position->pieceTables[white][pawn]);
     pawnOcc[1] = getColumnOcc(position->pieceTables[black][pawn]);
-
     uint64_t wDouble = doubledPawns[white];
     while (wDouble) {
         ev = ev-10;

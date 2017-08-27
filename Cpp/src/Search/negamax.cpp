@@ -94,7 +94,7 @@ static inline bool getHashMoveToFront(vdt_vector<chessMove>* moves, uint16_t has
 
 static inline void get_extensions_reductions(chessPosition* position, uint16_t* reduction, uint16_t* extension, bool check, bool movingSideInCheck, plyInfo plyinfo, int16_t depth, chessMove* move, uint16_t ind) {
 //#ifdef EXPERIMENTAL
-        if (!check && !movingSideInCheck && (move->captureType == none) && (depth > 2) && (plyinfo.ply > 0)) {
+        if (!check && !movingSideInCheck && (move->captureType == none) && (depth > 2) && (plyinfo.ply > 0) && (ind > 2)) {
             if (move->sortEval < 50) {
                 *reduction = 1;
                 if ((move->sortEval < -50)) {
@@ -105,18 +105,23 @@ static inline void get_extensions_reductions(chessPosition* position, uint16_t* 
                 }
             }
         }
-
-        if (ind > 1000) {
-            *reduction = 0;
-        }
-
+//#ifdef EXPERIMENTAL
+        if (check) {
+        	*reduction = 0; //TODO: A check should NEVER be reduced, independent of the ply/depth stuff
+        	if (((plyinfo.ply+depth < plyinfo.max_ply-1) || ((depth == 1) && (plyinfo.ply+depth < plyinfo.max_ply)) )) {
+				if (SEE(position, move) > -50) {
+					*extension = 1;
+				}
+        	}
+		}
+/*#else
         if (check && ((plyinfo.ply+depth < plyinfo.max_ply-1) || ((depth == 1) && (plyinfo.ply+depth < plyinfo.max_ply)) )) {
             *reduction = 0; //TODO: A check should NEVER be reduced, independent of the ply/depth stuff
             if (SEE(position, move) > -50) {
                 *extension = 1;
             }
         }
-
+#endif*/
         bool closeToPromotion = (move->type == pawnMove) && ((move->targetField > 48) || (move->targetField < 16));
 
         if ((closeToPromotion || (move->type == promotionQueen)) && (plyinfo.ply+depth+*extension < plyinfo.max_ply-1)) {

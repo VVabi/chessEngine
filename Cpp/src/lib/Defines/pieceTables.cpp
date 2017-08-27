@@ -11,7 +11,7 @@
 int16_t rawPieceTables[6][32] = {
                 //pawns
                 {
-#ifdef EXPERIMENTAL
+/*#ifdef EXPERIMENTAL
                         0, 0, 0, 0, //a1-d1
                         -5, -3, -2, -7, //a2-d2
                         -5, -3, 5, 5, //a3-d3  etc.
@@ -20,7 +20,7 @@ int16_t rawPieceTables[6][32] = {
                         -5, -3, 5, 10,
                         20, 25, 25, 25,
                         0, 0, 0, 0
-#else
+#else*/
                         0, 0, 0, 0, //a1-d1
                         0, 0, -2, -7, //a2-d2
                         0, 0, 5, 5, //a3-d3  etc.
@@ -29,7 +29,7 @@ int16_t rawPieceTables[6][32] = {
                         0, 0, 5, 10,
                         25, 25, 25, 25,
                         0, 0, 0, 0
-#endif
+//#endif
                 },
 
                 //knights

@@ -36,4 +36,6 @@
               GridPane.columnIndex="1" GridPane.rowIndex="2"/>
     <TextArea fx:id="evaltext" prefRowCount="5" prefColumnCount="15"
               GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+
+    <Button text="Take"  prefWidth="160" prefHeight="20" onAction="#handleTake" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
 </GridPane>

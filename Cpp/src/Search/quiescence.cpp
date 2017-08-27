@@ -105,7 +105,6 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, 
 
 
     int32_t baseEval = evaluation(position, alphabeta.alpha, alphabeta.beta);
-
     if (baseEval > alphabeta.alpha) {
         alphabeta.alpha = baseEval;
     }

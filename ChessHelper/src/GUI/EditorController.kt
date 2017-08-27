@@ -30,6 +30,12 @@ class EditorController {
     private val engine = ChessEngine("/home/vabi/code/chessEngine/Cpp/Release/Vabi", "/home/vabi")
 
     @FXML
+    fun handleTake() {
+        var fen = fentext!!.text
+        chessboard?.position = fen
+    }
+
+    @FXML
     fun handleGetEval(){
         val localEngine = ChessEngine("/home/vabi/code/chessEngine/Cpp/Release/Vabi", "/home/vabi")
         localEngine.setPosition(chessboard!!.position, mutableListOf())

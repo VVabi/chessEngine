@@ -1,0 +1,36 @@
+struct:ChessMove
+vdt:ChessMove move
+endstruct
+
+struct:RegisterLocation
+int32 location
+endstruct
+
+struct:checkMove
+vdt:string moveString
+endstruct
+
+struct:chessPosition
+vdt:string position
+endstruct
+
+struct:undoMove
+uint8 dummy
+endstruct
+
+struct:forceMove
+uint8 dummy
+endstruct
+
+struct:searchInfo
+uint64 nodes
+uint32 time
+uint32 depth
+int32 eval
+vdt:string moveString
+endstruct
+
+struct:evalDebug
+vdt:evaluation eval
+int32 valid
+endstruct

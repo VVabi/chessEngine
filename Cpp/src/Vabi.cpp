@@ -22,10 +22,14 @@
 #include <tests/tests.hpp>
 #include <parameters/parameters.hpp>
 
+
+
 int main() {
     initializeParameters();
     srand(get_timestamp());
+    initZobristHashValues();
     initHashTables();
+
     /*std::ofstream out("/home/vabi/TeX/Chess/positions.tex");
     std::ifstream in("/home/vabi/code/chessEngine/chessGui/openingPositions.txt");
     std::string line;

@@ -5,6 +5,7 @@ package GUI
  */
 import Tools.SelfPlayTournament
 import Tools.getLos
+import javafx.application.Platform
 import javafx.fxml.FXML
 import javafx.scene.control.TextArea
 import javafx.scene.control.TextField
@@ -56,7 +57,11 @@ class tuningController {
         val losData = getLos(challengerWins, draws, defenderWins)
         updateText += "Win percentage "+losData.winningFraction+"\nELO difference "+losData.eloDifference+ "\nLOS "+losData.los
         try {
-            resultArea?.text = updateText
+            Platform.runLater( {
+                resultArea?.text = updateText
+            })
+
+            println(updateText)
         } catch(e: Exception) {
             println(updateText)
         }

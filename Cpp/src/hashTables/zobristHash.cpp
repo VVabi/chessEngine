@@ -15,10 +15,14 @@
 static hashBucket* moveOrderingHashTable = NULL;
 static pawnHashEntry pawnHashTable[8192];
 
-const ZobristHashData hashData;
+ZobristHashData hashData;
 
 //uint64_t zobristHash[7][2][64];
 //uint64_t pawnHashValues[7][2][64];
+
+void initZobristHashValues() {
+	hashData.init();
+}
 
 
 #ifdef HASH
@@ -178,7 +182,7 @@ void clearHashTables() {
     memset(moveOrderingHashTable, 0, sizeof(hashBucket)*(HASHSIZE+1));
 }
 
-ZobristHashData::ZobristHashData() {
+void ZobristHashData::init() {
     setMovingSideHash(white, getRandUint64());
         setMovingSideHash(black, 0);
         for (uint16_t cnt = 0; cnt < 2; cnt++) {
