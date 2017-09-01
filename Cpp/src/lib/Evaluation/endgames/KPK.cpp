@@ -59,9 +59,9 @@ int16_t KPK_endgame(const chessPosition* position) { //currently only rook pawn 
         if (FILE(pawnfield) == 7) {
             uint64_t forbidden_mask;
             if (toWin == black) {
-                forbidden_mask = H1 | G1 | F1 | H2 | G2 | F2 | G3 | H3;
+                forbidden_mask = H1 | G1 | F1 | H2 | G2 | F2 | H3;
             } else {
-                forbidden_mask = H8 | G8 | F8 | H7 | G7 | F7 | G6 | H6;
+                forbidden_mask = H8 | G8 | F8 | H7 | G7 | F7 | H6;
             }
 
             if (BIT64(losingKingField) & forbidden_mask) {
@@ -72,9 +72,9 @@ int16_t KPK_endgame(const chessPosition* position) { //currently only rook pawn 
         if (FILE(pawnfield) == 0) {
             uint64_t forbidden_mask;
             if (toWin == black) {
-                forbidden_mask = A1 | B1 | C1 | A2 | B2 | C2 | B3 | A3;
+                forbidden_mask = A1 | B1 | C1 | A2 | B2 | C2 | A3;
             } else {
-                forbidden_mask = A8 | B8 | C8 | A7 | B7 | C7 | B6 | A6;
+                forbidden_mask = A8 | B8 | C8 | A7 | B7 | C7 | A6;
             }
 
             if (BIT64(losingKingField) & forbidden_mask) {
@@ -82,7 +82,7 @@ int16_t KPK_endgame(const chessPosition* position) { //currently only rook pawn 
             }
         }
     }
-    if ((FILE(pawnfield) > 0) && (FILE(pawnfield) < 7)) {
+    if ((FILE(pawnfield) > 0) && (FILE(pawnfield) < 7)) { //TODO: this is very discontinuous
         if (toWin == white) {
             if (pawnfield+16 == winningKingField) {
                 return COLORSIGN(toWin)*(300+70-10*distToPromotion);

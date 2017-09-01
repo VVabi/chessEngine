@@ -29,8 +29,8 @@ evaluationResult getEvaluationResult() {
 
 #define KINGSPRESENT (BIT64(20) | BIT64(32+20))
 
-#define WHITEROOKENDGAME (KINGSPRESENT | BIT64(12))
-#define BLACKROOKENDGAME (KINGSPRESENT | BIT64(12+32))
+#define WHITEKRK (KINGSPRESENT | BIT64(12))
+#define BLACKKRK (KINGSPRESENT | BIT64(12+32))
 
 #define WHITEKBBK (KINGSPRESENT | BIT64(9))
 #define BLACKKBBK (KINGSPRESENT | BIT64(9+32))
@@ -40,6 +40,9 @@ evaluationResult getEvaluationResult() {
 
 #define WHITEKPK (KINGSPRESENT |  BIT64(0))
 #define BLACKKPK (KINGSPRESENT | BIT64(32))
+
+#define WHITEKBNK (KINGSPRESENT | BIT64(8) | BIT64(4))
+#define BLACKKBNK (KINGSPRESENT | BIT64(40) | BIT64(36))
 
 static int16_t outposts(const chessPosition* position) {
     uint64_t wPawns = position->pieceTables[white][pawn];
@@ -192,7 +195,7 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
     //specific endgames
     //----------------------
     if (position->totalFigureEval < 700) {
-        if (position->presentPieces.compare(WHITEROOKENDGAME) || position->presentPieces.compare(BLACKROOKENDGAME)) {
+        if (position->presentPieces.compare(WHITEKRK) || position->presentPieces.compare(BLACKKRK)) {
             return COLORSIGN(position->toMove)*KRK_endgame(position);
         }
 
@@ -206,6 +209,10 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
 
         if (position->presentPieces.compare(WHITEKPK) || position->presentPieces.compare(BLACKKPK)) {
             return COLORSIGN(position->toMove)*KPK_endgame(position);
+        }
+
+        if (position->presentPieces.compare(WHITEKBNK) || position->presentPieces.compare(BLACKKBNK)) {
+            return COLORSIGN(position->toMove)*KBNK_endgame(position);
         }
     }
 
