@@ -27,6 +27,12 @@ inline uint16_t popLSB(uint64_t &a) {
     return n;
 }
 
+inline uint16_t popMSB(uint64_t &a) {
+    uint16_t n = __builtin_clzll(a);
+    a = a & (~(1ULL << n));
+    return n;
+}
+
 inline uint16_t popcount(uint64_t x) {
         x = (x & 0x5555555555555555ULL) + ((x >> 1) & 0x5555555555555555ULL);
         x = (x & 0x3333333333333333ULL) + ((x >> 2) & 0x3333333333333333ULL);

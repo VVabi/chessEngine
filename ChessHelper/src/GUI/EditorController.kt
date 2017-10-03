@@ -31,7 +31,7 @@ class EditorController {
 
     @FXML
     fun handleGetEval(){
-        val localEngine = ChessEngine("/home/vabi/code/chessEngine/Cpp/Release/Vabi", "/home/vabi")
+        val localEngine = ChessEngine("/home/vabi/code/chessEngine/Cpp/uciChallengeRelease/Vabi", "/home/vabi")
         localEngine.setPosition(chessboard!!.position, mutableListOf())
         var answer = localEngine.getEvalDetails()
         Platform.runLater() {

@@ -13,6 +13,7 @@
 #include <lib/Defines/boardParts.hpp>
 #include <lib/Attacks/attacks.hpp>
 #include <lib/moveGeneration/nonSliderMoveTables.hpp>
+#include <lib/moveGeneration/moveGenerationInternals.hpp>
 
 /*#ifdef EXPERIMENTAL
 int32_t attacksCloseToKingEvals[] =
@@ -49,17 +50,127 @@ int32_t attackScores[6][5] = { {0, 0, 0, 0, 0},
 int32_t attackScores[] = {1, 3, 3, 4, 7};
 //#endif
 
+#ifdef EXPERIMENTAL
+static int16_t shelterscores[80] = {
+          0, 10, 12, 13, 15, 17, 19, 21, 23, 25,
+         27, 29, 31, 33, 35, 37, 39, 41, 43, 45,
+         47, 49, 51, 54, 57, 60, 63, 66, 68, 70,
+         72, 74, 76, 78, 80, 82, 84, 86, 88, 90,
+         91, 92, 93, 94, 95, 96, 97, 98, 99, 100,
+         100,100,100,100,100,100,100,100,100,100,
+         100,100,100,100,100,100,100,100,100,100,
+         100,100,100,100,100,100,100,100,100,100,
+};
+#endif
 
 //int32_t attacksCloseToKingEvals[] = {0, 10, 20, 40, 80, 150, 230, 350, 400, 500, 600};
+#ifdef EXPERIMENTAL
+static uint64_t files[] = {FILEA, FILEB, FILEC, FILED, FILEE, FILEF, FILEG, FILEH};
+#endif
 
+
+
+#ifdef EXPERIMENTAL
+static int16_t pawnShelterSingleFile(playerColor playingSide, uint64_t pawnsOnFile) {
+    uint16_t distance;
+    if (playingSide == white) {
+        distance = ROW(findLSB(pawnsOnFile))-1;
+    } else {
+        distance = 6-ROW(findMSB(pawnsOnFile));
+    }
+
+    if (pawnsOnFile == 0) {
+        distance = 8;
+    }
+
+    return distance;
+}
+
+static int16_t pawnShelter(const chessPosition* position, playerColor playingSide) {
+    uint16_t kingField = findLSB(position->pieceTables[playingSide][king]);
+    uint16_t kingFile = FILE(kingField);
+    uint16_t score = 0;
+    uint64_t pawns    = position->pieceTables[playingSide][pawn];
+    uint64_t oppPawns = position->pieceTables[INVERTCOLOR(playingSide)][pawn];
+    uint64_t kingPawn = (pawns & files[kingFile]);
+
+    uint16_t distance = pawnShelterSingleFile(playingSide, kingPawn);
+    if (!(files[kingFile] & oppPawns)) {
+        score = score+2;
+        if (distance == 8) {
+            score += 2*distance+8;
+        }
+    } else {
+        score += distance;
+    }
+
+    if (kingFile > 0) {
+        uint16_t neighborFile = kingFile-1;
+        uint16_t distance = pawnShelterSingleFile(playingSide, files[neighborFile] & pawns);
+           if (!(files[neighborFile] & oppPawns)) {
+               score = score+2;
+               if (distance == 8) {
+                   score += 2*distance+8;
+               }
+           } else {
+               score += distance;
+           }
+    }
+
+    if (kingFile < 7) {
+        uint16_t neighborFile = kingFile+1;
+        uint16_t distance = pawnShelterSingleFile(playingSide, files[neighborFile] & pawns);
+           if (!(files[neighborFile] & oppPawns)) {
+               score = score+2;
+               if (distance == 8) {
+                   score += 2*distance+8;
+               }
+           } else {
+               score += distance;
+           }
+    }
+
+    assert(score < 80);
+    return -shelterscores[score];
+}
+#endif
+
+
+#ifdef EXPERIMENTAL
+void outputUint64(uint64_t num);
+
+static uint16_t getFreeKingFields(uint16_t kingField, uint64_t occ) {
+    uint64_t modOcc = occ | EASTONE(BIT64(kingField)) | WESTONE((BIT64(kingField)));
+    uint64_t mask = getPotentialRookMoves(kingField, modOcc);
+    mask |= getPotentialBishopMoves(kingField, occ);
+    return popcount(mask);
+}
+#endif
 
 static int32_t kingSafetySinglePlayer(const chessPosition* position, const uint8_t* pawnColumnOccupancy,
         playerColor playingSide, const AttackTable* opponentAttackTable, const kingSafetyEvalParameters* par) {
     int32_t ret = 0;
     //pawn shield
-    uint16_t kingField = findLSB(position->pieceTables[playingSide][king]);
-    uint16_t kingFile = FILE(kingField);
 
+    uint16_t kingField = findLSB(position->pieceTables[playingSide][king]);
+#ifdef EXPERIMENTAL
+#define SELF 768
+#define NEIGHBOR 384
+#define REMOTE   256
+    ret = ret-(SELF*getFreeKingFields(kingField, position->pieceTables[white][pawn] | position->pieceTables[black][pawn]))/256;
+    if (FILE(kingField) > 0){
+        ret = ret-(NEIGHBOR*getFreeKingFields(kingField-1, position->pieceTables[white][pawn] | position->pieceTables[black][pawn]))/256;
+    } else {
+        ret = ret-(REMOTE*getFreeKingFields(kingField+2, position->pieceTables[white][pawn] | position->pieceTables[black][pawn]))/256;
+    }
+    if (FILE(kingField) < 7){
+        ret = ret-(NEIGHBOR*getFreeKingFields(kingField+1, position->pieceTables[white][pawn] | position->pieceTables[black][pawn]))/256;
+    } else {
+        ret = ret-(REMOTE*getFreeKingFields(kingField-2, position->pieceTables[white][pawn] | position->pieceTables[black][pawn]))/256;
+    }
+#else
+//#ifndef EXPERIMENTAL
+    uint16_t kingFile = FILE(kingField);
     if (!((1 << kingFile) & pawnColumnOccupancy[playingSide])) { // no pawn in front of king. TODO: check for pawn really in FRONT of king
         ret = ret+par->selfopenfiletoking;
     }
@@ -85,7 +196,11 @@ static int32_t kingSafetySinglePlayer(const chessPosition* position, const uint8
             ret = ret+par->opponentopenfilenexttoking;
         }
     }
+#endif
+/*#else
+    ret = ret+pawnShelter(position, playingSide);
 
+#endif*/
     /*uint64_t relevant_files = files[FILE(kingField)];
     if (kingFile > 0) {
         relevant_files = relevant_files | files[FILE(kingField-1)];
@@ -137,6 +252,8 @@ static int32_t kingSafetySinglePlayer(const chessPosition* position, const uint8
     /*uint64_t attacks = opponentAttackTable->completeAttackTable & kingmoves;
 
     ret = ret-attacksCloseToKingEvals[popcount(attacks)];*/
+
+
 
     return (1-2*playingSide)*ret;
 }

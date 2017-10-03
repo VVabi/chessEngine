@@ -51,7 +51,7 @@ class testController {
         val data = testMap[name]
         if(data?.isRunning!!.compareAndSet(false, true)) {
             onTestStateChanged(name, testStatus.RUNNING)
-            val releaseEngine: ChessEngine = ChessEngine("/home/vabi/code/chessEngine/Cpp/Release/Vabi", "")
+            val releaseEngine: ChessEngine = ChessEngine("/home/vabi/code/chessEngine/Cpp/uciChallengeRelease/Vabi", "")
             val debugEngine: ChessEngine = ChessEngine("/home/vabi/code/chessEngine/Cpp/Debug/Vabi",   "")
 
             if(debugEngine.getType() == releaseEngine.getType()) {
