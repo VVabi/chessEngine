@@ -339,6 +339,7 @@ static inline searchLoopResults negamax_internal_move_loop(chessPosition* positi
     if (sortinfo.movingSideInCheck) {
         currentState = killers_handled;
     }
+
     for (uint16_t ind = 0; ind < moves.length; ind++) {
             while (!get_next_move_to_front(position, &currentState, moves, ind, plyinfo, sortinfo)) {}
 
@@ -558,7 +559,11 @@ int16_t negamax(chessPosition* position, plyInfo plyinfo, AlphaBeta alphabeta, p
     //futility pruning
     //-----------------
     if (plyinfo.depth == 1) {
+#ifdef EXPERIMENTAL
+        if (check_futility(movingSideInCheck, alphabeta.alpha, position, 200, 250)) {
+#else
         if (check_futility(movingSideInCheck, alphabeta.alpha, position, 100, 150)) {
+#endif
             PV->numMoves = 0;
             return negamaxQuiescence(position, plyinfo.qply, plyinfo.ply, alphabeta, 0, settings.searchId);
         }
