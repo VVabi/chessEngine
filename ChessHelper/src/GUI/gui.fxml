@@ -14,4 +14,7 @@
     <Tab text="Editor">
         <fx:include source="editor.fxml"/>
     </Tab>
+    <Tab text="Search">
+        <fx:include source="search.fxml"/>
+    </Tab>
 </TabPane>

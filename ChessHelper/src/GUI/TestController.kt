@@ -15,7 +15,7 @@ import kotlin.concurrent.thread
 
 data class testData(val Testfunction: (ChessEngine, ChessEngine) -> Boolean, var isRunning: AtomicBoolean)
 
-class testController {
+class TestController {
 
     @FXML var perft: Button? = null
     @FXML var debugVsRelease: Button? = null
@@ -51,8 +51,8 @@ class testController {
         val data = testMap[name]
         if(data?.isRunning!!.compareAndSet(false, true)) {
             onTestStateChanged(name, testStatus.RUNNING)
-            val releaseEngine: ChessEngine = ChessEngine("/home/vabi/code/chessEngine/Cpp/Release/Vabi", "")
-            val debugEngine: ChessEngine = ChessEngine("/home/vabi/code/chessEngine/Cpp/Debug/Vabi",   "")
+            val releaseEngine: ChessEngine = ChessEngine("/home/vabi/code/chessEngine/Cpp/Release/Vabi", "") //TODO
+            val debugEngine: ChessEngine = ChessEngine("/home/vabi/code/chessEngine/Cpp/Debug/Vabi",   "") //TODO
 
             if(debugEngine.getType() == releaseEngine.getType()) {
                 println("Alleged Release and Debug engines are the same type??")

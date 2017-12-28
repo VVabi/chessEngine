@@ -1,0 +1,5 @@
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.Button?>
+<GridPane fx:controller="GUI.SearchController" xmlns:fx="http://javafx.com/fxml" xmlns="http://javafx.com/javafx/8" alignment="center" hgap="10" vgap="30">
+    <Button fx:id="search" text="Search all positions in file" onAction="#handleSearchAll" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+</GridPane>

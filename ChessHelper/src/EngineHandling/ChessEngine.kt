@@ -5,7 +5,7 @@ import java.util.ArrayList
 /**
  * Created by vabi on 29.05.17. Abstract a chess engine (currently UCI only)
  */
-data class SearchResult(var eval: Int, var bestMove: String)
+data class SearchResult(var eval: Int, var bestMove: String, var nodes: Int)
 
 class ChessEngine(path: String, workingDirectory: String) {
 
@@ -41,13 +41,13 @@ class ChessEngine(path: String, workingDirectory: String) {
 
     fun search(depth: Int): SearchResult {
         uciEngine.put("go depth "+depth)
-        var eval = 0
+        var eval  = 0
+        var nodes = 0
         val bestMove: String
         while(true) {
 
             val answer = uciEngine.readAnswer()
             val parts = answer.split(" ")
-
             if("bestmove" == parts[0]) {
                 bestMove = parts[1]
                 break
@@ -66,10 +66,13 @@ class ChessEngine(path: String, workingDirectory: String) {
                             eval = -30000
                         }
                     }
+                    if ("nodes" == parts[index]) {
+                         nodes = Integer.parseInt(parts[index + 1])
+                    }
                 }
             }
         }
-        return SearchResult(eval, bestMove)
+        return SearchResult(eval, bestMove, nodes)
     }
 
 

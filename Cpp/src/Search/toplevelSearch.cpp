@@ -95,12 +95,14 @@ bool checkContinue(searchParameters params, uint16_t depth, uint16_t passedTime,
 
 #define EXTENSIONS_ALLOWED 7  //TODO: investigate why going to 5 is not significantly better??
 
+
+
 uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval, bool doAspiration, searchParameters params) {
-/*#ifdef EXPERIMENTAL
 
-    fenLogger.open("fen.txt", std::ios::app);
-
-#endif*/
+	std::ofstream fenlogger;
+	fenlogger.open ("/home/vabi/code/chessEngine/fen.txt", std::ofstream::app);
+	fenlogger << chessPositionToFenString(*position, true) << std::endl;
+	fenlogger.close();
 
     //TODO: refactor this function
     /*killerTable* table = getKillerTable();
