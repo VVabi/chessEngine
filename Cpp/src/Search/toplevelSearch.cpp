@@ -99,11 +99,28 @@ bool checkContinue(searchParameters params, uint16_t depth, uint16_t passedTime,
 
 uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval, bool doAspiration, searchParameters params) {
 
-	std::ofstream fenlogger;
-	fenlogger.open ("/home/vabi/code/chessEngine/fen.txt", std::ofstream::app);
-	fenlogger << chessPositionToFenString(*position, true) << std::endl;
-	fenlogger.close();
+	/*uint32_t totalFigures = position->totalFigureEval/100;
 
+	if (totalFigures > 5 && totalFigures < 72) {
+		uint32_t val = rand() & 127;
+		if (val == 0) {
+			std::string file = "/home/vabi/code/chessEngine/beginning.txt";
+
+			if (totalFigures < 60) {
+				file = "/home/vabi/code/chessEngine/midgame.txt";
+			}
+
+			if (totalFigures < 25) {
+				file = "/home/vabi/code/chessEngine/endgame.txt";
+			}
+
+			std::ofstream fenlogger;
+			fenlogger.open (file.c_str(), std::ofstream::app);
+			fenlogger << chessPositionToFenString(*position, true) << std::endl;
+			fenlogger.close();
+		}
+
+	}*/
     //TODO: refactor this function
     /*killerTable* table = getKillerTable();
     table->clear();*/
