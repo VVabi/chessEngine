@@ -66,7 +66,7 @@ uint64_t staticpawnhashhits = 0;
 #define BLOCKEDDIVISOR 2
 
 
-static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint64_t blackPawns, uint16_t blackKing, uint16_t whiteKing, uint64_t whitePieces, uint64_t blackPieces) {
+int16_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint64_t blackPawns, uint16_t blackKing, uint16_t whiteKing, uint64_t whitePieces, uint64_t blackPieces) {
     //TODO: remove code duplication. Generally this code sucks - too many white/black diffs...
     int32_t eval = 0;
     uint64_t whitePawnBuffer = whitePawns;
@@ -89,29 +89,6 @@ static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint6
                         eval = eval-passedPawnEvalValues[white][field]/BLOCKEDDIVISOR;
                     }
             }
-/*#ifdef EXPERIMENTAL
-            int16_t coverage = 0;
-            if (distToPromotion < 3) {
-                if (whiteAttackTable->attackTables[bishop] & BIT64(promotionField)) {
-                    coverage = coverage+15;
-                }
-
-                uint64_t minorAttacks = blackAttackTable->attackTables[bishop] | blackAttackTable->attackTables[knight];
-
-                if (minorAttacks & BIT64(promotionField)) {
-                    coverage = coverage-15;
-                }
-
-                if (blackAttackTable->attackTables[rook] & BIT64(promotionField)) {
-                    coverage = coverage-10;
-                }
-
-                if (blackAttackTable->attackTables[queen] & BIT64(promotionField)) {
-                    coverage = coverage-5;
-                }
-            }
-#endif*/
-
             eval = eval-kingToPromotionFieldDistance[distToPromotion][kingDist];
         }
     }
@@ -134,30 +111,6 @@ static int32_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint6
                         eval = eval+passedPawnEvalValues[black][field]/BLOCKEDDIVISOR;
                     }
             }
-        /*#ifdef EXPERIMENTAL
-            int16_t coverage = 0;
-            if (distToPromotion < 3) {
-                if (blackAttackTable->attackTables[bishop] & BIT64(promotionField)) {
-                    coverage = coverage-15;
-                }
-
-                uint64_t minorAttacks = whiteAttackTable->attackTables[bishop] | whiteAttackTable->attackTables[knight];
-
-                if (minorAttacks & BIT64(promotionField)) {
-                    coverage = coverage+15;
-                }
-
-                if (whiteAttackTable->attackTables[rook] & BIT64(promotionField)) {
-                    coverage = coverage+10;
-                }
-
-                if (whiteAttackTable->attackTables[queen] & BIT64(promotionField)) {
-                    coverage = coverage+5;
-                }
-
-            }
-            eval = eval+coverage;
-            #endif*/
             eval  = eval+kingToPromotionFieldDistance[distToPromotion][kingDist];
         }
     }
@@ -197,41 +150,21 @@ int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOcc
 }
 
 
-int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupancy, uint16_t phase) {
+int16_t staticPawnEvaluation(const chessPosition* position) {
     uint32_t eval = 0;
-    uint64_t whitePawns = position->pieceTables[white][pawn];
-    uint64_t blackPawns = position->pieceTables[black][pawn];
     int16_t staticPawn = 0;
 
     pawnHashEntry entry;
     if (getPawnHashTableEntry(&entry, position->pawnHash)) {
         staticPawn = entry.eval;
         staticpawnhashhits++;
-        pawnColumnOccupancy[0] = entry.pawnColumnOcc[0];
-        pawnColumnOccupancy[1] = entry.pawnColumnOcc[1];
-
-/*#ifdef DEBUG
-        int16_t staticPawnReal = staticPawnEval(whitePawns, white, pawnColumnOccupancy, &evalPars->staticPawnParameters)+staticPawnEval(blackPawns, black,  pawnColumnOccupancy+1, &evalPars->staticPawnParameters);
-        assert(staticPawnReal == staticPawn);
-        assert(pawnColumnOccupancy[0] == entry.pawnColumnOcc[0]);
-        assert(pawnColumnOccupancy[1] == entry.pawnColumnOcc[1]);
-#endif*/
+        //TODO add debug code here to verify the hash is correct!
     } else {
         staticpawncalls++;
-        staticPawn = staticPawnEvalComplete(position, pawnColumnOccupancy);
-        setPawnHashEntry(staticPawn, pawnColumnOccupancy[0], pawnColumnOccupancy[1], position->pawnHash);
+        staticPawn = staticPawnEvalComplete(position);
+        setPawnHashEntry(staticPawn, position->pawnHash);
     }
     eval = eval+staticPawn;
-    int32_t untapered = 0;
-    int32_t passedPawns = passedPawnEval(&untapered, whitePawns, blackPawns, findLSB(position->pieceTables[black][king]), findLSB(position->pieceTables[white][king]), position->pieces[white], position->pieces[black]);
-/*#ifdef EXPERIMENTAL
-    int16_t passedPawnPhase = std::max(phase-10, 0);
-#else*/
-
-//#endif
-    int16_t passedPawnPhase = std::max((int32_t) phase, 0);
-    passedPawns = ((256-getTaperingValue(passedPawnPhase))*passedPawns)/256;
-    eval = eval+passedPawns+untapered;
 
     return eval;
 }

@@ -336,8 +336,7 @@ void handleEval() {
 
 void handlePawnEval() {
     chessPosition cposition = memoryLibrarianRetrievePosition();
-    uint8_t pawnOcc[2];
-    std::cout << staticPawnEvalComplete(&cposition, pawnOcc) << std::endl;
+    std::cout << staticPawnEvalComplete(&cposition) << std::endl;
     free_position(&cposition);
 }
 

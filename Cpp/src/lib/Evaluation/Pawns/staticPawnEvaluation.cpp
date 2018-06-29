@@ -58,7 +58,7 @@ int16_t isolatedPawnTable[] = { 0, 0, 0, 0, 0, 0, 0, 0,
                                  0, 0, 0, 0, 0, 0, 0, 0,
 };
 
-int16_t staticPawnEvalComplete(const chessPosition* position, uint8_t* pawnOcc) {
+int16_t staticPawnEvalComplete(const chessPosition* position) {
     //from the pov of WHITE
     int16_t ev = 0;
 
@@ -96,8 +96,6 @@ int16_t staticPawnEvalComplete(const chessPosition* position, uint8_t* pawnOcc) 
     frontColumnFill[white] = NORTHONE(position->pieceTables[white][pawn]);
     frontColumnFill[black] = SOUTHONE(position->pieceTables[black][pawn]);
 
-    pawnOcc[0] = getColumnOcc(position->pieceTables[white][pawn]);
-    pawnOcc[1] = getColumnOcc(position->pieceTables[black][pawn]);
     uint64_t wDouble = doubledPawns[white];
     while (wDouble) {
         ev = ev-10;

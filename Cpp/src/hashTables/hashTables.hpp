@@ -127,7 +127,7 @@ uint64_t calcZobristHash(const chessPosition* position);
 PresentPieces calcPresentPieces(const chessPosition* position);
 uint64_t calcPawnHash(const chessPosition* position);
 hashEntry getHashTableEntry(uint64_t zobristKey);
-void setPawnHashEntry(int16_t eval, uint8_t whiteColumns, uint8_t blackColumns, uint64_t key);
+void setPawnHashEntry(int16_t eval,  uint64_t key);
 bool getPawnHashTableEntry(pawnHashEntry* entry, uint64_t key);
 void setHashEntry(hashEntry entry, uint64_t zobristKey);
 uint16_t getHashMove(uint64_t zobristKey);

@@ -78,7 +78,6 @@ struct pawnHashEntry {
     uint32_t hashHighBits;
     uint16_t hashLower;
     int16_t  eval;
-    uint8_t pawnColumnOcc[2];
 };
 
 class timeoutException: public std::exception {

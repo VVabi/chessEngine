@@ -21,16 +21,21 @@
 #include "lib/Evaluation/endgames/endgameEvals.hpp"
 #include "lib/Defines/pieceCombinations.hpp"
 
-enum evaluationType {eval_kingsafety};
+enum evaluationType {eval_kingsafety, eval_trapped_pieces, eval_outposts, eval_rookfiles};
+enum taperingDirection {taper_none, taper_endgame_higher, taper_earlygame_higher};
 
 struct EvaluationComponent {
     int16_t (*evalFunction)(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables);
     evaluationType type;
-    bool taper;
+    taperingDirection taperDirection;
 };
 
-EvaluationComponent evaluationComponents[] =
-                            {       &kingSafety,                eval_kingsafety,                true};
+EvaluationComponent evaluationComponents[] = {
+                            {       &kingSafety,          eval_kingsafety,              taper_earlygame_higher},
+                            {       &trappedPieces,       eval_trapped_pieces,          taper_none},
+                            {       &outposts,            eval_outposts,                taper_none},
+                            {       &rookOpenFiles,       eval_rookfiles,               taper_none},
+};
 
 
 int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, bool PSQ_only) {
@@ -107,21 +112,24 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
     eval = eval-mobilityScore;
 
     for (uint16_t cnt=0; cnt < sizeof(evaluationComponents)/sizeof(EvaluationComponent); cnt++) {
-        EvaluationComponent component    = evaluationComponents[cnt];
+        const EvaluationComponent component    = evaluationComponents[cnt];
         int32_t evalValue                = component.evalFunction(position, evalPars, attackTables);
-        if (component.taper) {
+        if (component.taperDirection == taper_earlygame_higher) {
             evalValue = (tapering*evalValue)/256;
+        } else if (component.taperDirection == taper_endgame_higher) {
+            evalValue = ((256-tapering)*evalValue)/256;
         }
         eval = eval+evalValue;
     }
 
+    eval = eval+staticPawnEvaluation(position);
 
+    int32_t untapered = 0;
+    int32_t passedPawns = passedPawnEval(&untapered, position->pieceTables[white][pawn], position->pieceTables[black][pawn], findLSB(position->pieceTables[black][king]), findLSB(position->pieceTables[white][king]), position->pieces[white], position->pieces[black]);
 
-    uint8_t pawnColumnOccupancy[2];
-    eval = eval+pawnEvaluation(position, pawnColumnOccupancy, phase);
-
-    int16_t rookFiles = rookOpenFiles(position, pawnColumnOccupancy, evalPars);
-    eval = eval+rookFiles;
+    int16_t passedPawnPhase = std::max((int32_t) phase, 0);
+    passedPawns = ((256-getTaperingValue(passedPawnPhase))*passedPawns)/256;
+    eval = eval+passedPawns+untapered;
 
 
     uint64_t numWhiteBishops = popcount(position->pieceTables[white][bishop]);
@@ -137,16 +145,6 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
         eval = eval-evalPars->bishoppair;
     }
 
-   /* int32_t kingSafetyComplete = kingSafety(position, evalPars, attackTables);
-    int32_t kingSafetyTapered = (tapering*kingSafetyComplete)/256;
-    eval = eval+kingSafetyTapered;*/
-
-    int16_t trapped = trappedPieces(position);
-    eval = eval+trapped;
-
-    int16_t oposts = outposts(position);
-    eval = eval+oposts;
-
     if (position->toMove == white) {
         eval = eval+10;
     } else {
@@ -156,13 +154,6 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
 #ifdef RANDOMEVAL
     eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?
 #endif
-    /*static uint32_t counter = 0;
-    counter++;
-
-    if ((counter > 100000) && (std::abs(eval-position->figureEval) > 100)) {
-        counter = 0;
-        latexOutput(position, result, eval);
-    }*/
 
 if (position->totalFigureEval < 500) {
     if ((position->pieceTables[white][pawn] == 0) && (eval > 0)) {
@@ -170,7 +161,6 @@ if (position->totalFigureEval < 500) {
             eval = eval/16;
         }
     }
-
 
     if ((position->pieceTables[black][pawn] == 0) && (eval < 0)) {
         if ((position->pieceTables[black][rook] | position->pieceTables[black][queen]) == 0) {

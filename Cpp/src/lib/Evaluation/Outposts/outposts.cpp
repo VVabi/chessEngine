@@ -9,10 +9,11 @@
 #include "lib/basics.hpp"
 #include "lib/bitfiddling.h"
 #include "parameters/parameters.hpp"
+#include "lib/Attacks/attacks.hpp"
 
 #define OUTPOSTVALUE 15
 
-int16_t outposts(const chessPosition* position) {
+int16_t outposts(const chessPosition* position, const evalParameters* par __attribute__ ((unused)), const AttackTable* attackTables __attribute__ ((unused))) {
     uint64_t wPawns = position->pieceTables[white][pawn];
     uint64_t bPawns = position->pieceTables[black][pawn];
     uint64_t wKnights = position->pieceTables[white][knight];

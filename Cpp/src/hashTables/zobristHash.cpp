@@ -47,7 +47,7 @@ bool getPawnHashTableEntry(pawnHashEntry* entry, uint64_t key) {
     return false;
 }
 
-void setPawnHashEntry(int16_t eval, uint8_t whiteColumns, uint8_t blackColumns, uint64_t key) {
+void setPawnHashEntry(int16_t eval, uint64_t key) {
     uint32_t index = (key & 8191);
     uint32_t zobristHigher = (uint32_t) (key  >> 32);
     uint16_t zobristLower  = (uint16_t) (((uint32_t) (key  & 0xFFFFFFFF)) >> 16);
@@ -56,8 +56,6 @@ void setPawnHashEntry(int16_t eval, uint8_t whiteColumns, uint8_t blackColumns, 
     entry.eval = eval;
     entry.hashHighBits = zobristHigher;
     entry.hashLower = zobristLower;
-    entry.pawnColumnOcc[0] = whiteColumns;
-    entry.pawnColumnOcc[1] = blackColumns;
     pawnHashTable[index] = entry;
 }
 
