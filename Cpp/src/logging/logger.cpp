@@ -9,16 +9,16 @@
 #include "logger.hpp"
 #include <lib/DebugFunctions/debugFunctions.hpp>
 #include <userInterface/UIlayer.hpp>
-static int clearPageCounter = 0;
+//static int clearPageCounter = 0;
 
-std::ofstream evalDebugging("/home/vabi/TeX/Chess/gamePositions.tex");
+/*std::ofstream evalDebugging("/home/vabi/TeX/Chess/gamePositions.tex");
 
 void putTableLine(std::ostream& out, int16_t value, std::string name) {
     out << name << " & " << value << "\\\\ \\hline" << std::endl;
-}
+}*/
 
 
-void latexOutput(const chessPosition* pos, evaluationResult ev, int16_t eval, std::ostream& out) {
+/*void latexOutput(const chessPosition* pos, evaluationResult ev, int16_t eval, std::ostream& out) {
     std::string fen = chessPositionToFenString(*pos, false);
     int16_t figureVal = calcFigureEvaluation(pos);
     out << "\\begin {figure}[!htbp] " << std::endl;
@@ -60,7 +60,7 @@ void latexOutput(std::string FEN, std::ostream& out) {
 
 void latexOutput(const chessPosition* pos, evaluationResult ev, int16_t eval) {
     latexOutput(pos, ev, eval, evalDebugging);
-}
+}*/
 
 
 

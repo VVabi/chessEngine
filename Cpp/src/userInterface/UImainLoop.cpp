@@ -312,13 +312,13 @@ void handlePosition(std::list<std::string> input) {
 void handleEval() {
     chessPosition cposition = memoryLibrarianRetrievePosition();
     int32_t eval = evaluation(&cposition, -32000, 32000);
-    evaluationResult res = getEvaluationResult();
+
     std::stringstream evalInfo;
     if (cposition.toMove == black) {
         eval = -eval; //always from POV of white
     }
 
-    evalInfo << "Total " << eval;
+    /*evalInfo << "Total " << eval;
     evalInfo << " Material " << cposition.figureEval;
     evalInfo << " PSQ " << res.PSQ-cposition.figureEval;
     evalInfo << " King safety " <<  res.kingSafety;
@@ -328,7 +328,7 @@ void handleEval() {
     evalInfo << " rook open files " << res.rookOpenFiles;
     evalInfo << " bishoppair " << res.bishoppair;
     evalInfo << " Trapped pieces " << res.trappedPieces;
-    evalInfo << " Outposts " << res.outPosts;
+    evalInfo << " Outposts " << res.outPosts;*/
     putLine(evalInfo.str());
     free_position(&cposition);
 }

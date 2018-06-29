@@ -205,7 +205,6 @@ int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOcc
     return eval*(1-2*color);
 }
 
-extern evaluationResult result;
 
 int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupancy, uint16_t phase) {
     uint32_t eval = 0;
@@ -232,7 +231,6 @@ int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupan
         setPawnHashEntry(staticPawn, pawnColumnOccupancy[0], pawnColumnOccupancy[1], position->pawnHash);
     }
     eval = eval+staticPawn;
-    result.staticPawn = staticPawn;
     int32_t untapered = 0;
     int32_t passedPawns = passedPawnEval(&untapered, whitePawns, blackPawns, findLSB(position->pieceTables[black][king]), findLSB(position->pieceTables[white][king]), position->pieces[white], position->pieces[black]);
 /*#ifdef EXPERIMENTAL
@@ -243,7 +241,6 @@ int32_t pawnEvaluation(const chessPosition* position, uint8_t* pawnColumnOccupan
     int16_t passedPawnPhase = std::max((int32_t) phase, 0);
     passedPawns = ((256-getTaperingValue(passedPawnPhase))*passedPawns)/256;
     eval = eval+passedPawns+untapered;
-    result.passedPawn = passedPawns+untapered;
 
     return eval;
 }

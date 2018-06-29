@@ -22,17 +22,8 @@ uint8_t getPawnColumns(uint64_t in);
 uint64_t getDoubledPawns(uint64_t in);
 uint64_t getIsolatedPawns(uint64_t in);
 int16_t staticPawnEvalComplete(const chessPosition* position, uint8_t* pawnOcc);
-struct evaluationResult {
-    int16_t PSQ;
-    int16_t staticPawn;
-    int16_t passedPawn;
-    int16_t kingSafety;
-    int16_t bishoppair;
-    int16_t mobility;
-    int16_t rookOpenFiles;
-    int16_t trappedPieces;
-    int16_t outPosts;
-};
+int16_t outposts(const chessPosition* position);
+int16_t trappedPieces(const chessPosition* position);
+int32_t rookOpenFiles(const chessPosition* position, uint8_t* pawnOccupancy, const evalParameters* evalParams);
 
-evaluationResult getEvaluationResult();
 #endif /* EVALUATION_EVALUATION_HPP_ */
