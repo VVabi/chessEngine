@@ -193,15 +193,6 @@ int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOcc
 
     eval = eval+staticPawnParameters->isolatedPawn*popcount(isolatedPawns & (~isolatedDoublePawns));
 
-/*#ifdef EXPERIMENTAL
-    //reward pawns covered by other pawns
-    //---------------------------------------
-    uint64_t takesRight = (color ? pawns >> 7 : pawns << 9) & NOTFILEA;
-    uint64_t takesLeft = (color ? pawns >> 9 : pawns << 7) & NOTFILEH;
-    uint64_t takes = takesLeft | takesRight;
-    eval = eval+3*popcount(takes & pawns);
-#endif*/
-
     return eval*(1-2*color);
 }
 

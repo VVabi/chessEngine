@@ -157,10 +157,18 @@ static int32_t kingSafetySinglePlayer(const chessPosition* position, const uint8
 }
 
 
-int32_t kingSafety(const chessPosition* position, const uint8_t* pawnColumnOccupancy,
-    const AttackTable* whiteAttackTable, const AttackTable* blackAttackTable, const kingSafetyEvalParameters* par) {
-    int32_t whiteSafety =  kingSafetySinglePlayer(position, pawnColumnOccupancy, white, blackAttackTable, par);
-    int32_t blackSafety =  kingSafetySinglePlayer(position, pawnColumnOccupancy, black, whiteAttackTable, par);
+int16_t kingSafety(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables) {
+    uint8_t pawnColumnOccupancy[2];
+
+    for (uint8_t color=0; color < 2; color++) {
+        uint64_t pawns = position->pieceTables[color][pawn];
+        pawns = northFill(pawns);
+        pawns = southFill(pawns);
+        pawnColumnOccupancy[color] = (uint8_t) (pawns & 0xFF);
+    }
+
+    int32_t whiteSafety =  kingSafetySinglePlayer(position, pawnColumnOccupancy, white, &attackTables[black], &par->kingSafetyParameters);
+    int32_t blackSafety =  kingSafetySinglePlayer(position, pawnColumnOccupancy, black, &attackTables[white], &par->kingSafetyParameters);
     int32_t ret =  whiteSafety+blackSafety;
     return ret;
 }
