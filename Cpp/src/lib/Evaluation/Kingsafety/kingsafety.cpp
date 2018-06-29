@@ -7,12 +7,12 @@
 
 
 
-#include <lib/basics.hpp>
-#include "evaluation.hpp"
-#include <lib/bitfiddling.h>
-#include <lib/Defines/boardParts.hpp>
-#include <lib/Attacks/attacks.hpp>
-#include <lib/moveGeneration/nonSliderMoveTables.hpp>
+#include "lib/basics.hpp"
+#include "lib/Evaluation/evaluation.hpp"
+#include "lib/bitfiddling.h"
+#include "lib/Defines/boardParts.hpp"
+#include "lib/Attacks/attacks.hpp"
+#include "lib/moveGeneration/nonSliderMoveTables.hpp"
 
 /*#ifdef EXPERIMENTAL
 int32_t attacksCloseToKingEvals[] =

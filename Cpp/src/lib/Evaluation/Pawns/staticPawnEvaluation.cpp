@@ -6,7 +6,7 @@
  */
 
 #include <lib/basics.hpp>
-#include "evaluation.hpp"
+#include "lib/Evaluation/evaluation.hpp"
 #include <lib/bitfiddling.h>
 #include <lib/Defines/boardParts.hpp>
 #include <parameters/parameters.hpp>

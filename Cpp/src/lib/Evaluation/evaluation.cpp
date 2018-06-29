@@ -5,20 +5,21 @@
  *      Author: vabi
  */
 
-#include <lib/basics.hpp>
-#include "evaluation.hpp"
 #include <stdlib.h>     /* srand, rand */
-#include <lib/Attacks/attacks.hpp>
-#include <lib/bitfiddling.h>
-#include <userInterface/UIlayer.hpp>
-#include <iostream>
-#include <fstream>
-#include <parameters/parameters.hpp>
-#include <logging/logger.hpp>
-#include <lib/Defines/chessFields.hpp>
-#include <lib/Evaluation/tapering.hpp>
-#include <lib/Evaluation/endgames/endgameEvals.hpp>
 
+#include "lib/basics.hpp"
+#include "evaluation.hpp"
+#include "lib/Attacks/attacks.hpp"
+#include "lib/bitfiddling.h"
+#include "userInterface/UIlayer.hpp"
+#include "iostream"
+#include "fstream"
+#include "parameters/parameters.hpp"
+#include "logging/logger.hpp"
+#include "lib/Defines/chessFields.hpp"
+#include "lib/Evaluation/tapering.hpp"
+#include "lib/Evaluation/endgames/endgameEvals.hpp"
+#include "lib/Defines/pieceCombinations.hpp"
 evaluationResult result;
 
 evaluationResult getEvaluationResult() {
@@ -26,23 +27,6 @@ evaluationResult getEvaluationResult() {
 }
 
 #define OUTPOSTVALUE 15
-
-#define KINGSPRESENT (BIT64(20) | BIT64(32+20))
-
-#define WHITEKRK (KINGSPRESENT | BIT64(12))
-#define BLACKKRK (KINGSPRESENT | BIT64(12+32))
-
-#define WHITEKBBK (KINGSPRESENT | BIT64(9))
-#define BLACKKBBK (KINGSPRESENT | BIT64(9+32))
-
-#define WHITEKBPK (KINGSPRESENT | BIT64(8) | BIT64(0))
-#define BLACKKBPK (KINGSPRESENT | BIT64(8+32) | BIT64(32))
-
-#define WHITEKPK (KINGSPRESENT |  BIT64(0))
-#define BLACKKPK (KINGSPRESENT | BIT64(32))
-
-#define WHITEKBNK (KINGSPRESENT | BIT64(8) | BIT64(4))
-#define BLACKKBNK (KINGSPRESENT | BIT64(40) | BIT64(36))
 
 static int16_t outposts(const chessPosition* position) {
     uint64_t wPawns = position->pieceTables[white][pawn];

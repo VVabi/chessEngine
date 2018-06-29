@@ -5,12 +5,24 @@ import PositionHelper.PositionDescriptor
 import Tools.getLos
 import java.io.File
 import java.net.ServerSocket
+import java.io.InputStreamReader
+import java.io.BufferedReader
+
+
 
 /**
  * Created by vabi on 29.05.17.
  */
 
 fun main(args: Array<String>) {
+
+    var server = ServerSocket(2345)
+    var s      = server.accept()
+    val inputStream = BufferedReader(
+            InputStreamReader(s.getInputStream()))
+    println("Incoming connection...")
+    println(inputStream.readLine())
+    println(inputStream.readLine())
 
    /* var p = PositionDescriptor("r2qkbnr/pppppppp/8/8/8/8/PP5P/RNBQKBNR w - - 0 1")
     println(p.toFen())*/
