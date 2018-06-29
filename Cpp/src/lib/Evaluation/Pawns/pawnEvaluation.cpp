@@ -150,7 +150,7 @@ int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOcc
 }
 
 
-int16_t staticPawnEvaluation(const chessPosition* position) {
+int16_t staticPawnEvaluation(const chessPosition* position, const evalParameters* par  __attribute__ ((unused)), const AttackTable* attackTables  __attribute__ ((unused))) {
     uint32_t eval = 0;
     int16_t staticPawn = 0;
 

@@ -13,7 +13,7 @@
 
 
 int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, bool PSQ_only = false);
-int16_t staticPawnEvaluation(const chessPosition* position);
+
 int32_t staticPawnEval(uint64_t pawns, playerColor color, const staticPawnEvalParameters* evalPars);
 
 
@@ -30,5 +30,7 @@ int16_t kingSafety(const chessPosition* position, const evalParameters* par, con
 int16_t outposts(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables);
 int16_t trappedPieces(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables);
 int16_t rookOpenFiles(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables);
+int16_t staticPawnEvaluation(const chessPosition* position, const evalParameters* par, const AttackTable* attackTable);
+int16_t bishopPair(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables);
 
 #endif /* EVALUATION_EVALUATION_HPP_ */

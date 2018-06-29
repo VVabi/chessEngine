@@ -21,7 +21,7 @@
 #include "lib/Evaluation/endgames/endgameEvals.hpp"
 #include "lib/Defines/pieceCombinations.hpp"
 
-enum evaluationType {eval_kingsafety, eval_trapped_pieces, eval_outposts, eval_rookfiles};
+enum evaluationType {eval_kingsafety, eval_trapped_pieces, eval_outposts, eval_rookfiles, eval_static_pawns, eval_bishoppair};
 enum taperingDirection {taper_none, taper_endgame_higher, taper_earlygame_higher};
 
 struct EvaluationComponent {
@@ -31,10 +31,12 @@ struct EvaluationComponent {
 };
 
 EvaluationComponent evaluationComponents[] = {
-                            {       &kingSafety,          eval_kingsafety,              taper_earlygame_higher},
-                            {       &trappedPieces,       eval_trapped_pieces,          taper_none},
-                            {       &outposts,            eval_outposts,                taper_none},
-                            {       &rookOpenFiles,       eval_rookfiles,               taper_none},
+                            {       &kingSafety,            eval_kingsafety,              taper_earlygame_higher},
+                            {       &trappedPieces,         eval_trapped_pieces,          taper_none},
+                            {       &outposts,              eval_outposts,                taper_none},
+                            {       &rookOpenFiles,         eval_rookfiles,               taper_none},
+                            {       &staticPawnEvaluation,  eval_static_pawns,            taper_none},
+                            {       &bishopPair,            eval_bishoppair,              taper_none},
 };
 
 
@@ -122,7 +124,7 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
         eval = eval+evalValue;
     }
 
-    eval = eval+staticPawnEvaluation(position);
+
 
     int32_t untapered = 0;
     int32_t passedPawns = passedPawnEval(&untapered, position->pieceTables[white][pawn], position->pieceTables[black][pawn], findLSB(position->pieceTables[black][king]), findLSB(position->pieceTables[white][king]), position->pieces[white], position->pieces[black]);
@@ -130,20 +132,6 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
     int16_t passedPawnPhase = std::max((int32_t) phase, 0);
     passedPawns = ((256-getTaperingValue(passedPawnPhase))*passedPawns)/256;
     eval = eval+passedPawns+untapered;
-
-
-    uint64_t numWhiteBishops = popcount(position->pieceTables[white][bishop]);
-
-
-    if (numWhiteBishops > 1) {
-        eval                    = eval+evalPars->bishoppair;
-    }
-
-    uint64_t numblackBishops = popcount(position->pieceTables[black][bishop]);
-
-    if (numblackBishops > 1) {
-        eval = eval-evalPars->bishoppair;
-    }
 
     if (position->toMove == white) {
         eval = eval+10;
@@ -155,6 +143,9 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
     eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?
 #endif
 
+
+//try to detect dead draws
+//-----------------------
 if (position->totalFigureEval < 500) {
     if ((position->pieceTables[white][pawn] == 0) && (eval > 0)) {
         if ((position->pieceTables[white][rook] | position->pieceTables[white][queen]) == 0) {
