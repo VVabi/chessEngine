@@ -66,22 +66,28 @@ uint64_t staticpawnhashhits = 0;
 #define BLOCKEDDIVISOR 2
 
 
-int16_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint64_t blackPawns, uint16_t blackKing, uint16_t whiteKing, uint64_t whitePieces, uint64_t blackPieces) {
+EvalComponentResult passedPawnEval(const chessPosition* position, const evalParameters* par  __attribute__ ((unused)), const AttackTable* attackTables  __attribute__ ((unused))) {
     //TODO: remove code duplication. Generally this code sucks - too many white/black diffs...
     int32_t eval = 0;
+    uint64_t whitePawns      = position->pieceTables[white][pawn];
+    uint64_t blackPawns      = position->pieceTables[black][pawn];
     uint64_t whitePawnBuffer = whitePawns;
 
+    uint16_t blackKing       =  findLSB(position->pieceTables[black][king]);
+    uint16_t whiteKing       =  findLSB(position->pieceTables[white][king]);
+
+    int16_t untaperedEval = 0;
     while (whitePawnBuffer) {
         uint16_t field = popLSB(whitePawnBuffer);
         if ((getPassedPawnMask(white, field) & blackPawns) == 0) {
             uint16_t promotionField  = FILE(field)+56;
             uint16_t distToPromotion = 7-ROW(field);
             uint16_t kingDist        = distBetweenFields(promotionField, blackKing);
-            bool blocked = blackPieces & BIT64(field+8);
+            bool blocked = position->pieces[black] & BIT64(field+8);
             if (distToPromotion <= 2) {
-                *untaperedEval = *untaperedEval+passedPawnEvalValues[white][field];
+                untaperedEval = untaperedEval+passedPawnEvalValues[white][field];
                                 if (blocked) {
-                                    *untaperedEval = *untaperedEval-passedPawnEvalValues[white][field]/BLOCKEDDIVISOR;
+                                    untaperedEval = untaperedEval-passedPawnEvalValues[white][field]/BLOCKEDDIVISOR;
                                 }
                             } else {
                 eval = eval+passedPawnEvalValues[white][field];
@@ -99,11 +105,11 @@ int16_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint64_t bla
             uint16_t promotionField  = FILE(field);
             uint16_t distToPromotion = ROW(field);
             uint16_t kingDist        = distBetweenFields(promotionField, whiteKing);
-            bool blocked = whitePieces & BIT64(field-8);
+            bool blocked = position->pieces[white] & BIT64(field-8);
             if (distToPromotion <= 2) {
-                *untaperedEval = *untaperedEval-passedPawnEvalValues[black][field];
+                untaperedEval = untaperedEval-passedPawnEvalValues[black][field];
                 if (blocked) {
-                    *untaperedEval = *untaperedEval+passedPawnEvalValues[black][field]/BLOCKEDDIVISOR;
+                    untaperedEval = untaperedEval+passedPawnEvalValues[black][field]/BLOCKEDDIVISOR;
                 }
             } else {
                 eval = eval-passedPawnEvalValues[black][field];
@@ -114,7 +120,12 @@ int16_t passedPawnEval(int32_t* untaperedEval, uint64_t whitePawns, uint64_t bla
             eval  = eval+kingToPromotionFieldDistance[distToPromotion][kingDist];
         }
     }
-    return eval;
+
+    EvalComponentResult result;
+    result.common = untaperedEval;
+    result.endgame = eval;
+    return result;
+
 }
 
 int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOccupancy, const staticPawnEvalParameters* staticPawnParameters) { //all stuff depending only on own pawn structure, not the opponents
@@ -150,7 +161,7 @@ int32_t staticPawnEval(uint64_t pawns, playerColor color, uint8_t* pawnColumnOcc
 }
 
 
-int16_t staticPawnEvaluation(const chessPosition* position, const evalParameters* par  __attribute__ ((unused)), const AttackTable* attackTables  __attribute__ ((unused))) {
+EvalComponentResult staticPawnEvaluation(const chessPosition* position, const evalParameters* par  __attribute__ ((unused)), const AttackTable* attackTables  __attribute__ ((unused))) {
     uint32_t eval = 0;
     int16_t staticPawn = 0;
 
@@ -166,5 +177,7 @@ int16_t staticPawnEvaluation(const chessPosition* position, const evalParameters
     }
     eval = eval+staticPawn;
 
-    return eval;
+    EvalComponentResult result;
+    result.common = eval;
+    return result;
 }

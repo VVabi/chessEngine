@@ -9,8 +9,9 @@
 #include "lib/bitfiddling.h"
 #include "parameters/parameters.hpp"
 #include "lib/Attacks/attacks.hpp"
+#include "lib/Evaluation/evaluation.hpp"
 
-int16_t trappedPieces(const chessPosition* position, const evalParameters* par __attribute__ ((unused)), const AttackTable* attackTables __attribute__ ((unused))) {
+EvalComponentResult trappedPieces(const chessPosition* position, const evalParameters* par __attribute__ ((unused)), const AttackTable* attackTables __attribute__ ((unused))) {
     uint64_t wPawns = position->pieceTables[white][pawn];
     uint64_t bPawns = position->pieceTables[black][pawn];
     uint64_t wKnights = position->pieceTables[white][knight];
@@ -24,74 +25,77 @@ int16_t trappedPieces(const chessPosition* position, const evalParameters* par _
 
     if (wBishops & H7) {
         if ((bPawns & G6) && (bPawns & F7)) {
-            ret = ret-50;
+            ret = ret-1;
         }
     }
 
     if (wBishops & A7) {
         if ((bPawns & B6) && (bPawns & C7)) {
-            ret = ret-50;
+            ret = ret-1;
         }
     }
 
     if (bBishops & H2) {
         if ((wPawns & G3) && (wPawns & F2)) {
-            ret = ret+50;
+            ret = ret+1;
         }
     }
 
     if (bBishops & A2) {
         if ((wPawns & B3) && (wPawns & C2)) {
-            ret = ret+50;
+            ret = ret+1;
         }
     }
 
     if (wKnights & H8) {
         if ((bPawns & (H7 | F7))) {
-            ret = ret-50;
+            ret = ret-1;
         }
     }
 
     if (wKnights & A8) {
         if ((bPawns & (A7 | C7))) {
-            ret = ret-50;
+            ret = ret-1;
         }
     }
 
     if (bKnights & H1) {
         if ((wPawns & (H2 | F2))) {
-            ret = ret+50;
+            ret = ret+1;
         }
     }
 
     if (bKnights & A1) {
         if ((wPawns & (A2 | C2))) {
-            ret = ret+50;
+            ret = ret+1;
         }
     }
 
     if (bRooks & H8) {
         if ((bPawns & (H7 | H6)) && (position->pieceTables[black][king] & G8)) {
-            ret = ret+50;
+            ret = ret+1;
         }
     }
 
     if (bRooks & A8) {
         if ((bPawns & (A7 | A6)) && (position->pieceTables[black][king] & B8)) {
-            ret = ret+50;
+            ret = ret+1;
         }
     }
 
     if (wRooks & H1) {
         if ((wPawns & (H2 | H3)) && (position->pieceTables[white][king] & G1)) {
-            ret = ret-50;
+            ret = ret-1;
         }
     }
 
     if (wRooks & A1) {
         if ((wPawns & (A2 | A3)) && (position->pieceTables[white][king] & B1)) {
-            ret = ret-50;
+            ret = ret-1;
         }
     }
-    return ret;
+    ret  = ret*par->trappedPiecesParameters.trappedValue;
+    EvalComponentResult result;
+    result.common = ret;
+    return result;
 }

@@ -26,27 +26,7 @@ int32_t attacksCloseToKingEvals[] =
 };
 
 #else*/
-int32_t attacksCloseToKingEvals[] =
-{ 0, 0, 1, 2, 3, 5, 8, 10, 13, 20,
- 23, 26, 29, 33, 37, 41, 45, 51, 57, 63,
- 69, 75, 82, 89, 96, 103, 110, 118, 127, 136,
- 145, 154, 163, 172, 181, 190, 199, 208, 217, 216,
- 226, 236, 246, 256, 266, 276, 286, 296, 306, 316,
- 326, 336, 346, 356, 366, 376, 386, 395, 404, 413,
- 421, 429, 437, 441, 450, 450, 450, 450, 450, 450
-};
-//#endif
 
-/*#ifdef EXPERIMENTAL
-int32_t attackScores[6][5] = { {0, 0, 0, 0, 0},
-                               {1, 3, 3, 4, 6},
-                               {2, 4, 4, 5, 9},
-                               {2, 5, 5, 7, 11},
-                               {2, 6, 6, 8, 12},
-                               {0, 0, 0, 0, 0}
-};
-#else*/
-int32_t attackScores[] = {1, 3, 3, 4, 7};
 
 //#endif
 
@@ -157,7 +137,7 @@ static int32_t kingSafetySinglePlayer(const chessPosition* position, const uint8
 }
 
 
-int16_t kingSafety(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables) {
+EvalComponentResult kingSafety(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables) {
     uint8_t pawnColumnOccupancy[2];
 
     for (uint8_t color=0; color < 2; color++) {
@@ -169,6 +149,7 @@ int16_t kingSafety(const chessPosition* position, const evalParameters* par, con
 
     int32_t whiteSafety =  kingSafetySinglePlayer(position, pawnColumnOccupancy, white, &attackTables[black], &par->kingSafetyParameters);
     int32_t blackSafety =  kingSafetySinglePlayer(position, pawnColumnOccupancy, black, &attackTables[white], &par->kingSafetyParameters);
-    int32_t ret =  whiteSafety+blackSafety;
+    EvalComponentResult ret;
+    ret.early_game = whiteSafety+blackSafety;
     return ret;
 }

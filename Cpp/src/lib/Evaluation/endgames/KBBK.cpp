@@ -39,5 +39,19 @@ int16_t KBBK_endgame(const chessPosition* position) {
     uint16_t losingKingField  = findLSB(position->pieceTables[INVERTCOLOR(toWin)][king]);
     eval = eval-getEndgameGamePSQentry(king, INVERTCOLOR(toWin), losingKingField);
     eval = eval+40-10*distBetweenFields(winningKingField, losingKingField);
+
+    uint16_t parity = (position->toMove == toWin ? 0 : 1);
+    uint16_t movesAtBorder = 0;
+    for (int16_t cnt = position->madeMoves.length-1-parity; cnt > 0; cnt = cnt-2) {
+        chessMove mv = position->madeMoves[cnt];
+        if (BIT64(mv.targetField) & (~BOUNDARY)) {
+            break;
+        }
+        movesAtBorder++;
+    }
+
+    eval = eval+10*movesAtBorder;
+
+    eval = eval-position->data.fiftyMoveRuleCounter;
     return (1-2*toWin)*eval;
 }

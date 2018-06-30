@@ -9,8 +9,9 @@
 #include "lib/bitfiddling.h"
 #include "parameters/parameters.hpp"
 #include "lib/Attacks/attacks.hpp"
+#include "lib/Evaluation/evaluation.hpp"
 
-int16_t rookOpenFiles(const chessPosition* position, const evalParameters* evalParams, const AttackTable* attackTables  __attribute__ ((unused))) {
+EvalComponentResult rookOpenFiles(const chessPosition* position, const evalParameters* evalParams, const AttackTable* attackTables  __attribute__ ((unused))) {
     int32_t ret = 0;
 
     uint8_t pawnOccupancy[2];
@@ -37,5 +38,7 @@ int16_t rookOpenFiles(const chessPosition* position, const evalParameters* evalP
         logError("Rook open file value too large: "+ret);
     }
 #endif
-    return ret;
+    EvalComponentResult result;
+    result.common = ret;
+    return result;
 }

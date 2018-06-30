@@ -39,12 +39,12 @@ int16_t KBNK_endgame(const chessPosition* position) {
     uint16_t winningKingField = findLSB(position->pieceTables[toWin][king]);
     uint16_t losingKingField  = findLSB(position->pieceTables[INVERTCOLOR(toWin)][king]);
     uint16_t bishopField      = findLSB(position->pieceTables[toWin][bishop]);
-
-    uint16_t parity = FILE(bishopField)+ROW(bishopField);
+    uint16_t knightField      = findLSB(position->pieceTables[toWin][knight]);
+    uint16_t bishopparity = FILE(bishopField)+ROW(bishopField);
 
     uint16_t good_corners[2];
 
-    if ((parity & 1)) {
+    if ((bishopparity & 1)) {
         good_corners[0] = 56;
         good_corners[1] = 7;
     } else {
@@ -52,11 +52,26 @@ int16_t KBNK_endgame(const chessPosition* position) {
         good_corners[1] = 63;
     }
 
+
+
     uint16_t distToMateField = std::min(distBetweenFields(losingKingField, good_corners[0]), distBetweenFields(losingKingField, good_corners[1]));
 
-    uint16_t kingDist = distBetweenFields(winningKingField, losingKingField);
+    uint16_t parity = (position->toMove == toWin ? 0 : 1);
+    uint16_t movesAtBorder = 0;
+    for (int16_t cnt = position->madeMoves.length-1-parity; cnt > 0; cnt = cnt-2) {
+        chessMove mv = position->madeMoves[cnt];
+        if ((distBetweenFields(good_corners[0], mv.targetField) > 3) && (distBetweenFields(good_corners[1], mv.targetField) > 3))  {
+            break;
+        }
+        movesAtBorder++;
+    }
 
-    eval = eval+100-25*distToMateField+100-10*kingDist;
+    eval = eval+10*movesAtBorder;
+
+    uint16_t kingDist = distBetweenFields(winningKingField, losingKingField);
+    uint16_t knightDist = distBetweenFields(knightField, losingKingField);
+    eval = eval+100-25*distToMateField+100-10*kingDist+100-10*knightDist;
+    eval = eval-position->data.fiftyMoveRuleCounter;
 
     return COLORSIGN(toWin)*eval;
 }

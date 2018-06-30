@@ -10,10 +10,11 @@
 #include "lib/bitfiddling.h"
 #include "parameters/parameters.hpp"
 #include "lib/Attacks/attacks.hpp"
+#include "lib/Evaluation/evaluation.hpp"
 
 #define OUTPOSTVALUE 15
 
-int16_t outposts(const chessPosition* position, const evalParameters* par __attribute__ ((unused)), const AttackTable* attackTables __attribute__ ((unused))) {
+EvalComponentResult outposts(const chessPosition* position, const evalParameters* par __attribute__ ((unused)), const AttackTable* attackTables __attribute__ ((unused))) {
     uint64_t wPawns = position->pieceTables[white][pawn];
     uint64_t bPawns = position->pieceTables[black][pawn];
     uint64_t wKnights = position->pieceTables[white][knight];
@@ -36,5 +37,7 @@ int16_t outposts(const chessPosition* position, const evalParameters* par __attr
     uint64_t wKnightOutposts = wKnights & (~bPawnAttackSpan) & bStops;
 
     ret = ret+OUTPOSTVALUE*popcount(wKnightOutposts);
-    return ret;
+    EvalComponentResult result;
+    result.common = ret;
+    return result;
 }

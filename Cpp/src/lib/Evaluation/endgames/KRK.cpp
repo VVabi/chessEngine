@@ -42,6 +42,54 @@ int16_t KRK_endgame(const chessPosition* position) {
     eval = eval-getEndgameGamePSQentry(king, INVERTCOLOR(toWin), losingKingField);
     eval = eval+40-10*distBetweenFields(winningKingField, losingKingField);
 
+    eval = eval-position->data.fiftyMoveRuleCounter;
+
+
+    uint16_t parity = (position->toMove == toWin ? 0 : 1);
+
+    uint16_t movesAtBorder = 0;
+    for (int16_t cnt = position->madeMoves.length-1-parity; cnt > 0; cnt = cnt-2) {
+        chessMove mv = position->madeMoves[cnt];
+        if (BIT64(mv.targetField) & (~BOUNDARY)) {
+            break;
+        }
+        movesAtBorder++;
+    }
+
+    eval = eval+10*movesAtBorder;
+
+    /*uint16_t rookfield = findLSB(position->pieceTables[toWin][rook]);
+
+    uint16_t rookfile  = FILE(rookfield);
+    uint16_t losingKingFile = FILE(losingKingField);
+    uint16_t winningKingFile = FILE(winningKingField);
+    uint16_t rookrow  = ROW(rookfield);
+    uint16_t losingKingrow = ROW(losingKingField);
+    uint16_t winningKingrow = ROW(winningKingField);
+
+
+    if ((losingKingrow == 7) || (losingKingrow == 0) || (losingKingFile == 0) || (losingKingrow == 7)) {
+        eval = eval+100;
+        if ((losingKingFile+1 == rookfile) && (rookfile+1 == winningKingFile)) {
+            eval = eval+15;
+        }
+
+        if ((losingKingFile-1 == rookfile) && (rookfile-1 == winningKingFile)) {
+            eval = eval+15;
+        }
+
+        if ((losingKingrow+1 == rookrow) && (rookrow+1 == winningKingrow)) {
+             eval = eval+15;
+        }
+
+        if ((losingKingrow-1 == rookrow) && (rookrow-1 == winningKingrow)) {
+             eval = eval+15;
+        }
+
+
+        eval = eval + 5*distBetweenFields(rookfield, losingKingField);
+    }*/
+
     return (1-2*toWin)*eval;
 }
 

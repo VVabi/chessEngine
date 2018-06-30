@@ -62,4 +62,6 @@
 
 #define WIDECENTER (C3 | D3 | E3 | C4 | D4 | E4 | C5 | D5 | E5)
 
+#define BOUNDARY (FILEA | FILEH | FIRSTROW | LASTROW)
+
 #endif /* LIB_DEFINES_BOARDPARTS_HPP_ */

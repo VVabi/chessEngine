@@ -33,7 +33,7 @@ template<typename T> class vdt_vector {
         data = buffer;
     }
 
-    T &operator[](uint32_t i) {
+    T &operator[](uint32_t i) const{
         if (i >= length) {
             std::cout << "vector index out ouf bounds" << std::endl;
             while (1) {

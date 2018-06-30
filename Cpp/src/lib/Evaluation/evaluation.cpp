@@ -20,23 +20,20 @@
 #include "lib/Evaluation/tapering.hpp"
 #include "lib/Evaluation/endgames/endgameEvals.hpp"
 #include "lib/Defines/pieceCombinations.hpp"
-
-enum evaluationType {eval_kingsafety, eval_trapped_pieces, eval_outposts, eval_rookfiles, eval_static_pawns, eval_bishoppair};
-enum taperingDirection {taper_none, taper_endgame_higher, taper_earlygame_higher};
-
-struct EvaluationComponent {
-    int16_t (*evalFunction)(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables);
-    evaluationType type;
-    taperingDirection taperDirection;
-};
+#include "lib/Evaluation/evaluation.hpp"
 
 EvaluationComponent evaluationComponents[] = {
-                            {       &kingSafety,            eval_kingsafety,              taper_earlygame_higher},
-                            {       &trappedPieces,         eval_trapped_pieces,          taper_none},
-                            {       &outposts,              eval_outposts,                taper_none},
-                            {       &rookOpenFiles,         eval_rookfiles,               taper_none},
-                            {       &staticPawnEvaluation,  eval_static_pawns,            taper_none},
-                            {       &bishopPair,            eval_bishoppair,              taper_none},
+                            {       &kingSafety,            eval_kingsafety,            taper_earlygame_higher                                  },
+                            {       &trappedPieces,         eval_trapped_pieces,        taper_none                                              },
+                            {       &outposts,              eval_outposts,              taper_none                                              },
+                            {       &rookOpenFiles,         eval_rookfiles,             taper_none                                              },
+                            {       &staticPawnEvaluation,  eval_static_pawns,          taper_none                                              },
+                            {       &bishopPair,            eval_bishoppair,            taper_none                                              },
+                            {       &passedPawnEval,        eval_passed_pawns,          taper_none  | taper_endgame_higher                      },
+};
+
+SimpleEvaluationComponent simpleEvaluationComponents[] = {
+                            {       &PSQ,             eval_PSQ,           taper_earlygame_higher | taper_endgame_higher},
 };
 
 
@@ -74,14 +71,6 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
     //now normal eval
     //-----------------
     const evalParameters* evalPars = getEvalParameters();
-
-    //evaluation from the point of view of WHITE, sign changed in the end if necessary
-    //--------------------------------------------------------------------------------------
-    int32_t eval = 0;
-    int32_t bufferMidgame =  position->pieceTableEval & 0xFFFF;
-    bufferMidgame         =  bufferMidgame - (1 << 15);
-    int32_t bufferEndgame =  position->pieceTableEval >> 16;
-    bufferEndgame  = bufferEndgame-(1 << 14);
     uint16_t phase = position->totalFigureEval/100;
 
     if (position->pieceTables[white][queen] | position->pieceTables[black][queen]) {
@@ -89,20 +78,31 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
     }
 
     uint16_t tapering = getTaperingValue(phase);
-    int32_t pieceTableEval = ((256-tapering)*bufferEndgame+tapering*bufferMidgame)/256; //division by 256
-    eval = eval+pieceTableEval;
 
-    if (PSQ_only) {
-        return (1-2*position->toMove)*eval;
+    //evaluation from the point of view of WHITE, sign changed in the end if necessary
+    //--------------------------------------------------------------------------------------
+
+    int32_t eval = 0;
+
+    //Simple eval components first
+    //--------------------------------
+    for (uint16_t cnt=0; cnt < sizeof(simpleEvaluationComponents)/sizeof(SimpleEvaluationComponent); cnt++) {
+        const SimpleEvaluationComponent component    = simpleEvaluationComponents[cnt];
+        EvalComponentResult evalValue                = component.evalFunction(position, evalPars);
+        eval = eval+(tapering*evalValue.early_game)/256;
+        eval = eval+((256-tapering)*evalValue.endgame)/256;
+        eval = eval+evalValue.common;
+        //TODO: add check whether all eval values that should be zero are zero
     }
 
     int32_t evalsigned = (1-2*position->toMove)*eval;
 
-    if ((evalsigned < alpha - 500) || (evalsigned > beta+500)) {
-        //std::cout << "Futility pruning in eval" << std::endl;
+    if (PSQ_only || (evalsigned < alpha - 500) || (evalsigned > beta+500)) {
         return evalsigned;
     }
 
+    //now the subtler components
+    //---------------------------
     int16_t mobilityScore = 0;
 
     AttackTable attackTables[2];
@@ -115,23 +115,13 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
 
     for (uint16_t cnt=0; cnt < sizeof(evaluationComponents)/sizeof(EvaluationComponent); cnt++) {
         const EvaluationComponent component    = evaluationComponents[cnt];
-        int32_t evalValue                = component.evalFunction(position, evalPars, attackTables);
-        if (component.taperDirection == taper_earlygame_higher) {
-            evalValue = (tapering*evalValue)/256;
-        } else if (component.taperDirection == taper_endgame_higher) {
-            evalValue = ((256-tapering)*evalValue)/256;
-        }
-        eval = eval+evalValue;
+        EvalComponentResult evalValue          = component.evalFunction(position, evalPars, attackTables);
+
+        eval = eval+(tapering*evalValue.early_game)/256;
+        eval = eval+((256-tapering)*evalValue.endgame)/256;
+        eval = eval+evalValue.common;
+        //TODO: add check whether all eval values that should be zero are zero
     }
-
-
-
-    int32_t untapered = 0;
-    int32_t passedPawns = passedPawnEval(&untapered, position->pieceTables[white][pawn], position->pieceTables[black][pawn], findLSB(position->pieceTables[black][king]), findLSB(position->pieceTables[white][king]), position->pieces[white], position->pieces[black]);
-
-    int16_t passedPawnPhase = std::max((int32_t) phase, 0);
-    passedPawns = ((256-getTaperingValue(passedPawnPhase))*passedPawns)/256;
-    eval = eval+passedPawns+untapered;
 
     if (position->toMove == white) {
         eval = eval+10;

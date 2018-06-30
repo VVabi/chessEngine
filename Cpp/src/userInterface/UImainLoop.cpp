@@ -318,8 +318,8 @@ void handleEval() {
         eval = -eval; //always from POV of white
     }
 
-    /*evalInfo << "Total " << eval;
-    evalInfo << " Material " << cposition.figureEval;
+    evalInfo << "Total " << eval;
+    /*evalInfo << " Material " << cposition.figureEval;
     evalInfo << " PSQ " << res.PSQ-cposition.figureEval;
     evalInfo << " King safety " <<  res.kingSafety;
     evalInfo << " Mobility " << res.mobility;

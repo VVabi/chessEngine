@@ -559,11 +559,11 @@ int16_t negamax(chessPosition* position, plyInfo plyinfo, AlphaBeta alphabeta, p
     //futility pruning
     //-----------------
     if (plyinfo.depth == 1) {
-#ifdef EXPERIMENTAL
+/*#ifdef EXPERIMENTAL
         if (check_futility(movingSideInCheck, alphabeta.alpha, position, 200, 250)) {
-#else
+#else*/
         if (check_futility(movingSideInCheck, alphabeta.alpha, position, 100, 150)) {
-#endif
+//#endif
             PV->numMoves = 0;
             return negamaxQuiescence(position, plyinfo.qply, plyinfo.ply, alphabeta, 0, settings.searchId);
         }

@@ -130,10 +130,14 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
     pvLine line;
     line.numMoves = 0;
     while (checkContinue(params, depth, get_timestamp()-start_ts, totalTime)) {
+
         try {
             //std::cout << "Depth " << depth << std::endl;
 
             *eval = negamax(position, plyInfo(0, depth+EXTENSIONS_ALLOWED, 0, depth), AlphaBeta(alpha, beta), &line, searchSettings(nullmove_enabled, hashprobe_disabled, checkextension_enabled, searchId));
+
+
+
             if (doAspiration) {
                 if ((*eval <= alpha) || (*eval >= beta)) {
                     *eval = negamax(position, plyInfo(0, depth+EXTENSIONS_ALLOWED, 0, depth), AlphaBeta(-32000, 32000), &line, searchSettings(nullmove_enabled, hashprobe_disabled, checkextension_enabled, searchId));
@@ -144,6 +148,8 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
             }
 
             *bestMove = line.line[0];
+
+
             /*chessMove localBestMove;
 
             uint64_t* nodeCounts = new uint64_t[moves.length];
@@ -235,6 +241,10 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
         if (*eval > 29000) {
             break;
         }
+
+        /*if ((depth > 6) && (previousEval < *eval-10)) { FOR SPECIAL ENDGAMES! Otherwise we dont make progress...
+          break;
+        }*/
     }
 
     depth--;
