@@ -20,21 +20,29 @@ struct kingSafetyEvalParameters {
     int16_t selfopenfilenexttoking;
     int16_t opponentopenfiletoking;
     int16_t opponentopenfilenexttoking;
-    int32_t attacksCloseToKingEvals[70];
-    int32_t attackScores[5];
+    int16_t attacksCloseToKingEvals[70];
+    int16_t attackScores[5];
 };
 
 struct trappedPiecesEvalParameters {
     int16_t trappedValue;
 };
 
+struct passedPawnEvalParameters {
+    int16_t passedPawnEvalValues[2][64];
+    int16_t kingToPromotionFieldDistance[7][7];
+};
+
+
 struct evalParameters {
     int16_t figureValues[7];
     int16_t bishoppair;
     int16_t rookOnOpenFile;
+    int16_t outposts;
     staticPawnEvalParameters staticPawnParameters;
     kingSafetyEvalParameters kingSafetyParameters;
     trappedPiecesEvalParameters  trappedPiecesParameters;
+    passedPawnEvalParameters passedPawnParameters;
 };
 
 extern evalParameters evaluationParameters;

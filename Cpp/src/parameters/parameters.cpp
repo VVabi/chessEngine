@@ -18,7 +18,7 @@
 evalParameters evaluationParameters;
 preParameters par;
 
-static int32_t attacksCloseToKingEvals[] =
+static int16_t attacksCloseToKingEvals[] =
 { 0, 0, 1, 2, 3, 5, 8, 10, 13, 20,
  23, 26, 29, 33, 37, 41, 45, 51, 57, 63,
  69, 75, 82, 89, 96, 103, 110, 118, 127, 136,
@@ -28,7 +28,37 @@ static int32_t attacksCloseToKingEvals[] =
  421, 429, 437, 441, 450, 450, 450, 450, 450, 450
 };
 
-static int32_t attackScores[] = {1, 3, 3, 4, 7};
+static int16_t attackScores[] = {1, 3, 3, 4, 7};
+
+static int16_t const passedPawnEvalValues[2][64] = {
+        { 0, 0, 0, 0, 0, 0, 0, 0,
+          8, 7, 6, 5, 5, 6, 7, 8,
+          16, 15, 14, 13, 13, 14, 15, 16,
+          31, 29, 27, 25, 25, 27, 29, 31,
+          47, 44, 42, 40, 40, 42, 44, 47,
+          90, 89, 84, 80, 80, 84, 89, 90,
+          135, 131, 128, 125, 125, 128, 131, 135,
+          0 , 0, 0, 0, 0, 0, 0, 0 },
+        { 0, 0, 0, 0, 0, 0, 0, 0,
+         135, 131, 128, 125, 125, 128, 131, 135,
+         90, 89, 84, 80, 80, 84, 89, 90,
+          47, 44, 42, 40, 40, 42, 44, 47,
+          31, 29, 27, 25, 25, 27, 29, 31,
+          16, 15, 14, 13, 13, 14, 15, 16,
+          8, 7, 6, 5, 5, 6, 7, 8,
+          0, 0, 0, 0, 0, 0, 0, 0 }
+};
+
+
+static int16_t kingToPromotionFieldDistance[7][7] = {  // [dist to promotion][king distance from promotion field
+        {0, 0, 0, 0, 0, 0, 0 }, //never happens
+        {0, 0, -10, -20, -30, -45, -60},
+        {0, 0, -5, -10, -15, -25, -40 },
+        {0, 0, 0, -5, -10, -15, -25 },
+        {0, 0, 0, 0, -5, -10, -15 },
+        {0, 0, 0, 0, -5, -5, -10 },
+        {0, 0, 0, 0, -5, -5, -10 },
+};
 
 
 void paramDefaultInit(preParameters* par) {
@@ -47,6 +77,7 @@ void paramDefaultInit(preParameters* par) {
     par->selfopenfilenexttoking     = SELFOPENFILENEXTTOKING;
     par->selfopenfiletoking         = SELFOPENFILETOKING;
     par->trappedPieces              = 50;
+    par->outposts                   = 15;
 }
 
 preParameters* getPreParameters() {
@@ -68,6 +99,8 @@ kingSafetyEvalParameters initializeKingSafetyParameters(const preParameters par)
     ret.opponentopenfiletoking     = par.opponentopenfiletoking;
     ret.selfopenfilenexttoking     = par.selfopenfilenexttoking;
     ret.selfopenfiletoking         = par.selfopenfiletoking;
+    memcpy(ret.attacksCloseToKingEvals, attacksCloseToKingEvals, sizeof(attacksCloseToKingEvals));
+    memcpy(ret.attackScores, attackScores, sizeof(attackScores));
     return ret;
 }
 
@@ -84,6 +117,10 @@ void initializeDependentParameters(preParameters par) {
     evaluationParameters.staticPawnParameters       = initializeStaticPawnParameters(par);
     evaluationParameters.kingSafetyParameters       = initializeKingSafetyParameters(par);
     evaluationParameters.trappedPiecesParameters.trappedValue = par.trappedPieces;
+    evaluationParameters.outposts                   = par.outposts;
+
+    memcpy(evaluationParameters.passedPawnParameters.passedPawnEvalValues, passedPawnEvalValues, sizeof(passedPawnEvalValues));
+    memcpy(evaluationParameters.passedPawnParameters.kingToPromotionFieldDistance, kingToPromotionFieldDistance, sizeof(kingToPromotionFieldDistance));
     for (uint16_t type = 0; type < 6; type++) {
         for (uint16_t field = 0; field < 32; field++) {
             int16_t value = getRawPieceTableEntry(type, field);

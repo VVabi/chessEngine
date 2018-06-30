@@ -14,29 +14,9 @@
 #include "lib/Attacks/attacks.hpp"
 #include "lib/moveGeneration/nonSliderMoveTables.hpp"
 
-/*#ifdef EXPERIMENTAL
-int32_t attacksCloseToKingEvals[] =
-{ 0, 0, 1, 2, 3, 4, 5, 6, 7, 9,
- 11, 13, 16, 20, 24, 28, 32, 36, 40, 44,
- 48, 52, 56, 60, 64, 68, 72, 76, 80, 85,
- 91, 97, 103, 109, 115, 121, 127, 134, 142,
- 152, 163, 175, 188, 202, 217, 232, 246, 260,
- 273, 286, 299, 312, 324, 336, 348, 360, 372, 384,
- 392, 400, 405, 410, 410, 410, 410, 410, 410, 410
-};
-
-#else*/
-
-
-//#endif
-
-
-//int32_t attacksCloseToKingEvals[] = {0, 10, 20, 40, 80, 150, 230, 350, 400, 500, 600};
-
-
-static int32_t kingSafetySinglePlayer(const chessPosition* position, const uint8_t* pawnColumnOccupancy,
+static int16_t kingSafetySinglePlayer(const chessPosition* position, const uint8_t* pawnColumnOccupancy,
         playerColor playingSide, const AttackTable* opponentAttackTable, const kingSafetyEvalParameters* par) {
-    int32_t ret = 0;
+    int16_t ret = 0;
     //pawn shield
     uint16_t kingField = findLSB(position->pieceTables[playingSide][king]);
     uint16_t kingFile = FILE(kingField);
@@ -65,74 +45,24 @@ static int32_t kingSafetySinglePlayer(const chessPosition* position, const uint8
             ret = ret+par->opponentopenfilenexttoking;
         }
     }
-    /*uint64_t relevant_files = files[FILE(kingField)];
-    if (kingFile > 0) {
-        relevant_files = relevant_files | files[FILE(kingField-1)];
-    }
 
-    if (kingFile < 7) {
-        relevant_files = relevant_files | files[FILE(kingField+1)];
-    }*/
-
-
-    /*uint64_t opponentPieces = position->pieces[1-playingSide];
-    uint64_t opponentQueens = position->pieceTables[1-playingSide][queen];*/
 
     uint64_t kingmoves = getKingMoves(kingField);
     kingmoves = kingmoves | BIT64(kingField);
-/*#ifdef EXPERIMENTAL
-    if (playingSide == white) {
-        kingmoves = kingmoves | (kingmoves << 8);
-    } else {
-        kingmoves = kingmoves | (kingmoves >> 8);
-    }
-#endif*/
+
     uint16_t kingAttackScore = 0;
 
     for (uint16_t pieceType = 0; pieceType < 5; pieceType++) {
         uint64_t attacks = opponentAttackTable->attackTables[pieceType] & kingmoves;
-
-/*#ifdef EXPERIMENTAL
-        uint16_t numAttacks = popcount(attacks);
-        if (numAttacks > 4) {
-            numAttacks = 4;
-        }
-        kingAttackScore = kingAttackScore+attackScores[numAttacks][pieceType];
-#else*/
-    kingAttackScore = kingAttackScore+popcount(attacks)*attackScores[pieceType];
-//#endif
+        kingAttackScore = kingAttackScore+popcount(attacks)*par->attackScores[pieceType];
     }
 
 
     if (kingAttackScore >= 70) {
         kingAttackScore = 69;
     }
-/*#ifdef EXPERIMENTAL
-    ret = ret-(3*attacksCloseToKingEvals[kingAttackScore])/2;
-#else*/
-    ret = ret-attacksCloseToKingEvals[kingAttackScore];
-//#endif
 
-    /*uint64_t attacks = opponentAttackTable->completeAttackTable & kingmoves;
-    ret = ret-attacksCloseToKingEvals[popcount(attacks)];*/
-/*#ifdef EXPERIMENTAL
-    if ((FILE(kingField) != 3) && FILE(kingField) != 4) {
-        uint64_t oppPawns = position->pieceTables[INVERTCOLOR(playingSide)][pawn];
-
-        uint64_t mask = kingmoves;
-        int16_t shifted = 0;
-        if (playingSide == white) {
-            shifted = kingField+16;
-        } else {
-            shifted = kingField-16;
-        }
-        if ((shifted < 64) && (shifted > -1)) {
-            mask = mask | getKingMoves(shifted);
-        }
-        uint16_t numPawns = popcount(mask & oppPawns);
-        ret = ret-numPawns;
-    }
-#endif*/
+    ret = ret-par->attacksCloseToKingEvals[kingAttackScore];
     return (1-2*playingSide)*ret;
 }
 
@@ -147,8 +77,8 @@ EvalComponentResult kingSafety(const chessPosition* position, const evalParamete
         pawnColumnOccupancy[color] = (uint8_t) (pawns & 0xFF);
     }
 
-    int32_t whiteSafety =  kingSafetySinglePlayer(position, pawnColumnOccupancy, white, &attackTables[black], &par->kingSafetyParameters);
-    int32_t blackSafety =  kingSafetySinglePlayer(position, pawnColumnOccupancy, black, &attackTables[white], &par->kingSafetyParameters);
+    int16_t whiteSafety =  kingSafetySinglePlayer(position, pawnColumnOccupancy, white, &attackTables[black], &par->kingSafetyParameters);
+    int16_t blackSafety =  kingSafetySinglePlayer(position, pawnColumnOccupancy, black, &attackTables[white], &par->kingSafetyParameters);
     EvalComponentResult ret;
     ret.early_game = whiteSafety+blackSafety;
     return ret;

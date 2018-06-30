@@ -17,36 +17,6 @@
 
 uint64_t files[] = {FILEA, FILEB, FILEC, FILED, FILEE, FILEF, FILEG, FILEH};
 
-static int16_t const passedPawnEvalValues[2][64] = {
-        { 0, 0, 0, 0, 0, 0, 0, 0,
-          8, 7, 6, 5, 5, 6, 7, 8,
-          16, 15, 14, 13, 13, 14, 15, 16,
-          31, 29, 27, 25, 25, 27, 29, 31,
-          47, 44, 42, 40, 40, 42, 44, 47,
-          90, 89, 84, 80, 80, 84, 89, 90,
-          135, 131, 128, 125, 125, 128, 131, 135,
-          0 , 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0,
-         135, 131, 128, 125, 125, 128, 131, 135,
-         90, 89, 84, 80, 80, 84, 89, 90,
-          47, 44, 42, 40, 40, 42, 44, 47,
-          31, 29, 27, 25, 25, 27, 29, 31,
-          16, 15, 14, 13, 13, 14, 15, 16,
-          8, 7, 6, 5, 5, 6, 7, 8,
-          0, 0, 0, 0, 0, 0, 0, 0 }
-};
-
-
-static int16_t kingToPromotionFieldDistance[7][7] = {  // [dist to promotion][king distance from promotion field
-        {0, 0, 0, 0, 0, 0, 0 }, //never happens
-        {0, 0, -10, -20, -30, -45, -60},
-        {0, 0, -5, -10, -15, -25, -40 },
-        {0, 0, 0, -5, -10, -15, -25 },
-        {0, 0, 0, 0, -5, -10, -15 },
-        {0, 0, 0, 0, -5, -5, -10 },
-        {0, 0, 0, 0, -5, -5, -10 },
-};
-
 static uint16_t distBetweenFields(uint16_t a, uint16_t b) {
     uint16_t fileA = FILE(a);
     uint16_t rowA  = ROW(a);
@@ -85,17 +55,17 @@ EvalComponentResult passedPawnEval(const chessPosition* position, const evalPara
             uint16_t kingDist        = distBetweenFields(promotionField, blackKing);
             bool blocked = position->pieces[black] & BIT64(field+8);
             if (distToPromotion <= 2) {
-                untaperedEval = untaperedEval+passedPawnEvalValues[white][field];
+                untaperedEval = untaperedEval+par->passedPawnParameters.passedPawnEvalValues[white][field];
                                 if (blocked) {
-                                    untaperedEval = untaperedEval-passedPawnEvalValues[white][field]/BLOCKEDDIVISOR;
+                                    untaperedEval = untaperedEval-par->passedPawnParameters.passedPawnEvalValues[white][field]/BLOCKEDDIVISOR;
                                 }
                             } else {
-                eval = eval+passedPawnEvalValues[white][field];
+                eval = eval+par->passedPawnParameters.passedPawnEvalValues[white][field];
                     if (blocked) {
-                        eval = eval-passedPawnEvalValues[white][field]/BLOCKEDDIVISOR;
+                        eval = eval-par->passedPawnParameters.passedPawnEvalValues[white][field]/BLOCKEDDIVISOR;
                     }
             }
-            eval = eval-kingToPromotionFieldDistance[distToPromotion][kingDist];
+            eval = eval-par->passedPawnParameters.kingToPromotionFieldDistance[distToPromotion][kingDist];
         }
     }
     uint64_t blackPawnBuffer = blackPawns;
@@ -107,17 +77,17 @@ EvalComponentResult passedPawnEval(const chessPosition* position, const evalPara
             uint16_t kingDist        = distBetweenFields(promotionField, whiteKing);
             bool blocked = position->pieces[white] & BIT64(field-8);
             if (distToPromotion <= 2) {
-                untaperedEval = untaperedEval-passedPawnEvalValues[black][field];
+                untaperedEval = untaperedEval-par->passedPawnParameters.passedPawnEvalValues[black][field];
                 if (blocked) {
-                    untaperedEval = untaperedEval+passedPawnEvalValues[black][field]/BLOCKEDDIVISOR;
+                    untaperedEval = untaperedEval+par->passedPawnParameters.passedPawnEvalValues[black][field]/BLOCKEDDIVISOR;
                 }
             } else {
-                eval = eval-passedPawnEvalValues[black][field];
+                eval = eval-par->passedPawnParameters.passedPawnEvalValues[black][field];
                     if (blocked) {
-                        eval = eval+passedPawnEvalValues[black][field]/BLOCKEDDIVISOR;
+                        eval = eval+par->passedPawnParameters.passedPawnEvalValues[black][field]/BLOCKEDDIVISOR;
                     }
             }
-            eval  = eval+kingToPromotionFieldDistance[distToPromotion][kingDist];
+            eval  = eval+par->passedPawnParameters.kingToPromotionFieldDistance[distToPromotion][kingDist];
         }
     }
 

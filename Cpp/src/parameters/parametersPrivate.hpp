@@ -26,6 +26,7 @@ struct preParameters {
     int64_t opponentopenfiletoking;
     int64_t opponentopenfilenexttoking;
     int64_t trappedPieces;
+    int64_t outposts;
 };
 
 
