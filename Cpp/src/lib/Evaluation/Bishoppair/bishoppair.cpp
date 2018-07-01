@@ -24,6 +24,10 @@ EvalComponentResult bishopPair(const chessPosition* position, const evalParamete
         ret = ret-par->bishoppair;
     }
     EvalComponentResult result;
+#ifdef EXPERIMENTAL
     result.common = ret;
+#else
+    result.common = (2*ret)/10;
+#endif
     return result;
 }

@@ -80,6 +80,11 @@ EvalComponentResult kingSafety(const chessPosition* position, const evalParamete
     int16_t whiteSafety =  kingSafetySinglePlayer(position, pawnColumnOccupancy, white, &attackTables[black], &par->kingSafetyParameters);
     int16_t blackSafety =  kingSafetySinglePlayer(position, pawnColumnOccupancy, black, &attackTables[white], &par->kingSafetyParameters);
     EvalComponentResult ret;
+#ifdef EXPERIMENTAL
+    ret.early_game = (4*(whiteSafety+blackSafety))/10;
+#else
     ret.early_game = whiteSafety+blackSafety;
+#endif
+
     return ret;
 }

@@ -72,10 +72,18 @@ std::map<evaluationType, DetailedEvaluationResultComponent> getDetailedEvalResul
     AttackTable attackTables[2];
     int16_t eval = 0;
     attackTables[white] = makeAttackTableWithMobility(position, white, &mobilityScore);
+#ifdef EXPERIMENTAL
+    eval = eval+(8*mobilityScore)/10;
+#else
     eval = eval+mobilityScore;
+#endif
     mobilityScore = 0;
     attackTables[black] = makeAttackTableWithMobility(position, black, &mobilityScore);
+#ifdef EXPERIMENTAL
+    eval = eval-(8*mobilityScore)/10;
+#else
     eval = eval-mobilityScore;
+#endif
 
     DetailedEvaluationResultComponent detailedResults;
     detailedResults.components.common  = eval;

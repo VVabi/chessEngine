@@ -16,47 +16,53 @@ import java.io.FileWriter
 
 fun main(args: Array<String>) {
 
-    var f = File("/home/vabi/test.txt")
+    /*var f = File("/home/vabi/test.txt")
 
     var lines = f.readLines()
 
 
 
-    var csvstring = ""
-
+    var csvstring = StringBuilder()
+    val localEngine = ChessEngine("/home/vabi/code/chessEngine/Cpp/Release/Vabi", "/home/vabi")
     for (line in lines) {
-        val localEngine = ChessEngine("/home/vabi/code/chessEngine/Cpp/Release/Vabi", "/home/vabi")
 
+        println(line)
         localEngine.setPosition(line, mutableListOf())
         if (!localEngine.isPositionQuiet()) {
-            println("BÖÖP")
-        } else {
-            println("DOOO")
+            continue
+        }
+
+        var stockfisheval = getStockfishEval(line)
+
+        if ((stockfisheval > 200) || (stockfisheval < -200)) {
+            continue
         }
         var answer = localEngine.getEvalDetails()
         var values = answer.split(' ')
-        csvstring = csvstring+"\n"
+        csvstring.append("\n")
        // println(answer)
         var first = false
         for (value in values) {
             try {
                 var n = Integer.parseInt(value)
                 if (first) {
-                    csvstring = csvstring+", "
+                    csvstring.append(", ")
                 }
                 first = true
-                csvstring=csvstring+n.toString()
+                csvstring.append(n)
             } catch (e: Exception) {
 
             }
         }
+
+        csvstring.append(", "+stockfisheval.toString())
     }
 
 
     var fileWriter = FileWriter("/home/vabi/chess.csv")
-    fileWriter.write(csvstring)
+    fileWriter.write(csvstring.toString())
     fileWriter.flush()
-    fileWriter.close()
+    fileWriter.close()*/
 
 
     launchGui()
