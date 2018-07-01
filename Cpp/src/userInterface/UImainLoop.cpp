@@ -309,6 +309,59 @@ void handlePosition(std::list<std::string> input) {
     memoryLibrarianAdd(fen, moveList);
 }
 
+// eval_kingsafety, eval_trapped_pieces, eval_outposts, eval_rookfiles, eval_static_pawns, eval_bishoppair, eval_PSQ, eval_passed_pawns, eval_mobility
+
+std::string toString(const evaluationType type) {
+
+    switch (type) {
+        case eval_kingsafety:
+            return "king safety";
+            break;
+        case eval_outposts:
+            return "outposts";
+            break;
+        case eval_trapped_pieces:
+            return "trapped pieces";
+            break;
+        case eval_rookfiles:
+            return "rook files";
+            break;
+        case eval_static_pawns:
+            return "static pawn";
+            break;
+        case eval_bishoppair:
+            return "bishop pair";
+            break;
+        case eval_PSQ:
+            return "PSQ";
+            break;
+        case eval_passed_pawns:
+            return "passed pawns";
+            break;
+        case eval_mobility:
+            return "mobility";
+            break;
+    }
+
+    return ""; //Unreachable
+}
+void handlecheckquiet() {
+    chessPosition cposition = memoryLibrarianRetrievePosition();
+    int32_t eval = evaluation(&cposition, -32000, 32000);
+    AlphaBeta alphabeta;
+    alphabeta.alpha = -32000;
+    alphabeta.beta  =  32000;
+    int32_t qeval = negamaxQuiescence(&cposition, 0, 0, alphabeta, 0, 0);
+
+    if (eval == qeval) {
+        putLine("true");
+    } else {
+        putLine("false");
+    }
+    free_position(&cposition);
+}
+
+
 void handleEval() {
     chessPosition cposition = memoryLibrarianRetrievePosition();
     int32_t eval = evaluation(&cposition, -32000, 32000);
@@ -319,16 +372,11 @@ void handleEval() {
     }
 
     evalInfo << "Total " << eval;
-    /*evalInfo << " Material " << cposition.figureEval;
-    evalInfo << " PSQ " << res.PSQ-cposition.figureEval;
-    evalInfo << " King safety " <<  res.kingSafety;
-    evalInfo << " Mobility " << res.mobility;
-    evalInfo << " Pawns " << res.staticPawn;
-    evalInfo << " Passed pawns " << res.passedPawn;
-    evalInfo << " rook open files " << res.rookOpenFiles;
-    evalInfo << " bishoppair " << res.bishoppair;
-    evalInfo << " Trapped pieces " << res.trappedPieces;
-    evalInfo << " Outposts " << res.outPosts;*/
+    auto evalMap = getDetailedEvalResults(&cposition);
+
+    for (auto const& entry: evalMap) {
+        std::cout << toString(entry.first) << " " << entry.second.eval << " ";
+    }
     putLine(evalInfo.str());
     free_position(&cposition);
 }
@@ -509,6 +557,9 @@ void UIloop() {
                     break;
                 case getMoveOrdering:
                     handleGetMoveOrdering();
+                    break;
+                case checkquiet:
+                    handlecheckquiet();
                     break;
                 default:
                     putLine("Not yet implemented");

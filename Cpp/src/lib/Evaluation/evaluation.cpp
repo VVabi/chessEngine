@@ -1,4 +1,5 @@
 /*
+
  * evaluation.cpp
  *
  *  Created on: Sep 25, 2016
@@ -35,6 +36,71 @@ EvaluationComponent evaluationComponents[] = {
 SimpleEvaluationComponent simpleEvaluationComponents[] = {
                             {       &PSQ,             eval_PSQ,           taper_earlygame_higher | taper_endgame_higher},
 };
+
+
+std::map<evaluationType, DetailedEvaluationResultComponent> getDetailedEvalResults(const chessPosition* position) {
+    std::map<evaluationType, DetailedEvaluationResultComponent> ret;
+
+    const evalParameters* evalPars = getEvalParameters();
+    uint16_t phase = position->totalFigureEval/100;
+
+    if (position->pieceTables[white][queen] | position->pieceTables[black][queen]) {
+        phase = phase+5;
+    }
+
+    uint16_t tapering = getTaperingValue(phase);
+
+    for (uint16_t cnt=0; cnt < sizeof(simpleEvaluationComponents)/sizeof(SimpleEvaluationComponent); cnt++) {
+        const SimpleEvaluationComponent component    = simpleEvaluationComponents[cnt];
+        EvalComponentResult evalValue                = component.evalFunction(position, evalPars);
+        int16_t eval = 0;
+        eval = eval+(tapering*evalValue.early_game)/256;
+        eval = eval+((256-tapering)*evalValue.endgame)/256;
+        eval = eval+evalValue.common;
+
+        DetailedEvaluationResultComponent detailedResults;
+        detailedResults.components      = evalValue;
+        detailedResults.eval            = eval;
+        detailedResults.taperingValue   = tapering;
+        ret[component.type] = detailedResults;
+    }
+
+    //now the subtler components
+    //---------------------------
+    int16_t mobilityScore = 0;
+
+    AttackTable attackTables[2];
+    int16_t eval = 0;
+    attackTables[white] = makeAttackTableWithMobility(position, white, &mobilityScore);
+    eval = eval+mobilityScore;
+    mobilityScore = 0;
+    attackTables[black] = makeAttackTableWithMobility(position, black, &mobilityScore);
+    eval = eval-mobilityScore;
+
+    DetailedEvaluationResultComponent detailedResults;
+    detailedResults.components.common  = eval;
+    detailedResults.eval               = eval;
+    detailedResults.taperingValue      = tapering;
+    ret[eval_mobility] =detailedResults;
+
+    for (uint16_t cnt=0; cnt < sizeof(evaluationComponents)/sizeof(EvaluationComponent); cnt++) {
+        const EvaluationComponent component    = evaluationComponents[cnt];
+        EvalComponentResult evalValue          = component.evalFunction(position, evalPars, attackTables);
+
+        int16_t eval = 0;
+        eval = eval+(tapering*evalValue.early_game)/256;
+        eval = eval+((256-tapering)*evalValue.endgame)/256;
+        eval = eval+evalValue.common;
+        DetailedEvaluationResultComponent detailedResults;
+        detailedResults.components      = evalValue;
+        detailedResults.eval            = eval;
+        detailedResults.taperingValue   = tapering;
+        ret[component.type] = detailedResults;
+    }
+
+    return ret;
+
+}
 
 
 int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, bool PSQ_only) {
@@ -123,11 +189,11 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
         //TODO: add check whether all eval values that should be zero are zero
     }
 
-    if (position->toMove == white) {
+    /*if (position->toMove == white) {
         eval = eval+10;
     } else {
         eval = eval-10;
-    }
+    }*/
 
 #ifdef RANDOMEVAL
     eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?

@@ -1,5 +1,6 @@
 package EngineHandling
 
+import com.sun.org.apache.xpath.internal.operations.Bool
 import java.util.ArrayList
 
 /**
@@ -114,5 +115,11 @@ class ChessEngine(path: String, workingDirectory: String) {
         uciEngine.put("eval")
         val answer = uciEngine.readAnswer()
         return answer
+    }
+
+    fun isPositionQuiet(): Boolean {
+        uciEngine.put("checkquiet")
+        val answer = uciEngine.readAnswer()
+        return answer.equals("true")
     }
 }

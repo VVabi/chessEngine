@@ -10,7 +10,7 @@
 
 #include <lib/Attacks/attacks.hpp>
 #include <parameters/parameters.hpp>
-
+#include <map>
 
 
 struct EvalComponentResult {
@@ -25,9 +25,8 @@ struct EvalComponentResult {
     }
 };
 
-enum evaluationType {eval_kingsafety, eval_trapped_pieces, eval_outposts, eval_rookfiles, eval_static_pawns, eval_bishoppair, eval_PSQ, eval_passed_pawns};
+enum evaluationType {eval_kingsafety, eval_trapped_pieces, eval_outposts, eval_rookfiles, eval_static_pawns, eval_bishoppair, eval_PSQ, eval_passed_pawns, eval_mobility};
 enum taperingDirection {taper_none=0, taper_endgame_higher=1, taper_earlygame_higher=2};
-
 
 
 struct EvaluationComponent {
@@ -42,8 +41,15 @@ struct SimpleEvaluationComponent {
     uint16_t taper_flags;
 };
 
-int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, bool PSQ_only = false);
+struct DetailedEvaluationResultComponent {
+    EvalComponentResult components;
+    int16_t eval;
+    int16_t taperingValue;
+};
 
+
+int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, bool PSQ_only = false);
+std::map<evaluationType, DetailedEvaluationResultComponent> getDetailedEvalResults(const chessPosition* position);
 int32_t staticPawnEval(uint64_t pawns, playerColor color, const staticPawnEvalParameters* evalPars);
 
 

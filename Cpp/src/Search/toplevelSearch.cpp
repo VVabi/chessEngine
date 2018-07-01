@@ -95,6 +95,9 @@ bool checkContinue(searchParameters params, uint16_t depth, uint16_t passedTime,
 
 #define EXTENSIONS_ALLOWED 7  //TODO: investigate why going to 5 is not significantly better??
 
+
+uint32_t cnt = 0;
+
 uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval, bool doAspiration, searchParameters params) {
 /*#ifdef EXPERIMENTAL
 
@@ -105,6 +108,16 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
     //TODO: refactor this function
     /*killerTable* table = getKillerTable();
     table->clear();*/
+    /*cnt++;
+
+    if ((cnt % 10) == 0) {
+        std::ofstream logging;
+        logging.open ("test.txt", std::ofstream::out | std::ofstream::app);
+        logging << chessPositionToFenString(*position, true) << std::endl;
+        logging.flush();
+        logging.close();
+    }*/
+
     resetSearchData();
     resetQuiescenceNodes();
     uint64_t start_ts  = get_timestamp();
