@@ -33,17 +33,23 @@ struct EvaluationComponent {
     EvalComponentResult (*evalFunction)(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables);
     evaluationType type;
     uint16_t taper_flags;
+    int16_t coefficient_common;
+    int16_t coefficient_earlygame;
+    int16_t coefficient_endgame;
 };
 
 struct SimpleEvaluationComponent {
     EvalComponentResult (*evalFunction)(const chessPosition* position, const evalParameters* par);
     evaluationType type;
     uint16_t taper_flags;
+    int16_t coefficient_common;
+    int16_t coefficient_earlygame;
+    int16_t coefficient_endgame;
 };
 
 struct DetailedEvaluationResultComponent {
     EvalComponentResult components;
-    int16_t eval;
+    int32_t eval;
     int16_t taperingValue;
 };
 

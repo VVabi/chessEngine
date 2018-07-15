@@ -39,10 +39,7 @@ EvalComponentResult rookOpenFiles(const chessPosition* position, const evalParam
     }
 #endif
     EvalComponentResult result;
-#ifdef EXPERIMENTAL
-    result.common = (4*ret)/10;
-#else
     result.common = ret;
-#endif
+
     return result;
 }

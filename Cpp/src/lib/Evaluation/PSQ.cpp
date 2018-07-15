@@ -34,13 +34,8 @@ EvalComponentResult PSQ(const chessPosition* position, const evalParameters* par
     bufferMidgame         =  bufferMidgame - (1 << 15);
     EvalComponentResult ret;
     ret.common = 0;
-#ifdef EXPERIMENTAL
-    ret.early_game = ((bufferMidgame-position->figureEval)*4)/10+position->figureEval;
-    ret.endgame    = ((bufferEndgame-position->figureEval)*4)/10+position->figureEval;
-#else
     ret.early_game = bufferMidgame;
     ret.endgame    = bufferEndgame;
-#endif
 
     return ret;
 }

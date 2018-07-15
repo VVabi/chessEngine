@@ -92,13 +92,9 @@ EvalComponentResult passedPawnEval(const chessPosition* position, const evalPara
     }
 
     EvalComponentResult result;
-#ifdef EXPERIMENTAL
-    result.common =(6*untaperedEval)/10;
-    result.endgame = (6*eval)/10;
-#else
     result.common = untaperedEval;
     result.endgame = eval;
-#endif
+
     return result;
 
 }
@@ -153,10 +149,7 @@ EvalComponentResult staticPawnEvaluation(const chessPosition* position, const ev
     eval = eval+staticPawn;
 
     EvalComponentResult result;
-#ifdef EXPERIMENTAL
-    result.common = eval/10;
-#else
+
     result.common = eval;
-#endif
     return result;
 }
