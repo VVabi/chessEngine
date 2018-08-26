@@ -44,6 +44,7 @@ void initUserEvents() {
     userEventList["quit"]               = quit;
     userEventList["perft"]              = perft;
     userEventList["eval"]               = eval;
+    userEventList["detailedeval"]       = detailedeval;
     userEventList["pawneval"]           = pawnEval;
     userEventList["see"]                = see;
     userEventList["clear"]              = clear;

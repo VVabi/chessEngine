@@ -1,7 +1,12 @@
 package EngineHandling
 
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.sun.org.apache.xpath.internal.operations.Bool
 import java.util.ArrayList
+import com.google.gson.JsonParser
+
+
 
 /**
  * Created by vabi on 29.05.17. Abstract a chess engine (currently UCI only)
@@ -107,8 +112,9 @@ class ChessEngine(path: String, workingDirectory: String) {
     fun getEval(): Int {
         uciEngine.put("eval")
         val answer = uciEngine.readAnswer()
-        val parts = answer.split(" ")
-        return Integer.parseInt(parts[1])
+        var jsonParser = JsonParser()
+        var jsonTree   = jsonParser.parse(answer).asJsonObject
+        return jsonTree["Total"].asInt
     }
 
     fun getEvalDetails(): String {

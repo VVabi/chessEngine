@@ -40,6 +40,7 @@
 #include <parameters/externalParamReader.hpp>
 #include <string>
 #include <Search/killerMoves.hpp>
+#include "userInterface/json/json.h"
 
 template <typename T>
 T StringToNumber(const std::string &Text) {
@@ -366,18 +367,62 @@ void handleEval() {
     chessPosition cposition = memoryLibrarianRetrievePosition();
     int32_t eval = evaluation(&cposition, -32000, 32000);
 
-    std::stringstream evalInfo;
     if (cposition.toMove == black) {
         eval = -eval; //always from POV of white
     }
 
-    evalInfo << "Total " << eval;
     auto evalMap = getDetailedEvalResults(&cposition);
 
+    Json::Value root;
+
+    root["Total"] = eval;
     for (auto const& entry: evalMap) {
-        std::cout << toString(entry.first) << " " << entry.second.eval << " ";
+        root[toString(entry.first)] = entry.second.eval/256;
     }
-    putLine(evalInfo.str());
+    Json::StreamWriterBuilder builder;
+    builder["commentStyle"] = "None";
+    builder["indentation"] = "";  // or whatever you like
+    putLine(Json::writeString(builder, root));
+    free_position(&cposition);
+}
+
+Json::Value evalComponentResultToJson(const EvalComponentResult comp) {
+	Json::Value value;
+	value["common"] 			= comp.common;
+	value["earlygame"]      	= comp.early_game;
+	value["endgame"]       		= comp.endgame;
+	return value;
+}
+
+Json::Value detailedEvalComponentToJson(const DetailedEvaluationResultComponent comp) {
+	Json::Value value;
+
+	value["taperingValue"] 	= comp.taperingValue;
+	value["eval"] 			= comp.eval;
+	value["components"]     = evalComponentResultToJson(comp.components);
+	return value;
+}
+
+void handleDetailedEval() {
+    chessPosition cposition = memoryLibrarianRetrievePosition();
+    int32_t eval = evaluation(&cposition, -32000, 32000);
+
+    if (cposition.toMove == black) {
+        eval = -eval; //always from POV of white
+    }
+
+    auto evalMap = getDetailedEvalResults(&cposition);
+
+    Json::Value root;
+
+    root["Total"] = eval;
+    for (auto const& entry: evalMap) {
+        root[toString(entry.first)] = detailedEvalComponentToJson(entry.second);
+    }
+    Json::StreamWriterBuilder builder;
+    builder["commentStyle"] = "None";
+    builder["indentation"] = "";
+    putLine(Json::writeString(builder, root));
     free_position(&cposition);
 }
 
@@ -534,6 +579,9 @@ void UIloop() {
                 case eval:
                     handleEval();
                     break;
+                case detailedeval:
+                	handleDetailedEval();
+                	break;
                 case pawnEval:
                     handlePawnEval();
                     break;

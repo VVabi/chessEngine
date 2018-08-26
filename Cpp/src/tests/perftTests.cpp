@@ -86,31 +86,41 @@ uint64_t perftNodes(chessPosition* position, uint16_t depth) {
 
 
     for (uint16_t ind = 0; ind < moves.length; ind++) {
-        switch (currentState) {
-                    case not_sorted:
-                        assert(ind == 0);
-                        currentState = hash_handled;
-                    case hash_handled:
-                        if (getGoodCaptureToFront(&moves, ind)) {
-                            moves[ind].sortEval = 10000;
-                            break;
-                        }
-                        currentState = good_captures_handled;
-                    case good_captures_handled: {
-                        currentState = killers_handled;
-                    }
-                    case killers_handled:
-                        //first move didn't produce cutoff, now we need to sort
-                        //------------------------------------------------------
-                        calculateStandardSortEvals(position, &moves, ind, 0, sortInfo(false, NO_REFUTATION, 0));
+    	bool finished = false;
 
-                        std::stable_sort(moves.data+ind, moves.data+moves.length);//stable sort makes the engine 100% predictable and comparable between different optimization levels
-                        currentState = fully_sorted;
-                        break;
-                    case fully_sorted:
-                        break;
-                }
+    	while (!finished) {
 
+			switch (currentState) {
+						case not_sorted:
+							assert(ind == 0);
+							currentState = hash_handled;
+							break;
+						case hash_handled:
+							if (getGoodCaptureToFront(&moves, ind)) {
+								moves[ind].sortEval = 10000;
+								finished = true;
+								break;
+							}
+							currentState = good_captures_handled;
+							break;
+						case good_captures_handled: {
+							currentState = killers_handled;
+							break;
+						}
+						case killers_handled:
+							//first move didn't produce cutoff, now we need to sort
+							//------------------------------------------------------
+							calculateStandardSortEvals(position, &moves, ind, 0, sortInfo(false, NO_REFUTATION, 0));
+
+							std::stable_sort(moves.data+ind, moves.data+moves.length);//stable sort makes the engine 100% predictable and comparable between different optimization levels
+							currentState = fully_sorted;
+							finished = true;
+							break;
+						case fully_sorted:
+							finished = true;
+							break;
+					}
+    	}
 
 
 

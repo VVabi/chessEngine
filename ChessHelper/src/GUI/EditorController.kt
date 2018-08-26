@@ -12,6 +12,10 @@ import javafx.scene.input.MouseEvent
 import java.awt.event.ActionEvent
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
+import com.google.gson.GsonBuilder
+import com.google.gson.Gson
+import com.google.gson.JsonParser
+
 
 /**
  * Created by fabian on 15.08.15.
@@ -40,8 +44,11 @@ class EditorController {
         val localEngine = ChessEngine("/home/vabi/code/chessEngine/Cpp/Release/Vabi", "/home/vabi")
         localEngine.setPosition(chessboard!!.position, mutableListOf())
         var answer = localEngine.getEvalDetails()
+        val gson = GsonBuilder().setPrettyPrinting().create()
+        var jsonParser = JsonParser()
+        var jsonTree   = jsonParser.parse(answer).asJsonObject
         Platform.runLater() {
-            evaltext?.text = answer.replace(Regex("( -?[0-9]* )"), "$1\n")
+            evaltext?.text = gson.toJson(jsonTree)
         }
         localEngine.close()
     }
