@@ -31,16 +31,19 @@
 #include <algorithm>
 #include <hashTables/hashTables.hpp>
 #include <lib/bitfiddling.h>
-//necessary to get windows compile to run
-//----------------------------------------
-#include <userInterface/mingw.thread.h>
-#include <userInterface/mingw.mutex.h>
 #include <parameters/parameters.hpp>
 #include <parameters/parametersPrivate.hpp>
 #include <parameters/externalParamReader.hpp>
 #include <string>
 #include <Search/killerMoves.hpp>
 #include "userInterface/json/json.h"
+
+//necessary to get windows compile to run
+//----------------------------------------
+#include <userInterface/mingw.thread.h>
+#include <userInterface/mingw.mutex.h>
+
+
 
 template <typename T>
 T StringToNumber(const std::string &Text) {
@@ -334,7 +337,7 @@ std::string toString(const evaluationType type) {
             return "bishop pair";
             break;
         case eval_PSQ:
-            return "PSQ";
+            return "psq";
             break;
         case eval_passed_pawns:
             return "passed pawns";
@@ -375,7 +378,7 @@ void handleEval() {
 
     Json::Value root;
 
-    root["Total"] = eval;
+    root["total"] = eval;
     for (auto const& entry: evalMap) {
         root[toString(entry.first)] = entry.second.eval/256;
     }
@@ -415,7 +418,7 @@ void handleDetailedEval() {
 
     Json::Value root;
 
-    root["Total"] = eval;
+    root["total"] = eval;
     for (auto const& entry: evalMap) {
         root[toString(entry.first)] = detailedEvalComponentToJson(entry.second);
     }

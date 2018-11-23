@@ -23,6 +23,7 @@
 #include "lib/Defines/pieceCombinations.hpp"
 #include "lib/Evaluation/evaluation.hpp"
 
+#define MOBILTIYWEIGHT 256
 EvaluationComponent evaluationComponents[] = {
                             {       &kingSafety,            eval_kingsafety,            taper_earlygame_higher,                     256,        256,        256                                     },
                             {       &trappedPieces,         eval_trapped_pieces,        taper_none,                                 256,        256,        256                                     },
@@ -72,17 +73,17 @@ std::map<evaluationType, DetailedEvaluationResultComponent> getDetailedEvalResul
     AttackTable attackTables[2];
     int16_t eval = 0;
     attackTables[white] = makeAttackTableWithMobility(position, white, &mobilityScore);
-
+    int32_t rawmobility = mobilityScore;
     eval = eval+((int32_t) mobilityScore)*256;
 
     mobilityScore = 0;
     attackTables[black] = makeAttackTableWithMobility(position, black, &mobilityScore);
 
     eval = eval-((int32_t) mobilityScore)*256;
-
+    rawmobility = rawmobility-mobilityScore;
     DetailedEvaluationResultComponent detailedResults;
-    detailedResults.components.common  = eval;
-    detailedResults.eval               = eval;
+    detailedResults.components.common  = rawmobility;
+    detailedResults.eval               = rawmobility;
     detailedResults.taperingValue      = tapering;
     ret[eval_mobility] =detailedResults;
 
@@ -91,13 +92,15 @@ std::map<evaluationType, DetailedEvaluationResultComponent> getDetailedEvalResul
         EvalComponentResult evalValue          = component.evalFunction(position, evalPars, attackTables);
 
         int32_t eval = 0;
-        eval = eval+(tapering*evalValue.early_game)/256;
-        eval = eval+((256-tapering)*evalValue.endgame)/256;
-        eval = eval+evalValue.common;
         DetailedEvaluationResultComponent detailedResults;
         eval = eval+((tapering*((int32_t) evalValue.early_game))/256)*component.coefficient_earlygame;
         eval = eval+(((256-tapering)*((int32_t) evalValue.endgame))/256)*component.coefficient_endgame;
         eval = eval+((int32_t) evalValue.common)*component.coefficient_common;
+
+        detailedResults.components      = evalValue;
+        detailedResults.eval            = eval;
+        detailedResults.taperingValue   = tapering;
+
         ret[component.type] = detailedResults;
     }
 
@@ -177,10 +180,10 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
     AttackTable attackTables[2];
 
     attackTables[white] = makeAttackTableWithMobility(position, white, &mobilityScore);
-    eval = eval+((int32_t) mobilityScore)*256;
+    eval = eval+((int32_t) mobilityScore)*MOBILTIYWEIGHT;
     mobilityScore = 0;
     attackTables[black] = makeAttackTableWithMobility(position, black, &mobilityScore);
-    eval = eval-((int32_t) mobilityScore)*256;
+    eval = eval-((int32_t) mobilityScore)*MOBILTIYWEIGHT;
 
     for (uint16_t cnt=0; cnt < sizeof(evaluationComponents)/sizeof(EvaluationComponent); cnt++) {
         const EvaluationComponent component    = evaluationComponents[cnt];

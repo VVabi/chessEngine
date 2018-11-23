@@ -3,6 +3,7 @@ import EngineHandling.getStockfishEval
 import GUI.launchGui
 import PositionHelper.PositionDescriptor
 import Tools.getLos
+import Tools.toCsvLine
 import java.io.File
 import java.net.ServerSocket
 import java.io.InputStreamReader
@@ -16,6 +17,7 @@ import java.io.FileWriter
 
 fun main(args: Array<String>) {
 
+
     /*var f = File("/home/vabi/test.txt")
 
     var lines = f.readLines()
@@ -24,6 +26,10 @@ fun main(args: Array<String>) {
 
     var csvstring = StringBuilder()
     val localEngine = ChessEngine("/home/vabi/code/chessEngine/Cpp/Release/Vabi", "/home/vabi")
+    var answer = localEngine.getEvalComponents()
+    csvstring.append(toCsvLine(answer).header)
+    csvstring.append("stockfish")
+    csvstring.append("\n")
     for (line in lines) {
 
         println(line)
@@ -34,32 +40,18 @@ fun main(args: Array<String>) {
 
         var stockfisheval = getStockfishEval(line)
 
-        if ((stockfisheval > 200) || (stockfisheval < -200)) {
+        if ((stockfisheval > 100) || (stockfisheval < -100)) {
             continue
         }
-        var answer = localEngine.getEvalDetails()
-        var values = answer.split(' ')
+        var answer = localEngine.getEvalComponents()
+
+        csvstring.append(toCsvLine(answer).line)
+        csvstring.append((stockfisheval/100.0).toString())
         csvstring.append("\n")
-       // println(answer)
-        var first = false
-        for (value in values) {
-            try {
-                var n = Integer.parseInt(value)
-                if (first) {
-                    csvstring.append(", ")
-                }
-                first = true
-                csvstring.append(n)
-            } catch (e: Exception) {
-
-            }
-        }
-
-        csvstring.append(", "+stockfisheval.toString())
     }
 
 
-    var fileWriter = FileWriter("/home/vabi/chess.csv")
+    var fileWriter = FileWriter("/home/vabi/chess2.csv")
     fileWriter.write(csvstring.toString())
     fileWriter.flush()
     fileWriter.close()*/

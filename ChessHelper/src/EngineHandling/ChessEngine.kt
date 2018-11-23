@@ -123,6 +123,12 @@ class ChessEngine(path: String, workingDirectory: String) {
         return answer
     }
 
+    fun getEvalComponents(): String {
+        uciEngine.put("detailedeval")
+        val answer = uciEngine.readAnswer()
+        return answer
+    }
+
     fun isPositionQuiet(): Boolean {
         uciEngine.put("checkquiet")
         val answer = uciEngine.readAnswer()
