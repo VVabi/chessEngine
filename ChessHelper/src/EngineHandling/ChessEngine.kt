@@ -114,7 +114,7 @@ class ChessEngine(path: String, workingDirectory: String) {
         val answer = uciEngine.readAnswer()
         var jsonParser = JsonParser()
         var jsonTree   = jsonParser.parse(answer).asJsonObject
-        return jsonTree["Total"].asInt
+        return jsonTree["total"].asInt
     }
 
     fun getEvalDetails(): String {
