@@ -7,11 +7,8 @@ import java.io.*
  */
 
 
-fun getStockfishEval(fen: String): Int {
-    val processBuilder = ProcessBuilder("stockfish")
-    val process = processBuilder.start()
-    val reader = BufferedReader(InputStreamReader(process.inputStream))
-    val writer = BufferedWriter(OutputStreamWriter(process.outputStream))
+fun getStockfishEval(fen: String, reader: BufferedReader, writer: BufferedWriter): Int {
+
     reader.readLine()
     writer.write("position fen "+fen+"\n")
     writer.write("eval\n")
@@ -21,7 +18,7 @@ fun getStockfishEval(fen: String): Int {
         s = reader.readLine()
     }
     var list = s.split(' ')
-    process.destroyForcibly()
+
 
     var value = (list[2].toDouble()*100).toInt()
 

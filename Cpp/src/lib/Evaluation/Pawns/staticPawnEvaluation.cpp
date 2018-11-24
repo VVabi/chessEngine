@@ -52,7 +52,9 @@ int16_t isolatedPawnTable[] = { 0, 0, 0, 0, 0, 0, 0, 0, -5, -6, -7, -8, -8, -7,
         -7, -7, -9, -11, -13, -13, -11, -9, -7, -5, -6, -8, -9, -9, -8, -6, -5,
         -5, -6, -7, -8, -8, -7, -6, -5, 0, 0, 0, 0, 0, 0, 0, 0, };
 
-int16_t doubledPawnEval(const chessPosition* position) {
+EvalComponentResult doubledPawnEval(const chessPosition* position,
+        const evalParameters* par __attribute__((unused)),
+        const AttackTable* attackTables __attribute__((unused))) {
     int16_t ev = 0;
     uint64_t doubledPawns[2];
     doubledPawns[white] = getDoubledPawns(position->pieceTables[white][pawn]);
@@ -87,10 +89,16 @@ int16_t doubledPawnEval(const chessPosition* position) {
             ev = ev + 5;
         }
     }
-    return ev;
+    EvalComponentResult ret;
+    ret.common      = ev;
+    ret.early_game  = 0;
+    ret.endgame     = 0;
+    return ret;
 }
 
-int16_t isolatedPawnEval(const chessPosition* position) {
+EvalComponentResult isolatedPawnEval(const chessPosition* position,
+        const evalParameters* par __attribute__((unused)),
+        const AttackTable* attackTables __attribute__((unused))) {
     int16_t ev = 0;
     uint64_t isolatedPawns[2];
     isolatedPawns[white] = getIsolatedPawns(position->pieceTables[white][pawn]);
@@ -106,10 +114,16 @@ int16_t isolatedPawnEval(const chessPosition* position) {
         uint16_t field = popLSB(bIso);
         ev = ev - isolatedPawnTable[field];
     }
-    return ev;
+    EvalComponentResult ret;
+    ret.common      = ev;
+    ret.early_game  = 0;
+    ret.endgame     = 0;
+    return ret;
 }
 
-int16_t backwardPawnsEval(const chessPosition* position) {
+EvalComponentResult backwardPawnsEval(const chessPosition* position,
+        const evalParameters* par __attribute__((unused)),
+        const AttackTable* attackTables __attribute__((unused))) {
     int16_t ev = 0;
     uint64_t backwardsPawns[2];
     uint64_t frontColumnFill[2];
@@ -136,6 +150,10 @@ int16_t backwardPawnsEval(const chessPosition* position) {
             ev = ev + 5;
         }
     }
-    return ev;
+    EvalComponentResult ret;
+    ret.common      = ev;
+    ret.early_game  = 0;
+    ret.endgame     = 0;
+    return ret;
 }
 

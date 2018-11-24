@@ -56,29 +56,17 @@ EvalComponentResult passedPawnEval(const chessPosition* position,
             uint16_t kingDist = distBetweenFields(promotionField, blackKing);
             bool blocked = position->pieces[black] & BIT64(field + 8);
             if (distToPromotion <= 2) {
-                untaperedEval =
-                        untaperedEval
-                                + par->passedPawnParameters.passedPawnEvalValues[white][field];
+                untaperedEval = untaperedEval + par->passedPawnParameters.passedPawnEvalValues[white][field];
                 if (blocked) {
-                    untaperedEval =
-                            untaperedEval
-                                    - par->passedPawnParameters.passedPawnEvalValues[white][field]
-                                            / BLOCKEDDIVISOR;
+                    untaperedEval = untaperedEval - par->passedPawnParameters.passedPawnEvalValues[white][field]/ BLOCKEDDIVISOR;
                 }
             } else {
-                eval =
-                        eval
-                                + par->passedPawnParameters.passedPawnEvalValues[white][field];
+                eval = eval + par->passedPawnParameters.passedPawnEvalValues[white][field];
                 if (blocked) {
-                    eval =
-                            eval
-                                    - par->passedPawnParameters.passedPawnEvalValues[white][field]
-                                            / BLOCKEDDIVISOR;
+                    eval = eval - par->passedPawnParameters.passedPawnEvalValues[white][field]/ BLOCKEDDIVISOR;
                 }
             }
-            eval =
-                    eval
-                            - par->passedPawnParameters.kingToPromotionFieldDistance[distToPromotion][kingDist];
+            eval = eval - par->passedPawnParameters.kingToPromotionFieldDistance[distToPromotion][kingDist];
         }
     }
     uint64_t blackPawnBuffer = blackPawns;
@@ -90,29 +78,17 @@ EvalComponentResult passedPawnEval(const chessPosition* position,
             uint16_t kingDist = distBetweenFields(promotionField, whiteKing);
             bool blocked = position->pieces[white] & BIT64(field - 8);
             if (distToPromotion <= 2) {
-                untaperedEval =
-                        untaperedEval
-                                - par->passedPawnParameters.passedPawnEvalValues[black][field];
+                untaperedEval = untaperedEval - par->passedPawnParameters.passedPawnEvalValues[black][field];
                 if (blocked) {
-                    untaperedEval =
-                            untaperedEval
-                                    + par->passedPawnParameters.passedPawnEvalValues[black][field]
-                                            / BLOCKEDDIVISOR;
+                    untaperedEval = untaperedEval + par->passedPawnParameters.passedPawnEvalValues[black][field]/ BLOCKEDDIVISOR;
                 }
             } else {
-                eval =
-                        eval
-                                - par->passedPawnParameters.passedPawnEvalValues[black][field];
+                eval = eval - par->passedPawnParameters.passedPawnEvalValues[black][field];
                 if (blocked) {
-                    eval =
-                            eval
-                                    + par->passedPawnParameters.passedPawnEvalValues[black][field]
-                                            / BLOCKEDDIVISOR;
+                    eval = eval + par->passedPawnParameters.passedPawnEvalValues[black][field]/ BLOCKEDDIVISOR;
                 }
             }
-            eval =
-                    eval
-                            + par->passedPawnParameters.kingToPromotionFieldDistance[distToPromotion][kingDist];
+            eval = eval + par->passedPawnParameters.kingToPromotionFieldDistance[distToPromotion][kingDist];
         }
     }
 
@@ -123,54 +99,18 @@ EvalComponentResult passedPawnEval(const chessPosition* position,
     return result;
 }
 
-int32_t staticPawnEval(uint64_t pawns, playerColor color,
-        uint8_t* pawnColumnOccupancy,
-        const staticPawnEvalParameters* staticPawnParameters) { //all stuff depending only on own pawn structure, not the opponents
-    int32_t eval = 0;
-    *pawnColumnOccupancy = 0;
-    uint8_t doublePawns = 0; //TODO: extend to triple pawns
-    for (uint16_t ind = 0; ind < 8; ind++) {
-        uint64_t occ = pawns & files[ind];
-        if (occ) {
-            *pawnColumnOccupancy = *pawnColumnOccupancy | (1 << ind);
-        }
-        if (popcount(occ) > 1) {
-            doublePawns = doublePawns | (1 << ind);
-        }
-    }
-
-    uint8_t isolatedPawns = ~((*pawnColumnOccupancy << 1)
-            | (*pawnColumnOccupancy >> 1)) & *pawnColumnOccupancy;
-
-    uint64_t isolatedDoublePawns = isolatedPawns & doublePawns;
-
-    uint64_t nonIsolatedDoublePawns = (~isolatedPawns) & doublePawns;
-
-    eval = eval
-            + staticPawnParameters->isolatedDoublePawn
-                    * popcount(isolatedDoublePawns)
-            + staticPawnParameters->nonIsolatedDoublePawn
-                    * popcount(nonIsolatedDoublePawns);
-
-    eval = eval
-            + staticPawnParameters->isolatedPawn
-                    * popcount(isolatedPawns & (~isolatedDoublePawns));
-
-    return eval * (1 - 2 * color);
-}
-
-EvalComponentResult staticPawnEvaluation(const chessPosition* position,
+/*EvalComponentResult staticPawnEvaluation(const chessPosition* position,
         const evalParameters* par __attribute__((unused)),
         const AttackTable* attackTables __attribute__((unused))) {
     uint32_t eval = 0;
     int16_t staticPawn = 0;
 
-    /*pawnHashEntry entry;
+    pawnHashEntry entry;
      if (getPawnHashTableEntry(&entry, position->pawnHash)) {
      staticPawn = entry.eval;
      staticpawnhashhits++;
      //TODO add debug code here to verify the hash is correct!
-     } else {*/
+     } else {
     staticpawncalls++;
     staticPawn += doubledPawnEval(position);
     staticPawn += isolatedPawnEval(position);
@@ -183,4 +123,4 @@ EvalComponentResult staticPawnEvaluation(const chessPosition* position,
 
     result.common = eval;
     return result;
-}
+}*/

@@ -329,8 +329,14 @@ std::string toString(const evaluationType type) {
         case eval_rookfiles:
             return "rook files";
             break;
-        case eval_static_pawns:
-            return "static pawn";
+        case eval_doubled_pawn:
+            return "doubled pawn";
+            break;
+        case eval_isolated_pawn:
+            return "isolated pawn";
+            break;
+        case eval_backwards_pawn:
+            return "backwards pawn";
             break;
         case eval_bishoppair:
             return "bishop pair";
@@ -379,7 +385,13 @@ void handleEval() {
 
     root["total"] = eval;
     for (auto const& entry : evalMap) {
-        root[toString(entry.first)] = entry.second.eval/256;
+        if (entry.first == eval_mobility) {
+            root[toString(entry.first)] = entry.second.eval;
+        } else {
+            root[toString(entry.first)] = entry.second.eval/256;
+        }
+
+
     }
     Json::StreamWriterBuilder builder;
     builder["commentStyle"] = "None";

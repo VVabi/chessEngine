@@ -30,7 +30,9 @@ EvaluationComponent evaluationComponents[] = {
                             {       &trappedPieces,         eval_trapped_pieces,        taper_none,                                 256,        256,        256                                     },
                             {       &outposts,              eval_outposts,              taper_none,                                 256,        256,        256                                     },
                             {       &rookOpenFiles,         eval_rookfiles,             taper_none,                                 256,        256,        256                                     },
-                            {       &staticPawnEvaluation,  eval_static_pawns,          taper_none,                                 256,        256,        256                                     },
+                            {       &doubledPawnEval,       eval_doubled_pawn,          taper_none,                                 256,        256,        256                                     },
+                            {       &isolatedPawnEval,      eval_isolated_pawn,         taper_none,                                 256,        256,        256                                     },
+                            {       &backwardPawnsEval,     eval_backwards_pawn,        taper_none,                                 256,        256,        256                                     },
                             {       &bishopPair,            eval_bishoppair,            taper_none,                                 256,        256,        256                                     },
                             {       &passedPawnEval,        eval_passed_pawns,          taper_none  | taper_endgame_higher,         256,        256,        256                                     },
 };
