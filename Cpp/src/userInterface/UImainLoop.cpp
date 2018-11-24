@@ -316,7 +316,6 @@ void handlePosition(std::list<std::string> input) {
 // eval_kingsafety, eval_trapped_pieces, eval_outposts, eval_rookfiles, eval_static_pawns, eval_bishoppair, eval_PSQ, eval_passed_pawns, eval_mobility
 
 std::string toString(const evaluationType type) {
-
     switch (type) {
         case eval_kingsafety:
             return "king safety";
@@ -379,7 +378,7 @@ void handleEval() {
     Json::Value root;
 
     root["total"] = eval;
-    for (auto const& entry: evalMap) {
+    for (auto const& entry : evalMap) {
         root[toString(entry.first)] = entry.second.eval/256;
     }
     Json::StreamWriterBuilder builder;
@@ -390,20 +389,20 @@ void handleEval() {
 }
 
 Json::Value evalComponentResultToJson(const EvalComponentResult comp) {
-	Json::Value value;
-	value["common"] 			= comp.common;
-	value["earlygame"]      	= comp.early_game;
-	value["endgame"]       		= comp.endgame;
-	return value;
+    Json::Value value;
+    value["common"]             = comp.common;
+    value["earlygame"]          = comp.early_game;
+    value["endgame"]            = comp.endgame;
+    return value;
 }
 
 Json::Value detailedEvalComponentToJson(const DetailedEvaluationResultComponent comp) {
-	Json::Value value;
+    Json::Value value;
 
-	value["taperingValue"] 	= comp.taperingValue;
-	value["eval"] 			= comp.eval;
-	value["components"]     = evalComponentResultToJson(comp.components);
-	return value;
+    value["taperingValue"]  = comp.taperingValue;
+    value["eval"]           = comp.eval;
+    value["components"]     = evalComponentResultToJson(comp.components);
+    return value;
 }
 
 void handleDetailedEval() {
@@ -419,7 +418,7 @@ void handleDetailedEval() {
     Json::Value root;
 
     root["total"] = eval;
-    for (auto const& entry: evalMap) {
+    for (auto const& entry : evalMap) {
         root[toString(entry.first)] = detailedEvalComponentToJson(entry.second);
     }
     Json::StreamWriterBuilder builder;
@@ -431,9 +430,10 @@ void handleDetailedEval() {
 
 
 void handlePawnEval() {
-    chessPosition cposition = memoryLibrarianRetrievePosition();
+    std::cout << "NOT IMPLEMENTED" << std::endl;
+    /*chessPosition cposition = memoryLibrarianRetrievePosition();
     std::cout << staticPawnEvalComplete(&cposition) << std::endl;
-    free_position(&cposition);
+    free_position(&cposition);*/
 }
 
 
@@ -583,8 +583,8 @@ void UIloop() {
                     handleEval();
                     break;
                 case detailedeval:
-                	handleDetailedEval();
-                	break;
+                    handleDetailedEval();
+                    break;
                 case pawnEval:
                     handlePawnEval();
                     break;

@@ -143,7 +143,6 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
     pvLine line;
     line.numMoves = 0;
     while (checkContinue(params, depth, get_timestamp()-start_ts, totalTime)) {
-
         try {
             //std::cout << "Depth " << depth << std::endl;
 

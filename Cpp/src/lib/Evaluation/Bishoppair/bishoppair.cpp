@@ -11,7 +11,7 @@
 #include "lib/Attacks/attacks.hpp"
 #include "lib/Evaluation/evaluation.hpp"
 
-EvalComponentResult bishopPair(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables __attribute__ ((unused))) {
+EvalComponentResult bishopPair(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables __attribute__((unused))) {
     int16_t ret = 0;
 
     uint64_t numWhiteBishops = popcount(position->pieceTables[white][bishop]);

@@ -22,6 +22,7 @@
 #include "lib/Evaluation/endgames/endgameEvals.hpp"
 #include "lib/Defines/pieceCombinations.hpp"
 #include "lib/Evaluation/evaluation.hpp"
+#include <map>
 
 #define MOBILTIYWEIGHT 256
 EvaluationComponent evaluationComponents[] = {
@@ -85,7 +86,7 @@ std::map<evaluationType, DetailedEvaluationResultComponent> getDetailedEvalResul
     detailedResults.components.common  = rawmobility;
     detailedResults.eval               = rawmobility;
     detailedResults.taperingValue      = tapering;
-    ret[eval_mobility] =detailedResults;
+    ret[eval_mobility] = detailedResults;
 
     for (uint16_t cnt=0; cnt < sizeof(evaluationComponents)/sizeof(EvaluationComponent); cnt++) {
         const EvaluationComponent component    = evaluationComponents[cnt];
@@ -105,7 +106,6 @@ std::map<evaluationType, DetailedEvaluationResultComponent> getDetailedEvalResul
     }
 
     return ret;
-
 }
 
 

@@ -26,7 +26,7 @@ struct EvalComponentResult {
 };
 
 enum evaluationType {eval_kingsafety, eval_trapped_pieces, eval_outposts, eval_rookfiles, eval_static_pawns, eval_bishoppair, eval_PSQ, eval_passed_pawns, eval_mobility};
-enum taperingDirection {taper_none=0, taper_endgame_higher=1, taper_earlygame_higher=2};
+enum taperingDirection {taper_none = 0, taper_endgame_higher = 1, taper_earlygame_higher = 2};
 
 
 struct EvaluationComponent {
@@ -65,7 +65,9 @@ void  getBackwardsPawns(uint64_t* whiteBackwards, uint64_t* blackBackwards, uint
 uint8_t getPawnColumns(uint64_t in);
 uint64_t getDoubledPawns(uint64_t in);
 uint64_t getIsolatedPawns(uint64_t in);
-int16_t staticPawnEvalComplete(const chessPosition* position);
+int16_t doubledPawnEval(const chessPosition* position);
+int16_t isolatedPawnEval(const chessPosition* position);
+int16_t backwardPawnsEval(const chessPosition* position);
 
 EvalComponentResult kingSafety(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables);
 EvalComponentResult outposts(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables);
