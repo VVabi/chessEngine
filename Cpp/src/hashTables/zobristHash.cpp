@@ -98,9 +98,17 @@ void setHashEntry(hashFlag flag, int16_t eval, uint8_t depth, uint8_t searchId, 
     int8_t replace_index = -1;
     int32_t target_score = ((int32_t) depth);
 
+    uint32_t high = (uint32_t) (key >> 32);
+    uint16_t low  =  (uint16_t) (((uint32_t) (key & 0xFFFFFFFF)) >> 16);
 
     for (uint8_t ind = 0; ind < 4; ind++) {
         hashEntry* entry = &current->hashData[ind];
+
+        if (entry->hashHighBits == 0) {
+        	replace_index = ind;
+        	break;
+        }
+
         uint8_t past_search = searchId-entry->index;
         int32_t score = ((int32_t) entry->depth)-2*((int32_t) past_search);
         //int32_t score = -((int32_t) past_search);
@@ -117,8 +125,8 @@ void setHashEntry(hashFlag flag, int16_t eval, uint8_t depth, uint8_t searchId, 
         entry->depth = depth;
         entry->searchId = searchId;
         entry->bestMove = bestMove;
-        entry->hashHighBits = (uint32_t) (key >> 32);
-        entry->hashLower    = (uint16_t) (((uint32_t) (key & 0xFFFFFFFF)) >> 16);
+        entry->hashHighBits = high;
+        entry->hashLower    = low;
         entry->index        = replace_index;
     }
 

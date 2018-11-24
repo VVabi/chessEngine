@@ -27,11 +27,11 @@
       <file leaf-file-name="main.kt" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="309">
+            <state relative-caret-position="699">
               <caret line="59" column="4" lean-forward="false" selection-start-line="59" selection-start-column="4" selection-end-line="59" selection-end-column="4" />
               <folding>
                 <element signature="e#0#315#0" expanded="true" />
-                <marker date="1543000220458" expanded="true" signature="7:289" ph="..." />
+                <marker date="1543005396338" expanded="true" signature="7:289" ph="..." />
               </folding>
             </state>
           </provider>
@@ -50,7 +50,7 @@
       <file leaf-file-name="ChessEngine.kt" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/EngineHandling/ChessEngine.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1059">
+            <state relative-caret-position="2178">
               <caret line="125" column="25" lean-forward="false" selection-start-line="125" selection-start-column="8" selection-end-line="125" selection-end-column="25" />
               <folding>
                 <element signature="e#24#203#0" expanded="true" />
@@ -62,7 +62,7 @@
       <file leaf-file-name="EvalToCsv.kt" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Tools/EvalToCsv.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-195">
+            <state relative-caret-position="270">
               <caret line="18" column="4" lean-forward="false" selection-start-line="18" selection-start-column="4" selection-end-line="18" selection-end-column="4" />
               <folding>
                 <element signature="e#15#141#0" expanded="true" />
@@ -88,7 +88,7 @@
               <caret line="45" column="33" lean-forward="false" selection-start-line="45" selection-start-column="33" selection-end-line="45" selection-end-column="33" />
               <folding>
                 <element signature="e#19#533#0" expanded="true" />
-                <marker date="1535281437977" expanded="false" signature="26:436" ph="..." />
+                <marker date="1543005396338" expanded="false" signature="26:436" ph="..." />
               </folding>
             </state>
           </provider>
@@ -215,6 +215,9 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
+      <pane id="Scope" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -253,9 +256,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scratches" />
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
       <pane id="AndroidView" />
     </panes>
   </component>
@@ -570,19 +570,18 @@
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Nl-Palette" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3226152" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.41766468" sideWeight="0.50292826" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.41800642" sideWeight="0.49707174" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.41800642" sideWeight="0.49707174" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Properties" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.0543131" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.05484558" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24973376" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24836601" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -594,6 +593,7 @@
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection Results" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32916668" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3226152" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32690248" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
@@ -639,7 +639,7 @@
           <caret line="45" column="13" lean-forward="false" selection-start-line="45" selection-start-column="4" selection-end-line="45" selection-end-column="13" />
           <folding>
             <element signature="e#0#315#0" expanded="true" />
-            <marker date="1543000220458" expanded="true" signature="7:289" ph="..." />
+            <marker date="1543005396338" expanded="true" signature="7:289" ph="..." />
           </folding>
         </state>
       </provider>
@@ -678,7 +678,7 @@
           <caret line="33" column="32" lean-forward="false" selection-start-line="33" selection-start-column="32" selection-end-line="33" selection-end-column="32" />
           <folding>
             <element signature="e#19#533#0" expanded="true" />
-            <marker date="1535281437977" expanded="false" signature="26:436" ph="..." />
+            <marker date="1543005396338" expanded="false" signature="26:436" ph="..." />
           </folding>
         </state>
       </provider>
@@ -714,7 +714,7 @@
           <caret line="45" column="13" lean-forward="false" selection-start-line="45" selection-start-column="4" selection-end-line="45" selection-end-column="13" />
           <folding>
             <element signature="e#0#315#0" expanded="true" />
-            <marker date="1543000220458" expanded="true" signature="7:289" ph="..." />
+            <marker date="1543005396338" expanded="true" signature="7:289" ph="..." />
           </folding>
         </state>
       </provider>
@@ -778,7 +778,7 @@
           <caret line="18" column="0" lean-forward="false" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="24" />
           <folding>
             <element signature="e#19#533#0" expanded="true" />
-            <marker date="1535281437977" expanded="false" signature="26:436" ph="..." />
+            <marker date="1543005396338" expanded="false" signature="26:436" ph="..." />
           </folding>
         </state>
       </provider>
@@ -789,7 +789,7 @@
           <caret line="45" column="13" lean-forward="false" selection-start-line="45" selection-start-column="4" selection-end-line="45" selection-end-column="13" />
           <folding>
             <element signature="e#0#315#0" expanded="true" />
-            <marker date="1543000220458" expanded="true" signature="7:289" ph="..." />
+            <marker date="1543005396338" expanded="true" signature="7:289" ph="..." />
           </folding>
         </state>
       </provider>
@@ -832,7 +832,7 @@
           <caret line="19" column="0" lean-forward="true" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
           <folding>
             <element signature="e#19#533#0" expanded="true" />
-            <marker date="1535281437977" expanded="false" signature="26:436" ph="..." />
+            <marker date="1543005396338" expanded="false" signature="26:436" ph="..." />
           </folding>
         </state>
       </provider>
@@ -843,7 +843,7 @@
           <caret line="45" column="13" lean-forward="false" selection-start-line="45" selection-start-column="4" selection-end-line="45" selection-end-column="13" />
           <folding>
             <element signature="e#0#315#0" expanded="true" />
-            <marker date="1543000220458" expanded="true" signature="7:289" ph="..." />
+            <marker date="1543005396338" expanded="true" signature="7:289" ph="..." />
           </folding>
         </state>
       </provider>
@@ -886,7 +886,7 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#315#0" expanded="true" />
-            <marker date="1543000220458" expanded="true" signature="7:289" ph="..." />
+            <marker date="1543005396338" expanded="true" signature="7:289" ph="..." />
           </folding>
         </state>
       </provider>
@@ -897,7 +897,7 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#315#0" expanded="true" />
-            <marker date="1543000220458" expanded="true" signature="7:289" ph="..." />
+            <marker date="1543005396338" expanded="true" signature="7:289" ph="..." />
           </folding>
         </state>
       </provider>
@@ -908,7 +908,7 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#315#0" expanded="true" />
-            <marker date="1543000220458" expanded="true" signature="7:289" ph="..." />
+            <marker date="1543005396338" expanded="true" signature="7:289" ph="..." />
           </folding>
         </state>
       </provider>
@@ -1001,7 +1001,7 @@
           <caret line="45" column="33" lean-forward="false" selection-start-line="45" selection-start-column="33" selection-end-line="45" selection-end-column="33" />
           <folding>
             <element signature="e#19#533#0" expanded="true" />
-            <marker date="1535281437977" expanded="false" signature="26:436" ph="..." />
+            <marker date="1543005396338" expanded="false" signature="26:436" ph="..." />
           </folding>
         </state>
       </provider>
@@ -1022,7 +1022,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/EngineHandling/ChessEngine.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1059">
+        <state relative-caret-position="2178">
           <caret line="125" column="25" lean-forward="false" selection-start-line="125" selection-start-column="8" selection-end-line="125" selection-end-column="25" />
           <folding>
             <element signature="e#24#203#0" expanded="true" />
@@ -1040,7 +1040,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Tools/EvalToCsv.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-195">
+        <state relative-caret-position="270">
           <caret line="18" column="4" lean-forward="false" selection-start-line="18" selection-start-column="4" selection-end-line="18" selection-end-column="4" />
           <folding>
             <element signature="e#15#141#0" expanded="true" />
@@ -1050,11 +1050,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="309">
+        <state relative-caret-position="699">
           <caret line="59" column="4" lean-forward="false" selection-start-line="59" selection-start-column="4" selection-end-line="59" selection-end-column="4" />
           <folding>
             <element signature="e#0#315#0" expanded="true" />
-            <marker date="1543000220458" expanded="true" signature="7:289" ph="..." />
+            <marker date="1543005396338" expanded="true" signature="7:289" ph="..." />
           </folding>
         </state>
       </provider>
