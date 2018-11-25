@@ -250,7 +250,6 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
         uint64_t potentialMoves =  getPotentialBishopMoves(nextPieceField, occupancy);;
         queenAttackTable = queenAttackTable | potentialMoves;
         result->common += popcount(potentialMoves & ~ownPieces);
-
     }
     retTable.attackTables[queen] = queenAttackTable;
 

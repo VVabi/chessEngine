@@ -8,7 +8,6 @@
 #include <Search/history.hpp>
 #include <lib/basics.hpp>
 #include <userInterface/userInterface.hpp>
-#include <userInterface/uciInterface.hpp>
 #include <fstream>
 #include <lib/moveMaking/moveMaking.hpp>
 #include <lib/Evaluation/evaluation.hpp>
@@ -26,16 +25,15 @@
 #include <map>
 #include <atomic>
 #include <thread>
-#include <tests/tests.hpp>
 #include <mutex>
 #include <algorithm>
 #include <hashTables/hashTables.hpp>
 #include <lib/bitfiddling.h>
 #include <parameters/parameters.hpp>
-#include <parameters/parametersPrivate.hpp>
 #include <parameters/externalParamReader.hpp>
 #include <string>
 #include <Search/killerMoves.hpp>
+#include <tests/tests.hpp>
 #include "userInterface/json/json.h"
 
 //necessary to get windows compile to run
@@ -110,7 +108,7 @@ void setSearchParams(searchParameters params) {
 std::thread engineThread;
 std::atomic<bool> isSearching(false);
 
-void search(chessPosition cposition, searchParameters params, bool quietMode=false) {
+void search(chessPosition cposition, searchParameters params, bool quietMode = false) {
     chessMove bestMove;
     uint32_t nodeCount = 0;
     uint64_t mtime = 0;
@@ -392,8 +390,6 @@ void handleEval() {
         } else {
             root[toString(entry.first)] = entry.second.eval/256;
         }
-
-
     }
     Json::StreamWriterBuilder builder;
     builder["commentStyle"] = "None";
