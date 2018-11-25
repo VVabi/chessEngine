@@ -14,7 +14,7 @@
 
 
 
-EvalComponentResult outposts(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables __attribute__((unused))) {
+EvalComponentResult outposts(const chessPosition* position, const evalParameters* par, EvalMemory* evalMemory __attribute__((unused))) {
     uint64_t wPawns = position->pieceTables[white][pawn];
     uint64_t bPawns = position->pieceTables[black][pawn];
     uint64_t wKnights = position->pieceTables[white][knight];

@@ -136,15 +136,15 @@ AttackTable makeAttackTable(const chessPosition* position, playerColor attacking
     return retTable;
 }
 
-#ifdef EXPERIMENTAL
+/*#ifdef EXPERIMENTAL
 int16_t bishopMobility[14]   = {-25, -18, -13, -8, -4, 0, 3, 5, 8, 10, 12, 13, 14, 15};
 int16_t rookMobility[15]     = {-25, -19, -14, -10, -7, -5, -2, 0, 2, 4, 6, 8, 10, 12, 13};
 int16_t knightMobility[9]   = {-20, -12, -6, 0, 3, 5, 8, 10, 12};
-#else
+#else*/
 int16_t bishopMobility[14]   = {-35, -25, -18, -13, -5, 0, 3, 5, 8, 10, 12, 14, 16, 18};
 int16_t rookMobility[15]     = {-35, -25, -18, -15, -10, -8, -3, 0, 3, 5, 8, 10, 12, 14, 16};
 int16_t knightMobility[9]   = {-25, -18, -8, 0, 3, 5, 8, 10, 12};
-#endif
+//#endif
 
 AttackTable makeAttackTableWithMobility(const chessPosition* position, playerColor attackingSide, EvalComponentResult* result) {
     uint64_t ownPieces = position->pieces[attackingSide];
@@ -169,7 +169,7 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
         knightAttackTable = knightAttackTable | getKnightMoves(nextKnight);
         uint16_t legalMoves = popcount(getKnightMoves(nextKnight) & ~ownPieces & ~opppawnTakes);
         assert(legalMoves < 9);
-#ifdef EXPERIMENTAL
+/*#ifdef EXPERIMENTAL
         result->common     += knightMobility[legalMoves];
         result->early_game += knightMobility[legalMoves]/2;
         if (attackingSide == white) {
@@ -177,9 +177,9 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
         } else {
             result->common     += popcount(allSouthOf(nextKnight) & getKnightMoves(nextKnight) & ~ownPieces & ~opppawnTakes)/2;
         }
-#else
+#else*/
         result->common += knightMobility[legalMoves];
-#endif
+
     }
     retTable.attackTables[knight] = knightAttackTable;
 
@@ -194,7 +194,7 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
         bishopAttackTable = bishopAttackTable | potentialMoves;
         uint16_t legalMoves = popcount(potentialMoves & ~ownPieces & ~opppawnTakes);
         assert(legalMoves < 14);
-#ifdef EXPERIMENTAL
+/*#ifdef EXPERIMENTAL
         result->common      += bishopMobility[legalMoves];
         result->early_game  += bishopMobility[legalMoves]/2;
         if (attackingSide == white) {
@@ -202,9 +202,9 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
         } else {
             result->common     += popcount(allSouthOf(nextPieceField) & potentialMoves & ~ownPieces & ~opppawnTakes)/2;
         }
-#else
+#else*/
         result->common += bishopMobility[legalMoves];
-#endif
+//#endif
     }
     retTable.attackTables[bishop] = bishopAttackTable;
     //rooks
@@ -216,7 +216,7 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
         uint64_t potentialMoves =  getPotentialRookMoves(nextPieceField, occupancy);
         uint16_t legalMoves = popcount(potentialMoves & ~ownPieces);
         assert(legalMoves < 15);
-#ifdef EXPERIMENTAL
+/*#ifdef EXPERIMENTAL
         result->endgame += rookMobility[legalMoves]/2;
         result->common  += rookMobility[legalMoves]/2;
         if (attackingSide == white) {
@@ -224,9 +224,9 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
         } else {
             result->common     += popcount(allSouthOf(nextPieceField) & potentialMoves & ~ownPieces & ~opppawnTakes)/2;
         }
-#else
+#else*/
         result->common += rookMobility[legalMoves];
-#endif
+//#endif
         rookAttackTable = rookAttackTable | potentialMoves;
     }
     retTable.attackTables[rook] = rookAttackTable;
@@ -383,21 +383,11 @@ int16_t see_internal(int16_t previous, chessPosition* position, uint16_t field, 
     }
 
     int16_t standPat = -previous;
-    //makeMove(&mv, position);
 
-
-    /*if (-previous+evalPars->figureValues[mv.captureType] < -50) {
-        return standPat; //can't recover, and for < -50 we don't care for the value TODO: make parameter
-    }*/
     position->toMove = (playerColor) (1-position->toMove);
     mask = mask | BIT64(mv.sourceField);
     int16_t seeVal = -see_internal(-previous+evalPars->figureValues[mv.captureType], position, field, (figureType) mv.type, evalPars, mask);
     position->toMove = (playerColor) (1-position->toMove);
-    //undoMove(position);
-    /*std::cout << position->madeMoves.length;
-    std::cout << "Capturing with " << mv.type << " from " << mv.sourceField << std::endl;
-    std::cout << "Standpat score was " << standPat << std::endl;
-    std::cout << "see score is "        << seeVal << std::endl;*/
 
     if (seeVal > standPat) {
         return seeVal;
@@ -421,4 +411,14 @@ int16_t SEE(chessPosition* position, chessMove* mv) {
     return ret;
 }
 
-
+EvalComponentResult evalMobility(const chessPosition* position, const evalParameters* par  __attribute__((unused)), EvalMemory* evalMemory) {
+    EvalComponentResult whiteMobilityScore;
+    evalMemory->attackTables[white] = makeAttackTableWithMobility(position, white, &whiteMobilityScore);
+    EvalComponentResult blackMobilityScore;
+    evalMemory->attackTables[black] = makeAttackTableWithMobility(position, black, &blackMobilityScore);
+    EvalComponentResult ret;
+    ret.common          = whiteMobilityScore.common     - blackMobilityScore.common;
+    ret.endgame         = whiteMobilityScore.endgame    - blackMobilityScore.endgame;
+    ret.early_game      = whiteMobilityScore.early_game - blackMobilityScore.early_game;
+    return ret;
+}

@@ -99,25 +99,6 @@ bool checkContinue(searchParameters params, uint16_t depth, uint16_t passedTime,
 uint32_t cnt = 0;
 
 uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval, bool doAspiration, searchParameters params, bool quietMode) {
-/*#ifdef EXPERIMENTAL
-
-    fenLogger.open("fen.txt", std::ios::app);
-
-#endif*/
-
-    //TODO: refactor this function
-    /*killerTable* table = getKillerTable();
-    table->clear();*/
-    /*cnt++;
-
-    if ((cnt % 10) == 0) {
-        std::ofstream logging;
-        logging.open ("test.txt", std::ofstream::out | std::ofstream::app);
-        logging << chessPositionToFenString(*position, true) << std::endl;
-        logging.flush();
-        logging.close();
-    }*/
-
     resetSearchData();
     resetQuiescenceNodes();
     uint64_t start_ts  = get_timestamp();
@@ -127,28 +108,17 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
     int32_t beta  = 32000;
     searchId++;
     uint64_t searchedNodes = 0;
+
     uint32_t worst_case_search_time = 0;
     uint32_t totalTime = calcSearchTime(params, position->toMove, position->madeMoves.length, &worst_case_search_time);
     setTotalTime(worst_case_search_time, start_ts);
     uint16_t madeMoves = position->madeMoves.length;
-    vdt_vector<chessMove> moves = vdt_vector<chessMove>(150);
-    generateAllMoves(&moves, position);
-    uint16_t refutationTarget = NO_REFUTATION;
-    calculateStandardSortEvals(position, &moves, 0, 0, sortInfo(false, refutationTarget, getHashMove(position->zobristHash)));
-    std::stable_sort(moves.data, moves.data+moves.length);
-    /*for (uint16_t ind = 0; ind < moves.length; ind++) {
-        std::cout<< moveToString(moves[ind], *position) << " Eval " << moves[ind].sortEval << std::endl;
-    }*/
 
     pvLine line;
     line.numMoves = 0;
     while (checkContinue(params, depth, get_timestamp()-start_ts, totalTime)) {
         try {
-            //std::cout << "Depth " << depth << std::endl;
-
             *eval = negamax(position, plyInfo(0, depth+EXTENSIONS_ALLOWED, 0, depth), AlphaBeta(alpha, beta), &line, searchSettings(nullmove_enabled, hashprobe_disabled, checkextension_enabled, searchId));
-
-
 
             if (doAspiration) {
                 if ((*eval <= alpha) || (*eval >= beta)) {
@@ -160,72 +130,8 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
             }
 
             *bestMove = line.line[0];
-
-
-            /*chessMove localBestMove;
-
-            uint64_t* nodeCounts = new uint64_t[moves.length];
-            for (uint16_t ind = 0; ind < moves.length; ind++) {
-                nodeCounts[ind] = 0;
-            }
-
-
-            *eval =  root_search(position, &localBestMove, alpha, beta, depth, depth+3, &moves, nodeCounts);
-            if (doAspiration) {
-                if ((*eval <= alpha) || (*eval >= beta)) {
-                    for (uint16_t ind = 0; ind < moves.length; ind++) {
-                        nodeCounts[ind] = 0;
-                    }
-                    *eval = root_search(position, &localBestMove, -32000, 32000, depth, depth+3, &moves, nodeCounts);
-                }
-
-                alpha = *eval-50;
-                beta  = *eval+50;
-            }
-
-            *bestMove = localBestMove;
-
-            uint64_t maxCount = 0;
-
-            for (uint16_t ind = 0; ind < moves.length; ind++) {
-
-                if (nodeCounts[ind] > maxCount) {
-                    maxCount = nodeCounts[ind];
-                }
-
-            }
-            uint32_t scaling = 1;
-
-            if (maxCount > INT16_MAX) {
-                scaling = maxCount/10000+1;
-            }
-            for (uint16_t ind = 0; ind < moves.length; ind++) {
-
-                if (nodeCounts[ind] > 0) {
-                    moves[ind].sortEval = (nodeCounts[ind]/scaling);
-                } else {
-                    if (moves[ind].sortEval > 0) {
-                        moves[ind].sortEval = moves[ind].sortEval-500;
-                    }
-                }
-
-                if (moves[ind].move == bestMove->move) {
-                    moves[ind].sortEval = INT16_MAX;
-                }
-                //std::cout << moves[ind].sortEval << std::endl;
-            }
-
-            std::stable_sort(moves.data, moves.data+moves.length);*/
-
-            /*std::cout << "New move list" << std::endl;
-
-            for (uint16_t ind = 0; ind < moves.length; ind++) {
-                std::cout<< moveToString(moves[ind], *position) << " Eval " << moves[ind].sortEval << std::endl;
-            }*/
-
             //TODO: free MEMORY!!!
         } catch(timeoutException& e) {
-            //std::cout << "Search timed out" << std::endl;
             break;
         }
 
@@ -247,17 +153,12 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
         if (!quietMode) {
             sendSearchInfo(*nodeCount, *mtime, *eval, depth, moveList);
         }
-        //logSearch(*nodeCount, *mtime, *eval, depth, moveToString(*bestMove));
         line.numMoves = 0;
         depth++;
         searchedNodes = searchedNodes+*nodeCount;
         if (*eval > 29000) {
             break;
         }
-
-        /*if ((depth > 6) && (previousEval < *eval-10)) { FOR SPECIAL ENDGAMES! Otherwise we dont make progress...
-          break;
-        }*/
     }
 
     depth--;

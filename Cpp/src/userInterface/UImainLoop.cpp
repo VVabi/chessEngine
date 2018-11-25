@@ -338,6 +338,12 @@ std::string toString(const evaluationType type) {
         case eval_mobility:
             return "mobility";
             break;
+        case eval_special_endgames:
+            return "special_endgames";
+            break;
+        case eval_draw_detection:
+            return "draw_detection";
+            break;
     }
 
     return ""; //Unreachable
@@ -373,11 +379,7 @@ void handleEval() {
 
     root["total"] = eval;
     for (auto const& entry : evalMap) {
-        if (entry.first == eval_mobility) {
-            root[toString(entry.first)] = entry.second.eval;
-        } else {
             root[toString(entry.first)] = entry.second.eval/256;
-        }
     }
     Json::StreamWriterBuilder builder;
     builder["commentStyle"] = "None";
@@ -461,7 +463,14 @@ void handleSetEvalParam(std::list<std::string> input) {
 
 
 void runPerformanceTests(uint32_t d) {
-    for (uint16_t depth = 3; depth < d+1; depth++) {
+    //for (uint16_t depth = 3; depth < d+1; depth++) {
+    while (true) {
+        uint16_t depth = 3;
+        if (depth > d+100) {
+            std::cout << depth << std::endl;
+            std::cout << d+100 << std::endl;
+            break;
+        }
         std::ifstream file;
         file.open("/home/vabi/code/chessEngine/quiet-labeled.epd");
         if (!file.is_open()) {

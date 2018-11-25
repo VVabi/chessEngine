@@ -12,6 +12,9 @@
 #include <parameters/parameters.hpp>
 #include <map>
 
+struct EvalMemory {
+    AttackTable attackTables[2];
+};
 
 struct EvalComponentResult {
     int16_t common;
@@ -25,11 +28,11 @@ struct EvalComponentResult {
     }
 };
 
-enum evaluationType {eval_kingsafety, eval_trapped_pieces, eval_outposts, eval_rookfiles, eval_doubled_pawn, eval_isolated_pawn, eval_backwards_pawn, eval_bishoppair, eval_PSQ, eval_passed_pawns, eval_mobility};
+enum evaluationType {eval_kingsafety, eval_trapped_pieces, eval_outposts, eval_rookfiles, eval_doubled_pawn, eval_isolated_pawn, eval_backwards_pawn, eval_bishoppair, eval_PSQ, eval_passed_pawns, eval_mobility, eval_special_endgames, eval_draw_detection};
 
 
 struct EvaluationComponent {
-    EvalComponentResult (*evalFunction)(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables);
+    EvalComponentResult (*evalFunction)(const chessPosition* position, const evalParameters* par, EvalMemory* memory);
     evaluationType type;
     int16_t coefficient_common;
     int16_t coefficient_earlygame;
@@ -62,17 +65,17 @@ void  getBackwardsPawns(uint64_t* whiteBackwards, uint64_t* blackBackwards, uint
 uint8_t getPawnColumns(uint64_t in);
 uint64_t getDoubledPawns(uint64_t in);
 uint64_t getIsolatedPawns(uint64_t in);
-EvalComponentResult doubledPawnEval(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables);
-EvalComponentResult isolatedPawnEval(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables);
-EvalComponentResult backwardPawnsEval(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables);
+EvalComponentResult evalMobility(const chessPosition* position, const evalParameters* par, EvalMemory* evalMemory);
+EvalComponentResult doubledPawnEval(const chessPosition* position, const evalParameters* par,  EvalMemory* attackTables);
+EvalComponentResult isolatedPawnEval(const chessPosition* position, const evalParameters* par,  EvalMemory* attackTables);
+EvalComponentResult backwardPawnsEval(const chessPosition* position, const evalParameters* par,  EvalMemory* attackTables);
 
-EvalComponentResult kingSafety(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables);
-EvalComponentResult outposts(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables);
-EvalComponentResult trappedPieces(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables);
-EvalComponentResult rookOpenFiles(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables);
-EvalComponentResult staticPawnEvaluation(const chessPosition* position, const evalParameters* par, const AttackTable* attackTable);
-EvalComponentResult bishopPair(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables);
-EvalComponentResult passedPawnEval(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables);
+EvalComponentResult kingSafety(const chessPosition* position, const evalParameters* par,  EvalMemory* attackTables);
+EvalComponentResult outposts(const chessPosition* position, const evalParameters* par,  EvalMemory* evalMemory);
+EvalComponentResult trappedPieces(const chessPosition* position, const evalParameters* par,  EvalMemory* attackTables);
+EvalComponentResult rookOpenFiles(const chessPosition* position, const evalParameters* par,  EvalMemory* attackTables);
+EvalComponentResult bishopPair(const chessPosition* position, const evalParameters* par,  EvalMemory* attackTables);
+EvalComponentResult passedPawnEval(const chessPosition* position, const evalParameters* par,  EvalMemory* attackTables);
 
 EvalComponentResult PSQ(const chessPosition* position, const evalParameters* par);
 

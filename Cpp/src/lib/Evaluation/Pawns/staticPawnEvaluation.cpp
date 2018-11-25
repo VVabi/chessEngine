@@ -54,7 +54,7 @@ int16_t isolatedPawnTable[] = { 0, 0, 0, 0, 0, 0, 0, 0, -5, -6, -7, -8, -8, -7,
 
 EvalComponentResult doubledPawnEval(const chessPosition* position,
         const evalParameters* par __attribute__((unused)),
-        const AttackTable* attackTables __attribute__((unused))) {
+        EvalMemory* evalMemory __attribute__((unused))) {
     int16_t ev = 0;
     uint64_t doubledPawns[2];
     doubledPawns[white] = getDoubledPawns(position->pieceTables[white][pawn]);
@@ -98,7 +98,7 @@ EvalComponentResult doubledPawnEval(const chessPosition* position,
 
 EvalComponentResult isolatedPawnEval(const chessPosition* position,
         const evalParameters* par __attribute__((unused)),
-        const AttackTable* attackTables __attribute__((unused))) {
+        EvalMemory* evalMemory __attribute__((unused))) {
     int16_t ev = 0;
     uint64_t isolatedPawns[2];
     isolatedPawns[white] = getIsolatedPawns(position->pieceTables[white][pawn]);
@@ -123,7 +123,7 @@ EvalComponentResult isolatedPawnEval(const chessPosition* position,
 
 EvalComponentResult backwardPawnsEval(const chessPosition* position,
         const evalParameters* par __attribute__((unused)),
-        const AttackTable* attackTables __attribute__((unused))) {
+        EvalMemory* evalMemory __attribute__((unused))) {
     int16_t ev = 0;
     uint64_t backwardsPawns[2];
     uint64_t frontColumnFill[2];

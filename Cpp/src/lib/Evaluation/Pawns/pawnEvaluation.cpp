@@ -37,7 +37,7 @@ uint64_t staticpawnhashhits = 0;
 
 EvalComponentResult passedPawnEval(const chessPosition* position,
         const evalParameters* par __attribute__((unused)),
-        const AttackTable* attackTables __attribute__((unused))) {
+        EvalMemory* evalMemory __attribute__((unused))) {
     //TODO: remove code duplication. Generally this code sucks - too many white/black diffs...
     int32_t eval = 0;
     uint64_t whitePawns = position->pieceTables[white][pawn];

@@ -11,7 +11,7 @@
 #include "lib/Attacks/attacks.hpp"
 #include "lib/Evaluation/evaluation.hpp"
 
-EvalComponentResult rookOpenFiles(const chessPosition* position, const evalParameters* evalParams, const AttackTable* attackTables  __attribute__((unused))) {
+EvalComponentResult rookOpenFiles(const chessPosition* position, const evalParameters* evalParams, EvalMemory* evalMemory  __attribute__((unused))) {
     int32_t ret = 0;
 
     uint8_t pawnOccupancy[2];
