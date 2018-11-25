@@ -23,6 +23,8 @@
 #include <atomic>
 #include <string>
 #include <Search/repetition.hpp>
+#include <userInterface/userInterface.hpp>
+#include <vector>
 
 static char figureNames[2][6] = { {'P', 'N', 'B', 'R', 'Q', 'K'},
         {'p', 'n', 'b', 'r', 'q', 'k'},
@@ -41,46 +43,27 @@ uint64_t get_timestamp() {
     return mtime;
 }
 
+void search(chessPosition cposition, searchParameters params, bool quietMode = false); //TODO remove
 
-uint64_t runSinglePositionPerformanceTest(std::string position, uint16_t depth, uint64_t* negamaxNodes, uint64_t* qNodes, bool useAspiration) {
+uint64_t runSinglePositionPerformanceTest(std::string position, uint16_t depth, uint64_t* negamaxNodes, uint64_t* qNodes) {
     searchId++;
-    chessPosition c = stringToChessPosition(position);
-
+    std::vector<std::string> moves;
+    memoryLibrarianAdd(position, moves);
     resetSearchData();
     resetQuiescenceNodes();
     struct timeval start, end;
     //long mtime, seconds, useconds;
     gettimeofday(&start, NULL);
     //int32_t eval = negamax(&c, depth, -100000, 100000, &bestMove);
-    int16_t alpha = -32000;
-    int16_t beta  = 32000;
-    int32_t searchdepth = 3;
     uint64_t start_ts = get_timestamp();
     setTotalTime(100000000, start_ts);
-    while (searchdepth <= depth && (searchdepth < 14)) {
-        bool succeeded = false;
-        pvLine line;
-        int16_t eval = negamax(&c, plyInfo(0, depth+7, 0, searchdepth), AlphaBeta(alpha, beta), &line, searchSettings(searchId));
-        if (useAspiration) {
-            if ((eval <= alpha)) {
-                alpha = alpha-100;
-            } else if (eval >= beta) {
-                beta = beta+100;
-            } else {
-                succeeded = true;
-            }
+    chessPosition cposition = memoryLibrarianRetrievePosition();
+    searchParameters paramsToUse;
+    paramsToUse.depth = depth;
+    paramsToUse.type = fixed_depth;
 
+    search(cposition, paramsToUse, true);
 
-        } else {
-            succeeded = true;
-        }
-
-        if (succeeded) {
-            searchdepth++;
-            alpha = eval-50;
-            beta  = eval+50;
-        }
-    }
     gettimeofday(&end, NULL);
 
     /*seconds  = end.tv_sec  - start.tv_sec;
@@ -154,33 +137,6 @@ std::string chessPositionToString(const chessPosition position) {
     }
 
 
-    return ret;
-}
-
-std::string chessPositionToOutputString(const chessPosition position) {
-    //Not performance-critical
-    //---------------------------
-    std::string ret = "";
-
-    for (int8_t row = 7; row >= 0; row--) {
-        for (int8_t column = 0; column < 8; column++) {
-        uint64_t num = (1ULL << (8*row+column));
-        bool found = false;
-        for (uint8_t color = 0; color < 2; color++) {
-            for (uint8_t figureCnt = 0; figureCnt < 6; figureCnt++) {
-                if (position.pieceTables[color][figureCnt] & num) {
-                    ret.push_back(figureNames[color][figureCnt]);
-                    found = true;
-                }
-            }
-        }
-
-        if (!found) {
-            ret.push_back('0');
-        }
-        }
-        ret.push_back('\n');
-    }
     return ret;
 }
 
@@ -319,113 +275,7 @@ chessPosition FENtoChessPosition(std::string fen) {
     return position;
 }
 
-chessPosition stringToChessPosition(std::string strposition) {
-    repetitionData.reset(); //TODO: this is a hack
-    //Not performance-critical
-    //---------------------------
-    chessPosition position;
-    zeroInitPosition(&position);
-    //
-    if (strposition.length() != 69) {
-        std::cout << "Invalid chess position string!!" << std::endl;
-        return position;
-    }
 
-    for (uint8_t ind = 0; ind < 64; ind++) {
-        char c = strposition.at(ind);
-            switch (c) {
-                case 'K':
-                    position.pieces[white]                  |= (1ULL << ind);
-                    position.pieceTables[white][king]       |= (1ULL << ind);
-                    break;
-                case 'Q':
-                    position.pieceTables[white][queen]      |= (1ULL << ind);
-                    position.pieces[white]                  |= (1ULL << ind);
-                    break;
-                case 'R':
-                    position.pieceTables[white][rook]       |= (1ULL << ind);
-                    position.pieces[white]                  |= (1ULL << ind);
-                    break;
-                case 'B':
-                    position.pieceTables[white][bishop]     |= (1ULL << ind);
-                    position.pieces[white]                  |= (1ULL << ind);
-                    break;
-                case 'N':
-                    position.pieceTables[white][knight]     |= (1ULL << ind);
-                    position.pieces[white]                  |= (1ULL << ind);
-                    break;
-                case 'P':
-                    position.pieceTables[white][pawn]       |= (1ULL << ind);
-                    position.pieces[white]                  |= (1ULL << ind);
-                    break;
-                case 'k':
-                    position.pieceTables[black][king]       |= (1ULL << ind);
-                    position.pieces[black]                  |= (1ULL << ind);
-                    break;
-                case 'q':
-                    position.pieceTables[black][queen]      |= (1ULL << ind);
-                    position.pieces[black]                  |= (1ULL << ind);
-                    break;
-                case 'r':
-                    position.pieceTables[black][rook]       |= (1ULL << ind);
-                    position.pieces[black]                  |= (1ULL << ind);
-                    break;
-                case 'b':
-                    position.pieceTables[black][bishop]     |= (1ULL << ind);
-                    position.pieces[black]                  |= (1ULL << ind);
-                    break;
-                case 'n':
-                    position.pieceTables[black][knight]     |= (1ULL << ind);
-                    position.pieces[black]                  |= (1ULL << ind);
-                    break;
-                case 'p':
-                    position.pieceTables[black][pawn]       |= (1ULL << ind);
-                    position.pieces[black]                  |= (1ULL << ind);
-                    break;
-                case '0':
-                    break;
-                default:
-                    std::cout << "invalid position string" << std::endl;
-                    break;
-            }
-    }
-
-    if (strposition.at(64) == 'w') {
-        position.toMove = white;
-    } else if (strposition.at(64) == 'b') {
-        position.toMove = black;
-    } else {
-        std::cout << "invalid position string" << std::endl;
-    }
-
-    position.data.castlingRights = 0;
-    if (strposition.at(65) == 'K') {
-        position.data.castlingRights = position.data.castlingRights | 1;
-    }
-    if (strposition.at(66) == 'Q') {
-        position.data.castlingRights = position.data.castlingRights | 2;
-    }
-    if (strposition.at(67) == 'k') {
-        position.data.castlingRights = position.data.castlingRights | 4;
-    }
-    if (strposition.at(68) == 'q') {
-        position.data.castlingRights = position.data.castlingRights | 8;
-    }
-
-    position.totalFigureEval   = calcTotalFigureEvaluation(&position);
-    position.figureEval   = calcFigureEvaluation(&position);
-    position.pieceTableEval = ((1 << 15) + position.figureEval+ calcPieceTableValue(&position))
-                            +(((1 << 14) + calcEndGamePieceTableValue(&position)+position.figureEval) << 16);
-    position.zobristHash    = calcZobristHash(&position);
-
-    position.pawnHash = calcPawnHash(&position);
-    position.data.hash = position.zobristHash;
-    position.data.enPassantFile = 8;
-    position.data.fiftyMoveRuleCounter = 0;
-
-    debug_incremental_calculations(&position);
-    return position;
-}
 
 
 std::string moveToString(chessMove move) {

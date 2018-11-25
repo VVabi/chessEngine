@@ -110,13 +110,15 @@ void setSearchParams(searchParameters params) {
 std::thread engineThread;
 std::atomic<bool> isSearching(false);
 
-void search(chessPosition cposition, searchParameters params) {
+void search(chessPosition cposition, searchParameters params, bool quietMode=false) {
     chessMove bestMove;
     uint32_t nodeCount = 0;
     uint64_t mtime = 0;
     int32_t eval = 0;
-    searchMove(&cposition, &bestMove, &nodeCount, &mtime, &eval, false, params);
-    putLine("bestmove " + moveToString(bestMove));
+    searchMove(&cposition, &bestMove, &nodeCount, &mtime, &eval, false, params, quietMode);
+    if (!quietMode) {
+        putLine("bestmove " + moveToString(bestMove));
+    }
     free_position(&cposition);
     isSearching = false;
 }
@@ -128,7 +130,7 @@ void launchSearch() {
     }
     isSearching = true;
     chessPosition cposition = memoryLibrarianRetrievePosition();
-    engineThread = std::thread(search, cposition, paramsToUse);
+    engineThread = std::thread(search, cposition, paramsToUse, false);
 }
 
 void handleUciInput(std::ostream& stream) {
@@ -477,17 +479,21 @@ void handleSetEvalParam(std::list<std::string> input) {
 void runPerformanceTests(uint32_t d) {
     for (uint16_t depth = 3; depth < d+1; depth++) {
         std::ifstream file;
-        file.open("chesspositionsfixed.txt");
+        file.open("/home/vabi/code/chessEngine/quiet-labeled.epd");
+        if (!file.is_open()) {
+            std::cout << "Could not open file" << std::endl;
+        }
         std::string line;
         uint64_t negamaxNodes = 0;
         uint64_t qNodes = 0;
 
         uint32_t nodes = 0;
-        while (std::getline(file, line)) {
+        uint32_t count = 0;
+        while (std::getline(file, line) && count < 1000) {
             //std::cout << line << std::endl;
             uint64_t nmNodes = 0;
             uint64_t qn = 0;
-            uint64_t newNodes = runSinglePositionPerformanceTest(line, depth, &nmNodes, &qn, true);
+            uint64_t newNodes = runSinglePositionPerformanceTest(line, depth, &nmNodes, &qn);
             if (newNodes != qn+nmNodes) {
                 std::cout << "WTF???" << std::endl;
             }
@@ -497,6 +503,7 @@ void runPerformanceTests(uint32_t d) {
             //std::cout << qn << std::endl;
             negamaxNodes = negamaxNodes+nmNodes;
             qNodes = qNodes+qn;
+            count++;
         }
         std::cout << "Depth " << depth  << " Nodes " << nodes << std::endl;
         std::cout << "negamaxnodes " <<  negamaxNodes << std::endl;

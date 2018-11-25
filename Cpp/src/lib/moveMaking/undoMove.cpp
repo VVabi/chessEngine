@@ -189,7 +189,7 @@ void undoMove(chessPosition* position) {
     #ifdef DEBUG
 
     if (position->zobristHash != position->data.hash) {
-        std::cout << chessPositionToOutputString(*position) << std::endl;
+        std::cout << chessPositionToFenString(*position) << std::endl;
         std::cout << "WTF???" << std::endl;
     }
     debug_incremental_calculations(position);

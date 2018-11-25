@@ -24,23 +24,22 @@
 #include "lib/Evaluation/evaluation.hpp"
 #include <map>
 
-#define MOBILTIYWEIGHT 256
+#define MOBILITYWEIGHT 256
 EvaluationComponent evaluationComponents[] = {
-                            {       &kingSafety,            eval_kingsafety,            taper_earlygame_higher,                     256,        256,        256                                     },
-                            {       &trappedPieces,         eval_trapped_pieces,        taper_none,                                 256,        256,        256                                     },
-                            {       &outposts,              eval_outposts,              taper_none,                                 256,        256,        256                                     },
-                            {       &rookOpenFiles,         eval_rookfiles,             taper_none,                                 256,        256,        256                                     },
-                            {       &doubledPawnEval,       eval_doubled_pawn,          taper_none,                                 256,        256,        256                                     },
-                            {       &isolatedPawnEval,      eval_isolated_pawn,         taper_none,                                 256,        256,        256                                     },
-                            {       &backwardPawnsEval,     eval_backwards_pawn,        taper_none,                                 256,        256,        256                                     },
-                            {       &bishopPair,            eval_bishoppair,            taper_none,                                 256,        256,        256                                     },
-                            {       &passedPawnEval,        eval_passed_pawns,          taper_none  | taper_endgame_higher,         256,        256,        256                                     },
+                            {       &kingSafety,            eval_kingsafety,               256,        256,        256      },
+                            {       &trappedPieces,         eval_trapped_pieces,           256,        256,        256      },
+                            {       &outposts,              eval_outposts,                 256,        256,        256      },
+                            {       &rookOpenFiles,         eval_rookfiles,                256,        256,        256      },
+                            {       &doubledPawnEval,       eval_doubled_pawn,             256,        256,        256      },
+                            {       &isolatedPawnEval,      eval_isolated_pawn,            256,        256,        256      },
+                            {       &backwardPawnsEval,     eval_backwards_pawn,           256,        256,        256      },
+                            {       &bishopPair,            eval_bishoppair,               256,        256,        256      },
+                            {       &passedPawnEval,        eval_passed_pawns,             256,        256,        256      },
 };
 
 SimpleEvaluationComponent simpleEvaluationComponents[] = {
-                            {       &PSQ,             eval_PSQ,           taper_earlygame_higher | taper_endgame_higher,            256,        256,        256              },
+                            {       &PSQ,             eval_PSQ,                            256,        256,        256      },
 };
-
 
 std::map<evaluationType, DetailedEvaluationResultComponent> getDetailedEvalResults(const chessPosition* position) {
     std::map<evaluationType, DetailedEvaluationResultComponent> ret;
@@ -71,19 +70,19 @@ std::map<evaluationType, DetailedEvaluationResultComponent> getDetailedEvalResul
 
     //now the subtler components
     //---------------------------
-    int16_t mobilityScore = 0;
+    EvalComponentResult mobilityScore;
 
     AttackTable attackTables[2];
     int16_t eval = 0;
     attackTables[white] = makeAttackTableWithMobility(position, white, &mobilityScore);
-    int32_t rawmobility = mobilityScore;
-    eval = eval+((int32_t) mobilityScore)*256;
+    int32_t rawmobility = mobilityScore.common;
+    eval = eval+((int32_t) mobilityScore.common)*256;
 
-    mobilityScore = 0;
+    mobilityScore = EvalComponentResult();
     attackTables[black] = makeAttackTableWithMobility(position, black, &mobilityScore);
 
-    eval = eval-((int32_t) mobilityScore)*256;
-    rawmobility = rawmobility-mobilityScore;
+    eval = eval-((int32_t) mobilityScore.common)*256;
+    rawmobility = rawmobility-mobilityScore.common;
     DetailedEvaluationResultComponent detailedResults;
     detailedResults.components.common  = rawmobility;
     detailedResults.eval               = rawmobility;
@@ -177,15 +176,14 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
 
     //now the subtler components
     //---------------------------
-    int16_t mobilityScore = 0;
-
     AttackTable attackTables[2];
 
-    attackTables[white] = makeAttackTableWithMobility(position, white, &mobilityScore);
-    eval = eval+((int32_t) mobilityScore)*MOBILTIYWEIGHT;
-    mobilityScore = 0;
-    attackTables[black] = makeAttackTableWithMobility(position, black, &mobilityScore);
-    eval = eval-((int32_t) mobilityScore)*MOBILTIYWEIGHT;
+    EvalComponentResult whiteMobilityScore;
+    attackTables[white] = makeAttackTableWithMobility(position, white, &whiteMobilityScore);
+    eval = eval+((int32_t) whiteMobilityScore.common)*MOBILITYWEIGHT+((256-tapering)*((int32_t) whiteMobilityScore.endgame))+(tapering*((int32_t) whiteMobilityScore.early_game));
+    EvalComponentResult blackMobilityScore;
+    attackTables[black] = makeAttackTableWithMobility(position, black, &blackMobilityScore);
+    eval = eval-((int32_t) blackMobilityScore.common)*MOBILITYWEIGHT-((256-tapering)*((int32_t) blackMobilityScore.endgame))-(tapering*((int32_t) blackMobilityScore.early_game));
 
     for (uint16_t cnt=0; cnt < sizeof(evaluationComponents)/sizeof(EvaluationComponent); cnt++) {
         const EvaluationComponent component    = evaluationComponents[cnt];

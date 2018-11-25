@@ -60,4 +60,17 @@ inline uint8_t getColumnOcc(uint64_t in) {
     return in & 0xFF;
 }
 
+inline uint64_t allSouthOf(uint16_t field) {
+    uint16_t row = ROW(field);
+    uint16_t first = row << 3;
+    return (1 << first)-1;
+}
+
+inline uint64_t allNorthOf(uint16_t field) {
+    uint16_t row = ROW(field);
+    uint16_t first = row << 3;
+    return UINT64_MAX-(1 << first)+1;
+}
+
+
 #endif  // CPP_SRC_LIB_BITFIDDLING_H_

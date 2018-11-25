@@ -26,13 +26,11 @@ struct EvalComponentResult {
 };
 
 enum evaluationType {eval_kingsafety, eval_trapped_pieces, eval_outposts, eval_rookfiles, eval_doubled_pawn, eval_isolated_pawn, eval_backwards_pawn, eval_bishoppair, eval_PSQ, eval_passed_pawns, eval_mobility};
-enum taperingDirection {taper_none = 0, taper_endgame_higher = 1, taper_earlygame_higher = 2};
 
 
 struct EvaluationComponent {
     EvalComponentResult (*evalFunction)(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables);
     evaluationType type;
-    uint16_t taper_flags;
     int16_t coefficient_common;
     int16_t coefficient_earlygame;
     int16_t coefficient_endgame;
@@ -41,7 +39,6 @@ struct EvaluationComponent {
 struct SimpleEvaluationComponent {
     EvalComponentResult (*evalFunction)(const chessPosition* position, const evalParameters* par);
     evaluationType type;
-    uint16_t taper_flags;
     int16_t coefficient_common;
     int16_t coefficient_earlygame;
     int16_t coefficient_endgame;
@@ -78,5 +75,7 @@ EvalComponentResult bishopPair(const chessPosition* position, const evalParamete
 EvalComponentResult passedPawnEval(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables);
 
 EvalComponentResult PSQ(const chessPosition* position, const evalParameters* par);
+
+AttackTable makeAttackTableWithMobility(const chessPosition* position, playerColor attackingSide, EvalComponentResult* result);
 
 #endif /* EVALUATION_EVALUATION_HPP_ */

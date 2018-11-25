@@ -98,7 +98,7 @@ bool checkContinue(searchParameters params, uint16_t depth, uint16_t passedTime,
 
 uint32_t cnt = 0;
 
-uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval, bool doAspiration, searchParameters params) {
+uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval, bool doAspiration, searchParameters params, bool quietMode) {
 /*#ifdef EXPERIMENTAL
 
     fenLogger.open("fen.txt", std::ios::app);
@@ -244,8 +244,9 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
             std::string mv = moveToString(line.line[ind]);
             moveList.push_back(mv);
         }
-
-        sendSearchInfo(*nodeCount, *mtime, *eval, depth, moveList);
+        if (!quietMode) {
+            sendSearchInfo(*nodeCount, *mtime, *eval, depth, moveList);
+        }
         //logSearch(*nodeCount, *mtime, *eval, depth, moveToString(*bestMove));
         line.numMoves = 0;
         depth++;

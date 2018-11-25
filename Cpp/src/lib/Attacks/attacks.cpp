@@ -12,6 +12,7 @@
 #include <lib/moveMaking/moveMaking.hpp>
 #include "attacks.hpp"
 #include <assert.h>
+#include <lib/Evaluation/evaluation.hpp>
 #include <parameters/parameters.hpp>
 #include <lib/moveGeneration/moveGenerationInternals.hpp>
 #include <lib/moveGeneration/nonSliderMoveTables.hpp>
@@ -135,19 +136,17 @@ AttackTable makeAttackTable(const chessPosition* position, playerColor attacking
     return retTable;
 }
 
-/*int16_t bishopMobility[14]   = {-35, -25, -18, -13, -5, 0, 3, 5, 8, 10, 13, 15, 17, 18};
-int16_t rookMobility[15]     = {-35, -25, -18, -15, -10, -8, -3, 0, 3, 5, 8, 9, 11, 13, 16};
-int16_t knightMobility[9]   = {-25, -18, -8, 0, 3, 5, 8, 10, 12};*/
-
+#ifdef EXPERIMENTAL
+int16_t bishopMobility[14]   = {-25, -18, -13, -8, -4, 0, 3, 5, 8, 10, 12, 13, 14, 15};
+int16_t rookMobility[15]     = {-25, -19, -14, -10, -7, -5, -2, 0, 2, 4, 6, 8, 10, 12, 13};
+int16_t knightMobility[9]   = {-20, -12, -6, 0, 3, 5, 8, 10, 12};
+#else
 int16_t bishopMobility[14]   = {-35, -25, -18, -13, -5, 0, 3, 5, 8, 10, 12, 14, 16, 18};
 int16_t rookMobility[15]     = {-35, -25, -18, -15, -10, -8, -3, 0, 3, 5, 8, 10, 12, 14, 16};
 int16_t knightMobility[9]   = {-25, -18, -8, 0, 3, 5, 8, 10, 12};
+#endif
 
-AttackTable makeAttackTableWithMobility(const chessPosition* position, playerColor attackingSide, int16_t* mobilityScore) {
-//TODO: get rid of the code duplication
-
-
-    *mobilityScore = 0;
+AttackTable makeAttackTableWithMobility(const chessPosition* position, playerColor attackingSide, EvalComponentResult* result) {
     uint64_t ownPieces = position->pieces[attackingSide];
     AttackTable retTable;
     //pawns
@@ -170,7 +169,17 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
         knightAttackTable = knightAttackTable | getKnightMoves(nextKnight);
         uint16_t legalMoves = popcount(getKnightMoves(nextKnight) & ~ownPieces & ~opppawnTakes);
         assert(legalMoves < 9);
-        *mobilityScore = *mobilityScore+knightMobility[legalMoves];
+#ifdef EXPERIMENTAL
+        result->common     += knightMobility[legalMoves];
+        result->early_game += knightMobility[legalMoves]/2;
+        if (attackingSide == white) {
+            result->common     += popcount(allNorthOf(nextKnight) & getKnightMoves(nextKnight) & ~ownPieces & ~opppawnTakes)/2;
+        } else {
+            result->common     += popcount(allSouthOf(nextKnight) & getKnightMoves(nextKnight) & ~ownPieces & ~opppawnTakes)/2;
+        }
+#else
+        result->common += knightMobility[legalMoves];
+#endif
     }
     retTable.attackTables[knight] = knightAttackTable;
 
@@ -185,7 +194,17 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
         bishopAttackTable = bishopAttackTable | potentialMoves;
         uint16_t legalMoves = popcount(potentialMoves & ~ownPieces & ~opppawnTakes);
         assert(legalMoves < 14);
-        *mobilityScore = *mobilityScore+bishopMobility[legalMoves];
+#ifdef EXPERIMENTAL
+        result->common      += bishopMobility[legalMoves];
+        result->early_game  += bishopMobility[legalMoves]/2;
+        if (attackingSide == white) {
+            result->common     += popcount(allNorthOf(nextPieceField) & potentialMoves & ~ownPieces & ~opppawnTakes)/2;
+        } else {
+            result->common     += popcount(allSouthOf(nextPieceField) & potentialMoves & ~ownPieces & ~opppawnTakes)/2;
+        }
+#else
+        result->common += bishopMobility[legalMoves];
+#endif
     }
     retTable.attackTables[bishop] = bishopAttackTable;
     //rooks
@@ -197,7 +216,17 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
         uint64_t potentialMoves =  getPotentialRookMoves(nextPieceField, occupancy);
         uint16_t legalMoves = popcount(potentialMoves & ~ownPieces);
         assert(legalMoves < 15);
-        *mobilityScore = *mobilityScore+rookMobility[legalMoves];
+#ifdef EXPERIMENTAL
+        result->endgame += rookMobility[legalMoves]/2;
+        result->common  += rookMobility[legalMoves]/2;
+        if (attackingSide == white) {
+            result->common     += popcount(allNorthOf(nextPieceField) & potentialMoves & ~ownPieces & ~opppawnTakes)/2;
+        } else {
+            result->common     += popcount(allSouthOf(nextPieceField) & potentialMoves & ~ownPieces & ~opppawnTakes)/2;
+        }
+#else
+        result->common += rookMobility[legalMoves];
+#endif
         rookAttackTable = rookAttackTable | potentialMoves;
     }
     retTable.attackTables[rook] = rookAttackTable;
@@ -211,7 +240,7 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
         uint16_t nextPieceField = popLSB(queens);
         uint64_t potentialMoves =  getPotentialRookMoves(nextPieceField, occupancy);
         queenAttackTable = queenAttackTable | potentialMoves;
-        *mobilityScore = *mobilityScore+popcount(potentialMoves & ~ownPieces);
+        result->common += popcount(potentialMoves & ~ownPieces);
     }
 
     //TODO: this could be optimized by merging with the rook table and doing both at once
@@ -220,7 +249,8 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
         uint16_t nextPieceField = popLSB(queens);
         uint64_t potentialMoves =  getPotentialBishopMoves(nextPieceField, occupancy);;
         queenAttackTable = queenAttackTable | potentialMoves;
-        *mobilityScore = *mobilityScore+popcount(potentialMoves & ~ownPieces);
+        result->common += popcount(potentialMoves & ~ownPieces);
+
     }
     retTable.attackTables[queen] = queenAttackTable;
 
@@ -234,6 +264,9 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
     }
     retTable.attackTables[king] = kingAttackTable;
     retTable.completeAttackTable = retTable.attackTables[king] | retTable.attackTables[pawn] | retTable.attackTables[knight] | retTable.attackTables[bishop] | retTable.attackTables[rook] | retTable.attackTables[queen];
+
+    /*result->early_game  = 0;
+    result->endgame     = 0;*/
     return retTable;
 }
 
