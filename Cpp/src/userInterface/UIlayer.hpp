@@ -15,11 +15,6 @@
 bool doContinueSearch();
 void UIloop();
 uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval, bool doAspiration, searchParameters params, bool quietMode = false);
-std::string chessPositionToString(const chessPosition position);
-std::string chessPositionToOutputString(const chessPosition position);
-chessPosition stringToChessPosition(std::string strposition);
-chessPosition FENtoChessPosition(std::string fen);
-std::string chessPositionToFenString(chessPosition position, bool EPD = false);
 std::string moveToString(chessMove move);
 uint64_t stringToMove(std::string mv);
 bool checkAndMakeMove(chessPosition* position, std::string move);

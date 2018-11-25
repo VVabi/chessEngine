@@ -21,7 +21,7 @@ inline uint16_t findMSB(const uint64_t a) {
     return 63-__builtin_clzll(a); //TODO: replace by ctz?
 }
 
-inline uint16_t popLSB(uint64_t &a) {
+inline uint16_t popLSB(uint64_t&a) {
     uint16_t n = __builtin_ctzll(a);
     a = a & (~(1ULL << n));
     return n;

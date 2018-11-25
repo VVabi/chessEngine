@@ -204,7 +204,7 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
     }*/
 
 #ifdef RANDOMEVAL
-    eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?
+    eval = eval+(rand_r() & 7)-3; //TODO: how is this performance-wise?
 #endif
 
 

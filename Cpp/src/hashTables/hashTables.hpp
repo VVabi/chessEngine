@@ -8,6 +8,10 @@
 #ifndef HASHTABLES_HASHTABLES_HPP_
 #define HASHTABLES_HASHTABLES_HPP_
 
+#include <lib/basics.hpp>
+#include <lib/basicTypes.hpp>
+#include <cassert>
+
 
 #define HASHSIZE 0x1FFFFF //needs to be a power of 2 -1!
 

@@ -6,14 +6,14 @@
  */
 
 
-#include "basics.hpp"
-#include <iostream>
-#include <string.h>
-#include <lib/bitfiddling.h>
-#include <lib/Defines/boardParts.hpp>
+#include <stdint.h>
 #include <hashTables/hashTables.hpp>
+#include <lib/basics.hpp>
 #include <lib/DebugFunctions/debugFunctions.hpp>
-#include <userInterface/UIlayer.hpp>
+#include <parameters/parameters.hpp>
+#include <util/FEN/fenhelper.hpp>
+#include <cstring>
+#include <iostream>
 
 
 inline figureType toFigureType(uint16_t num) {

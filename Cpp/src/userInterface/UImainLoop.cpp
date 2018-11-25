@@ -5,43 +5,44 @@
  *      Author: vabi
  */
 
-#include <Search/history.hpp>
+#include <DataTypes/vdt_vector.hpp>
+#include <hashTables/hashTables.hpp>
+#include <lib/Attacks/attacks.hpp>
 #include <lib/basics.hpp>
-#include <userInterface/userInterface.hpp>
-#include <fstream>
-#include <lib/moveMaking/moveMaking.hpp>
+#include <lib/basicTypes.hpp>
 #include <lib/Evaluation/evaluation.hpp>
-#include "UIlayer.hpp"
-#include <Search/search.hpp>
-#include <iomanip>
-#include <userInterface/interfaceStructs.hpp>
 #include <lib/moveGeneration/moveGeneration.hpp>
-#include <logging/logger.hpp>
+#include <parameters/externalParamReader.hpp>
+#include <parameters/parameters.hpp>
+#include <parameters/parametersPrivate.hpp>
+#include <Search/history.hpp>
+#include <Search/killerMoves.hpp>
+#include <Search/search.hpp>
+#include <tests/tests.hpp>
+#include <userInterface/interfaceStructs.hpp>
+#include <userInterface/json/json.h>
+#include <userInterface/userEvents.hpp>
+#include <userInterface/userInterface.hpp>
+#include <userInterface/UIlayer.hpp>
+#include <algorithm>
+#include <atomic>
+#include <cassert>
+#include <cstdint>
+#include <fstream>
 #include <iostream>
-#include "userEvents.hpp"
-#include <sstream>
-#include <vector>
 #include <list>
 #include <map>
-#include <atomic>
-#include <thread>
 #include <mutex>
-#include <algorithm>
-#include <hashTables/hashTables.hpp>
-#include <lib/bitfiddling.h>
-#include <parameters/parameters.hpp>
-#include <parameters/externalParamReader.hpp>
+#include <sstream>
 #include <string>
-#include <Search/killerMoves.hpp>
-#include <tests/tests.hpp>
-#include "userInterface/json/json.h"
+#include <thread>
+#include <utility>
+#include <vector>
 
-//necessary to get windows compile to run
-//----------------------------------------
-#include <userInterface/mingw.thread.h>
-#include <userInterface/mingw.mutex.h>
-
-
+#ifdef WINDOWS
+#include "util/mingw.mutex.h"
+#include "util/mingw.thread.h"
+#endif
 
 template <typename T>
 T StringToNumber(const std::string &Text) {
@@ -74,7 +75,6 @@ void sendSearchInfo(uint64_t nodes, uint32_t time, int32_t eval, uint32_t depth,
     uint64_t npsInt = nps;
     std::stringstream out;
 
-
     if (eval > 29000) {
         int16_t mate_in = (30000-eval+1)/2;
         out << "info depth " << depth << " score mate " << mate_in << " nps " << npsInt << " nodes " << nodes << " pv ";
@@ -90,16 +90,6 @@ void sendSearchInfo(uint64_t nodes, uint32_t time, int32_t eval, uint32_t depth,
     }
     putLine(out.str());
 }
-
-
-
-/*#ifdef EXPERIMENTAL
-std::ofstream fenLogger;
-#endif*/
-
-
-
-
 
 void setSearchParams(searchParameters params) {
     paramsToUse = params;
@@ -312,8 +302,6 @@ void handlePosition(std::list<std::string> input) {
 
     memoryLibrarianAdd(fen, moveList);
 }
-
-// eval_kingsafety, eval_trapped_pieces, eval_outposts, eval_rookfiles, eval_static_pawns, eval_bishoppair, eval_PSQ, eval_passed_pawns, eval_mobility
 
 std::string toString(const evaluationType type) {
     switch (type) {

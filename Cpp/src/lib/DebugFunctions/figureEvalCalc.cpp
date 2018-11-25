@@ -7,9 +7,9 @@
 
 
 #include <lib/basics.hpp>
+#include <lib/basicTypes.hpp>
 #include <lib/bitfiddling.h>
 #include <parameters/parameters.hpp>
-
 
 int16_t calcFigureEvaluation(const chessPosition* position) {
     int16_t val = 0;

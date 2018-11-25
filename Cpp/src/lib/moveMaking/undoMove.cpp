@@ -15,6 +15,7 @@
 #include <parameters/parameters.hpp>
 #include <lib/Evaluation/PSQ.hpp>
 #include <Search/repetition.hpp>
+#include <util/FEN/fenhelper.hpp>
 
 
 void undoNullMove(chessPosition* position) {
