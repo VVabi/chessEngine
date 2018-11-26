@@ -26,7 +26,12 @@
 
 int main() {
     initializeParameters();
+    //srand(get_timestamp());
+#ifdef EXPERIMENTAL
+    srand(get_timestamp()+153);
+#else
     srand(get_timestamp());
+#endif
     initZobristHashValues();
     initHashTables();
 

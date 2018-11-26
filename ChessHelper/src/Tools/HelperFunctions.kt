@@ -18,7 +18,13 @@ fun getLos(wins: Int, draws: Int, losses: Int): LOSdata {
     val numGames        = reader.readLine().toInt()
     val winningFraction = reader.readLine().toDouble()
     val eloDifference   = reader.readLine().toDouble()
-    val los             = reader.readLine().toDouble()
+    var los = 0.0
+    try {
+        los = reader.readLine().toDouble()
+    } catch(e: NumberFormatException) {
+
+    }
+
     process.destroy()
     return LOSdata(numGames, winningFraction, eloDifference, los)
     return LOSdata(0,0.0,0.0,0.0)

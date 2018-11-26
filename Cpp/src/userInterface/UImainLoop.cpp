@@ -104,11 +104,13 @@ void search(chessPosition cposition, searchParameters params, bool quietMode = f
     uint64_t mtime = 0;
     int32_t eval = 0;
     searchMove(&cposition, &bestMove, &nodeCount, &mtime, &eval, false, params, quietMode);
+    //TODO: this is a subtle point: we need to set isSearching to false first; otherwise we put out the bestmove and then may refuse the next request since we are still
+    //searching. We should find a better solution.
+    isSearching = false;
     if (!quietMode) {
         putLine("bestmove " + moveToString(bestMove));
     }
     free_position(&cposition);
-    isSearching = false;
 }
 
 void launchSearch() {
@@ -566,6 +568,9 @@ void UIloop() {
             }
 
         } else {
+            if (engineThread.joinable()) {
+                engineThread.join();
+            }
             //full interface otherwise
             //---------------------------
             switch (ev.input) {
