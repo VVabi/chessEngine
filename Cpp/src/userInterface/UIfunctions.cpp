@@ -229,7 +229,7 @@ bool checkAndMakeMove(chessPosition* position, std::string move) {
     chessMove m;
     bool found = checkMove(position, move, &m);
         if (found) {
-            std::cout << moveToString(m) << std::endl;
+            //std::cout << moveToString(m) << std::endl;
             makeMove(&m, position);
             uint16_t kingField = findLSB(position->pieceTables[1-position->toMove][king]);
             if (isFieldAttacked(position, position->toMove, kingField)) {

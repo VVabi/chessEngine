@@ -92,16 +92,16 @@ static inline bool getHashMoveToFront(vdt_vector<chessMove>* moves, uint16_t has
     return false;
 }
 
-static inline void get_extensions_reductions(chessPosition* position, uint16_t* reduction, uint16_t* extension, bool check, bool movingSideInCheck, plyInfo plyinfo, int16_t depth, chessMove* move, uint16_t ind) {
-//#ifdef EXPERIMENTAL
-        if (!check && !movingSideInCheck && (move->captureType == none) && (depth > 2) && (plyinfo.ply > 0) && (ind > 2)) {
+static inline void get_extensions_reductions(chessPosition* position, uint16_t* reduction, uint16_t* extension, bool check, bool movingSideInCheck, plyInfo plyinfo, int16_t depth, chessMove* move, uint16_t ind, int16_t bestIndex) {
+        if ((bestIndex == -1) && !check && !movingSideInCheck && (move->captureType == none) && (depth > 2) && (plyinfo.ply > 0) && (ind > 2)) {
             if (move->sortEval < 50) {
                 *reduction = 1;
-                if ((move->sortEval < -50)) {
-                    *reduction = 2;
-                    if (depth > 10) {
-                        *reduction = 3;
-                    }
+                //TODO: this is questionably brutal
+                    if ((move->sortEval < -50)) {
+                        *reduction = 2;
+                        if (depth > 10) {
+                            *reduction = 3;
+                        }
                 }
             }
         }
@@ -127,6 +127,11 @@ static inline void get_extensions_reductions(chessPosition* position, uint16_t* 
         if ((closeToPromotion || (move->type == promotionQueen)) && (plyinfo.ply+depth+*extension < plyinfo.max_ply-1)) {
             *extension = *extension+1;
             *reduction = 0;
+#ifdef EXPERIMENTAL
+            if (plyinfo.ply+depth+*extension < plyinfo.max_ply-1 && position->totalFigureEval < 3000 && (depth < 2)) {
+                *extension = *extension+1;
+            }
+#endif
         }
 }
 
@@ -387,7 +392,7 @@ static inline searchLoopResults negamax_internal_move_loop(chessPosition* positi
             //------------------------------
             uint16_t reduction = 0;
             uint16_t extension = 0;
-            get_extensions_reductions(position, &reduction, &extension, check, sortinfo.movingSideInCheck, plyinfo, plyinfo.depth, &moves[ind], ind);
+            get_extensions_reductions(position, &reduction, &extension, check, sortinfo.movingSideInCheck, plyinfo, plyinfo.depth, &moves[ind], ind, bestIndex);
             if ((settings.checkextensionSetting == checkextension_disabled)) {
                 extension = 0;
             }

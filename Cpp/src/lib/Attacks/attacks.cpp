@@ -169,17 +169,7 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
         knightAttackTable = knightAttackTable | getKnightMoves(nextKnight);
         uint16_t legalMoves = popcount(getKnightMoves(nextKnight) & ~ownPieces & ~opppawnTakes);
         assert(legalMoves < 9);
-/*#ifdef EXPERIMENTAL
-        result->common     += knightMobility[legalMoves];
-        result->early_game += knightMobility[legalMoves]/2;
-        if (attackingSide == white) {
-            result->common     += popcount(allNorthOf(nextKnight) & getKnightMoves(nextKnight) & ~ownPieces & ~opppawnTakes)/2;
-        } else {
-            result->common     += popcount(allSouthOf(nextKnight) & getKnightMoves(nextKnight) & ~ownPieces & ~opppawnTakes)/2;
-        }
-#else*/
         result->common += knightMobility[legalMoves];
-
     }
     retTable.attackTables[knight] = knightAttackTable;
 
@@ -194,17 +184,7 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
         bishopAttackTable = bishopAttackTable | potentialMoves;
         uint16_t legalMoves = popcount(potentialMoves & ~ownPieces & ~opppawnTakes);
         assert(legalMoves < 14);
-/*#ifdef EXPERIMENTAL
-        result->common      += bishopMobility[legalMoves];
-        result->early_game  += bishopMobility[legalMoves]/2;
-        if (attackingSide == white) {
-            result->common     += popcount(allNorthOf(nextPieceField) & potentialMoves & ~ownPieces & ~opppawnTakes)/2;
-        } else {
-            result->common     += popcount(allSouthOf(nextPieceField) & potentialMoves & ~ownPieces & ~opppawnTakes)/2;
-        }
-#else*/
         result->common += bishopMobility[legalMoves];
-//#endif
     }
     retTable.attackTables[bishop] = bishopAttackTable;
     //rooks
@@ -216,17 +196,7 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
         uint64_t potentialMoves =  getPotentialRookMoves(nextPieceField, occupancy);
         uint16_t legalMoves = popcount(potentialMoves & ~ownPieces);
         assert(legalMoves < 15);
-/*#ifdef EXPERIMENTAL
-        result->endgame += rookMobility[legalMoves]/2;
-        result->common  += rookMobility[legalMoves]/2;
-        if (attackingSide == white) {
-            result->common     += popcount(allNorthOf(nextPieceField) & potentialMoves & ~ownPieces & ~opppawnTakes)/2;
-        } else {
-            result->common     += popcount(allSouthOf(nextPieceField) & potentialMoves & ~ownPieces & ~opppawnTakes)/2;
-        }
-#else*/
         result->common += rookMobility[legalMoves];
-//#endif
         rookAttackTable = rookAttackTable | potentialMoves;
     }
     retTable.attackTables[rook] = rookAttackTable;

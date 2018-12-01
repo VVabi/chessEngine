@@ -59,7 +59,7 @@ uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t n
         if (timeAllotted > total/10.0) {
             timeAllotted = total/10.0;
         }
-        *worst_case_time = total/3.0;
+        *worst_case_time = total/1.5;
         return timeAllotted;
     }
 

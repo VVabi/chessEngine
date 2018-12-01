@@ -25,5 +25,41 @@ EvalComponentResult bishopPair(const chessPosition* position, const evalParamete
     }
     EvalComponentResult result;
     result.common = ret;
+
+/*#ifdef EXPERIMENTAL
+
+
+    if (numWhiteBishops == 1) {
+        int16_t field = findLSB(position->pieceTables[white][bishop]);
+
+        uint64_t otherColoredFields;
+        uint64_t ownColouredFields;
+
+        if (field & 1) {
+            otherColoredFields = BLACKFIELDS;
+            ownColouredFields  = WHITEFIELDS;
+        } else {
+            otherColoredFields = WHITEFIELDS;
+            ownColouredFields  = BLACKFIELDS;
+        }
+        result.early_game += (popcount(otherColoredFields & position->pieceTables[white][pawn])-popcount(ownColouredFields & position->pieceTables[white][pawn]));
+    }
+
+    if (numblackBishops == 1) {
+        int16_t field = findLSB(position->pieceTables[black][bishop]);
+
+        uint64_t otherColoredFields;
+        uint64_t ownColouredFields;
+
+        if (field & 1) {
+            otherColoredFields = BLACKFIELDS;
+            ownColouredFields  = WHITEFIELDS;
+        } else {
+            otherColoredFields = WHITEFIELDS;
+            ownColouredFields  = BLACKFIELDS;
+        }
+        result.early_game -= (popcount(otherColoredFields & position->pieceTables[black][pawn])-popcount(ownColouredFields & position->pieceTables[black][pawn]));
+    }
+#endif*/
     return result;
 }

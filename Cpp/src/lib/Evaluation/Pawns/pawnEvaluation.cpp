@@ -66,7 +66,34 @@ EvalComponentResult passedPawnEval(const chessPosition* position,
                     eval = eval - par->passedPawnParameters.passedPawnEvalValues[white][field]/ BLOCKEDDIVISOR;
                 }
             }
+            //TODO: I think we should add more static knowledge about when a pawn is passed
+           if ((distToPromotion == 1) && (position->toMove == white) && (((evalMemory->attackTables[black].completeAttackTable & BIT64(promotionField)) == 0)) ) {
+               untaperedEval += 300;
+           }
             eval = eval - par->passedPawnParameters.kingToPromotionFieldDistance[distToPromotion][kingDist];
+
+/*#ifdef EXPERIMENTAL
+            uint64_t passedPawnFile = files[FILE(field)];
+
+            uint64_t ownRooks   = passedPawnFile & position->pieceTables[white][rook];
+            uint64_t otherRooks = passedPawnFile & position->pieceTables[black][rook];
+
+            while (ownRooks) {
+                uint16_t rookField = popLSB(ownRooks);
+                if (rookField < field) {
+                    eval += 10;
+                } else {
+                    eval -= 20;
+                }
+            }
+
+            while (otherRooks) {
+                uint16_t rookField = popLSB(otherRooks);
+                if (rookField < field) {
+                    eval -= 20;
+                }
+            }
+#endif*/
         }
     }
     uint64_t blackPawnBuffer = blackPawns;
@@ -89,6 +116,34 @@ EvalComponentResult passedPawnEval(const chessPosition* position,
                 }
             }
             eval = eval + par->passedPawnParameters.kingToPromotionFieldDistance[distToPromotion][kingDist];
+
+            //TODO: I think we should add more static knowledge about when a pawn is passed
+           if ((distToPromotion == 1) && (position->toMove == black) && (((evalMemory->attackTables[white].completeAttackTable & BIT64(promotionField)) == 0)) ){
+               untaperedEval -= 300;
+           }
+
+/*#ifdef EXPERIMENTAL
+           uint64_t passedPawnFile = files[FILE(field)];
+           uint64_t ownRooks   = passedPawnFile & position->pieceTables[black][rook];
+           uint64_t otherRooks = passedPawnFile & position->pieceTables[white][rook];
+
+           while (ownRooks) {
+               uint16_t rookField = popLSB(ownRooks);
+               if (rookField > field) {
+                   eval -= 10;
+               } else {
+                   eval += 20;
+               }
+           }
+
+           while (otherRooks) {
+               uint16_t rookField = popLSB(otherRooks);
+               if (rookField > field) {
+                   eval += 20;
+               }
+           }
+#endif*/
+
         }
     }
 

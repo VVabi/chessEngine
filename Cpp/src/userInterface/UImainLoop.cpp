@@ -465,14 +465,7 @@ void handleSetEvalParam(std::list<std::string> input) {
 
 
 void runPerformanceTests(uint32_t d) {
-    //for (uint16_t depth = 3; depth < d+1; depth++) {
-    while (true) {
-        uint16_t depth = 3;
-        if (depth > d+100) {
-            std::cout << depth << std::endl;
-            std::cout << d+100 << std::endl;
-            break;
-        }
+    for (uint16_t depth = 3; depth < d+1; depth++) {
         std::ifstream file;
         file.open("/home/vabi/code/chessEngine/quiet-labeled.epd");
         if (!file.is_open()) {

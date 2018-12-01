@@ -1,5 +1,4 @@
 /*
-
  * evaluation.cpp
  *
  *  Created on: Sep 25, 2016
@@ -14,8 +13,6 @@
 #include <lib/Evaluation/evaluation.hpp>
 #include <lib/Evaluation/tapering.hpp>
 #include <lib/figureValueHashing.hpp>
-
-static EvalMemory evalMemory;
 
 static EvaluationComponent evaluationComponents[] = {
         //Careful here - order is important since a previous function may write needed info to EvalMemory!
@@ -125,7 +122,7 @@ std::map<evaluationType, DetailedEvaluationResultComponent> getDetailedEvalResul
         detailedResults.taperingValue   = tapering;
         ret[component.type] = detailedResults;
     }
-
+    EvalMemory evalMemory;
     //now the subtler components
     //---------------------------
     for (uint16_t cnt=0; cnt < sizeof(evaluationComponents)/sizeof(EvaluationComponent); cnt++) {
@@ -212,6 +209,8 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
     if (PSQ_only || (evalsigned < alpha - 500) || (evalsigned > beta+500)) {
         return evalsigned;
     }
+
+    EvalMemory evalMemory;
 
     //now the subtler components
     //---------------------------
