@@ -105,7 +105,6 @@ static inline void get_extensions_reductions(chessPosition* position, uint16_t* 
                 }
             }
         }
-//#ifdef EXPERIMENTAL
         if (check) {
             *reduction = 0; //TODO: A check should NEVER be reduced, independent of the ply/depth stuff
             if (((plyinfo.ply+depth < plyinfo.max_ply-1) || ((depth == 1) && (plyinfo.ply+depth < plyinfo.max_ply)) )) {
@@ -114,24 +113,15 @@ static inline void get_extensions_reductions(chessPosition* position, uint16_t* 
                 }
             }
         }
-/*#else
-        if (check && ((plyinfo.ply+depth < plyinfo.max_ply-1) || ((depth == 1) && (plyinfo.ply+depth < plyinfo.max_ply)) )) {
-            *reduction = 0; //TODO: A check should NEVER be reduced, independent of the ply/depth stuff
-            if (SEE(position, move) > -50) {
-                *extension = 1;
-            }
-        }
-#endif*/
         bool closeToPromotion = (move->type == pawnMove) && ((move->targetField > 48) || (move->targetField < 16));
 
         if ((closeToPromotion || (move->type == promotionQueen)) && (plyinfo.ply+depth+*extension < plyinfo.max_ply-1)) {
             *extension = *extension+1;
             *reduction = 0;
-#ifdef EXPERIMENTAL
             if (plyinfo.ply+depth+*extension < plyinfo.max_ply-1 && position->totalFigureEval < 3000 && (depth < 2)) {
                 *extension = *extension+1;
             }
-#endif
+
         }
 }
 
