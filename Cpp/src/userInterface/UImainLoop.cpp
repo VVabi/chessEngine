@@ -475,8 +475,8 @@ void runPerformanceTests(uint32_t d) {
         uint64_t negamaxNodes = 0;
         uint64_t qNodes = 0;
 
-        uint32_t nodes = 0;
-        uint32_t count = 0;
+        uint64_t nodes = 0;
+        uint64_t count = 0;
         while (std::getline(file, line) && count < 1000) {
             //std::cout << line << std::endl;
             uint64_t nmNodes = 0;
