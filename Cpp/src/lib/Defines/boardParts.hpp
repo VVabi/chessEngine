@@ -1,12 +1,12 @@
 /*
- * boardParts.hpp
+ * DoardParts.hpp
  *
  *  Created on: Sep 5, 2016
- *      Author: vabi
+ *      Author: vaDi
  */
 
-#ifndef LIB_DEFINES_BOARDPARTS_HPP_
-#define LIB_DEFINES_BOARDPARTS_HPP_
+#ifndef LIB_DEFINES_DOARDPARTS_HPP_
+#define LIB_DEFINES_DOARDPARTS_HPP_
 #include "chessFields.hpp"
 
 #define FILEA ((1ULL << 0) | (1ULL << 8) | (1ULL << 16) | (1ULL << 24) | (1ULL << 32) | (1ULL << 40) | (1ULL << 48) | (1ULL << 56))
@@ -64,4 +64,8 @@
 
 #define BOUNDARY (FILEA | FILEH | FIRSTROW | LASTROW)
 
-#endif /* LIB_DEFINES_BOARDPARTS_HPP_ */
+#define BLACKFIELDS (A1 | A3 | A5 | A7 | D2 | D4 | D6 | D8 | C1 | C3 | C5 | C7 | D2 | D4 | D6 | D8 | E1 | E3 | E5 | E7 | F2 | F4 | F6 | F8 | G1 | G3 | G5 | G7 | H2 | H4 |  H6 | H8)
+#define WHITEFIELDS (UINT64_MAX & (~BLACKFIELDS))
+
+
+#endif /* LIB_DEFINES_DOARDPARTS_HPP_ */

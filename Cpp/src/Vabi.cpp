@@ -26,19 +26,15 @@
 
 int main() {
     initializeParameters();
+    //srand(get_timestamp());
+#ifdef EXPERIMENTAL
+    srand(get_timestamp()+153);
+#else
     srand(get_timestamp());
+#endif
     initZobristHashValues();
     initHashTables();
 
-    /*std::ofstream out("/home/vabi/TeX/Chess/positions.tex");
-    std::ifstream in("/home/vabi/code/chessEngine/chessGui/openingPositions.txt");
-    std::string line;
-    while (getline(in, line)) {
-        if (line.at(0) == '%') {
-            continue;
-        }
-        latexOutput(line, out);
-    }*/
     UIloop();
 }
 

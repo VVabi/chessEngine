@@ -15,6 +15,7 @@
 #include <parameters/parameters.hpp>
 #include <lib/Evaluation/PSQ.hpp>
 #include <Search/repetition.hpp>
+#include <util/FEN/fenhelper.hpp>
 
 
 void undoNullMove(chessPosition* position) {
@@ -189,7 +190,7 @@ void undoMove(chessPosition* position) {
     #ifdef DEBUG
 
     if (position->zobristHash != position->data.hash) {
-        std::cout << chessPositionToOutputString(*position) << std::endl;
+        std::cout << chessPositionToFenString(*position) << std::endl;
         std::cout << "WTF???" << std::endl;
     }
     debug_incremental_calculations(position);

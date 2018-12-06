@@ -21,8 +21,8 @@ static uint16_t taperingValues[81] = {  0,  0,  0,  0,  0,  0,  0,  0,
 
 
 uint16_t getTaperingValue(uint16_t material) {
-   if (material > 80) {
+    if (material > 80) {
        material = 80;
-   }
-   return taperingValues[material];
+    }
+    return taperingValues[material];
 }

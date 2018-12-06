@@ -10,6 +10,7 @@
 #include <vector>
 #include <lib/basics.hpp>
 #include <userInterface/UIlayer.hpp>
+#include <util/FEN/fenhelper.hpp>
 #include <fstream>
 #include <iostream>
 

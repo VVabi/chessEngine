@@ -17,7 +17,7 @@ extern uint64_t bishopFieldTable[];
 extern uint64_t bishopMoveTables[64][512];
 extern uint64_t bishopMagicNumbers[];
 
-__attribute__((always_inline)) static inline uint64_t getPotentialRookMoves(uint16_t rookField, uint64_t occupancy) {
+__attribute__((always_inline)) static inline uint64_t getPotentialRookMoves(const uint16_t rookField, const uint64_t occupancy) {
 #ifdef DEBUG
     assert(rookField < 64);
 #endif
@@ -28,7 +28,7 @@ __attribute__((always_inline)) static inline uint64_t getPotentialRookMoves(uint
     return potentialMoves;
 }
 
-__attribute__((always_inline)) static inline uint64_t getPotentialBishopMoves(uint16_t bishopField, uint64_t occupancy) {
+__attribute__((always_inline)) static inline uint64_t getPotentialBishopMoves(const uint16_t bishopField, const uint64_t occupancy) {
 #ifdef DEBUG
     assert(bishopField < 64);
 #endif
@@ -39,14 +39,14 @@ __attribute__((always_inline)) static inline uint64_t getPotentialBishopMoves(ui
     return potentialMoves;
 }
 
-__attribute__((always_inline)) static inline uint64_t getBishopMoves(uint16_t field) {
+__attribute__((always_inline)) static inline uint64_t getBishopMoves(const uint16_t field) {
 #ifdef DEBUG
     assert(field < 64);
 #endif
     return bishopFieldTable[field];
 }
 
-__attribute__((always_inline)) static inline uint64_t getRookMoves(uint16_t field) {
+__attribute__((always_inline)) static inline uint64_t getRookMoves(const uint16_t field) {
 #ifdef DEBUG
     assert(field < 64);
 #endif

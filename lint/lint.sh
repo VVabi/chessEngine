@@ -45,7 +45,7 @@
 +runtime/printf_format,\
 -runtime/references,\
 -runtime/string,\
--runtime/threadsafe_fn,\
++runtime/threadsafe_fn,\
 +runtime/vlog,\
 +whitespace/blank_line,\
 +whitespace/braces,\
@@ -65,4 +65,4 @@
 +whitespace/semicolon,\
 +whitespace/tab,\
 +whitespace/todo \
-$(find ../Cpp -type f -regex ".*\.\(c\|h\|hpp\|cpp\)" | grep -v "../Cpp/src/lib/Defines/bishopMoveTables.cpp" | grep -v "../Cpp/src/lib/Defines/rookMoveTables.cpp" | grep -v "../Cpp/src/userInterface/mingw.mutex.h" | grep -v "../Cpp/src/userInterface/mingw.thread.h")
+$(find ../Cpp -type f -regex ".*\.\(c\|h\|hpp\|cpp\)" | grep -v "../Cpp/src/lib/Defines/bishopMoveTables.cpp" | grep -v "../Cpp/src/lib/Defines/rookMoveTables.cpp" | grep -v "../Cpp/src/util/mingw.mutex.h" | grep -v "../Cpp/src/util/mingw.thread.h" | grep -v "../src/userInterface/json/jsoncpp.cpp" | grep -v "../src/userInterface/json/json.h" | grep -v "../src/userInterface/json/json-forwards.h")

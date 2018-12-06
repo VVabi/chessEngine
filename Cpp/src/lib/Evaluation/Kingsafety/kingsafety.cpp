@@ -67,7 +67,7 @@ static int16_t kingSafetySinglePlayer(const chessPosition* position, const uint8
 }
 
 
-EvalComponentResult kingSafety(const chessPosition* position, const evalParameters* par, const AttackTable* attackTables) {
+EvalComponentResult kingSafety(const chessPosition* position, const evalParameters* par, EvalMemory* evalMemory) {
     uint8_t pawnColumnOccupancy[2];
 
     for (uint8_t color=0; color < 2; color++) {
@@ -77,8 +77,8 @@ EvalComponentResult kingSafety(const chessPosition* position, const evalParamete
         pawnColumnOccupancy[color] = (uint8_t) (pawns & 0xFF);
     }
 
-    int16_t whiteSafety =  kingSafetySinglePlayer(position, pawnColumnOccupancy, white, &attackTables[black], &par->kingSafetyParameters);
-    int16_t blackSafety =  kingSafetySinglePlayer(position, pawnColumnOccupancy, black, &attackTables[white], &par->kingSafetyParameters);
+    int16_t whiteSafety =  kingSafetySinglePlayer(position, pawnColumnOccupancy, white, &evalMemory->attackTables[black], &par->kingSafetyParameters);
+    int16_t blackSafety =  kingSafetySinglePlayer(position, pawnColumnOccupancy, black, &evalMemory->attackTables[white], &par->kingSafetyParameters);
     EvalComponentResult ret;
     ret.early_game = whiteSafety+blackSafety;
     return ret;

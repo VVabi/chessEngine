@@ -105,8 +105,8 @@ void setHashEntry(hashFlag flag, int16_t eval, uint8_t depth, uint8_t searchId, 
         hashEntry* entry = &current->hashData[ind];
 
         if (entry->hashHighBits == 0) {
-        	replace_index = ind;
-        	break;
+            replace_index = ind;
+            break;
         }
 
         uint8_t past_search = searchId-entry->index;

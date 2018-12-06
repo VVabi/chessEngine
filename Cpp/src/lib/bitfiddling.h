@@ -21,7 +21,7 @@ inline uint16_t findMSB(const uint64_t a) {
     return 63-__builtin_clzll(a); //TODO: replace by ctz?
 }
 
-inline uint16_t popLSB(uint64_t &a) {
+inline uint16_t popLSB(uint64_t&a) {
     uint16_t n = __builtin_ctzll(a);
     a = a & (~(1ULL << n));
     return n;
@@ -59,5 +59,18 @@ inline uint8_t getColumnOcc(uint64_t in) {
     in = southFill(in) | northFill(in);
     return in & 0xFF;
 }
+
+inline uint64_t allSouthOf(uint16_t field) {
+    uint16_t row = ROW(field);
+    uint16_t first = row << 3;
+    return (1 << first)-1;
+}
+
+inline uint64_t allNorthOf(uint16_t field) {
+    uint16_t row = ROW(field);
+    uint16_t first = row << 3;
+    return UINT64_MAX-(1 << first)+1;
+}
+
 
 #endif  // CPP_SRC_LIB_BITFIDDLING_H_

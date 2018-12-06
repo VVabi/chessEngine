@@ -1,46 +1,103 @@
 /*
-
  * evaluation.cpp
  *
  *  Created on: Sep 25, 2016
  *      Author: vabi
  */
 
-#include <stdlib.h>     /* srand, rand */
+#include <stdint.h>
+#include <lib/basics.hpp>
+#include <lib/basicTypes.hpp>
+#include <lib/Defines/pieceCombinations.hpp>
+#include <lib/Evaluation/endgames/endgameEvals.hpp>
+#include <lib/Evaluation/evaluation.hpp>
+#include <lib/Evaluation/tapering.hpp>
+#include <lib/figureValueHashing.hpp>
 
-#include "lib/basics.hpp"
-#include "evaluation.hpp"
-#include "lib/Attacks/attacks.hpp"
-#include "lib/bitfiddling.h"
-#include "userInterface/UIlayer.hpp"
-#include "iostream"
-#include "fstream"
-#include "parameters/parameters.hpp"
-#include "logging/logger.hpp"
-#include "lib/Defines/chessFields.hpp"
-#include "lib/Evaluation/tapering.hpp"
-#include "lib/Evaluation/endgames/endgameEvals.hpp"
-#include "lib/Defines/pieceCombinations.hpp"
-#include "lib/Evaluation/evaluation.hpp"
-
-#define MOBILTIYWEIGHT 256
-EvaluationComponent evaluationComponents[] = {
-                            {       &kingSafety,            eval_kingsafety,            taper_earlygame_higher,                     256,        256,        256                                     },
-                            {       &trappedPieces,         eval_trapped_pieces,        taper_none,                                 256,        256,        256                                     },
-                            {       &outposts,              eval_outposts,              taper_none,                                 256,        256,        256                                     },
-                            {       &rookOpenFiles,         eval_rookfiles,             taper_none,                                 256,        256,        256                                     },
-                            {       &staticPawnEvaluation,  eval_static_pawns,          taper_none,                                 256,        256,        256                                     },
-                            {       &bishopPair,            eval_bishoppair,            taper_none,                                 256,        256,        256                                     },
-                            {       &passedPawnEval,        eval_passed_pawns,          taper_none  | taper_endgame_higher,         256,        256,        256                                     },
+static EvaluationComponent evaluationComponents[] = {
+        //Careful here - order is important since a previous function may write needed info to EvalMemory!
+                            {       &evalMobility,          eval_mobility,                 256,        256,        256      },
+                            {       &kingSafety,            eval_kingsafety,               256,        256,        256      },
+                            {       &trappedPieces,         eval_trapped_pieces,           256,        256,        256      },
+                            {       &outposts,              eval_outposts,                 256,        256,        256      },
+                            {       &rookOpenFiles,         eval_rookfiles,                256,        256,        256      },
+                            {       &doubledPawnEval,       eval_doubled_pawn,             256,        256,        256      },
+                            {       &isolatedPawnEval,      eval_isolated_pawn,            256,        256,        256      },
+                            {       &backwardPawnsEval,     eval_backwards_pawn,           256,        256,        256      },
+                            {       &bishopPair,            eval_bishoppair,               256,        256,        256      },
+                            {       &passedPawnEval,        eval_passed_pawns,             256,        256,        256      },
 };
 
-SimpleEvaluationComponent simpleEvaluationComponents[] = {
-                            {       &PSQ,             eval_PSQ,           taper_earlygame_higher | taper_endgame_higher,            256,        256,        256              },
+static SimpleEvaluationComponent simpleEvaluationComponents[] = {
+                            {       &PSQ,             eval_PSQ,                            256,        256,        256      },
 };
-
 
 std::map<evaluationType, DetailedEvaluationResultComponent> getDetailedEvalResults(const chessPosition* position) {
+
     std::map<evaluationType, DetailedEvaluationResultComponent> ret;
+
+    if (position->totalFigureEval < 700) {
+            int16_t eval = 0;
+            bool in_special_endgame = false;
+            if (position->presentPieces.compare(WHITEKRK) || position->presentPieces.compare(BLACKKRK)) {
+                eval = COLORSIGN(position->toMove)*KRK_endgame(position);
+                in_special_endgame = true;
+            }
+
+            if (position->presentPieces.compare(WHITEKBBK) || position->presentPieces.compare(BLACKKBBK)) {
+                eval = COLORSIGN(position->toMove)*KBBK_endgame(position);
+                in_special_endgame = true;
+            }
+
+            if (position->presentPieces.compare(WHITEKBPK) || position->presentPieces.compare(BLACKKBPK)) {
+                eval = COLORSIGN(position->toMove)*KBPK_endgame(position);
+                in_special_endgame = true;
+            }
+
+            if (position->presentPieces.compare(WHITEKPK) || position->presentPieces.compare(BLACKKPK)) {
+                eval = COLORSIGN(position->toMove)*KPK_endgame(position);
+                in_special_endgame = true;
+            }
+
+            if (position->presentPieces.compare(WHITEKBNK) || position->presentPieces.compare(BLACKKBNK)) {
+                eval = COLORSIGN(position->toMove)*KBNK_endgame(position);
+                in_special_endgame = true;
+            }
+
+            if (in_special_endgame) {
+                DetailedEvaluationResultComponent detailedResults;
+                detailedResults.components.common       = 0;
+                detailedResults.components.early_game   = 0;
+                detailedResults.components.endgame      = eval;
+                detailedResults.eval                    = eval*256;
+                detailedResults.taperingValue           = 0;
+
+                ret[eval_special_endgames] = detailedResults;
+                DetailedEvaluationResultComponent dummy;
+                dummy.components.common       = 0;
+                dummy.components.early_game   = 0;
+                dummy.components.endgame      = 0;
+                dummy.eval                    = 0;
+                dummy.taperingValue           = 0;
+                ret[eval_draw_detection]      = dummy;
+
+                for (uint16_t cnt=0; cnt < sizeof(simpleEvaluationComponents)/sizeof(SimpleEvaluationComponent); cnt++) {
+                    const SimpleEvaluationComponent component    = simpleEvaluationComponents[cnt];
+                    ret[component.type]                          = dummy;
+                }
+
+                for (uint16_t cnt=0; cnt < sizeof(evaluationComponents)/sizeof(EvaluationComponent); cnt++) {
+                    const EvaluationComponent component             = evaluationComponents[cnt];
+                    ret[component.type]                             = dummy;
+                }
+
+                return ret;
+            }
+
+        }
+
+
+
 
     const evalParameters* evalPars = getEvalParameters();
     uint16_t phase = position->totalFigureEval/100;
@@ -65,31 +122,12 @@ std::map<evaluationType, DetailedEvaluationResultComponent> getDetailedEvalResul
         detailedResults.taperingValue   = tapering;
         ret[component.type] = detailedResults;
     }
-
+    EvalMemory evalMemory;
     //now the subtler components
     //---------------------------
-    int16_t mobilityScore = 0;
-
-    AttackTable attackTables[2];
-    int16_t eval = 0;
-    attackTables[white] = makeAttackTableWithMobility(position, white, &mobilityScore);
-    int32_t rawmobility = mobilityScore;
-    eval = eval+((int32_t) mobilityScore)*256;
-
-    mobilityScore = 0;
-    attackTables[black] = makeAttackTableWithMobility(position, black, &mobilityScore);
-
-    eval = eval-((int32_t) mobilityScore)*256;
-    rawmobility = rawmobility-mobilityScore;
-    DetailedEvaluationResultComponent detailedResults;
-    detailedResults.components.common  = rawmobility;
-    detailedResults.eval               = rawmobility;
-    detailedResults.taperingValue      = tapering;
-    ret[eval_mobility] =detailedResults;
-
     for (uint16_t cnt=0; cnt < sizeof(evaluationComponents)/sizeof(EvaluationComponent); cnt++) {
         const EvaluationComponent component    = evaluationComponents[cnt];
-        EvalComponentResult evalValue          = component.evalFunction(position, evalPars, attackTables);
+        EvalComponentResult evalValue          = component.evalFunction(position, evalPars, &evalMemory);
 
         int32_t eval = 0;
         DetailedEvaluationResultComponent detailedResults;
@@ -105,7 +143,6 @@ std::map<evaluationType, DetailedEvaluationResultComponent> getDetailedEvalResul
     }
 
     return ret;
-
 }
 
 
@@ -173,21 +210,13 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
         return evalsigned;
     }
 
+    EvalMemory evalMemory;
+
     //now the subtler components
     //---------------------------
-    int16_t mobilityScore = 0;
-
-    AttackTable attackTables[2];
-
-    attackTables[white] = makeAttackTableWithMobility(position, white, &mobilityScore);
-    eval = eval+((int32_t) mobilityScore)*MOBILTIYWEIGHT;
-    mobilityScore = 0;
-    attackTables[black] = makeAttackTableWithMobility(position, black, &mobilityScore);
-    eval = eval-((int32_t) mobilityScore)*MOBILTIYWEIGHT;
-
     for (uint16_t cnt=0; cnt < sizeof(evaluationComponents)/sizeof(EvaluationComponent); cnt++) {
         const EvaluationComponent component    = evaluationComponents[cnt];
-        EvalComponentResult evalValue          = component.evalFunction(position, evalPars, attackTables);
+        EvalComponentResult evalValue          = component.evalFunction(position, evalPars, &evalMemory);
 
         eval = eval+((tapering*((int32_t) evalValue.early_game))/256)*component.coefficient_earlygame;
         eval = eval+(((256-tapering)*((int32_t) evalValue.endgame))/256)*component.coefficient_endgame;
@@ -219,7 +248,7 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
 
         if ((position->pieceTables[black][pawn] == 0) && (eval < 0)) {
             if ((position->pieceTables[black][rook] | position->pieceTables[black][queen]) == 0) {
-                eval = eval/16;
+                                eval = eval/16;
             }
         }
     }

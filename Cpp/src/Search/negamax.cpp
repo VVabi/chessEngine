@@ -92,20 +92,19 @@ static inline bool getHashMoveToFront(vdt_vector<chessMove>* moves, uint16_t has
     return false;
 }
 
-static inline void get_extensions_reductions(chessPosition* position, uint16_t* reduction, uint16_t* extension, bool check, bool movingSideInCheck, plyInfo plyinfo, int16_t depth, chessMove* move, uint16_t ind) {
-//#ifdef EXPERIMENTAL
-        if (!check && !movingSideInCheck && (move->captureType == none) && (depth > 2) && (plyinfo.ply > 0) && (ind > 2)) {
+static inline void get_extensions_reductions(chessPosition* position, uint16_t* reduction, uint16_t* extension, bool check, bool movingSideInCheck, plyInfo plyinfo, int16_t depth, chessMove* move, uint16_t ind, int16_t bestIndex) {
+        if ((bestIndex == -1) && !check && !movingSideInCheck && (move->captureType == none) && (depth > 2) && (plyinfo.ply > 0) && (ind > 2)) {
             if (move->sortEval < 50) {
                 *reduction = 1;
-                if ((move->sortEval < -50)) {
-                    *reduction = 2;
-                    if (depth > 10) {
-                        *reduction = 3;
-                    }
+                //TODO: this is questionably brutal
+                    if ((move->sortEval < -50)) {
+                        *reduction = 2;
+                        if (depth > 10) {
+                            *reduction = 3;
+                        }
                 }
             }
         }
-//#ifdef EXPERIMENTAL
         if (check) {
             *reduction = 0; //TODO: A check should NEVER be reduced, independent of the ply/depth stuff
             if (((plyinfo.ply+depth < plyinfo.max_ply-1) || ((depth == 1) && (plyinfo.ply+depth < plyinfo.max_ply)) )) {
@@ -114,19 +113,15 @@ static inline void get_extensions_reductions(chessPosition* position, uint16_t* 
                 }
             }
         }
-/*#else
-        if (check && ((plyinfo.ply+depth < plyinfo.max_ply-1) || ((depth == 1) && (plyinfo.ply+depth < plyinfo.max_ply)) )) {
-            *reduction = 0; //TODO: A check should NEVER be reduced, independent of the ply/depth stuff
-            if (SEE(position, move) > -50) {
-                *extension = 1;
-            }
-        }
-#endif*/
         bool closeToPromotion = (move->type == pawnMove) && ((move->targetField > 48) || (move->targetField < 16));
 
         if ((closeToPromotion || (move->type == promotionQueen)) && (plyinfo.ply+depth+*extension < plyinfo.max_ply-1)) {
             *extension = *extension+1;
             *reduction = 0;
+            if (plyinfo.ply+depth+*extension < plyinfo.max_ply-1 && position->totalFigureEval < 3000 && (depth < 2)) {
+                *extension = *extension+1;
+            }
+
         }
 }
 
@@ -203,14 +198,15 @@ static inline bool check_nullmove(chessPosition* position, uint16_t* refutationM
     return true;
 }
 
-static inline bool checkHashTable(int16_t* eval, uint16_t* hashMove, HashprobeSetting setting, uint64_t zobristHash, int16_t* alpha, int16_t* beta, int16_t depth, uint8_t searchId) {
+static inline bool checkHashTable(int16_t* eval, uint16_t* hashMove, uint16_t* hashdepth, HashprobeSetting setting, uint64_t zobristHash, int16_t* alpha, int16_t* beta, int16_t depth, uint8_t searchId) {
     hashEntry hashVal      = getHashTableEntry(zobristHash);
     uint32_t zobristHigher = (uint32_t) (zobristHash >> 32);
     uint16_t zobristLower  = (uint16_t) (((uint32_t) (zobristHash & 0xFFFFFFFF)) >> 16);
     bool isHit = (zobristHigher == hashVal.hashHighBits) && (zobristLower == hashVal.hashLower);
 
     if (isHit) {
-        *hashMove = hashVal.bestMove;
+       *hashMove = hashVal.bestMove;
+       *hashdepth = hashVal.depth;
     }
 
     assert(!((*hashMove != 0) && !isHit));
@@ -352,6 +348,7 @@ static inline searchLoopResults negamax_internal_move_loop(chessPosition* positi
             //now make move and check for legality
             //---------------------------------------
             makeMove(&moves[ind], position);
+
             uint16_t kingField = findLSB(position->pieceTables[1- position->toMove][king]);
 
             if (sortinfo.movingSideInCheck || (BIT64(moves[ind].sourceField) & (getRookMoves(kingField) | getBishopMoves(kingField))) || (moves[ind].type == kingMove)) {
@@ -387,7 +384,7 @@ static inline searchLoopResults negamax_internal_move_loop(chessPosition* positi
             //------------------------------
             uint16_t reduction = 0;
             uint16_t extension = 0;
-            get_extensions_reductions(position, &reduction, &extension, check, sortinfo.movingSideInCheck, plyinfo, plyinfo.depth, &moves[ind], ind);
+            get_extensions_reductions(position, &reduction, &extension, check, sortinfo.movingSideInCheck, plyinfo, plyinfo.depth, &moves[ind], ind, bestIndex);
             if ((settings.checkextensionSetting == checkextension_disabled)) {
                 extension = 0;
             }
@@ -539,9 +536,25 @@ int16_t negamax(chessPosition* position, plyInfo plyinfo, AlphaBeta alphabeta, p
     //----------------------------------------
     uint16_t hashmove = 0;
     int16_t hashEval = 0;
-    if (checkHashTable(&hashEval, &hashmove, settings.hashprobeSetting, position->zobristHash, &alphabeta.alpha, &alphabeta.beta, plyinfo.depth, settings.searchId)) {
+    uint16_t hashDepth = 0;
+    if (checkHashTable(&hashEval, &hashmove, & hashDepth, settings.hashprobeSetting, position->zobristHash, &alphabeta.alpha, &alphabeta.beta, plyinfo.depth, settings.searchId)) {
         PV->numMoves = 0;
         return hashEval;
+    }
+
+    //IID
+    //------
+    if (((hashmove == 0) || hashDepth < 3) && (settings.hashprobeSetting == hashprobe_enabled) && (plyinfo.depth > 4)) {
+        for (int16_t d = 3; d < plyinfo.depth-1; d++) {
+            plyInfo info = plyinfo;
+            info.depth = d;
+            info.max_ply = info.ply+d+2;
+            pvLine dummy;
+            dummy.numMoves = 0;
+            negamax(position, info, alphabeta, &dummy, settings);
+            chessMove mv = dummy.line[0];
+            hashmove = ((mv.sourceField) | (mv.targetField << 8));
+        }
     }
 
     //try nullmove pruning
@@ -559,11 +572,7 @@ int16_t negamax(chessPosition* position, plyInfo plyinfo, AlphaBeta alphabeta, p
     //futility pruning
     //-----------------
     if (plyinfo.depth == 1) {
-/*#ifdef EXPERIMENTAL
-        if (check_futility(movingSideInCheck, alphabeta.alpha, position, 200, 250)) {
-#else*/
         if (check_futility(movingSideInCheck, alphabeta.alpha, position, 100, 150)) {
-//#endif
             PV->numMoves = 0;
             return negamaxQuiescence(position, plyinfo.qply, plyinfo.ply, alphabeta, 0, settings.searchId);
         }
