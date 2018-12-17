@@ -163,7 +163,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
             moveList.push_back(mv);
         }
         if (!quietMode) {
-            sendSearchInfo(*nodeCount, *mtime, *eval, depth, moveList);
+            sendSearchInfo(*nodeCount, *mtime, *eval, depth, moveList, position->madeMoves.length);
         }
         line.numMoves = 0;
         depth++;

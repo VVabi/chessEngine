@@ -70,16 +70,16 @@ bool doContinueSearch() {
     return continueSearch;
 }
 
-void sendSearchInfo(uint64_t nodes, uint32_t time, int32_t eval, uint32_t depth, const std::list<std::string>& PV) {
+void sendSearchInfo(uint64_t nodes, uint32_t time, int32_t eval, uint32_t depth, const std::list<std::string>& PV, uint32_t numMadeMoves) {
     double nps = (static_cast<double>(nodes))/(static_cast<double>(time))*1000.0;
     uint64_t npsInt = nps;
     std::stringstream out;
 
     if (eval > 29000) {
-        int16_t mate_in = (30000-eval+1)/2;
+        int16_t mate_in = (30000-eval+1-numMadeMoves)/2;
         out << "info depth " << depth << " score mate " << mate_in << " nps " << npsInt << " nodes " << nodes << " pv ";
     } else if (eval < -29000) {
-        int16_t mate_in = (-30000-eval)/2;
+        int16_t mate_in = (-30000-eval+numMadeMoves)/2;
         out << "info depth " << depth << " score mate " << mate_in << " nps " << npsInt << " nodes " << nodes << " pv ";
     } else {
         out << "info depth " << depth << " score cp " << eval << " nps " << npsInt << " nodes " << nodes << " pv ";

@@ -213,7 +213,7 @@ static inline bool checkHashTable(int16_t* eval, uint16_t* hashMove, uint16_t* h
     if (setting == hashprobe_enabled) { //TODO: we should check whether another move leads to 3fold rep draw!
         if (isHit) { //TODO: assign bestMove - this can blow up in our face easily TODO: add proper checkmate handling
             int16_t oldEval  = hashVal.eval;
-            if ((depth <= hashVal.depth) && (oldEval > -10000) && (oldEval < 10000) && (oldEval != 0)) { //TODO: the != 0 is stupid, but somehwere something goes wrong with 3fold rep scores, so excluded ehre for safety
+            if ((depth <= hashVal.depth) && (oldEval != 0)) { //TODO: the != 0 is stupid, but somewhere something goes wrong with 3fold rep scores, so excluded here for safety
                 if (((hashVal.flag == FAILHIGH) || (hashVal.flag == FULLSEARCH)) && (oldEval >= *beta)) {
                     setSearchId(searchId, zobristHash, hashVal.index);
                     *eval = *beta;
@@ -469,7 +469,7 @@ static inline int16_t negamax_internal(chessPosition* position, plyInfo plyinfo,
     //------------------------------
     if (res.noMovesAvailable()) {
         if (sortinfo.movingSideInCheck) {
-            alphabeta.mate(plyinfo.ply);
+            alphabeta.mate(position->madeMoves.length);
         } else {
             alphabeta.stalemate();
         }
