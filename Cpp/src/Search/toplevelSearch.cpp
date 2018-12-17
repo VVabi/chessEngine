@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <userInterface/UIlayer.hpp>
 #include <Search/killerMoves.hpp>
+#include <tests/tests.hpp>
 
 
 static uint8_t searchId;
@@ -67,8 +68,8 @@ uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t n
 }
 
 
-bool checkContinue(searchParameters params, uint16_t depth, uint16_t passedTime, uint16_t allottedTime) {
-    if (depth > 27) {
+bool checkContinue(searchParameters params, uint16_t depth, uint16_t maxdepth, uint16_t passedTime, uint16_t allottedTime) {
+    if (depth > maxdepth) {
         return false;
     }
 
@@ -116,7 +117,18 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
 
     pvLine line;
     line.numMoves = 0;
-    while (checkContinue(params, depth, get_timestamp()-start_ts, totalTime)) {
+    uint16_t  maxdepth = 27;
+
+    //if there is only a single reply, don't continue searching - it is just a waste of time
+    //-----------------------------------------------------------------------
+    uint32_t numLegalMoves = perftNodes(position, 1);
+
+    if (numLegalMoves == 1) {
+        maxdepth = 3;
+    }
+
+
+    while (checkContinue(params, depth, maxdepth, get_timestamp()-start_ts, totalTime)) {
         try {
             *eval = negamax(position, plyInfo(0, depth+EXTENSIONS_ALLOWED, 0, depth), AlphaBeta(alpha, beta), &line, searchSettings(nullmove_enabled, hashprobe_disabled, checkextension_enabled, searchId));
 
@@ -156,7 +168,7 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
         line.numMoves = 0;
         depth++;
         searchedNodes = searchedNodes+*nodeCount;
-        if (*eval > 29000) {
+        if (*eval > 29000 || *eval < -29000) {
             break;
         }
     }

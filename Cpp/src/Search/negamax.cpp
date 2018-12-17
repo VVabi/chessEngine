@@ -26,6 +26,7 @@
 #include <Search/killerMoves.hpp>
 #include <lib/moveGeneration/moveGenerationInternals.hpp>
 #include <Search/repetition.hpp>
+#include <util/FEN/fenhelper.hpp>
 
 searchDebugData searchCounts;
 
@@ -121,7 +122,6 @@ static inline void get_extensions_reductions(chessPosition* position, uint16_t* 
             if (plyinfo.ply+depth+*extension < plyinfo.max_ply-1 && position->totalFigureEval < 3000 && (depth < 2)) {
                 *extension = *extension+1;
             }
-
         }
 }
 
@@ -342,6 +342,18 @@ static inline searchLoopResults negamax_internal_move_loop(chessPosition* positi
             //illegal move. Since list is sorted or, in case ind = 0, best move is first, we can leave here: all further moves are also illegal.
             //---------------------------------------------------------------------------------------------------------------------------------
             if (moves[ind].sortEval < -10000) {
+                //TODO: we should add this check, but since we count nodes in makeMove, this destroys the debug vs release tests
+/*#ifdef DEBUG
+                makeMove(&moves[ind], position);
+                uint16_t kingField = findLSB(position->pieceTables[1- position->toMove][king]);
+                if (!isFieldAttacked(position,  position->toMove, kingField) && moves[ind].type != castlingKingside && moves[ind].type != castlingQueenside) {
+                    std::cout << chessPositionToFenString(*position, false) << std::endl;
+                    std::cout << moveToString(moves[ind]) << std::endl;
+
+                    logError("Move wrongly classified as illegal by move ordering");
+                }
+                undoMove(position);
+#endif*/
                 break;
             }
 
@@ -389,9 +401,9 @@ static inline searchLoopResults negamax_internal_move_loop(chessPosition* positi
                 extension = 0;
             }
 
-            //PVSearch, currently a small gain for us with the > 3
+            //PVSearch, currently a small gain for us with the > 2
             //-------------------------------------------------
-            if (((ind > 3) || (bestIndex != -1)) && (plyinfo.depth > 2)) {
+            if (((ind > 2) || (bestIndex != -1)) && (plyinfo.depth > 2)) {
                 int32_t value = -negamax(position, plyinfo.increment(extension-reduction), alphabeta.zeroWindow().invert(), &localPV, searchSettings(settings.searchId));
                 if (value < alphabeta.alpha+1) {
                     undoMove(position);
@@ -542,32 +554,8 @@ int16_t negamax(chessPosition* position, plyInfo plyinfo, AlphaBeta alphabeta, p
         return hashEval;
     }
 
-    //IID
-    //------
-    if (((hashmove == 0) || hashDepth < 3) && (settings.hashprobeSetting == hashprobe_enabled) && (plyinfo.depth > 4)) {
-        for (int16_t d = 3; d < plyinfo.depth-1; d++) {
-            plyInfo info = plyinfo;
-            info.depth = d;
-            info.max_ply = info.ply+d+2;
-            pvLine dummy;
-            dummy.numMoves = 0;
-            negamax(position, info, alphabeta, &dummy, settings);
-            chessMove mv = dummy.line[0];
-            hashmove = ((mv.sourceField) | (mv.targetField << 8));
-        }
-    }
-
-    //try nullmove pruning
-    //-------------------------
-    uint16_t refutationTarget = NO_REFUTATION; //invalid
     uint64_t ownKing = position->pieceTables[position->toMove][king];
     bool movingSideInCheck = isFieldAttacked(position, (playerColor) (1-position->toMove), findLSB(ownKing));
-    if ((settings.nullmoveSetting == nullmove_enabled) && !movingSideInCheck && (plyinfo.depth >= 2)) {
-        if (check_nullmove(position, &refutationTarget, plyinfo.ply, plyinfo.max_ply, plyinfo.depth, alphabeta.beta, settings)) {
-            PV->numMoves = 0;
-            return alphabeta.beta;
-        }
-    }
 
     //futility pruning
     //-----------------
@@ -582,6 +570,33 @@ int16_t negamax(chessPosition* position, plyInfo plyinfo, AlphaBeta alphabeta, p
         if (check_futility(movingSideInCheck, alphabeta.alpha, position, 500, 600)) {
             PV->numMoves = 0;
             return negamaxQuiescence(position, plyinfo.qply, plyinfo.ply, alphabeta, 0, settings.searchId);
+        }
+    }
+
+    //try nullmove pruning
+    //-------------------------
+    uint16_t refutationTarget = NO_REFUTATION; //invalid
+
+    if ((settings.nullmoveSetting == nullmove_enabled) && !movingSideInCheck && (plyinfo.depth >= 2)) {
+        if (check_nullmove(position, &refutationTarget, plyinfo.ply, plyinfo.max_ply, plyinfo.depth, alphabeta.beta, settings)) {
+            PV->numMoves = 0;
+            return alphabeta.beta;
+        }
+    }
+
+    //IID
+    //------
+    if (((hashmove == 0) || hashDepth < 3) && (settings.hashprobeSetting == hashprobe_enabled) && (plyinfo.depth > 4)) {
+        for (int16_t d = 3; d < plyinfo.depth; d++) {
+            plyInfo info = plyinfo;
+            info.depth = d;
+            info.max_ply = info.ply+d+2;
+            pvLine dummy;
+            dummy.numMoves = 0;
+            memset(&dummy.line[0], 0, sizeof(chessMove)); //important for debug vs release exactness!
+            negamax(position, info, alphabeta, &dummy, settings);
+            chessMove mv = dummy.line[0];
+            hashmove = ((mv.sourceField) | (mv.targetField << 8));
         }
     }
 
