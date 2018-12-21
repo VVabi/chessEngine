@@ -80,9 +80,9 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, 
     uint32_t zobristHigher = (uint32_t) (position->zobristHash >> 32);
     uint16_t zobristLower  = (uint16_t) (((uint32_t) (position->zobristHash & 0xFFFFFFFF)) >> 16);
     uint16_t hashMove = hashVal.bestMove;
-    if ((zobristHigher == hashVal.hashHighBits) && (zobristLower == hashVal.hashLower)) { //TODO: assign bestMove - this can blow up in our face easily TODO: add proper checkmate handling
+    if ((zobristHigher == hashVal.hashHighBits) && (zobristLower == hashVal.hashLower)) { //TODO: assign bestMove - this can blow up in our face easily
         int16_t oldEval  = hashVal.eval;
-        if ((oldEval > -10000) && (oldEval < 10000) && (oldEval != 0)) { //TODO: the != 0 is stupid, but somewhere something goes wrong with 3fold rep scores, so excluded ehre for safety
+        if ((oldEval != 0)) { //TODO: the != 0 is stupid, but somewhere something goes wrong with 3fold rep scores, so excluded here for safety
             if (((hashVal.flag == FAILHIGH) || (hashVal.flag == FULLSEARCH)) && (oldEval >= alphabeta.beta)) {
                 setSearchId(searchId, position->zobristHash, hashVal.index);
                 return alphabeta.beta;
