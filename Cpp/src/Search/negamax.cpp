@@ -131,7 +131,14 @@ static inline bool backtrack_position_for_repetition(chessPosition* position) {
     assert(static_cast<int>(position->madeMoves.length)-static_cast<int>(numMovesToCheck) >= 0);
     assert(position->madeMoves.length == position->dataStack.length);
     for (int32_t ind = static_cast<int32_t>(position->madeMoves.length-1); ind >= static_cast<int32_t>(position->madeMoves.length)-numMovesToCheck; ind--) {
-        if (position->dataStack[ind].hash == current_hash) {
+    	//only check to next nullmove. TODO: disable completely after a nullmove?
+    	//---------------------------------
+    	if ((position->madeMoves[ind].sourceField | position->madeMoves[ind].targetField) == 0) {
+    		break;
+    	}
+
+
+    	if (position->dataStack[ind].hash == current_hash) {
             return true;
         }
     }
@@ -163,7 +170,8 @@ static inline bool check_futility(bool movingSideInCheck, int32_t alpha, chessPo
 }
 
 static inline bool check_nullmove(chessPosition* position, uint16_t* refutationMoveTarget, uint16_t ply, uint16_t max_ply, int16_t depth, int32_t beta, searchSettings settings) {
-    if (beta > 10000) { //TODO: more dynamic condition here?
+
+	if (beta > 10000) { //TODO: more dynamic condition here?
         return false;
     }
 

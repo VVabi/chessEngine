@@ -346,6 +346,9 @@ std::string toString(const evaluationType type) {
         case eval_draw_detection:
             return "draw_detection";
             break;
+        case eval_king_endgame_position:
+        	return "king_endgame_position";
+        	break;
     }
 
     return ""; //Unreachable
