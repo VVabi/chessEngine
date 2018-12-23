@@ -236,6 +236,7 @@ static inline bool checkHashTable(int16_t* eval, uint16_t* hashMove, uint16_t* h
                         }
                     }
                     *eval = oldEval; //guaranteed to be in (alpha, beta)
+                    assert(((oldEval > *alpha) && (oldEval < *beta)) || isMateScore);
                     return true;
                 } /*else if ((hashVal.flag == FAILHIGH) && (oldEval > *alpha)) {
                     *alpha = oldEval;

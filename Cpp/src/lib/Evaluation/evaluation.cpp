@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <lib/basics.hpp>
 #include <lib/basicTypes.hpp>
+#include <lib/Defines/boardParts.hpp>
 #include <lib/Defines/pieceCombinations.hpp>
 #include <lib/Evaluation/endgames/endgameEvals.hpp>
 #include <lib/Evaluation/evaluation.hpp>
@@ -204,11 +205,25 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
         //TODO: add check whether all eval values that should be zero are zero
     }
 
+
+
+    if (position->presentPieces.maskedCompare(KKBB, pawn)) {
+    	uint64_t whiteBishops = position->pieceTables[white][bishop];
+    	uint64_t blackBishops = position->pieceTables[black][bishop];
+
+    	bool differentColored = (!!(whiteBishops & WHITEFIELDS)  != !!(blackBishops & WHITEFIELDS));
+
+    	if (differentColored) {
+    		eval = eval/2;
+    	}
+
+    }
     int32_t evalsigned = (1-2*position->toMove)*(eval/256);
 
     if (PSQ_only || (evalsigned < alpha - 500) || (evalsigned > beta+500)) {
         return evalsigned;
     }
+
 
     EvalMemory evalMemory;
 

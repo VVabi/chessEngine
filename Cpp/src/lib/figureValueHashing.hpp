@@ -46,6 +46,17 @@ class PresentPieces {
     bool compare(uint64_t other) const {
         return (other == value);
     }
+
+    bool maskedCompare(uint64_t other, figureType ignoredType) const {
+        uint16_t offset = 4*ignoredType;
+        uint64_t mask = BIT64(offset) | BIT64(offset+1) | BIT64(offset+2) | BIT64(offset+3);
+        offset = 32+4*ignoredType;
+        mask |= BIT64(offset) | BIT64(offset+1) | BIT64(offset+2) | BIT64(offset+3);
+
+        uint64_t maskedValue = value & ~mask;
+        return (maskedValue == other);
+    }
+
 };
 
 
