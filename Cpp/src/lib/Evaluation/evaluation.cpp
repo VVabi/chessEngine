@@ -264,7 +264,10 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
     	uint64_t whiteBishops = position->pieceTables[white][bishop];
     	uint64_t blackBishops = position->pieceTables[black][bishop];
 
-    	bool differentColored = (!!(whiteBishops & WHITEFIELDS)  != !!(blackBishops & WHITEFIELDS));
+    	bool wbishopOnWhite = !!(whiteBishops & WHITEFIELDS);
+    	bool bbishopOnWhite = !!(blackBishops & WHITEFIELDS);
+
+    	bool differentColored = wbishopOnWhite != bbishopOnWhite;
 
     	if (differentColored) {
     		eval = eval/2;

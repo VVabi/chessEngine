@@ -60,7 +60,7 @@ int16_t KBPK_endgame(const chessPosition* position) {
 
     if (FILE(pawnfield) == 0) {
         uint16_t cornerparity;
-        int16_t bishopParity = (ROW(bishopfield)-FILE(bishopfield)) % 2;
+        int16_t bishopParity = std::abs((ROW(bishopfield)-FILE(bishopfield))) % 2;
         if (toWin == white) {
             cornerparity = 1;
         } else {
@@ -83,7 +83,7 @@ int16_t KBPK_endgame(const chessPosition* position) {
 
     if (FILE(pawnfield) == 7) {
         uint16_t cornerparity;
-        int16_t bishopParity = (ROW(bishopfield)-FILE(bishopfield)) % 2;
+        int16_t bishopParity = std::abs((ROW(bishopfield)-FILE(bishopfield))) % 2;
         if (toWin == white) {
             cornerparity = 0;
         } else {
