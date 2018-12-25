@@ -206,16 +206,11 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
         //TODO: add check whether all eval values that should be zero are zero
     }
 
-
-
-
-
     int32_t evalsigned = (1-2*position->toMove)*(eval/256);
 
     if (PSQ_only || (evalsigned < alpha - 500) || (evalsigned > beta+500)) {
         return evalsigned;
     }
-
 
     EvalMemory evalMemory;
 
@@ -233,11 +228,11 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
 
     eval = eval/256;
 
-    /*if (position->toMove == white) {
+    if (position->toMove == white) {
         eval = eval+10;
     } else {
         eval = eval-10;
-    }*/
+    }
 
 #ifdef RANDOMEVAL
     eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise?

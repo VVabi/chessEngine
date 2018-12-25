@@ -256,7 +256,7 @@ static inline void calcSortEval(chessPosition* position, chessMove* mv, bool isI
     if (mv->captureType == none) {
         int32_t hist = getHistoryTables()->getHistoryEntry(position->toMove, mv->sourceField, mv->targetField);
 
-        int32_t historyValue = std::sqrt(std::abs(hist)); //TODO: this is absolutely NOT a good idea performance-wise
+        int32_t historyValue = 2*std::sqrt(std::abs(hist)); //TODO: this is absolutely NOT a good idea performance-wise
         historyValue = (hist > 0 ? historyValue: -historyValue);
 
 

@@ -30,7 +30,7 @@
 
 searchDebugData searchCounts;
 
-static int16_t figureValues[7] = {PAWNVALUE, KNIGHTVALUE, BISHOPVALUE, ROOKVALUE, QUEENVALUE, 10000, 0};
+//static int16_t figureValues[7] = {PAWNVALUE, KNIGHTVALUE, BISHOPVALUE, ROOKVALUE, QUEENVALUE, 10000, 0};
 
 searchDebugData getSearchData() {
     return searchCounts;
@@ -55,20 +55,18 @@ static moveStack qmvStack;
 
 static inline bool getGoodCaptureToFront(vdt_vector<chessMove>* moves, uint16_t start_index) {
     int16_t best_index = -1;
-    int16_t best = 0;
+    int16_t best = -150;
     for (uint16_t ind = start_index; ind < moves->length; ind++) {
         chessMove mv = (*moves)[ind];
         if (mv.captureType == none) {
             continue;
         }
 
-        if (((uint16_t) mv.captureType) >= ((uint16_t) mv.type)) { // || ((mv.captureType == knight) && (mv.type == bishopMove))) {
-            int16_t local_best = 5*figureValues[mv.captureType]/2-figureValues[mv.type];
-            if (local_best > best) {
-                best = local_best;
-                best_index = ind;
-            }
-        }
+		int16_t local_best = mv.sortEval;
+		if (local_best > best) {
+			best = local_best;
+			best_index = ind;
+		}
     }
 
     if (best_index > -1) {
@@ -94,7 +92,7 @@ static inline bool getHashMoveToFront(vdt_vector<chessMove>* moves, uint16_t has
 }
 
 static inline void get_extensions_reductions(chessPosition* position, uint16_t* reduction, uint16_t* extension, bool check, bool movingSideInCheck, plyInfo plyinfo, int16_t depth, chessMove* move, uint16_t ind, int16_t bestIndex) {
-        if ((bestIndex == -1) && !check && !movingSideInCheck && (move->captureType == none) && (depth > 2) && (plyinfo.ply > 0) && (ind > 2)) {
+        if ((bestIndex == -1) && !check && !movingSideInCheck && ((move->captureType == none) || (move->sortEval < -550)) && (depth > 2) && (plyinfo.ply > 0) && (ind > 2)) {
             if (move->sortEval < 50) {
                 *reduction = 1;
                 //TODO: this is questionably brutal
@@ -307,6 +305,12 @@ static inline bool get_next_move_to_front(chessPosition* position, sortState* cu
                     sortedNextMove = true;
                 }
                 *currentState = hash_handled;
+					for (uint16_t cnt = ind; cnt < moves.length; cnt++) {
+					  if (moves[cnt].captureType == none) {
+							  continue;
+						  }
+					  moves[cnt].sortEval = SEE(position, &moves[cnt]);
+					}
                 break;
             case hash_handled:
                 if (getGoodCaptureToFront(&moves, ind)) {
