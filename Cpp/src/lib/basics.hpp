@@ -12,6 +12,8 @@
 #include <string>
 #include <DataTypes/vdt_vector.hpp>
 #include <assert.h>
+#include <lib/basics.hpp>
+#include <lib/bitfiddling.h>
 #include "basicTypes.hpp"
 #include "figureValueHashing.hpp"
 
@@ -58,7 +60,7 @@ enum hashFlag: uint16_t {FULLSEARCH = 0, FAILLOW = 1, FAILHIGH = 2};
 
 
 
-struct hashEntry {
+struct HashEntry {
     uint32_t hashHighBits;
     uint16_t hashLower;
     uint16_t bestMove;
@@ -69,8 +71,8 @@ struct hashEntry {
     uint16_t index;
 }__attribute__((packed));
 
-struct hashBucket {
-    hashEntry hashData[4];
+struct HashBucket {
+    HashEntry hashData[4];
 }; //__attribute__((aligned(64)));
 
 
@@ -78,6 +80,45 @@ struct pawnHashEntry {
     uint32_t hashHighBits;
     uint16_t hashLower;
     int16_t  eval;
+};
+
+class HashTable {
+	HashBucket* data;
+	uint32_t length;
+
+public:
+	HashTable() {
+		length = 0;
+		data   = NULL;
+	}
+
+	HashBucket* get(uint64_t key) {
+		uint64_t index = key & (length-1);
+
+#ifdef DEBUG
+		if (index >= length) {
+			//logError(std::string("OutOfBounds during hashtable access"));
+			while(1) {
+
+			}
+		}
+#endif
+		return &data[index];
+	}
+
+	void clear() {
+		memset(data, 0, sizeof(HashBucket)*length);
+	}
+
+	void realloc(uint32_t new_size) {
+	    assert(popcount(new_size) == 1);
+		if (data != 0) {
+			delete[] data;
+		}
+
+		data 	= new HashBucket[new_size];
+		length 	= new_size;
+	}
 };
 
 class timeoutException: public std::exception {

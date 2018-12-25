@@ -75,7 +75,7 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, 
         return negamax(position, plyInfo(ply, ply+1, qply, 1),  alphabeta, &line, searchSettings(nullmove_disabled, hashprobe_enabled, checkextension_disabled, searchId));
     }
 #ifdef HASH
-    hashEntry hashVal      = getHashTableEntry(position->zobristHash);
+    HashEntry hashVal      = getHashTableEntry(position->zobristHash);
 
     uint32_t zobristHigher = (uint32_t) (position->zobristHash >> 32);
     uint16_t zobristLower  = (uint16_t) (((uint32_t) (position->zobristHash & 0xFFFFFFFF)) >> 16);
