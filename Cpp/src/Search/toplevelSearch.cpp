@@ -169,7 +169,16 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
         depth++;
         searchedNodes = searchedNodes+*nodeCount;
         if (*eval > 29000 || *eval < -29000) {
-            break;
+            int32_t mate_plys;
+            if (*eval < 0) {
+                mate_plys = *eval+30000;
+            } else {
+                mate_plys = 30000-*eval;
+            }
+
+            if (depth >= mate_plys) {
+                break;
+            }
         }
     }
 
