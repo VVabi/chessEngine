@@ -33,7 +33,7 @@ class RepetitionData {
 
     bool isRepetitionCandidate(uint64_t zobristHash) const{
         uint16_t index = zobristHash & (REPTABLESIZE-1);
-        return (repetitionData[index] > 0);
+        return (repetitionData[index] > 1);
     }
 };
 

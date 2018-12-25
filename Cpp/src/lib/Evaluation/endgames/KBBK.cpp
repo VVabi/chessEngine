@@ -13,7 +13,7 @@
 #include <lib/bitfiddling.h>
 #include <algorithm>
 
-static uint16_t distBetweenFields(uint16_t a, uint16_t b) {
+static inline uint16_t distBetweenFields(uint16_t a, uint16_t b) {
     uint16_t fileA = FILE(a);
     uint16_t rowA  = ROW(a);
     uint16_t fileB = FILE(b);
