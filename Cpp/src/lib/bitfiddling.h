@@ -7,6 +7,7 @@
 
 #ifndef CPP_SRC_LIB_BITFIDDLING_H_
 #define CPP_SRC_LIB_BITFIDDLING_H_
+#include <lib/basicTypes.hpp>
 #include <stdint.h>
 #include <lib/Defines/boardParts.hpp>
 

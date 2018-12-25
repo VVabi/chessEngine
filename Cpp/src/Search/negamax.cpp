@@ -207,7 +207,7 @@ static inline bool check_nullmove(chessPosition* position, uint16_t* refutationM
 }
 
 static inline bool checkHashTable(int16_t* eval, uint16_t* hashMove, uint16_t* hashdepth, HashprobeSetting setting, uint64_t zobristHash, int16_t* alpha, int16_t* beta, int16_t depth, int16_t ply, uint8_t searchId) {
-    hashEntry hashVal      = getHashTableEntry(zobristHash);
+    HashEntry hashVal      = getHashTableEntry(zobristHash);
     uint32_t zobristHigher = (uint32_t) (zobristHash >> 32);
     uint16_t zobristLower  = (uint16_t) (((uint32_t) (zobristHash & 0xFFFFFFFF)) >> 16);
     bool isHit = (zobristHigher == hashVal.hashHighBits) && (zobristLower == hashVal.hashLower);

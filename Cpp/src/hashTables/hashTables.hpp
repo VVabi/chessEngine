@@ -13,7 +13,7 @@
 #include <cassert>
 
 
-#define HASHSIZE 0x1FFFFF //needs to be a power of 2 -1!
+#define DEFAULT_HASHSIZE 0x200000 //needs to be a power of 2 -1!
 
 class ZobristHashData {
     uint64_t zobristHash[7][2][64];
@@ -127,13 +127,14 @@ __attribute__((always_inline)) static inline uint64_t getEnPassantHash(uint16_t 
 
 void initZobristHashValues();
 void initHashTables();
+void reallocHashTables(uint32_t new_size);
 uint64_t calcZobristHash(const chessPosition* position);
 PresentPieces calcPresentPieces(const chessPosition* position);
 uint64_t calcPawnHash(const chessPosition* position);
-hashEntry getHashTableEntry(uint64_t zobristKey);
+HashEntry getHashTableEntry(uint64_t zobristKey);
 void setPawnHashEntry(int16_t eval,  uint64_t key);
 bool getPawnHashTableEntry(pawnHashEntry* entry, uint64_t key);
-void setHashEntry(hashEntry entry, uint64_t zobristKey);
+void setHashEntry(HashEntry entry, uint64_t zobristKey);
 uint16_t getHashMove(uint64_t zobristKey);
 void setHashMove(uint16_t move, uint64_t zobristKey, uint8_t searchId);
 void setHashEntry(hashFlag flag, int16_t eval, uint8_t depth, uint8_t searchId, uint16_t bestMove, uint64_t key);

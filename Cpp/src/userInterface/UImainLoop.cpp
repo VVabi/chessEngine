@@ -126,6 +126,7 @@ void launchSearch() {
 void handleUciInput(std::ostream& stream) {
     stream << "id name Vabi" << std::endl;
     stream << "id author Fabian Lenhardt" << std::endl;
+    stream << "option name Hash type spin default " << (DEFAULT_HASHSIZE*sizeof(HashBucket))/(1024*1024)  << " min 1 max 4096" << std::endl;
     stream << "uciok" << std::endl;
 }
 
@@ -538,6 +539,25 @@ void handleGetMoveOrdering() {
     vec.free_array();
 }
 
+void handlesetoption(std::list<std::string> input) {
+	//TODO: the uci spec is not really clear what is allowed here?
+	//-------------------------------
+    auto iterator = input.begin();
+    iterator++;
+    std::string name = *iterator;
+
+	if (name == "Hash") {
+	    iterator++;
+	    iterator++;
+		std::string value = *iterator;
+		uint32_t total_size = std::stoi(value)*1024*1024;
+
+		uint32_t size_to_allocate = total_size/sizeof(HashBucket);
+		uint16_t msb = findMSB(size_to_allocate);
+		reallocHashTables(1 << msb);
+	}
+}
+
 void UIloop() {
     initUserEvents();
     bool continueLoop = true;
@@ -625,6 +645,9 @@ void UIloop() {
                 case checkquiet:
                     handlecheckquiet();
                     break;
+                case setoption:
+                	handlesetoption(ev.data);
+                	break;
                 default:
                     putLine("Not yet implemented");
             }

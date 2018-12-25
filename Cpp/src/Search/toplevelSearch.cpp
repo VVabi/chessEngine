@@ -54,11 +54,15 @@ uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t n
             remainingMoves = 20;
         }
 
-        uint32_t completeExpectedTime = total+remainingMoves*increment;
+        remainingMoves = std::min((int32_t) remainingMoves, (int32_t) params.movesToGo);
+
+        uint32_t completeExpectedTime = total+(remainingMoves-1)*increment;
         float timeAllotted = 2*completeExpectedTime/(3.0*remainingMoves);
 
-        if (timeAllotted > total/10.0) {
-            timeAllotted = total/10.0;
+        double maxFraction = std::min(10.0, (double) remainingMoves/2);
+
+        if (timeAllotted > total/maxFraction) {
+            timeAllotted = total/maxFraction;
         }
         *worst_case_time = total/1.5;
         return timeAllotted;
@@ -88,7 +92,6 @@ bool checkContinue(searchParameters params, uint16_t depth, uint16_t maxdepth, u
     if (params.type == fixed_time) {
         return passedTime < params.fixedTime;
     }
-
 
     return true;
 }
