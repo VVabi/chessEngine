@@ -22,6 +22,7 @@
 #include <Search/history.hpp>
 #include <Search/killerMoves.hpp>
 #include <lib/Evaluation/PSQ.hpp>
+#include <lib/Evaluation/tapering.hpp>
 
 #define WHITEKINGCASTLECHESSFIELDS ((1ULL << 4) | (1ULL << 5) | (1ULL << 6))
 #define WHITEQUEENCASTLECHESSFIELDS ((1ULL << 4) | (1ULL << 3) | (1ULL << 2))
@@ -60,7 +61,7 @@ static inline void calcSortEval(chessPosition* position, chessMove* mv, bool isI
     }
 
     if (((uint16_t) mv->type) < 6) {
-        //TODO: taper this
+        //tapering is clearly worse...
         if (position->totalFigureEval < 4500) {
             sortEval = sortEval+(getEndgameGamePSQentry(mv->type, position->toMove, mv->targetField)-getEndgameGamePSQentry(mv->type, position->toMove, mv->sourceField))/2;
         } else {
@@ -99,12 +100,12 @@ static inline void calcSortEval(chessPosition* position, chessMove* mv, bool isI
         sortEval = sortEval-30;
     }
 
-    if (targetCovered) {
+    if (targetCovered && mv->type == pawnMove) { //TODO: targetCovered is always true for non-pawn moves
         sortEval = sortEval+20;
     }
 
     if (sourceAttacked) {
-        sortEval = sortEval+100;
+        sortEval = sortEval+80;
         if (!sourceCovered) {
             sortEval = sortEval+100;
         }
