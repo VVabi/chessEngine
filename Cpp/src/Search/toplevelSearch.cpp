@@ -59,7 +59,7 @@ uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t n
         uint32_t completeExpectedTime = total+(remainingMoves-1)*increment;
         float timeAllotted = 2*completeExpectedTime/(3.0*remainingMoves);
 
-        double maxFraction = std::min(10.0, (double) remainingMoves/2);
+        double maxFraction = std::min(10.0, static_cast<double>(remainingMoves/2));
 
         if (timeAllotted > total/maxFraction) {
             timeAllotted = total/maxFraction;

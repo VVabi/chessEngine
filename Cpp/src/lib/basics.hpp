@@ -83,42 +83,40 @@ struct pawnHashEntry {
 };
 
 class HashTable {
-	HashBucket* data;
-	uint32_t length;
+    HashBucket* data;
+    uint32_t length;
 
-public:
-	HashTable() {
-		length = 0;
-		data   = NULL;
-	}
+ public:
+    HashTable() {
+        length = 0;
+        data   = NULL;
+    }
 
-	HashBucket* get(uint64_t key) {
-		uint64_t index = key & (length-1);
+    HashBucket* get(uint64_t key) {
+        uint64_t index = key & (length-1);
 
 #ifdef DEBUG
-		if (index >= length) {
-			//logError(std::string("OutOfBounds during hashtable access"));
-			while(1) {
-
-			}
-		}
+        if (index >= length) {
+            //logError(std::string("OutOfBounds during hashtable access"));
+            while (1) {}
+        }
 #endif
-		return &data[index];
-	}
+        return &data[index];
+    }
 
-	void clear() {
-		memset(data, 0, sizeof(HashBucket)*length);
-	}
+    void clear() {
+        memset(data, 0, sizeof(HashBucket)*length);
+    }
 
-	void realloc(uint32_t new_size) {
-	    assert(popcount(new_size) == 1);
-		if (data != 0) {
-			delete[] data;
-		}
+    void realloc(uint32_t new_size) {
+        assert(popcount(new_size) == 1);
+        if (data != 0) {
+            delete[] data;
+        }
 
-		data 	= new HashBucket[new_size];
-		length 	= new_size;
-	}
+        data    = new HashBucket[new_size];
+        length  = new_size;
+    }
 };
 
 class timeoutException: public std::exception {

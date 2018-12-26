@@ -118,13 +118,10 @@ static inline void calcSortEval(chessPosition* position, chessMove* mv, bool isI
         sortEval = sortEval+300;
     }
 
-
     bool sourceAttacked = false;
     bool targetAttacked = false;
     bool sourceCovered  = false;
     bool targetCovered  = false; //TODO: this doesnt work as intended - the target of a move is usually covered... - or may be covered after the move, eg. h7h5 from startposition, even if it wasnt before
-
-
 
     if (BIT64(mv->sourceField) & ownAttackTable->completeAttackTable) {
         sourceCovered = true;
@@ -140,12 +137,9 @@ static inline void calcSortEval(chessPosition* position, chessMove* mv, bool isI
         targetAttacked = true;
     }
 
-
-
     if ((mv->captureType == none) && (mv->type > pawnMove) && (BIT64(mv->targetField) & opponentAttackTable->attackTables[pawn])) {
         sortEval = sortEval-100;
     }
-
 
     if (sourceCovered) {
         sortEval = sortEval-30;
@@ -200,9 +194,9 @@ static inline void calcSortEval(chessPosition* position, chessMove* mv, bool isI
 
     if ((mv->type == pawnMove)) {
         if (BIT64(mv->targetField) & CENTER) {
-            sortEval = sortEval+50;
+            sortEval = sortEval+40;
         } else if (BIT64(mv->targetField) & WIDECENTER) {
-            sortEval = sortEval+30;
+            sortEval = sortEval+20;
         }
     }
 

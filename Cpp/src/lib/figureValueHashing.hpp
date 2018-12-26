@@ -56,7 +56,6 @@ class PresentPieces {
         uint64_t maskedValue = value & ~mask;
         return (maskedValue == other);
     }
-
 };
 
 

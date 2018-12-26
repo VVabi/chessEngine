@@ -62,11 +62,11 @@ static inline bool getGoodCaptureToFront(vdt_vector<chessMove>* moves, uint16_t 
             continue;
         }
 
-		int16_t local_best = mv.sortEval;
-		if (local_best > best) {
-			best = local_best;
-			best_index = ind;
-		}
+        int16_t local_best = mv.sortEval;
+        if (local_best > best) {
+            best = local_best;
+            best_index = ind;
+        }
     }
 
     if (best_index > -1) {
@@ -129,14 +129,14 @@ static inline bool backtrack_position_for_repetition(chessPosition* position) {
     assert(static_cast<int>(position->madeMoves.length)-static_cast<int>(numMovesToCheck) >= 0);
     assert(position->madeMoves.length == position->dataStack.length);
     for (int32_t ind = static_cast<int32_t>(position->madeMoves.length-1); ind >= static_cast<int32_t>(position->madeMoves.length)-numMovesToCheck; ind--) {
-    	//only check to next nullmove. TODO: disable completely after a nullmove?
-    	//---------------------------------
-    	if ((position->madeMoves[ind].sourceField | position->madeMoves[ind].targetField) == 0) {
-    		break;
-    	}
+        //only check to next nullmove. TODO: disable completely after a nullmove?
+        //---------------------------------
+        if ((position->madeMoves[ind].sourceField | position->madeMoves[ind].targetField) == 0) {
+            break;
+        }
 
 
-    	if (position->dataStack[ind].hash == current_hash) {
+        if (position->dataStack[ind].hash == current_hash) {
             return true;
         }
     }
@@ -168,8 +168,7 @@ static inline bool check_futility(bool movingSideInCheck, int32_t alpha, chessPo
 }
 
 static inline bool check_nullmove(chessPosition* position, uint16_t* refutationMoveTarget, uint16_t ply, uint16_t max_ply, int16_t depth, int32_t beta, searchSettings settings) {
-
-	if (beta > 10000) { //TODO: more dynamic condition here?
+    if (beta > 10000) { //TODO: more dynamic condition here?
         return false;
     }
 
@@ -244,11 +243,7 @@ static inline bool checkHashTable(int16_t* eval, uint16_t* hashMove, uint16_t* h
                     *eval = oldEval; //guaranteed to be in (alpha, beta)
                     assert(((oldEval > *alpha) && (oldEval < *beta)) || isMateScore);
                     return true;
-                } /*else if ((hashVal.flag == FAILHIGH) && (oldEval > *alpha)) {
-                    *alpha = oldEval;
-                } else if ((hashVal.flag == FAILLOW) && (oldEval < *beta)) {
-                    *beta = oldEval;
-                }*/ //This could be used to tighten the window a bit, but it's actually pretty tricky to get right I think.
+                }
             }
         }
     }
@@ -305,12 +300,12 @@ static inline bool get_next_move_to_front(chessPosition* position, sortState* cu
                     sortedNextMove = true;
                 }
                 *currentState = hash_handled;
-					for (uint16_t cnt = ind; cnt < moves.length; cnt++) {
-					  if (moves[cnt].captureType == none) {
-							  continue;
-						  }
-					  moves[cnt].sortEval = SEE(position, &moves[cnt]);
-					}
+                    for (uint16_t cnt = ind; cnt < moves.length; cnt++) {
+                      if (moves[cnt].captureType == none) {
+                              continue;
+                          }
+                      moves[cnt].sortEval = SEE(position, &moves[cnt]);
+                    }
                 break;
             case hash_handled:
                 if (getGoodCaptureToFront(&moves, ind)) {
