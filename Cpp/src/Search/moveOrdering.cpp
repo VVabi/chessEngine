@@ -61,11 +61,11 @@ static inline void calcSortEval(chessPosition* position, chessMove* mv, bool isI
 
     if (((uint16_t) mv->type) < 6) {
         //TODO: taper this
-        /*if (position->totalFigureEval < 3500) {
+        if (position->totalFigureEval < 4500) {
             sortEval = sortEval+(getEndgameGamePSQentry(mv->type, position->toMove, mv->targetField)-getEndgameGamePSQentry(mv->type, position->toMove, mv->sourceField))/2;
-        } else {*/
+        } else {
             sortEval = sortEval+(getEarlyGamePSQentry(mv->type, position->toMove, mv->targetField)-getEarlyGamePSQentry(mv->type, position->toMove, mv->sourceField))/2;
-        //}
+        }
     }
 
     if (mv->type == promotionQueen) {
