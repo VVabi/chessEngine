@@ -300,12 +300,12 @@ static inline bool get_next_move_to_front(chessPosition* position, sortState* cu
                     sortedNextMove = true;
                 }
                 *currentState = hash_handled;
-                    for (uint16_t cnt = ind; cnt < moves.length; cnt++) {
-                      if (moves[cnt].captureType == none) {
-                              continue;
-                          }
-                      moves[cnt].sortEval = SEE(position, &moves[cnt]);
+                for (uint16_t cnt = ind; cnt < moves.length; cnt++) {
+                    if (moves[cnt].captureType == none) {
+                       continue;
                     }
+                    moves[cnt].sortEval = SEE(position, &moves[cnt]);
+                }
                 break;
             case hash_handled:
                 if (getGoodCaptureToFront(&moves, ind)) {

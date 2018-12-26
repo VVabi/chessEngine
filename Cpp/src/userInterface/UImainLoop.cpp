@@ -496,6 +496,8 @@ void runPerformanceTests(uint32_t d) {
             negamaxNodes = negamaxNodes+nmNodes;
             qNodes = qNodes+qn;
             count++;
+            std::cout << "Progress " << count/10 << " %\r";
+            std::cout.flush();
         }
         std::cout << "Depth " << depth  << " Nodes " << nodes << std::endl;
         std::cout << "negamaxnodes " <<  negamaxNodes << std::endl;
