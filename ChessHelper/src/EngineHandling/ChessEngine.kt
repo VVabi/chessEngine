@@ -45,7 +45,7 @@ class ChessEngine(path: String, workingDirectory: String) {
     }
 
     fun search(depth: Int): SearchResult {
-        uciEngine.put("go depth "+depth)
+        uciEngine.put("go depth "+depth+" flexible")
         var eval = 0
         val bestMove: String
         while(true) {

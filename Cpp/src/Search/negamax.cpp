@@ -220,8 +220,6 @@ static inline bool checkHashTable(int16_t* eval, uint16_t* hashMove, uint16_t* h
             int16_t oldEval  = hashVal.eval;
             bool isMateScore = (std::abs(oldEval) > 10000) && (std::abs(oldEval) < 30001);
 
-
-
             if ((depth <= hashVal.depth) && (oldEval != 0)) { //TODO: the != 0 is stupid, but somewhere something goes wrong with 3fold rep scores, so excluded here for safety
                 if (((hashVal.flag == FAILHIGH) || (hashVal.flag == FULLSEARCH)) && (oldEval >= *beta) && (!isMateScore || oldEval > *beta+1000)) {
                     setSearchId(searchId, zobristHash, hashVal.index);
@@ -569,8 +567,9 @@ int16_t negamax(chessPosition* position, plyInfo plyinfo, AlphaBeta alphabeta, p
         }
     }
 
-    //Interestingly, changing the order of the next two calls is a clear ELO loss - but why? I don't really get it.
-    //go to quiescence on depth 0.
+
+    //go to quiescence on depth 0. Doing this before the hasvtable check very slightly changes the search since we don't correct mate scores in the quiescence hash lookup.
+    //doing it this way seems to be better?
     //---------------------------
     if (plyinfo.depth <= 0) {
         searchCounts.wentToQuiescence++;
