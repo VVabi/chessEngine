@@ -67,9 +67,9 @@ EvalComponentResult passedPawnEval(const chessPosition* position,
                 }
             }
             //TODO: I think we should add more static knowledge about when a pawn is passed
-           if ((distToPromotion == 1) && (position->toMove == white) && (((evalMemory->attackTables[black].completeAttackTable & BIT64(promotionField)) == 0)) ) {
-               untaperedEval += 300;
-           }
+            if ((distToPromotion == 1) && (position->toMove == white) && (((evalMemory->attackTables[black].completeAttackTable & BIT64(promotionField)) == 0))) {
+            untaperedEval += 300;
+            }
             eval = eval - par->passedPawnParameters.kingToPromotionFieldDistance[distToPromotion][kingDist];
 
 /*#ifdef EXPERIMENTAL
@@ -118,9 +118,9 @@ EvalComponentResult passedPawnEval(const chessPosition* position,
             eval = eval + par->passedPawnParameters.kingToPromotionFieldDistance[distToPromotion][kingDist];
 
             //TODO: I think we should add more static knowledge about when a pawn is passed
-           if ((distToPromotion == 1) && (position->toMove == black) && (((evalMemory->attackTables[white].completeAttackTable & BIT64(promotionField)) == 0)) ){
-               untaperedEval -= 300;
-           }
+            if ((distToPromotion == 1) && (position->toMove == black) && (((evalMemory->attackTables[white].completeAttackTable & BIT64(promotionField)) == 0))) {
+            untaperedEval -= 300;
+            }
 
 /*#ifdef EXPERIMENTAL
            uint64_t passedPawnFile = files[FILE(field)];
@@ -143,7 +143,6 @@ EvalComponentResult passedPawnEval(const chessPosition* position,
                }
            }
 #endif*/
-
         }
     }
 

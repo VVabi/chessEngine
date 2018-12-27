@@ -233,7 +233,7 @@ void reallocHashTables(uint32_t new_size) {
 }
 
 void initHashTables() {
-	reallocHashTables(DEFAULT_HASHSIZE);
+    reallocHashTables(DEFAULT_HASHSIZE);
 }
 
 

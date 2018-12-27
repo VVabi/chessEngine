@@ -348,8 +348,8 @@ std::string toString(const evaluationType type) {
             return "draw_detection";
             break;
         case eval_king_endgame_position:
-        	return "king_endgame_position";
-        	break;
+            return "king_endgame_position";
+            break;
     }
 
     return ""; //Unreachable
@@ -496,6 +496,8 @@ void runPerformanceTests(uint32_t d) {
             negamaxNodes = negamaxNodes+nmNodes;
             qNodes = qNodes+qn;
             count++;
+            std::cout << "Progress " << count/10 << " %\r";
+            std::cout.flush();
         }
         std::cout << "Depth " << depth  << " Nodes " << nodes << std::endl;
         std::cout << "negamaxnodes " <<  negamaxNodes << std::endl;
@@ -540,22 +542,22 @@ void handleGetMoveOrdering() {
 }
 
 void handlesetoption(std::list<std::string> input) {
-	//TODO: the uci spec is not really clear what is allowed here?
-	//-------------------------------
+    //TODO: the uci spec is not really clear what is allowed here?
+    //-------------------------------
     auto iterator = input.begin();
     iterator++;
     std::string name = *iterator;
 
-	if (name == "Hash") {
-	    iterator++;
-	    iterator++;
-		std::string value = *iterator;
-		uint32_t total_size = std::stoi(value)*1024*1024;
+    if (name == "Hash") {
+        iterator++;
+        iterator++;
+        std::string value = *iterator;
+        uint32_t total_size = std::stoi(value)*1024*1024;
 
-		uint32_t size_to_allocate = total_size/sizeof(HashBucket);
-		uint16_t msb = findMSB(size_to_allocate);
-		reallocHashTables(1 << msb);
-	}
+        uint32_t size_to_allocate = total_size/sizeof(HashBucket);
+        uint16_t msb = findMSB(size_to_allocate);
+        reallocHashTables(1 << msb);
+    }
 }
 
 void UIloop() {
@@ -646,8 +648,8 @@ void UIloop() {
                     handlecheckquiet();
                     break;
                 case setoption:
-                	handlesetoption(ev.data);
-                	break;
+                    handlesetoption(ev.data);
+                    break;
                 default:
                     putLine("Not yet implemented");
             }
