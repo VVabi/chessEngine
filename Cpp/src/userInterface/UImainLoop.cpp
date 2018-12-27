@@ -160,6 +160,7 @@ void handleGo(std::list<std::string> input) {
     params.increment[0] = 0;
     params.increment[1] = 0;
     params.movesToGo = UINT16_MAX;
+    params.flexibleDepth = false;
 
     for (auto iterator = input.begin(), end = input.end(); iterator != end; ++iterator) {
         std::string current = *iterator;
@@ -247,6 +248,10 @@ void handleGo(std::list<std::string> input) {
             std::string togo = *iterator;
             params.movesToGo = StringToNumber<int32_t>(togo);
             params.type = time_until_move;
+        }
+
+        if ("flexible" == current) {
+            params.flexibleDepth = true;
         }
     }
 

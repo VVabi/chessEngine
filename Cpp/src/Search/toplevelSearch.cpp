@@ -130,6 +130,25 @@ uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* node
         maxdepth = 3;
     }
 
+    if (params.flexibleDepth) {
+        uint16_t phase = position->totalFigureEval/100;
+
+        if (position->pieceTables[white][queen] | position->pieceTables[black][queen]) {
+            phase = phase+5;
+        }
+
+        if (phase < 40) {
+            params.depth++;
+        }
+
+        if (phase < 20) {
+            params.depth++;
+        }
+
+        if (phase < 10) {
+            params.depth++;
+        }
+    }
 
     while (checkContinue(params, depth, maxdepth, get_timestamp()-start_ts, totalTime)) {
         try {
