@@ -355,6 +355,9 @@ std::string toString(const evaluationType type) {
         case eval_king_endgame_position:
             return "king_endgame_position";
             break;
+        case eval_space:
+            return "space";
+            break;
     }
 
     return ""; //Unreachable

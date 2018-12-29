@@ -29,6 +29,7 @@ static EvaluationComponent evaluationComponents[] = {
                             {       &bishopPair,            eval_bishoppair,               256,        256,        256      },
                             {       &passedPawnEval,        eval_passed_pawns,             256,        256,        256      },
                             {       &kingEndgamePosition,   eval_king_endgame_position,    256,        256,        256      },
+                            {       &spaceAdvantage,        eval_space,                    256,        256,        256      },
 };
 
 static SimpleEvaluationComponent simpleEvaluationComponents[] = {
