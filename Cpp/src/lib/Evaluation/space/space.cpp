@@ -6,6 +6,7 @@
  */
 
 
+#include <DataTypes/data_utils.hpp>
 #include "lib/basics.hpp"
 #include "lib/bitfiddling.h"
 #include "parameters/parameters.hpp"
@@ -13,21 +14,23 @@
 #include "lib/Evaluation/evaluation.hpp"
 #include <algorithm>
 
-
-int16_t evals[] = {0, 5, 10, 18, 30, 45, 60, 75, 90};
-
-EvalComponentResult spaceAdvantage(const chessPosition* position, const evalParameters* evalParams __attribute__((unused)), EvalMemory* evalMemory  __attribute__((unused))) {
+EvalComponentResult spaceAdvantage(const chessPosition* position, const evalParameters* evalParams, EvalMemory* evalMemory  __attribute__((unused))) {
     EvalComponentResult ret;
 
-    int32_t numWhitePieces = popcount(position->pieces[white] & NORTHHALF);
-    int32_t numBlackPieces = popcount(position->pieces[black] & SOUTHHALF);
+    uint32_t numWhitePieces = popcount(position->pieces[white] & NORTHHALF);
+    uint32_t numBlackPieces = popcount(position->pieces[black] & SOUTHHALF);
 
-    numWhitePieces = std::min(8, numWhitePieces);
-    numBlackPieces = std::min(8, numBlackPieces);
+    constexpr uint32_t maxSize = sizeof(evalParams->spaceParameters.figuresInOppHalf)/sizeof(evalParams->spaceParameters.figuresInOppHalf[0]);
 
-    ret.early_game = 0;
-    ret.common = (evals[numWhitePieces]-evals[numBlackPieces])/3;
-    ret.endgame = (evals[numWhitePieces]-evals[numBlackPieces])/3;
+    numWhitePieces = std::min(maxSize, numWhitePieces);
+    numBlackPieces = std::min(maxSize, numBlackPieces);
+
+    ret.early_game      = 0;
+    int16_t whiteScore  = safe_access<const int16_t, maxSize>(evalParams->spaceParameters.figuresInOppHalf, numWhitePieces);
+    int16_t blackScore  = safe_access<const int16_t, maxSize>(evalParams->spaceParameters.figuresInOppHalf, numBlackPieces);
+    int16_t score       = (whiteScore-blackScore)/3;
+    ret.common          = score;
+    ret.endgame         = score;
 
     return ret;
 }

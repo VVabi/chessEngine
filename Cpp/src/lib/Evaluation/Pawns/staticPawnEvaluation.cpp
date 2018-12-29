@@ -98,7 +98,7 @@ EvalComponentResult doubledPawnEval(const chessPosition* position,
 
 EvalComponentResult isolatedPawnEval(const chessPosition* position,
         const evalParameters* par __attribute__((unused)),
-        EvalMemory* evalMemory __attribute__((unused))) {
+        EvalMemory* evalMemory __attribute__((unused)))  {
     int16_t ev = 0;
     uint64_t isolatedPawns[2];
     isolatedPawns[white] = getIsolatedPawns(position->pieceTables[white][pawn]);

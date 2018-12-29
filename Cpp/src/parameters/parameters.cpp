@@ -119,6 +119,10 @@ void initializeDependentParameters(preParameters par) {
     evaluationParameters.trappedPiecesParameters.trappedValue = par.trappedPieces;
     evaluationParameters.outposts                   = par.outposts;
 
+    int16_t spaceEvals[] = {0, 5, 10, 18, 30, 45, 60, 75, 90};
+    assert(sizeof(spaceEvals) == sizeof(evaluationParameters.spaceParameters.figuresInOppHalf));
+    memcpy(evaluationParameters.spaceParameters.figuresInOppHalf, spaceEvals, sizeof(evaluationParameters.spaceParameters.figuresInOppHalf));
+
     memcpy(evaluationParameters.passedPawnParameters.passedPawnEvalValues, passedPawnEvalValues, sizeof(passedPawnEvalValues));
     memcpy(evaluationParameters.passedPawnParameters.kingToPromotionFieldDistance, kingToPromotionFieldDistance, sizeof(kingToPromotionFieldDistance));
     for (uint16_t type = 0; type < 6; type++) {

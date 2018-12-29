@@ -22,8 +22,6 @@
 #include <tests/tests.hpp>
 #include <parameters/parameters.hpp>
 
-
-
 int main() {
     initializeParameters();
     //srand(get_timestamp());

@@ -33,6 +33,9 @@ struct passedPawnEvalParameters {
     int16_t kingToPromotionFieldDistance[7][7];
 };
 
+struct SpaceEvalParameters {
+    int16_t figuresInOppHalf[9];
+};
 
 struct evalParameters {
     int16_t figureValues[7];
@@ -43,6 +46,7 @@ struct evalParameters {
     kingSafetyEvalParameters kingSafetyParameters;
     trappedPiecesEvalParameters  trappedPiecesParameters;
     passedPawnEvalParameters passedPawnParameters;
+    SpaceEvalParameters     spaceParameters;
 };
 
 extern evalParameters evaluationParameters;

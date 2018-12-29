@@ -15,7 +15,7 @@
 #include <lib/Defines/passedPawns.hpp>
 #include <lib/Evaluation/tapering.hpp>
 
-uint64_t files[] = { FILEA, FILEB, FILEC, FILED, FILEE, FILEF, FILEG, FILEH };
+//uint64_t files[] = { FILEA, FILEB, FILEC, FILED, FILEE, FILEF, FILEG, FILEH };
 
 static uint16_t distBetweenFields(uint16_t a, uint16_t b) {
     uint16_t fileA = FILE(a);
