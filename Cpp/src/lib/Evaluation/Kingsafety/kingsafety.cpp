@@ -7,6 +7,7 @@
 
 
 
+#include <DataTypes/data_utils.hpp>
 #include "lib/basics.hpp"
 #include "lib/Evaluation/evaluation.hpp"
 #include "lib/bitfiddling.h"
@@ -54,7 +55,7 @@ static int16_t kingSafetySinglePlayer(const chessPosition* position, const uint8
 
     for (uint16_t pieceType = 0; pieceType < 5; pieceType++) {
         uint64_t attacks = opponentAttackTable->attackTables[pieceType] & kingmoves;
-        kingAttackScore = kingAttackScore+popcount(attacks)*par->attackScores[pieceType];
+        kingAttackScore = kingAttackScore+popcount(attacks)*SAFE_ARRAY_ACCESS(par->attackScores, pieceType);
     }
 
 
@@ -62,7 +63,7 @@ static int16_t kingSafetySinglePlayer(const chessPosition* position, const uint8
         kingAttackScore = 69;
     }
 
-    ret = ret-par->attacksCloseToKingEvals[kingAttackScore];
+    ret = ret-SAFE_ARRAY_ACCESS(par->attacksCloseToKingEvals, kingAttackScore);
     return (1-2*playingSide)*ret;
 }
 

@@ -101,8 +101,7 @@ preParameters* getPreParameters() {
 
 staticPawnEvalParameters initializeStaticPawnParameters() {
     staticPawnEvalParameters ret_par;
-    assert(sizeof(isolatedPawnTable) == sizeof(ret_par.isolatedPawnTable));
-    memcpy(ret_par.isolatedPawnTable, isolatedPawnTable, sizeof(isolatedPawnTable));
+    SAFE_CPY(ret_par.isolatedPawnTable, isolatedPawnTable);
     ret_par.doublePawn                  = -10;
     ret_par.unresolvableDoublePawn      = -5;
     ret_par.backwardsPawn               = -5;
@@ -116,8 +115,8 @@ kingSafetyEvalParameters initializeKingSafetyParameters(const preParameters par)
     ret.opponentopenfiletoking     = par.opponentopenfiletoking;
     ret.selfopenfilenexttoking     = par.selfopenfilenexttoking;
     ret.selfopenfiletoking         = par.selfopenfiletoking;
-    memcpy(ret.attacksCloseToKingEvals, attacksCloseToKingEvals, sizeof(attacksCloseToKingEvals));
-    memcpy(ret.attackScores, attackScores, sizeof(attackScores));
+    SAFE_CPY(ret.attacksCloseToKingEvals, attacksCloseToKingEvals);
+    SAFE_CPY(ret.attackScores, attackScores);
     return ret;
 }
 
@@ -146,11 +145,10 @@ void initializeDependentParameters(preParameters par) {
     evaluationParameters.outposts                   = par.outposts;
     evaluationParameters.mobilityParameters         = initializeMobilityParameters();
 
-    assert(sizeof(spaceEvals) == sizeof(evaluationParameters.spaceParameters.figuresInOppHalf));
-    memcpy(evaluationParameters.spaceParameters.figuresInOppHalf, spaceEvals, sizeof(evaluationParameters.spaceParameters.figuresInOppHalf));
+    SAFE_CPY(evaluationParameters.spaceParameters.figuresInOppHalf, spaceEvals);
+    SAFE_CPY(evaluationParameters.passedPawnParameters.passedPawnEvalValues, passedPawnEvalValues);
+    SAFE_CPY(evaluationParameters.passedPawnParameters.kingToPromotionFieldDistance, kingToPromotionFieldDistance);
 
-    memcpy(evaluationParameters.passedPawnParameters.passedPawnEvalValues, passedPawnEvalValues, sizeof(passedPawnEvalValues));
-    memcpy(evaluationParameters.passedPawnParameters.kingToPromotionFieldDistance, kingToPromotionFieldDistance, sizeof(kingToPromotionFieldDistance));
     for (uint16_t type = 0; type < 6; type++) {
         for (uint16_t field = 0; field < 32; field++) {
             int16_t value = getRawPieceTableEntry(type, field);

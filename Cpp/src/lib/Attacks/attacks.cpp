@@ -162,7 +162,7 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
         knightAttackTable = knightAttackTable | getKnightMoves(nextKnight);
         uint16_t legalMoves = popcount(getKnightMoves(nextKnight) & ~ownPieces & ~opppawnTakes);
         assert(legalMoves < 9);
-        result->common += SAFE_ARR_ACC(par->mobilityParameters.knightMobility, legalMoves); //safe_access<const int16_t, sizeof(par->mobilityParameters.knightMobility)/sizeof(par->mobilityParameters.knightMobility[0])>(par->mobilityParameters.knightMobility, legalMoves);
+        result->common += SAFE_ARRAY_ACCESS(par->mobilityParameters.knightMobility, legalMoves);
     }
     retTable.attackTables[knight] = knightAttackTable;
 
@@ -177,7 +177,7 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
         bishopAttackTable = bishopAttackTable | potentialMoves;
         uint16_t legalMoves = popcount(potentialMoves & ~ownPieces & ~opppawnTakes);
         assert(legalMoves < 14);
-        result->common += safe_access<const int16_t, sizeof(par->mobilityParameters.bishopMobility)/sizeof(par->mobilityParameters.bishopMobility[0])>(par->mobilityParameters.bishopMobility, legalMoves);
+        result->common += SAFE_ARRAY_ACCESS(par->mobilityParameters.bishopMobility, legalMoves);
     }
     retTable.attackTables[bishop] = bishopAttackTable;
     //rooks
@@ -189,7 +189,7 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
         uint64_t potentialMoves =  getPotentialRookMoves(nextPieceField, occupancy);
         uint16_t legalMoves = popcount(potentialMoves & ~ownPieces);
         assert(legalMoves < 15);
-        result->common += safe_access<const int16_t, sizeof(par->mobilityParameters.rookMobility)/sizeof(par->mobilityParameters.rookMobility[0])>(par->mobilityParameters.rookMobility, legalMoves);
+        result->common += SAFE_ARRAY_ACCESS(par->mobilityParameters.rookMobility, legalMoves);
         rookAttackTable = rookAttackTable | potentialMoves;
     }
     retTable.attackTables[rook] = rookAttackTable;

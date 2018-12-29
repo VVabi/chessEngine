@@ -7,12 +7,14 @@
 
 
 #include <DataTypes/data_utils.hpp>
-#include "lib/basics.hpp"
-#include "lib/bitfiddling.h"
-#include "parameters/parameters.hpp"
-#include "lib/Attacks/attacks.hpp"
-#include "lib/Evaluation/evaluation.hpp"
+#include <lib/basics.hpp>
+#include <lib/basicTypes.hpp>
+#include <lib/bitfiddling.h>
+#include <lib/Defines/boardParts.hpp>
+#include <lib/Evaluation/evaluation.hpp>
+#include <parameters/parameters.hpp>
 #include <algorithm>
+#include <cstdint>
 
 EvalComponentResult spaceAdvantage(const chessPosition* position, const evalParameters* evalParams, EvalMemory* evalMemory  __attribute__((unused))) {
     EvalComponentResult ret;
@@ -26,8 +28,8 @@ EvalComponentResult spaceAdvantage(const chessPosition* position, const evalPara
     numBlackPieces = std::min(maxSize, numBlackPieces);
 
     ret.early_game      = 0;
-    int16_t whiteScore  = safe_access<const int16_t, maxSize>(evalParams->spaceParameters.figuresInOppHalf, numWhitePieces);
-    int16_t blackScore  = safe_access<const int16_t, maxSize>(evalParams->spaceParameters.figuresInOppHalf, numBlackPieces);
+    int16_t whiteScore  = SAFE_ARRAY_ACCESS(evalParams->spaceParameters.figuresInOppHalf, numWhitePieces);
+    int16_t blackScore  = SAFE_ARRAY_ACCESS(evalParams->spaceParameters.figuresInOppHalf, numBlackPieces);
     int16_t score       = (whiteScore-blackScore)/3;
     ret.common          = score;
     ret.endgame         = score;

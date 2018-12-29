@@ -104,13 +104,13 @@ EvalComponentResult isolatedPawnEval(const chessPosition* position,
     uint64_t wIso = isolatedPawns[white];
     while (wIso) {
         uint16_t field = popLSB(wIso);
-        ev = ev + safe_access<const int16_t, sizeof(par->staticPawnParameters.isolatedPawnTable)/sizeof(par->staticPawnParameters.isolatedPawnTable[0])>(par->staticPawnParameters.isolatedPawnTable, field);
+        ev = ev + SAFE_ARRAY_ACCESS(par->staticPawnParameters.isolatedPawnTable, field);
     }
 
     uint64_t bIso = isolatedPawns[black];
     while (bIso) {
         uint16_t field = popLSB(bIso);
-        ev = ev - safe_access<const int16_t, sizeof(par->staticPawnParameters.isolatedPawnTable)/sizeof(par->staticPawnParameters.isolatedPawnTable[0])>(par->staticPawnParameters.isolatedPawnTable, field);
+        ev = ev - SAFE_ARRAY_ACCESS(par->staticPawnParameters.isolatedPawnTable, field);
     }
     EvalComponentResult ret;
     ret.common      = ev;

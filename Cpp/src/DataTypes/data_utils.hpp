@@ -20,6 +20,6 @@ template<typename T, uint32_t length> inline T safe_access(T* val, uint32_t inde
     return val[index];
 }
 
-#define SAFE_ARR_ACC(x,n) safe_access<std::remove_reference<decltype(x[0])>::type, sizeof(x)/sizeof(x[0])>(x,n) //TODO: unfortunately does not work as intended since decltype(x[0]) returns a reference.
+#define SAFE_ARRAY_ACCESS(x,n) safe_access<std::remove_reference<decltype(x[0])>::type, sizeof(x)/sizeof(x[0])>(x,n)
 
 #endif /* DATATYPES_DATA_UTILS_HPP_ */
