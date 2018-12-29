@@ -5,6 +5,7 @@
  *      Author: vabi
  */
 
+#include <DataTypes/data_utils.hpp>
 #include <lib/basics.hpp>
 #include "lib/Evaluation/evaluation.hpp"
 #include <lib/bitfiddling.h>
@@ -15,16 +16,16 @@
 
 void getBackwardsPawns(uint64_t* whiteBackwards, uint64_t* blackBackwards,
         uint64_t wPawns, uint64_t bPawns) {
-    uint64_t wStops = NORTHONE(wPawns);
-    uint64_t wPawnFill = northFill(wStops);
-    uint64_t wPawnAttackSpan = WESTONE(wPawnFill) | EASTONE(wPawnFill);
-    uint64_t wPawnAttacks = WESTONE(wStops) | EASTONE(wStops);
-    uint64_t bStops = SOUTHONE(bPawns);
-    uint64_t bPawnFill = southFill(bStops);
-    uint64_t bPawnAttackSpan = WESTONE(bPawnFill) | EASTONE(bPawnFill);
-    uint64_t bPawnAttacks = WESTONE(bStops) | EASTONE(bStops);
-    *whiteBackwards = SOUTHONE(wStops & bPawnAttacks & ~wPawnAttackSpan);
-    *blackBackwards = NORTHONE(bStops & wPawnAttacks & ~bPawnAttackSpan);
+    uint64_t wStops             = NORTHONE(wPawns);
+    uint64_t wPawnFill          = northFill(wStops);
+    uint64_t wPawnAttackSpan    = WESTONE(wPawnFill) | EASTONE(wPawnFill);
+    uint64_t wPawnAttacks       = WESTONE(wStops) | EASTONE(wStops);
+    uint64_t bStops             = SOUTHONE(bPawns);
+    uint64_t bPawnFill          = southFill(bStops);
+    uint64_t bPawnAttackSpan    = WESTONE(bPawnFill) | EASTONE(bPawnFill);
+    uint64_t bPawnAttacks       = WESTONE(bStops) | EASTONE(bStops);
+    *whiteBackwards             = SOUTHONE(wStops & bPawnAttacks & ~wPawnAttackSpan); //TODO: currently a blocked pawn can be backwards - that is strange
+    *blackBackwards             = NORTHONE(bStops & wPawnAttacks & ~bPawnAttackSpan);
 }
 
 uint8_t getPawnColumns(uint64_t in) {
@@ -32,28 +33,25 @@ uint8_t getPawnColumns(uint64_t in) {
 }
 
 uint64_t getDoubledPawns(uint64_t in) {
-    uint64_t stops = NORTHONE(in);
-    uint64_t pawnFill = northFill(stops);
-    uint64_t frontDoubled = pawnFill & in;
+    uint64_t stops          = NORTHONE(in);
+    uint64_t pawnFill       = northFill(stops);
+    uint64_t frontDoubled   = pawnFill & in;
     return (in & (southFill(frontDoubled) | northFill(frontDoubled)));
 }
 
 uint64_t getIsolatedPawns(uint64_t in) {
-    uint64_t fill = northFill(in) | southFill(in);
-    uint64_t emptyCols = ~fill;
-    uint64_t westEmpty = EASTONE(emptyCols);
-    uint64_t eastEmpty = WESTONE(emptyCols);
+    uint64_t fill           = northFill(in) | southFill(in);
+    uint64_t emptyCols      = ~fill;
+    uint64_t westEmpty      = EASTONE(emptyCols);
+    uint64_t eastEmpty      = WESTONE(emptyCols);
     uint64_t neighborsEmpty = (westEmpty | FILEA) & (eastEmpty | FILEH);
     return in & neighborsEmpty;
 }
 
-int16_t isolatedPawnTable[] = { 0, 0, 0, 0, 0, 0, 0, 0, -5, -6, -7, -8, -8, -7,
-        -6, -5, -5, -6, -8, -9, -9, -8, -6, -5, -7, -9, -11, -13, -13, -11, -9,
-        -7, -7, -9, -11, -13, -13, -11, -9, -7, -5, -6, -8, -9, -9, -8, -6, -5,
-        -5, -6, -7, -8, -8, -7, -6, -5, 0, 0, 0, 0, 0, 0, 0, 0, };
+
 
 EvalComponentResult doubledPawnEval(const chessPosition* position,
-        const evalParameters* par __attribute__((unused)),
+        const evalParameters* par,
         EvalMemory* evalMemory __attribute__((unused))) {
     int16_t ev = 0;
     uint64_t doubledPawns[2];
@@ -74,19 +72,19 @@ EvalComponentResult doubledPawnEval(const chessPosition* position,
     neighboringColumn[black] = bPawnAttackSpan;
 
     while (wDouble) {
-        ev = ev - 10;
+        ev = ev + par->staticPawnParameters.doublePawn;
         uint16_t field = popLSB(wDouble);
         if (!(BIT64(field) & neighboringColumn[black])) { //no black pawn on an adjacent column
-            ev = ev - 5;
+            ev = ev + par->staticPawnParameters.unresolvableDoublePawn;
         }
     }
 
     uint64_t bDouble = doubledPawns[black];
     while (bDouble) {
-        ev = ev + 10;
+        ev = ev - par->staticPawnParameters.doublePawn;
         uint16_t field = popLSB(bDouble);
         if (!(BIT64(field) & neighboringColumn[white])) { //no black pawn on an adjacent column
-            ev = ev + 5;
+            ev = ev - par->staticPawnParameters.unresolvableDoublePawn;
         }
     }
     EvalComponentResult ret;
@@ -97,7 +95,7 @@ EvalComponentResult doubledPawnEval(const chessPosition* position,
 }
 
 EvalComponentResult isolatedPawnEval(const chessPosition* position,
-        const evalParameters* par __attribute__((unused)),
+        const evalParameters* par,
         EvalMemory* evalMemory __attribute__((unused)))  {
     int16_t ev = 0;
     uint64_t isolatedPawns[2];
@@ -106,13 +104,13 @@ EvalComponentResult isolatedPawnEval(const chessPosition* position,
     uint64_t wIso = isolatedPawns[white];
     while (wIso) {
         uint16_t field = popLSB(wIso);
-        ev = ev + isolatedPawnTable[field];
+        ev = ev + safe_access<const int16_t, sizeof(par->staticPawnParameters.isolatedPawnTable)/sizeof(par->staticPawnParameters.isolatedPawnTable[0])>(par->staticPawnParameters.isolatedPawnTable, field);
     }
 
     uint64_t bIso = isolatedPawns[black];
     while (bIso) {
         uint16_t field = popLSB(bIso);
-        ev = ev - isolatedPawnTable[field];
+        ev = ev - safe_access<const int16_t, sizeof(par->staticPawnParameters.isolatedPawnTable)/sizeof(par->staticPawnParameters.isolatedPawnTable[0])>(par->staticPawnParameters.isolatedPawnTable, field);
     }
     EvalComponentResult ret;
     ret.common      = ev;
@@ -122,7 +120,7 @@ EvalComponentResult isolatedPawnEval(const chessPosition* position,
 }
 
 EvalComponentResult backwardPawnsEval(const chessPosition* position,
-        const evalParameters* par __attribute__((unused)),
+        const evalParameters* par,
         EvalMemory* evalMemory __attribute__((unused))) {
     int16_t ev = 0;
     uint64_t backwardsPawns[2];
@@ -139,7 +137,7 @@ EvalComponentResult backwardPawnsEval(const chessPosition* position,
     while (wBackwards) {
         uint16_t field = popLSB(wBackwards);
         if (!(BIT64(field) & frontColumnFill[black])) {
-            ev = ev - 5;
+            ev = ev + par->staticPawnParameters.backwardsPawn;
         }
     }
 
@@ -147,7 +145,7 @@ EvalComponentResult backwardPawnsEval(const chessPosition* position,
     while (bBackwards) {
         uint16_t field = popLSB(bBackwards);
         if (!(BIT64(field) & frontColumnFill[white])) {
-            ev = ev + 5;
+            ev = ev - par->staticPawnParameters.backwardsPawn;
         }
     }
     EvalComponentResult ret;

@@ -10,9 +10,10 @@
 #include "parametersPrivate.hpp"
 
 struct staticPawnEvalParameters {
-    int16_t isolatedPawn;
-    int16_t isolatedDoublePawn;
-    int16_t nonIsolatedDoublePawn;
+    int16_t isolatedPawnTable[64];
+    int16_t doublePawn; //subtracted for BOTH pawns of a doubled pawn!
+    int16_t unresolvableDoublePawn;
+    int16_t backwardsPawn;
 };
 
 struct kingSafetyEvalParameters {

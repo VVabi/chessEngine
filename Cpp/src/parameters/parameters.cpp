@@ -60,6 +60,15 @@ static int16_t kingToPromotionFieldDistance[7][7] = {  // [dist to promotion][ki
         {0, 0, 0, 0, -5, -5, -10 },
 };
 
+static int16_t isolatedPawnTable[] =
+        {  0, 0, 0, 0, 0, 0, 0, 0,
+          -5, -6, -7, -8, -8, -7,-6, -5,
+          -5, -6, -8, -9, -9, -8, -6, -5,
+          -7, -9, -11, -13, -13, -11, -9,
+          -7, -7, -9, -11, -13, -13, -11, -9,
+          -7, -5, -6, -8, -9, -9, -8, -6, -5,
+          -5, -6, -7, -8, -8, -7, -6, -5,
+           0, 0, 0, 0, 0, 0, 0, 0, };
 
 void paramDefaultInit(preParameters* par) {
     par->pawnValue      = PAWNVALUE;
@@ -84,11 +93,13 @@ preParameters* getPreParameters() {
     return &par;
 }
 
-staticPawnEvalParameters  initializeStaticPawnParameters(const preParameters par) {
+staticPawnEvalParameters initializeStaticPawnParameters() {
     staticPawnEvalParameters ret_par;
-    ret_par.isolatedDoublePawn      = par.isolateddoublepawns;
-    ret_par.isolatedPawn            = par.isolatedpawns;
-    ret_par.nonIsolatedDoublePawn   = par.nonisolateddoublepawns;
+    assert(sizeof(isolatedPawnTable) == sizeof(ret_par.isolatedPawnTable));
+    memcpy(ret_par.isolatedPawnTable, isolatedPawnTable, sizeof(isolatedPawnTable));
+    ret_par.doublePawn                  = -10;
+    ret_par.unresolvableDoublePawn      = -5;
+    ret_par.backwardsPawn               = -5;
     return ret_par;
 }
 
@@ -114,7 +125,7 @@ void initializeDependentParameters(preParameters par) {
     evaluationParameters.figureValues[none]         = 0;
     evaluationParameters.bishoppair                 = par.bishoppair;
     evaluationParameters.rookOnOpenFile             = par.rookonopenfile;
-    evaluationParameters.staticPawnParameters       = initializeStaticPawnParameters(par);
+    evaluationParameters.staticPawnParameters       = initializeStaticPawnParameters();
     evaluationParameters.kingSafetyParameters       = initializeKingSafetyParameters(par);
     evaluationParameters.trappedPiecesParameters.trappedValue = par.trappedPieces;
     evaluationParameters.outposts                   = par.outposts;
