@@ -56,7 +56,7 @@ static inline void calcSortEval(chessPosition* position, chessMove* mv, bool isI
 
     int16_t sortEval = 0;
 
-    if (mv->captureType != none) {
+    if ((mv->captureType != none) && (mv->type < 6)) {
         sortEval += captureEvals[mv->type][mv->captureType];
     }
 
