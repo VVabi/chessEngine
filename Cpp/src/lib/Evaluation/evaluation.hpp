@@ -79,6 +79,6 @@ EvalComponentResult passedPawnEval(const chessPosition* position, const evalPara
 EvalComponentResult spaceAdvantage(const chessPosition* position, const evalParameters* evalParams, EvalMemory* evalMemory  __attribute__((unused)));
 EvalComponentResult PSQ(const chessPosition* position, const evalParameters* par);
 
-AttackTable makeAttackTableWithMobility(const chessPosition* position, playerColor attackingSide, EvalComponentResult* result);
+AttackTable makeAttackTableWithMobility(const chessPosition* position, playerColor attackingSide, EvalComponentResult* result, const evalParameters* par);
 
 #endif /* EVALUATION_EVALUATION_HPP_ */

@@ -15,6 +15,8 @@
 #include <lib/Defines/evalParameters.hpp>
 #include <lib/Evaluation/PSQ.hpp>
 
+#define SAFE_CPY(dst, src) assert(sizeof(dst) == sizeof(src)); memcpy(dst, src, sizeof(src));
+
 evalParameters evaluationParameters;
 preParameters par;
 
@@ -70,6 +72,10 @@ static int16_t isolatedPawnTable[] =
           -5, -6, -7, -8, -8, -7, -6, -5,
            0, 0, 0, 0, 0, 0, 0, 0, };
 
+static int16_t bishopMobility[14]   = {-35, -25, -18, -13, -5, 0, 3, 5, 8, 10, 12, 14, 16, 18};
+static int16_t rookMobility[15]     = {-35, -25, -18, -15, -10, -8, -3, 0, 3, 5, 8, 10, 12, 14, 16};
+static int16_t knightMobility[9]   = {-25, -18, -8, 0, 3, 5, 8, 10, 12};
+static int16_t spaceEvals[] = {0, 5, 10, 18, 30, 45, 60, 75, 90};
 void paramDefaultInit(preParameters* par) {
     par->pawnValue      = PAWNVALUE;
     par->knightValue    = KNIGHTVALUE;
@@ -115,6 +121,15 @@ kingSafetyEvalParameters initializeKingSafetyParameters(const preParameters par)
     return ret;
 }
 
+
+MobilityParameters initializeMobilityParameters() {
+    MobilityParameters ret;
+    SAFE_CPY(ret.bishopMobility, bishopMobility);
+    SAFE_CPY(ret.knightMobility, knightMobility);
+    SAFE_CPY(ret.rookMobility,   rookMobility);
+    return ret;
+}
+
 void initializeDependentParameters(preParameters par) {
     evaluationParameters.figureValues[pawn]         = par.pawnValue;
     evaluationParameters.figureValues[knight]       = par.knightValue;
@@ -129,8 +144,8 @@ void initializeDependentParameters(preParameters par) {
     evaluationParameters.kingSafetyParameters       = initializeKingSafetyParameters(par);
     evaluationParameters.trappedPiecesParameters.trappedValue = par.trappedPieces;
     evaluationParameters.outposts                   = par.outposts;
+    evaluationParameters.mobilityParameters         = initializeMobilityParameters();
 
-    int16_t spaceEvals[] = {0, 5, 10, 18, 30, 45, 60, 75, 90};
     assert(sizeof(spaceEvals) == sizeof(evaluationParameters.spaceParameters.figuresInOppHalf));
     memcpy(evaluationParameters.spaceParameters.figuresInOppHalf, spaceEvals, sizeof(evaluationParameters.spaceParameters.figuresInOppHalf));
 

@@ -38,6 +38,12 @@ struct SpaceEvalParameters {
     int16_t figuresInOppHalf[9];
 };
 
+struct MobilityParameters {
+     int16_t bishopMobility[14];
+     int16_t rookMobility[15];
+     int16_t knightMobility[9];
+};
+
 struct evalParameters {
     int16_t figureValues[7];
     int16_t bishoppair;
@@ -48,6 +54,7 @@ struct evalParameters {
     trappedPiecesEvalParameters  trappedPiecesParameters;
     passedPawnEvalParameters passedPawnParameters;
     SpaceEvalParameters     spaceParameters;
+    MobilityParameters      mobilityParameters;
 };
 
 extern evalParameters evaluationParameters;
