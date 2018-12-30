@@ -14,6 +14,7 @@
 
 struct EvalMemory {
     AttackTable attackTables[2];
+    uint64_t passedPawns[2];
 };
 
 struct EvalComponentResult {

@@ -37,7 +37,7 @@ uint64_t staticpawnhashhits = 0;
 
 EvalComponentResult passedPawnEval(const chessPosition* position,
         const evalParameters* par __attribute__((unused)),
-        EvalMemory* evalMemory __attribute__((unused))) {
+        EvalMemory* evalMemory) {
     //TODO: remove code duplication. Generally this code sucks - too many white/black diffs...
     int32_t eval = 0;
     uint64_t whitePawns = position->pieceTables[white][pawn];
@@ -48,9 +48,11 @@ EvalComponentResult passedPawnEval(const chessPosition* position,
     uint16_t whiteKing = findLSB(position->pieceTables[white][king]);
 
     int16_t untaperedEval = 0;
+    uint64_t wPassedPawns = 0;
     while (whitePawnBuffer) {
         uint16_t field = popLSB(whitePawnBuffer);
         if ((getPassedPawnMask(white, field) & blackPawns) == 0) {
+            wPassedPawns = wPassedPawns | BIT64(field);
             uint16_t promotionField = FILE(field) + 56;
             uint16_t distToPromotion = 7 - ROW(field);
             uint16_t kingDist = distBetweenFields(promotionField, blackKing);
@@ -68,38 +70,17 @@ EvalComponentResult passedPawnEval(const chessPosition* position,
             }
             //TODO: I think we should add more static knowledge about when a pawn is passed
             if ((distToPromotion == 1) && (position->toMove == white) && (((evalMemory->attackTables[black].completeAttackTable & BIT64(promotionField)) == 0))) {
-            untaperedEval += 300;
+                untaperedEval += 300;
             }
             eval = eval - par->passedPawnParameters.kingToPromotionFieldDistance[distToPromotion][kingDist];
-
-/*#ifdef EXPERIMENTAL
-            uint64_t passedPawnFile = files[FILE(field)];
-
-            uint64_t ownRooks   = passedPawnFile & position->pieceTables[white][rook];
-            uint64_t otherRooks = passedPawnFile & position->pieceTables[black][rook];
-
-            while (ownRooks) {
-                uint16_t rookField = popLSB(ownRooks);
-                if (rookField < field) {
-                    eval += 10;
-                } else {
-                    eval -= 20;
-                }
-            }
-
-            while (otherRooks) {
-                uint16_t rookField = popLSB(otherRooks);
-                if (rookField < field) {
-                    eval -= 20;
-                }
-            }
-#endif*/
         }
     }
     uint64_t blackPawnBuffer = blackPawns;
+    uint64_t bPassedPawns = 0;
     while (blackPawnBuffer) {
         uint16_t field = popLSB(blackPawnBuffer);
         if ((getPassedPawnMask(black, field) & whitePawns) == 0) {
+            bPassedPawns = bPassedPawns | BIT64(field);
             uint16_t promotionField = FILE(field);
             uint16_t distToPromotion = ROW(field);
             uint16_t kingDist = distBetweenFields(promotionField, whiteKing);
@@ -119,32 +100,12 @@ EvalComponentResult passedPawnEval(const chessPosition* position,
 
             //TODO: I think we should add more static knowledge about when a pawn is passed
             if ((distToPromotion == 1) && (position->toMove == black) && (((evalMemory->attackTables[white].completeAttackTable & BIT64(promotionField)) == 0))) {
-            untaperedEval -= 300;
+                untaperedEval -= 300;
             }
-
-/*#ifdef EXPERIMENTAL
-           uint64_t passedPawnFile = files[FILE(field)];
-           uint64_t ownRooks   = passedPawnFile & position->pieceTables[black][rook];
-           uint64_t otherRooks = passedPawnFile & position->pieceTables[white][rook];
-
-           while (ownRooks) {
-               uint16_t rookField = popLSB(ownRooks);
-               if (rookField > field) {
-                   eval -= 10;
-               } else {
-                   eval += 20;
-               }
-           }
-
-           while (otherRooks) {
-               uint16_t rookField = popLSB(otherRooks);
-               if (rookField > field) {
-                   eval += 20;
-               }
-           }
-#endif*/
         }
     }
+    evalMemory->passedPawns[white] = wPassedPawns;
+    evalMemory->passedPawns[black] = bPassedPawns;
 
     EvalComponentResult result;
     result.common = untaperedEval;
@@ -152,29 +113,3 @@ EvalComponentResult passedPawnEval(const chessPosition* position,
 
     return result;
 }
-
-/*EvalComponentResult staticPawnEvaluation(const chessPosition* position,
-        const evalParameters* par __attribute__((unused)),
-        const AttackTable* attackTables __attribute__((unused))) {
-    uint32_t eval = 0;
-    int16_t staticPawn = 0;
-
-    pawnHashEntry entry;
-     if (getPawnHashTableEntry(&entry, position->pawnHash)) {
-     staticPawn = entry.eval;
-     staticpawnhashhits++;
-     //TODO add debug code here to verify the hash is correct!
-     } else {
-    staticpawncalls++;
-    staticPawn += doubledPawnEval(position);
-    staticPawn += isolatedPawnEval(position);
-    staticPawn += backwardPawnsEval(position);
-    setPawnHashEntry(staticPawn, position->pawnHash);
-    //}
-    eval = eval + staticPawn;
-
-    EvalComponentResult result;
-
-    result.common = eval;
-    return result;
-}*/
