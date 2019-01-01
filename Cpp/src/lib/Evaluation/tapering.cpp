@@ -6,7 +6,6 @@
  */
 #include "tapering.hpp"
 
-
 static uint16_t taperingValues[81] = {  0,  0,  0,  0,  0,  0,  0,  0,
                                      0,  0,  0,  0,  0,  0,  0,  0,
                                     0, 2, 7, 12, 17, 22, 27, 33,

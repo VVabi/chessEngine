@@ -195,8 +195,6 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
     retTable.attackTables[rook] = rookAttackTable;
 
     //queens
-
-
     uint64_t queens = position->pieceTables[attackingSide][queen];
     uint64_t queenAttackTable = 0;
     while (queens != 0) {
@@ -252,6 +250,11 @@ static inline bool getNextCapture(chessMove* nextCapture, const chessPosition* p
         nextCapture->sourceField = source;
         nextCapture->targetField = field;
         nextCapture->type        = pawnMove;
+
+        if (ROW(field) == 0 || ROW(field) == 7) {
+            nextCapture->type = promotionQueen;
+        }
+
         return true;
         //}
     }
@@ -349,7 +352,16 @@ int16_t see_internal(int16_t previous, chessPosition* position, uint16_t field, 
 
     position->toMove = (playerColor) (1-position->toMove);
     mask = mask | BIT64(mv.sourceField);
-    int16_t seeVal = -see_internal(-previous+evalPars->figureValues[mv.captureType], position, field, (figureType) mv.type, evalPars, mask);
+
+    int16_t gain = evalPars->figureValues[mv.captureType];
+    figureType last = (figureType) mv.type;
+
+    if (mv.type == promotionQueen) {
+        gain += evalPars->figureValues[queen]-evalPars->figureValues[pawn];
+        last  = queen;
+    }
+
+    int16_t seeVal = -see_internal(-previous+gain, position, field, last, evalPars, mask);
     position->toMove = (playerColor) (1-position->toMove);
 
     if (seeVal > standPat) {
@@ -361,16 +373,25 @@ int16_t see_internal(int16_t previous, chessPosition* position, uint16_t field, 
 
 int16_t SEE(chessPosition* position, chessMove* mv) {
     //TODO: SEE currently cannot handle promotions!!!!
-    if (mv->type > 5) {
+    if ((mv->type > 5)
+
+            && (mv->type != promotionQueen)
+
+            ) {
         return 0;
     }
     const evalParameters* evalPars = getEvalParameters();
     assert(evalPars->figureValues[none] == 0);
-    uint16_t val = evalPars->figureValues[mv->captureType];
-    uint64_t mask = BIT64(mv->sourceField);
-    position->toMove = (playerColor) (1-position->toMove);
-    int16_t ret = -see_internal(val, position, mv->targetField, (figureType) mv->type, evalPars, mask);
-    position->toMove = (playerColor) (1-position->toMove);
+    uint16_t val            = evalPars->figureValues[mv->captureType];
+
+    if (mv->type == promotionQueen) {
+        val += evalPars->figureValues[queen]-evalPars->figureValues[pawn];
+    }
+
+    uint64_t mask           = BIT64(mv->sourceField);
+    position->toMove        = (playerColor) (1-position->toMove);
+    int16_t ret             = -see_internal(val, position, mv->targetField, (figureType) mv->type, evalPars, mask);
+    position->toMove        = (playerColor) (1-position->toMove);
     return ret;
 }
 

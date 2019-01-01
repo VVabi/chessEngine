@@ -122,10 +122,11 @@ EvalComponentResult isolatedPawnEval(const chessPosition* position,
 EvalComponentResult backwardPawnsEval(const chessPosition* position,
         const evalParameters* par,
         EvalMemory* evalMemory __attribute__((unused))) {
+    EvalComponentResult ret;
     int16_t ev = 0;
     uint64_t backwardsPawns[2];
     uint64_t frontColumnFill[2];
-
+    uint64_t pawnColumns[2];
     getBackwardsPawns(backwardsPawns, backwardsPawns + 1,
             position->pieceTables[white][pawn],
             position->pieceTables[black][pawn]);
@@ -133,11 +134,19 @@ EvalComponentResult backwardPawnsEval(const chessPosition* position,
     frontColumnFill[white] = NORTHONE(position->pieceTables[white][pawn]);
     frontColumnFill[black] = SOUTHONE(position->pieceTables[black][pawn]);
 
+    pawnColumns[white] = northFill(position->pieceTables[white][pawn]);
+    pawnColumns[black] = southFill(position->pieceTables[black][pawn]);
+
     uint64_t wBackwards = backwardsPawns[white];
     while (wBackwards) {
         uint16_t field = popLSB(wBackwards);
         if (!(BIT64(field) & frontColumnFill[black])) {
             ev = ev + par->staticPawnParameters.backwardsPawn;
+#ifdef EXPERIMENTAL
+            if (!(BIT64(field) & pawnColumns[black])) {
+                ev = ev + par->staticPawnParameters.backwardsPawn;
+            }
+#endif
         }
     }
 
@@ -146,12 +155,17 @@ EvalComponentResult backwardPawnsEval(const chessPosition* position,
         uint16_t field = popLSB(bBackwards);
         if (!(BIT64(field) & frontColumnFill[white])) {
             ev = ev - par->staticPawnParameters.backwardsPawn;
+#ifdef EXPERIMENTAL
+            if (!(BIT64(field) & pawnColumns[white])) {
+                ev = ev - par->staticPawnParameters.backwardsPawn;
+            }
+#endif
         }
     }
-    EvalComponentResult ret;
+
     ret.common      = ev;
-    ret.early_game  = 0;
-    ret.endgame     = 0;
+    //ret.early_game  = 0;
+    //ret.endgame     = 0;
     return ret;
 }
 

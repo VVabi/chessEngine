@@ -192,7 +192,6 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, 
 
         //This has to be done AFTER sorting of course - that was a nasty bug
         //-----------------------
-
         if (moves[ind].sortEval < -50) {
         #ifdef DEBUG
             for (uint16_t cnt = ind+1; cnt < moves.length; cnt++) {
@@ -214,6 +213,7 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, 
         uint16_t kingField = findLSB(position->pieceTables[1- position->toMove][king]);
 
         if (isFieldAttacked(position,  position->toMove, kingField)) {
+            //move was illegal, continue
         } else {
             nodes++;
             int32_t value = -negamaxQuiescence(position, qply+1, ply+1, alphabeta.invert(), depth+1, searchId);
