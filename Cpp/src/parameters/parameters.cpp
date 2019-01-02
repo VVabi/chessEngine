@@ -103,12 +103,8 @@ staticPawnEvalParameters initializeStaticPawnParameters() {
     staticPawnEvalParameters ret_par;
     SAFE_CPY(ret_par.isolatedPawnTable, isolatedPawnTable);
     ret_par.doublePawn                  = -10;
-    ret_par.unresolvableDoublePawn      = -5;
-#ifdef EXPERIMENTAL
+    ret_par.unresolvableDoublePawn      = -10;
     ret_par.backwardsPawn               = -3;
-#else
-    ret_par.backwardsPawn               = -5;
-#endif
     return ret_par;
 }
 

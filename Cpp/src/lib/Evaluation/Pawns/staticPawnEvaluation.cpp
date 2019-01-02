@@ -83,7 +83,7 @@ EvalComponentResult doubledPawnEval(const chessPosition* position,
     while (bDouble) {
         ev = ev - par->staticPawnParameters.doublePawn;
         uint16_t field = popLSB(bDouble);
-        if (!(BIT64(field) & neighboringColumn[white])) { //no black pawn on an adjacent column
+        if (!(BIT64(field) & neighboringColumn[white])) { //no white pawn on an adjacent column
             ev = ev - par->staticPawnParameters.unresolvableDoublePawn;
         }
     }
@@ -142,11 +142,9 @@ EvalComponentResult backwardPawnsEval(const chessPosition* position,
         uint16_t field = popLSB(wBackwards);
         if (!(BIT64(field) & frontColumnFill[black])) {
             ev = ev + par->staticPawnParameters.backwardsPawn;
-#ifdef EXPERIMENTAL
             if (!(BIT64(field) & pawnColumns[black])) {
                 ev = ev + par->staticPawnParameters.backwardsPawn;
             }
-#endif
         }
     }
 
@@ -155,11 +153,9 @@ EvalComponentResult backwardPawnsEval(const chessPosition* position,
         uint16_t field = popLSB(bBackwards);
         if (!(BIT64(field) & frontColumnFill[white])) {
             ev = ev - par->staticPawnParameters.backwardsPawn;
-#ifdef EXPERIMENTAL
             if (!(BIT64(field) & pawnColumns[white])) {
                 ev = ev - par->staticPawnParameters.backwardsPawn;
             }
-#endif
         }
     }
 
