@@ -358,6 +358,9 @@ std::string toString(const evaluationType type) {
         case eval_space:
             return "space";
             break;
+        case eval_rook_positioning:
+            return "rook_positions";
+            break;
     }
 
     return ""; //Unreachable

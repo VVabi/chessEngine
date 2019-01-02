@@ -29,7 +29,7 @@ struct EvalComponentResult {
     }
 };
 
-enum evaluationType {eval_kingsafety, eval_trapped_pieces, eval_outposts, eval_rookfiles, eval_doubled_pawn, eval_isolated_pawn, eval_backwards_pawn, eval_bishoppair, eval_PSQ, eval_passed_pawns, eval_mobility, eval_special_endgames, eval_draw_detection, eval_king_endgame_position, eval_space};
+enum evaluationType {eval_kingsafety, eval_trapped_pieces, eval_outposts, eval_rookfiles, eval_doubled_pawn, eval_isolated_pawn, eval_backwards_pawn, eval_bishoppair, eval_PSQ, eval_passed_pawns, eval_mobility, eval_special_endgames, eval_draw_detection, eval_king_endgame_position, eval_space, eval_rook_positioning};
 
 
 struct EvaluationComponent {
@@ -79,6 +79,7 @@ EvalComponentResult bishopPair(const chessPosition* position, const evalParamete
 EvalComponentResult passedPawnEval(const chessPosition* position, const evalParameters* par,  EvalMemory* attackTables);
 EvalComponentResult spaceAdvantage(const chessPosition* position, const evalParameters* evalParams, EvalMemory* evalMemory  __attribute__((unused)));
 EvalComponentResult PSQ(const chessPosition* position, const evalParameters* par);
+EvalComponentResult rookPositioning(const chessPosition* position, const evalParameters* evalParams, EvalMemory* evalMemory);
 
 AttackTable makeAttackTableWithMobility(const chessPosition* position, playerColor attackingSide, EvalComponentResult* result, const evalParameters* par);
 
