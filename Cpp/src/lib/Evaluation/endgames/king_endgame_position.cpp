@@ -37,7 +37,7 @@ static int16_t evalScores[] = {10, 8, 5, 2, 0, -5, -10, -15};
 
 EvalComponentResult kingEndgamePosition(const chessPosition* position,
         const evalParameters* par __attribute__((unused)),
-        EvalMemory* evalMemory __attribute__((unused))) {
+        EvalMemory* evalMemory) {
     EvalComponentResult result;
     uint64_t wpawns         = position->pieceTables[white][pawn];
     uint16_t wkingField     = findLSB(position->pieceTables[white][king]);
@@ -62,6 +62,41 @@ EvalComponentResult kingEndgamePosition(const chessPosition* position,
     minDist = calcClosestDistance(bkingField, bpawns);
     if (minDist < 8) {
         result.endgame -= evalScores[minDist];
+    }
+
+    for (uint16_t color = 0; color < 2; color++) {
+        int16_t sign            = COLORSIGN(color);
+        uint64_t ownKings       = position->pieceTables[color][king];
+        uint16_t ownKingField   = findLSB(ownKings);
+        uint64_t oppPassedPawns = evalMemory->passedPawns[1-color];
+
+        bool tempo = (position->toMove == color);
+        uint16_t margin = tempo? 1: 0;
+        while (oppPassedPawns != 0) {
+            uint16_t next = popLSB(oppPassedPawns);
+
+            uint16_t promotionField;
+            //uint64_t passedPawnSpan;
+            //uint64_t mask  = BIT64(next);
+            if (color == white) {
+                //passedPawnSpan = southFill(mask);
+                promotionField = FILE(next);
+
+            } else {
+               // passedPawnSpan = northFill(mask);
+                promotionField = 56+FILE(next);
+            }
+
+            /*if (BIT64(ownKingField) & passedPawnSpan) {
+                result.endgame += sign*10;
+            }*/
+
+            if (distBetweenFields(promotionField, ownKingField) <= distBetweenFields(next, promotionField)+margin) {
+                result.endgame += sign*10;
+            } else {
+                result.endgame -= sign*10;
+            }
+        }
     }
     return result;
 }

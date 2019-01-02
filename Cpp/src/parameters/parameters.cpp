@@ -15,6 +15,8 @@
 #include <lib/Defines/evalParameters.hpp>
 #include <lib/Evaluation/PSQ.hpp>
 
+#define SAFE_CPY(dst, src) assert(sizeof(dst) == sizeof(src)); memcpy(dst, src, sizeof(src));
+
 evalParameters evaluationParameters;
 preParameters par;
 
@@ -60,7 +62,20 @@ static int16_t kingToPromotionFieldDistance[7][7] = {  // [dist to promotion][ki
         {0, 0, 0, 0, -5, -5, -10 },
 };
 
+static int16_t isolatedPawnTable[] =
+        {  0, 0, 0, 0, 0, 0, 0, 0,
+          -5, -6, -7, -8, -8, -7,-6, -5,
+          -5, -6, -8, -9, -9, -8, -6, -5,
+          -7, -9, -11, -13, -13, -11, -9,
+          -7, -7, -9, -11, -13, -13, -11, -9,
+          -7, -5, -6, -8, -9, -9, -8, -6, -5,
+          -5, -6, -7, -8, -8, -7, -6, -5,
+           0, 0, 0, 0, 0, 0, 0, 0, };
 
+static int16_t bishopMobility[14]   = {-35, -25, -18, -13, -5, 0, 3, 5, 8, 10, 12, 14, 16, 18};
+static int16_t rookMobility[15]     = {-35, -25, -18, -15, -10, -8, -3, 0, 3, 5, 8, 10, 12, 14, 16};
+static int16_t knightMobility[9]   = {-25, -18, -8, 0, 3, 5, 8, 10, 12};
+static int16_t spaceEvals[] = {0, 5, 10, 18, 30, 45, 60, 75, 90};
 void paramDefaultInit(preParameters* par) {
     par->pawnValue      = PAWNVALUE;
     par->knightValue    = KNIGHTVALUE;
@@ -84,11 +99,12 @@ preParameters* getPreParameters() {
     return &par;
 }
 
-staticPawnEvalParameters  initializeStaticPawnParameters(const preParameters par) {
+staticPawnEvalParameters initializeStaticPawnParameters() {
     staticPawnEvalParameters ret_par;
-    ret_par.isolatedDoublePawn      = par.isolateddoublepawns;
-    ret_par.isolatedPawn            = par.isolatedpawns;
-    ret_par.nonIsolatedDoublePawn   = par.nonisolateddoublepawns;
+    SAFE_CPY(ret_par.isolatedPawnTable, isolatedPawnTable);
+    ret_par.doublePawn                  = -10;
+    ret_par.unresolvableDoublePawn      = -10;
+    ret_par.backwardsPawn               = -3;
     return ret_par;
 }
 
@@ -99,8 +115,17 @@ kingSafetyEvalParameters initializeKingSafetyParameters(const preParameters par)
     ret.opponentopenfiletoking     = par.opponentopenfiletoking;
     ret.selfopenfilenexttoking     = par.selfopenfilenexttoking;
     ret.selfopenfiletoking         = par.selfopenfiletoking;
-    memcpy(ret.attacksCloseToKingEvals, attacksCloseToKingEvals, sizeof(attacksCloseToKingEvals));
-    memcpy(ret.attackScores, attackScores, sizeof(attackScores));
+    SAFE_CPY(ret.attacksCloseToKingEvals, attacksCloseToKingEvals);
+    SAFE_CPY(ret.attackScores, attackScores);
+    return ret;
+}
+
+
+MobilityParameters initializeMobilityParameters() {
+    MobilityParameters ret;
+    SAFE_CPY(ret.bishopMobility, bishopMobility);
+    SAFE_CPY(ret.knightMobility, knightMobility);
+    SAFE_CPY(ret.rookMobility,   rookMobility);
     return ret;
 }
 
@@ -114,13 +139,16 @@ void initializeDependentParameters(preParameters par) {
     evaluationParameters.figureValues[none]         = 0;
     evaluationParameters.bishoppair                 = par.bishoppair;
     evaluationParameters.rookOnOpenFile             = par.rookonopenfile;
-    evaluationParameters.staticPawnParameters       = initializeStaticPawnParameters(par);
+    evaluationParameters.staticPawnParameters       = initializeStaticPawnParameters();
     evaluationParameters.kingSafetyParameters       = initializeKingSafetyParameters(par);
     evaluationParameters.trappedPiecesParameters.trappedValue = par.trappedPieces;
     evaluationParameters.outposts                   = par.outposts;
+    evaluationParameters.mobilityParameters         = initializeMobilityParameters();
 
-    memcpy(evaluationParameters.passedPawnParameters.passedPawnEvalValues, passedPawnEvalValues, sizeof(passedPawnEvalValues));
-    memcpy(evaluationParameters.passedPawnParameters.kingToPromotionFieldDistance, kingToPromotionFieldDistance, sizeof(kingToPromotionFieldDistance));
+    SAFE_CPY(evaluationParameters.spaceParameters.figuresInOppHalf, spaceEvals);
+    SAFE_CPY(evaluationParameters.passedPawnParameters.passedPawnEvalValues, passedPawnEvalValues);
+    SAFE_CPY(evaluationParameters.passedPawnParameters.kingToPromotionFieldDistance, kingToPromotionFieldDistance);
+
     for (uint16_t type = 0; type < 6; type++) {
         for (uint16_t field = 0; field < 32; field++) {
             int16_t value = getRawPieceTableEntry(type, field);

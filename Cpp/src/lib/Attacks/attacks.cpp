@@ -12,6 +12,7 @@
 #include <lib/moveMaking/moveMaking.hpp>
 #include "attacks.hpp"
 #include <assert.h>
+#include <DataTypes/data_utils.hpp>
 #include <lib/Evaluation/evaluation.hpp>
 #include <parameters/parameters.hpp>
 #include <lib/moveGeneration/moveGenerationInternals.hpp>
@@ -136,17 +137,9 @@ AttackTable makeAttackTable(const chessPosition* position, playerColor attacking
     return retTable;
 }
 
-/*#ifdef EXPERIMENTAL
-int16_t bishopMobility[14]   = {-25, -18, -13, -8, -4, 0, 3, 5, 8, 10, 12, 13, 14, 15};
-int16_t rookMobility[15]     = {-25, -19, -14, -10, -7, -5, -2, 0, 2, 4, 6, 8, 10, 12, 13};
-int16_t knightMobility[9]   = {-20, -12, -6, 0, 3, 5, 8, 10, 12};
-#else*/
-int16_t bishopMobility[14]   = {-35, -25, -18, -13, -5, 0, 3, 5, 8, 10, 12, 14, 16, 18};
-int16_t rookMobility[15]     = {-35, -25, -18, -15, -10, -8, -3, 0, 3, 5, 8, 10, 12, 14, 16};
-int16_t knightMobility[9]   = {-25, -18, -8, 0, 3, 5, 8, 10, 12};
-//#endif
 
-AttackTable makeAttackTableWithMobility(const chessPosition* position, playerColor attackingSide, EvalComponentResult* result) {
+
+AttackTable makeAttackTableWithMobility(const chessPosition* position, playerColor attackingSide, EvalComponentResult* result, const evalParameters* par) {
     uint64_t ownPieces = position->pieces[attackingSide];
     AttackTable retTable;
     //pawns
@@ -169,7 +162,7 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
         knightAttackTable = knightAttackTable | getKnightMoves(nextKnight);
         uint16_t legalMoves = popcount(getKnightMoves(nextKnight) & ~ownPieces & ~opppawnTakes);
         assert(legalMoves < 9);
-        result->common += knightMobility[legalMoves];
+        result->common += SAFE_ARRAY_ACCESS(par->mobilityParameters.knightMobility, legalMoves);
     }
     retTable.attackTables[knight] = knightAttackTable;
 
@@ -184,7 +177,7 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
         bishopAttackTable = bishopAttackTable | potentialMoves;
         uint16_t legalMoves = popcount(potentialMoves & ~ownPieces & ~opppawnTakes);
         assert(legalMoves < 14);
-        result->common += bishopMobility[legalMoves];
+        result->common += SAFE_ARRAY_ACCESS(par->mobilityParameters.bishopMobility, legalMoves);
     }
     retTable.attackTables[bishop] = bishopAttackTable;
     //rooks
@@ -196,14 +189,12 @@ AttackTable makeAttackTableWithMobility(const chessPosition* position, playerCol
         uint64_t potentialMoves =  getPotentialRookMoves(nextPieceField, occupancy);
         uint16_t legalMoves = popcount(potentialMoves & ~ownPieces);
         assert(legalMoves < 15);
-        result->common += rookMobility[legalMoves];
+        result->common += SAFE_ARRAY_ACCESS(par->mobilityParameters.rookMobility, legalMoves);
         rookAttackTable = rookAttackTable | potentialMoves;
     }
     retTable.attackTables[rook] = rookAttackTable;
 
     //queens
-
-
     uint64_t queens = position->pieceTables[attackingSide][queen];
     uint64_t queenAttackTable = 0;
     while (queens != 0) {
@@ -259,6 +250,11 @@ static inline bool getNextCapture(chessMove* nextCapture, const chessPosition* p
         nextCapture->sourceField = source;
         nextCapture->targetField = field;
         nextCapture->type        = pawnMove;
+
+        if (ROW(field) == 0 || ROW(field) == 7) {
+            nextCapture->type = promotionQueen;
+        }
+
         return true;
         //}
     }
@@ -356,7 +352,16 @@ int16_t see_internal(int16_t previous, chessPosition* position, uint16_t field, 
 
     position->toMove = (playerColor) (1-position->toMove);
     mask = mask | BIT64(mv.sourceField);
-    int16_t seeVal = -see_internal(-previous+evalPars->figureValues[mv.captureType], position, field, (figureType) mv.type, evalPars, mask);
+
+    int16_t gain = evalPars->figureValues[mv.captureType];
+    figureType last = (figureType) mv.type;
+
+    if (mv.type == promotionQueen) {
+        gain += evalPars->figureValues[queen]-evalPars->figureValues[pawn];
+        last  = queen;
+    }
+
+    int16_t seeVal = -see_internal(-previous+gain, position, field, last, evalPars, mask);
     position->toMove = (playerColor) (1-position->toMove);
 
     if (seeVal > standPat) {
@@ -368,24 +373,33 @@ int16_t see_internal(int16_t previous, chessPosition* position, uint16_t field, 
 
 int16_t SEE(chessPosition* position, chessMove* mv) {
     //TODO: SEE currently cannot handle promotions!!!!
-    if (mv->type > 5) {
+    if ((mv->type > 5)
+
+            && (mv->type != promotionQueen)
+
+            ) {
         return 0;
     }
     const evalParameters* evalPars = getEvalParameters();
     assert(evalPars->figureValues[none] == 0);
-    uint16_t val = evalPars->figureValues[mv->captureType];
-    uint64_t mask = BIT64(mv->sourceField);
-    position->toMove = (playerColor) (1-position->toMove);
-    int16_t ret = -see_internal(val, position, mv->targetField, (figureType) mv->type, evalPars, mask);
-    position->toMove = (playerColor) (1-position->toMove);
+    uint16_t val            = evalPars->figureValues[mv->captureType];
+
+    if (mv->type == promotionQueen) {
+        val += evalPars->figureValues[queen]-evalPars->figureValues[pawn];
+    }
+
+    uint64_t mask           = BIT64(mv->sourceField);
+    position->toMove        = (playerColor) (1-position->toMove);
+    int16_t ret             = -see_internal(val, position, mv->targetField, (figureType) mv->type, evalPars, mask);
+    position->toMove        = (playerColor) (1-position->toMove);
     return ret;
 }
 
-EvalComponentResult evalMobility(const chessPosition* position, const evalParameters* par  __attribute__((unused)), EvalMemory* evalMemory) {
+EvalComponentResult evalMobility(const chessPosition* position, const evalParameters* par, EvalMemory* evalMemory) {
     EvalComponentResult whiteMobilityScore;
-    evalMemory->attackTables[white] = makeAttackTableWithMobility(position, white, &whiteMobilityScore);
+    evalMemory->attackTables[white] = makeAttackTableWithMobility(position, white, &whiteMobilityScore, par);
     EvalComponentResult blackMobilityScore;
-    evalMemory->attackTables[black] = makeAttackTableWithMobility(position, black, &blackMobilityScore);
+    evalMemory->attackTables[black] = makeAttackTableWithMobility(position, black, &blackMobilityScore, par);
     EvalComponentResult ret;
     ret.common          = whiteMobilityScore.common     - blackMobilityScore.common;
     ret.endgame         = whiteMobilityScore.endgame    - blackMobilityScore.endgame;

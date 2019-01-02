@@ -73,6 +73,10 @@ uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t n
 
 
 bool checkContinue(searchParameters params, uint16_t depth, uint16_t maxdepth, uint16_t passedTime, uint16_t allottedTime) {
+    if (depth == 3) {
+        return true;
+    }
+
     if (depth > maxdepth) {
         return false;
     }

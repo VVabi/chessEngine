@@ -10,9 +10,10 @@
 #include "parametersPrivate.hpp"
 
 struct staticPawnEvalParameters {
-    int16_t isolatedPawn;
-    int16_t isolatedDoublePawn;
-    int16_t nonIsolatedDoublePawn;
+    int16_t isolatedPawnTable[64];
+    int16_t doublePawn; //subtracted for BOTH pawns of a doubled pawn!
+    int16_t unresolvableDoublePawn;
+    int16_t backwardsPawn;
 };
 
 struct kingSafetyEvalParameters {
@@ -33,6 +34,15 @@ struct passedPawnEvalParameters {
     int16_t kingToPromotionFieldDistance[7][7];
 };
 
+struct SpaceEvalParameters {
+    int16_t figuresInOppHalf[9];
+};
+
+struct MobilityParameters {
+     int16_t bishopMobility[14];
+     int16_t rookMobility[15];
+     int16_t knightMobility[9];
+};
 
 struct evalParameters {
     int16_t figureValues[7];
@@ -43,6 +53,8 @@ struct evalParameters {
     kingSafetyEvalParameters kingSafetyParameters;
     trappedPiecesEvalParameters  trappedPiecesParameters;
     passedPawnEvalParameters passedPawnParameters;
+    SpaceEvalParameters     spaceParameters;
+    MobilityParameters      mobilityParameters;
 };
 
 extern evalParameters evaluationParameters;
