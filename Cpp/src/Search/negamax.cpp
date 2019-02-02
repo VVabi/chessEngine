@@ -608,8 +608,11 @@ int16_t negamax(chessPosition* position, plyInfo plyinfo, AlphaBeta alphabeta, p
         }
     }
 
-    if (plyinfo.depth == 2) {
-        if (check_futility(movingSideInCheck, alphabeta.alpha, position, 100, 150)) {
+    int16_t premargin = 100;
+    int16_t margin    = 150;
+
+    if (plyinfo.depth == 2) {s
+        if (check_futility(movingSideInCheck, alphabeta.alpha, position, premargin, margin)) {
             PV->numMoves = 0;
             return negamaxQuiescence(position, plyinfo.qply, plyinfo.ply, alphabeta, 0, settings.searchId);
         }
