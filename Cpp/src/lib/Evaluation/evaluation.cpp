@@ -32,6 +32,7 @@ static EvaluationComponent evaluationComponents[] = {
                             {       &kingEndgamePosition,   eval_king_endgame_position,    256,        256,        256      },
                             {       &spaceAdvantage,        eval_space,                    256,        256,        256      },
                             {       &threatDetection,       eval_threats,                  256,        256,        256      },
+                            {       &rookPositioning,       eval_rook_positioning,         256,        256,        256      },
 };
 
 static SimpleEvaluationComponent simpleEvaluationComponents[] = {

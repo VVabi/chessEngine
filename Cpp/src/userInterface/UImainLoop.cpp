@@ -360,6 +360,8 @@ std::string toString(const evaluationType type) {
             break;
         case eval_threats:
             return "threat_detection";
+        case eval_rook_positioning:
+            return "rook_positions";
             break;
     }
 
