@@ -51,13 +51,13 @@ static void calcCaptureSortEval(chessPosition* position, chessMove* mv, uint16_t
 
 #define ILLEGAL -20000
 
-static inline void calcSortEval(chessPosition* position, chessMove* mv, bool isInCheck, AttackTable* opponentAttackTable, AttackTable* ownAttackTable, uint16_t hashedMove, uint16_t killerA, uint16_t killerB, uint16_t refutationTarget, const evalParameters* evalPars) {
+static inline void calcSortEval(chessPosition* position, chessMove* mv, bool isInCheck, AttackTable* opponentAttackTable, AttackTable* ownAttackTable, uint16_t hashedMove, uint16_t killerA, uint16_t killerB, uint16_t refutationTarget, const evalParameters* evalPars, const uint64_t hangingPieces) {
     isInCheck = !isInCheck;
 
     int16_t sortEval = 0;
 
     if ((mv->captureType != none) && (mv->type < 6)) {
-        sortEval += captureEvals[mv->type][mv->captureType];
+        sortEval = captureEvals[mv->type][mv->captureType];
     }
 
     if (((uint16_t) mv->type) < 6) {
@@ -73,7 +73,11 @@ static inline void calcSortEval(chessPosition* position, chessMove* mv, bool isI
         sortEval = sortEval+300;
     }
 
-    bool sourceAttacked = false;
+    if (BIT64(mv->sourceField) & hangingPieces) {
+        sortEval += 100;
+    }
+
+    //bool sourceAttacked = false;
     bool targetAttacked = false;
     bool sourceCovered  = false;
     bool targetCovered  = false; //TODO: this doesnt work as intended - the target of a move is usually covered... - or may be covered after the move, eg. h7h5 from startposition, even if it wasnt before
@@ -85,9 +89,9 @@ static inline void calcSortEval(chessPosition* position, chessMove* mv, bool isI
         targetCovered = true; //hm that can ONLY be false for some pawn moves actually...
     }
 
-    if (BIT64(mv->sourceField) & opponentAttackTable->completeAttackTable) {
+    /*if (BIT64(mv->sourceField) & opponentAttackTable->completeAttackTable) {
         sourceAttacked = true;
-    }
+    }*/
     if (BIT64(mv->targetField) & opponentAttackTable->completeAttackTable) {
         targetAttacked = true;
     }
@@ -104,7 +108,7 @@ static inline void calcSortEval(chessPosition* position, chessMove* mv, bool isI
         sortEval = sortEval+20;
     }
 
-    if (sourceAttacked) {
+    /*if (sourceAttacked) {
         sortEval = sortEval+80;
         if (!sourceCovered) {
             sortEval = sortEval+100;
@@ -112,7 +116,7 @@ static inline void calcSortEval(chessPosition* position, chessMove* mv, bool isI
         if (mv->type == kingMove) {
             sortEval = sortEval+400;
         }
-    }
+    }*/
 
     if (targetAttacked  && (mv->captureType == none)) {
         sortEval = sortEval-100;
@@ -242,8 +246,22 @@ bool calculateStandardSortEvals(chessPosition* position,  vdt_vector<chessMove>*
     killerTable* table = getKillerTable();
     const singlePlyKillers killers = table->getKillers(ply);
     const evalParameters* evalPars                      = getEvalParameters(); //TODO: move outside
+
+    playerColor toMove = position->toMove;
+
+    uint64_t hangingPieces = position->pieces[toMove] & opponentAttackTable.completeAttackTable & ~ownAttackTable.completeAttackTable;
+
+    uint64_t pieces = position->pieces[toMove]^position->pieceTables[toMove][pawn];
+    hangingPieces = hangingPieces | (pieces & opponentAttackTable.attackTables[pawn]);
+
+    pieces = pieces^position->pieceTables[toMove][bishop]^position->pieceTables[toMove][knight];
+    hangingPieces = hangingPieces | (pieces & (opponentAttackTable.attackTables[knight] | opponentAttackTable.attackTables[bishop]));
+
+    pieces = pieces^position->pieceTables[toMove][rook];
+    hangingPieces = hangingPieces | (pieces & (opponentAttackTable.attackTables[rook]));
+
     for (uint16_t ind = start_index; ind < moves->length; ind++) {
-        calcSortEval(position, &(*moves)[ind], isInCheck, &opponentAttackTable, &ownAttackTable, sortinfo.hashMove, killers.killers[0], killers.killers[1], sortinfo.refutationTarget, evalPars);
+        calcSortEval(position, &(*moves)[ind], isInCheck, &opponentAttackTable, &ownAttackTable, sortinfo.hashMove, killers.killers[0], killers.killers[1], sortinfo.refutationTarget, evalPars, hangingPieces);
         if ((*moves)[ind].sortEval > bestEval) {
             bestEval = (*moves)[ind].sortEval;
         }

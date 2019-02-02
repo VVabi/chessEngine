@@ -25,6 +25,9 @@ fun runEvalSymmetryTests(engine: ChessEngine, debugEngine: ChessEngine): Boolean
 
         if (eval4 != eval1) {
             println("Debug/Release build discrepancy")
+            println(eval4)
+            println(eval1)
+            return false
         }
 
         var failed = false
