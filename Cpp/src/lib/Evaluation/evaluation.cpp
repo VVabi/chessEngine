@@ -31,6 +31,7 @@ static EvaluationComponent evaluationComponents[] = {
                             {       &passedPawnEval,        eval_passed_pawns,             256,        256,        256      },
                             {       &kingEndgamePosition,   eval_king_endgame_position,    256,        256,        256      },
                             {       &spaceAdvantage,        eval_space,                    256,        256,        256      },
+                            {       &threatDetection,       eval_threats,                  256,        256,        256      },
 };
 
 static SimpleEvaluationComponent simpleEvaluationComponents[] = {
@@ -231,24 +232,6 @@ int32_t evaluation(const chessPosition* position, int32_t alpha, int32_t beta, b
     } else {
         eval = eval-10;
     }
-
-    for (uint16_t color=0; color < 2; color++) {
-        uint64_t hangingPieces = position->pieces[color] & evalMemory.attackTables[INVERTCOLOR(color)].completeAttackTable & ~evalMemory.attackTables[color].completeAttackTable;
-
-        uint64_t pieces = position->pieces[color]^position->pieceTables[color][pawn];
-        hangingPieces = hangingPieces | (pieces & evalMemory.attackTables[INVERTCOLOR(color)].attackTables[pawn]);
-
-        pieces = pieces^position->pieceTables[color][bishop]^position->pieceTables[color][knight];
-        hangingPieces = hangingPieces | (pieces & (evalMemory.attackTables[INVERTCOLOR(color)].attackTables[knight] | evalMemory.attackTables[INVERTCOLOR(color)].attackTables[bishop]));
-
-        pieces = pieces^position->pieceTables[color][rook];
-        hangingPieces = hangingPieces | (pieces & (evalMemory.attackTables[INVERTCOLOR(color)].attackTables[rook]));
-
-        if (popcount(hangingPieces) > 1) {
-            eval -= COLORSIGN(color)*100;
-        }
-   }
-
 
 #ifdef RANDOMEVAL
     eval = eval+(rand() & 7)-3; //TODO: how is this performance-wise? // NOLINT

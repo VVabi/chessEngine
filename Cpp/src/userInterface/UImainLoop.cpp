@@ -358,6 +358,9 @@ std::string toString(const evaluationType type) {
         case eval_space:
             return "space";
             break;
+        case eval_threats:
+            return "threat_detection";
+            break;
     }
 
     return ""; //Unreachable
