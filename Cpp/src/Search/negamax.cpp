@@ -91,8 +91,11 @@ static inline bool getHashMoveToFront(vdt_vector<chessMove>* moves, uint16_t has
     return false;
 }
 
+#define BAD_CAPTURE_THRESHOLD -550 //TODO this never triggers!!
+
 static inline void get_extensions_reductions(chessPosition* position, uint16_t* reduction, uint16_t* extension, bool check, bool movingSideInCheck, plyInfo plyinfo, int16_t depth, chessMove* move, uint16_t ind, int16_t bestIndex) {
-        if ((bestIndex == -1) && !check && !movingSideInCheck && ((move->captureType == none) || (move->sortEval < -550)) && (depth > 2) && (plyinfo.ply > 0) && (ind > 2)) {
+
+    if ((bestIndex == -1) && !check && !movingSideInCheck && ((move->captureType == none) || (move->sortEval < BAD_CAPTURE_THRESHOLD)) && (depth > 2) && (plyinfo.ply > 0) && (ind > 2)) {
             if (move->sortEval < 50) {
                 *reduction = 1;
                 //TODO: this is questionably brutal
@@ -357,6 +360,11 @@ static inline searchLoopResults negamax_internal_move_loop(chessPosition* positi
         currentState = killers_handled;
     }
 
+    /*if (position->zobristHash == 0xfd46bb0ce3e60b8f) {
+        std::cout << chessPositionToFenString(*position, false);
+        std::cout << "gotcha" << std::endl;
+    }*/
+
     for (uint16_t ind = 0; ind < moves.length; ind++) {
             while (!get_next_move_to_front(position, &currentState, moves, ind, plyinfo, sortinfo)) {}
 
@@ -599,15 +607,11 @@ int16_t negamax(chessPosition* position, plyInfo plyinfo, AlphaBeta alphabeta, p
             return negamaxQuiescence(position, plyinfo.qply, plyinfo.ply, alphabeta, 0, settings.searchId);
         }
     }
-//#ifdef EXPERIMENTAl
+
     int16_t premargin = 100;
     int16_t margin    = 150;
-/*#else
-    int16_t premargin = 500;
-    int16_t margin    = 600;
-#endif*/
 
-    if (plyinfo.depth == 2) {
+    if (plyinfo.depth == 2) {s
         if (check_futility(movingSideInCheck, alphabeta.alpha, position, premargin, margin)) {
             PV->numMoves = 0;
             return negamaxQuiescence(position, plyinfo.qply, plyinfo.ply, alphabeta, 0, settings.searchId);

@@ -14,6 +14,7 @@
 #include <lib/Evaluation/evaluation.hpp>
 #include <lib/Evaluation/tapering.hpp>
 #include <lib/figureValueHashing.hpp>
+#include <util/FEN/fenhelper.hpp>
 #include <map>
 
 static EvaluationComponent evaluationComponents[] = {
@@ -30,10 +31,8 @@ static EvaluationComponent evaluationComponents[] = {
                             {       &passedPawnEval,        eval_passed_pawns,             256,        256,        256      },
                             {       &kingEndgamePosition,   eval_king_endgame_position,    256,        256,        256      },
                             {       &spaceAdvantage,        eval_space,                    256,        256,        256      },
-/*#ifdef EXPERIMENTAL
+                            {       &threatDetection,       eval_threats,                  256,        256,        256      },
                             {       &rookPositioning,       eval_rook_positioning,         256,        256,        256      },
-#endif*/
-
 };
 
 static SimpleEvaluationComponent simpleEvaluationComponents[] = {
