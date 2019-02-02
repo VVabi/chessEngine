@@ -49,6 +49,7 @@ struct evalParameters {
     int16_t bishoppair;
     int16_t rookOnOpenFile;
     int16_t outposts;
+    int16_t hangingPieces;
     staticPawnEvalParameters staticPawnParameters;
     kingSafetyEvalParameters kingSafetyParameters;
     trappedPiecesEvalParameters  trappedPiecesParameters;

@@ -144,6 +144,7 @@ void initializeDependentParameters(preParameters par) {
     evaluationParameters.trappedPiecesParameters.trappedValue = par.trappedPieces;
     evaluationParameters.outposts                   = par.outposts;
     evaluationParameters.mobilityParameters         = initializeMobilityParameters();
+    evaluationParameters.hangingPieces              = -100;
 
     SAFE_CPY(evaluationParameters.spaceParameters.figuresInOppHalf, spaceEvals);
     SAFE_CPY(evaluationParameters.passedPawnParameters.passedPawnEvalValues, passedPawnEvalValues);
