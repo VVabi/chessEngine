@@ -94,7 +94,6 @@ static inline bool getHashMoveToFront(vdt_vector<chessMove>* moves, uint16_t has
 #define BAD_CAPTURE_THRESHOLD -550 //TODO this never triggers!!
 
 static inline void get_extensions_reductions(chessPosition* position, uint16_t* reduction, uint16_t* extension, bool check, bool movingSideInCheck, plyInfo plyinfo, int16_t depth, chessMove* move, uint16_t ind, int16_t bestIndex) {
-
     if ((bestIndex == -1) && !check && !movingSideInCheck && ((move->captureType == none) || (move->sortEval < BAD_CAPTURE_THRESHOLD)) && (depth > 2) && (plyinfo.ply > 0) && (ind > 2)) {
             if (move->sortEval < 50) {
                 *reduction = 1;
@@ -611,7 +610,7 @@ int16_t negamax(chessPosition* position, plyInfo plyinfo, AlphaBeta alphabeta, p
     int16_t premargin = 100;
     int16_t margin    = 150;
 
-    if (plyinfo.depth == 2) {s
+    if (plyinfo.depth == 2) {
         if (check_futility(movingSideInCheck, alphabeta.alpha, position, premargin, margin)) {
             PV->numMoves = 0;
             return negamaxQuiescence(position, plyinfo.qply, plyinfo.ply, alphabeta, 0, settings.searchId);

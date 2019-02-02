@@ -14,12 +14,12 @@ template<typename T, uint32_t length> inline T safe_access(T* val, uint32_t inde
 #ifdef DEBUG
     if (index >= length) {
         logError("Index out of bounds");
-        while(true) {}
+        while (true) {}
     }
 #endif
     return val[index];
 }
 
-#define SAFE_ARRAY_ACCESS(x,n) safe_access<std::remove_reference<decltype(x[0])>::type, sizeof(x)/sizeof(x[0])>(x,n)
+#define SAFE_ARRAY_ACCESS(x, n) safe_access<std::remove_reference<decltype(x[0])>::type, sizeof(x)/sizeof(x[0])>(x, n)
 
 #endif /* DATATYPES_DATA_UTILS_HPP_ */
