@@ -30,9 +30,10 @@ static EvaluationComponent evaluationComponents[] = {
                             {       &passedPawnEval,        eval_passed_pawns,             256,        256,        256      },
                             {       &kingEndgamePosition,   eval_king_endgame_position,    256,        256,        256      },
                             {       &spaceAdvantage,        eval_space,                    256,        256,        256      },
-#ifdef EXPERIMENTAL
+/*#ifdef EXPERIMENTAL
                             {       &rookPositioning,       eval_rook_positioning,         256,        256,        256      },
-#endif
+#endif*/
+
 };
 
 static SimpleEvaluationComponent simpleEvaluationComponents[] = {

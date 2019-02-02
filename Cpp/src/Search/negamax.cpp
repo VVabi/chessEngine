@@ -599,9 +599,16 @@ int16_t negamax(chessPosition* position, plyInfo plyinfo, AlphaBeta alphabeta, p
             return negamaxQuiescence(position, plyinfo.qply, plyinfo.ply, alphabeta, 0, settings.searchId);
         }
     }
+//#ifdef EXPERIMENTAl
+    int16_t premargin = 100;
+    int16_t margin    = 150;
+/*#else
+    int16_t premargin = 500;
+    int16_t margin    = 600;
+#endif*/
 
     if (plyinfo.depth == 2) {
-        if (check_futility(movingSideInCheck, alphabeta.alpha, position, 500, 600)) {
+        if (check_futility(movingSideInCheck, alphabeta.alpha, position, premargin, margin)) {
             PV->numMoves = 0;
             return negamaxQuiescence(position, plyinfo.qply, plyinfo.ply, alphabeta, 0, settings.searchId);
         }
