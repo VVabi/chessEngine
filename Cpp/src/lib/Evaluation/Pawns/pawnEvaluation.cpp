@@ -57,6 +57,7 @@ EvalComponentResult passedPawnEval(const chessPosition* position,
             uint16_t distToPromotion = 7 - ROW(field);
             uint16_t kingDist = distBetweenFields(promotionField, blackKing);
             bool blocked = position->pieces[black] & BIT64(field + 8);
+            bool blockedPromotion = (position->pieces[white] | position->pieces[black]) & BIT64(promotionField);
             if (distToPromotion <= 2) {
                 untaperedEval = untaperedEval + par->passedPawnParameters.passedPawnEvalValues[white][field];
                 if (blocked) {
@@ -69,7 +70,7 @@ EvalComponentResult passedPawnEval(const chessPosition* position,
                 }
             }
             //TODO: I think we should add more static knowledge about when a pawn is passed
-            if ((distToPromotion == 1) && (position->toMove == white) && (((evalMemory->attackTables[black].completeAttackTable & BIT64(promotionField)) == 0))) {
+            if ((distToPromotion == 1) && (position->toMove == white) && (((evalMemory->attackTables[black].completeAttackTable & BIT64(promotionField)) == 0)) && !blockedPromotion) {
                 untaperedEval += 300;
             }
             eval = eval - par->passedPawnParameters.kingToPromotionFieldDistance[distToPromotion][kingDist];
@@ -85,6 +86,7 @@ EvalComponentResult passedPawnEval(const chessPosition* position,
             uint16_t distToPromotion = ROW(field);
             uint16_t kingDist = distBetweenFields(promotionField, whiteKing);
             bool blocked = position->pieces[white] & BIT64(field - 8);
+            bool blockedPromotion = (position->pieces[white] | position->pieces[black]) & BIT64(promotionField);
             if (distToPromotion <= 2) {
                 untaperedEval = untaperedEval - par->passedPawnParameters.passedPawnEvalValues[black][field];
                 if (blocked) {
@@ -99,7 +101,7 @@ EvalComponentResult passedPawnEval(const chessPosition* position,
             eval = eval + par->passedPawnParameters.kingToPromotionFieldDistance[distToPromotion][kingDist];
 
             //TODO: I think we should add more static knowledge about when a pawn is passed
-            if ((distToPromotion == 1) && (position->toMove == black) && (((evalMemory->attackTables[white].completeAttackTable & BIT64(promotionField)) == 0))) {
+            if ((distToPromotion == 1) && (position->toMove == black) && (((evalMemory->attackTables[white].completeAttackTable & BIT64(promotionField)) == 0)) && !blockedPromotion) {
                 untaperedEval -= 300;
             }
         }

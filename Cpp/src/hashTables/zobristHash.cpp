@@ -102,7 +102,26 @@ void setHashEntry(hashFlag flag, int16_t eval, uint8_t depth, uint8_t searchId, 
     uint32_t high = (uint32_t) (key >> 32);
     uint16_t low  =  (uint16_t) (((uint32_t) (key & 0xFFFFFFFF)) >> 16);
 
+    //if the position is already stored, update that slot instead of creating a duplicate. Otherwise a lookup
+    //may return the older entry. A deeper result from the current search is kept
+    //---------------------------------------------------------------------------------------------------------
+    bool alreadyStored = false;
     for (uint8_t ind = 0; ind < 4; ind++) {
+        HashEntry* entry = &current->hashData[ind];
+        if ((entry->hashHighBits == high) && (entry->hashLower == low)) {
+            if ((depth < entry->depth) && (entry->searchId == searchId)) {
+                return;
+            }
+            if (bestMove == 0) {
+                bestMove = entry->bestMove;
+            }
+            replace_index = ind;
+            alreadyStored = true;
+            break;
+        }
+    }
+
+    for (uint8_t ind = 0; (ind < 4) && !alreadyStored; ind++) {
         HashEntry* entry = &current->hashData[ind];
 
         if (entry->hashHighBits == 0) {

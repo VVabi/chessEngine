@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <userInterface/UIlayer.hpp>
 #include <Search/killerMoves.hpp>
+#include <Search/history.hpp>
 #include <tests/tests.hpp>
 
 
@@ -122,6 +123,12 @@ uint32_t cnt = 0;
 uint32_t searchMove(chessPosition* position, chessMove* bestMove, uint32_t* nodeCount, uint64_t* mtime, int32_t* eval, bool doAspiration, searchParameters params, bool quietMode) {
     resetSearchData();
     resetQuiescenceNodes();
+
+    //killers are indexed by ply from the root, so the ones from the previous search sit at the wrong plies.
+    //History stays useful, but older results should count less than new ones
+    //-------------------------------------------------------------------------------------------------------
+    getKillerTable()->clear();
+    getHistoryTables()->rescale();
     uint64_t start_ts  = get_timestamp();
     uint16_t depth = 3;
     *eval = 0;

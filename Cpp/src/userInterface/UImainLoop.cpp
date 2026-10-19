@@ -643,6 +643,7 @@ void UIloop() {
                     handleSEE(ev.data);
                     break;
                 case clear:
+                case ucinewgame:
                     handleClear();
                     break;
                 case info:

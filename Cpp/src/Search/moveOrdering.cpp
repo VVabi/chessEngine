@@ -140,7 +140,7 @@ static inline void calcSortEval(chessPosition* position, chessMove* mv, bool isI
     }
 
     if (mv->type == rookMove) {
-        uint16_t targetFile = FILE(mv->targetField);
+        uint64_t targetFile = FILEA << FILE(mv->targetField);
         uint64_t pawns      = position->pieceTables[position->toMove][pawn];
         uint64_t opppawns      = position->pieceTables[1-position->toMove][pawn];
         if ((targetFile & pawns) == 0) {
