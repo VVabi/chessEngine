@@ -395,6 +395,23 @@ int16_t SEE(chessPosition* position, chessMove* mv) {
     return ret;
 }
 
+//Same as SEE, but for a move that has already been made on position: the opponent is to move
+//and the source field is already empty, so neither the side flip nor the source mask is needed
+int16_t SEEAfterMove(chessPosition* position, chessMove* mv) {
+    if ((mv->type > 5) && (mv->type != promotionQueen)) {
+        return 0;
+    }
+    const evalParameters* evalPars = getEvalParameters();
+    assert(evalPars->figureValues[none] == 0);
+    uint16_t val            = evalPars->figureValues[mv->captureType];
+
+    if (mv->type == promotionQueen) {
+        val += evalPars->figureValues[queen]-evalPars->figureValues[pawn];
+    }
+
+    return -see_internal(val, position, mv->targetField, (figureType) mv->type, evalPars, 0);
+}
+
 EvalComponentResult evalMobility(const chessPosition* position, const evalParameters* par, EvalMemory* evalMemory) {
     EvalComponentResult whiteMobilityScore;
     evalMemory->attackTables[white] = makeAttackTableWithMobility(position, white, &whiteMobilityScore, par);

@@ -109,7 +109,7 @@ static inline void get_extensions_reductions(chessPosition* position, uint16_t* 
         if (check) {
             *reduction = 0; //TODO: A check should NEVER be reduced, independent of the ply/depth stuff
             if (((plyinfo.ply+depth < plyinfo.max_ply-1) || ((depth == 1) && (plyinfo.ply+depth < plyinfo.max_ply)) )) {
-                if (SEE(position, move) > -50) {
+                if (SEEAfterMove(position, move) > -50) { //move has already been made here
                     *extension = 1;
                 }
             }

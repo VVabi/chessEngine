@@ -110,7 +110,7 @@ void setHashEntry(hashFlag flag, int16_t eval, uint8_t depth, uint8_t searchId, 
             break;
         }
 
-        uint8_t past_search = searchId-entry->index;
+        uint8_t past_search = searchId-entry->searchId;
         int32_t score = ((int32_t) entry->depth)-2*((int32_t) past_search);
         //int32_t score = -((int32_t) past_search);
         if (score < target_score) {

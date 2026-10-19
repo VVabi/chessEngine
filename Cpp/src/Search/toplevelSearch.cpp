@@ -29,6 +29,8 @@
 
 static uint8_t searchId;
 
+#define MOVE_OVERHEAD_MS 30
+
 uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t numMadeMoves, uint32_t* worst_case_time) {
     if (params.type == infinite) {
         *worst_case_time = UINT32_MAX;
@@ -40,26 +42,37 @@ uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t n
         return UINT32_MAX;
     }
 
+    if (params.type == fixed_time) {
+        *worst_case_time = params.fixedTime;
+        return params.fixedTime;
+    }
+
     //TODO: implement the movesToGo parameter handling - currently we play stuff like "40 moves in 40 min" extremely badly
     if (params.totalTime[toMove] > 0) {
         uint32_t total = params.totalTime[toMove];
         uint32_t increment = params.increment[toMove];
 
-        //estimate remaining moves
-        uint16_t totalExpectedMoves = 1/2*numMadeMoves+60;
+        //keep some time in reserve for communication/process overhead
+        //-------------------------------------------------------------
+        total = (total > MOVE_OVERHEAD_MS ? total-MOVE_OVERHEAD_MS : 0);
 
-        int16_t remainingMoves = totalExpectedMoves-numMadeMoves;
+        //estimate remaining moves. numMadeMoves counts plies, the estimate is in full moves
+        //-----------------------------------------------------------------------------------
+        int32_t movesPlayed = numMadeMoves/2;
+        int32_t totalExpectedMoves = movesPlayed/2+60;
+        int32_t remainingMoves = totalExpectedMoves-movesPlayed;
 
         if (remainingMoves < 20) {
             remainingMoves = 20;
         }
 
-        remainingMoves = std::min((int32_t) remainingMoves, (int32_t) params.movesToGo);
+        remainingMoves = std::min(remainingMoves, (int32_t) params.movesToGo);
+        remainingMoves = std::max(remainingMoves, 1);
 
         uint32_t completeExpectedTime = total+(remainingMoves-1)*increment;
-        float timeAllotted = 2*completeExpectedTime/(3.0*remainingMoves);
+        double timeAllotted = 2*completeExpectedTime/(3.0*remainingMoves);
 
-        double maxFraction = std::min(10.0, static_cast<double>(remainingMoves/2));
+        double maxFraction = std::max(1.0, std::min(10.0, static_cast<double>(remainingMoves/2)));
 
         if (timeAllotted > total/maxFraction) {
             timeAllotted = total/maxFraction;
@@ -72,7 +85,7 @@ uint32_t calcSearchTime(searchParameters params,  playerColor toMove, uint16_t n
 }
 
 
-bool checkContinue(searchParameters params, uint16_t depth, uint16_t maxdepth, uint16_t passedTime, uint16_t allottedTime) {
+bool checkContinue(searchParameters params, uint16_t depth, uint16_t maxdepth, uint32_t passedTime, uint32_t allottedTime) {
     if (depth == 3) {
         return true;
     }
@@ -94,7 +107,7 @@ bool checkContinue(searchParameters params, uint16_t depth, uint16_t maxdepth, u
     }
 
     if (params.type == fixed_time) {
-        return passedTime < params.fixedTime;
+        return passedTime < (uint32_t) params.fixedTime;
     }
 
     return true;

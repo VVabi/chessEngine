@@ -18,5 +18,6 @@ bool isFieldAttacked(const chessPosition* position, playerColor attackingSide, u
 AttackTable makeAttackTable(const chessPosition* position, playerColor attackingSide, uint64_t ignoreMask = 0);
 
 int16_t SEE(chessPosition* position, chessMove* mv);
+int16_t SEEAfterMove(chessPosition* position, chessMove* mv);
 int16_t SEEold(chessPosition* position, chessMove* mv);
 #endif /* LIB_ATTACKS_ATTACKS_HPP_ */
