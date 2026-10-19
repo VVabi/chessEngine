@@ -74,7 +74,7 @@ uint64_t perftNodes(chessPosition* position, uint16_t depth) {
         return 1;
     }
     uint64_t nodes = 0;
-    vdt_vector<chessMove> moves = vdt_vector<chessMove>(150);
+    vdt_vector<chessMove> moves = vdt_vector<chessMove>(MAX_MOVES_PER_PLY);
     generateAllMoves(&moves, position);
     /*calculateStandardSortEvals(position, &moves, 0, 0, 0, NO_REFUTATION);
      std::sort(moves.data, moves.data+moves.length);*/

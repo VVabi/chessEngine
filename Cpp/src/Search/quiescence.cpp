@@ -21,6 +21,7 @@
 #include <userInterface/UIlayer.hpp>
 #include <parameters/parameters.hpp>
 #include <fstream>
+#include <lib/Defines/boardParts.hpp>
 static int32_t qindices[150] = {0};
 
 void resetqIndices() {
@@ -81,7 +82,7 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, 
     uint16_t zobristLower  = (uint16_t) (((uint32_t) (position->zobristHash & 0xFFFFFFFF)) >> 16);
     uint16_t hashMove = hashVal.bestMove;
     if ((zobristHigher == hashVal.hashHighBits) && (zobristLower == hashVal.hashLower)) { //TODO: assign bestMove - this can blow up in our face easily
-        int16_t oldEval  = hashVal.eval;
+        int16_t oldEval  = evalFromHash(hashVal.eval, ply);
         if ((oldEval != 0)) { //TODO: the != 0 is stupid, but somewhere something goes wrong with 3fold rep scores, so excluded here for safety
             if (((hashVal.flag == FAILHIGH) || (hashVal.flag == FULLSEARCH)) && (oldEval >= alphabeta.beta)) {
                 setSearchId(searchId, position->zobristHash, hashVal.index);
@@ -118,14 +119,15 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, 
 
     //position is truely hopeless.Note that this DOES NOT SAVE NODES - the individual checks below will also fail! But we save some processing time
     //------------------------------------
-    if (marginDifference > 1100) { //TODO: take promotions into account!
+    uint64_t promotionCandidates = position->pieceTables[position->toMove][pawn] & (position->toMove == white ? SEVENTHROW : SECONDROW);
+    if ((marginDifference > 1100) && (promotionCandidates == 0)) {
         return alphabeta.alpha;
     }
 
     chessMove bestMove;
     bestMove.sourceField = 0;
     bestMove.targetField = 0;
-    uint16_t stackCounter = mvStack.getCounter();
+    __attribute__((unused)) uint16_t stackCounter = mvStack.getCounter();
     vdt_vector<chessMove> moves = mvStack.getNext();
     generateAllCaptureMoves(&moves, position);
 
@@ -136,7 +138,7 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, 
     uint32_t capturecnt = 0;
 
     for (uint16_t ind = 0; ind < allMoves.length; ind++) {
-        if (allMoves[ind].captureType != none) {
+        if ((allMoves[ind].captureType != none) || ((allMoves[ind].type == promotionQueen))) {
             capturecnt++;
         }
     }
@@ -204,6 +206,9 @@ int16_t negamaxQuiescence(chessPosition* position, uint16_t qply, uint16_t ply, 
         //delta pruning. TODO: make define
         //----------------------------------------------------
         int32_t gainValue = evalPars->figureValues[moves[ind].captureType];
+        if (moves[ind].type == promotionQueen) {
+            gainValue += evalPars->figureValues[queen]-evalPars->figureValues[pawn];
+        }
         if (gainValue < marginDifference-200) {
             continue;
         }

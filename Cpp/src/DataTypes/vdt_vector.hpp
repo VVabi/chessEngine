@@ -6,6 +6,7 @@
 #include <stddef.h>
 #include <iostream>
 #include <string.h>
+#include <stdlib.h>
 
 template<typename T> class vdt_vector {
  public:
@@ -36,9 +37,7 @@ template<typename T> class vdt_vector {
     T &operator[](uint32_t i) const {
         if (i >= length) {
             std::cout << "vector index out ouf bounds" << std::endl;
-            while (1) {
-                //add fatal
-            }
+            abort();
         }
         return data[i];
     }
@@ -46,9 +45,7 @@ template<typename T> class vdt_vector {
     void add(T* element) {
         if (length >= allocated_length) {
            std::cout << "vector is full" << std::endl;
-           while (1) {
-               //add fatal
-           }
+           abort();
         }
         /*if (length >= allocated_length) {
             uint32_t new_length = 2*allocated_length;

@@ -138,6 +138,27 @@ void setHashEntry(HashEntry entry, uint64_t zobristKey);
 uint16_t getHashMove(uint64_t zobristKey);
 void setHashMove(uint16_t move, uint64_t zobristKey, uint8_t searchId);
 void setHashEntry(hashFlag flag, int16_t eval, uint8_t depth, uint8_t searchId, uint16_t bestMove, uint64_t key);
+
+//Mate scores are relative to the root during the search, but stored relative to the node in the hash table,
+//since the same position can be reached at different plies. Apply these to every store and every probe
+//-----------------------------------------------------------------------------------------------------------
+inline bool isMateScore(int32_t eval) {
+    return (eval > 10000 || eval < -10000) && (eval < 30001) && (eval > -30001);
+}
+
+inline int16_t evalToHash(int32_t eval, uint16_t ply) {
+    if (isMateScore(eval)) {
+        return (eval < 0 ? eval-ply : eval+ply);
+    }
+    return eval;
+}
+
+inline int16_t evalFromHash(int32_t eval, uint16_t ply) {
+    if (isMateScore(eval)) {
+        return (eval < 0 ? eval+ply : eval-ply);
+    }
+    return eval;
+}
 void setSearchId(uint8_t searchId, uint64_t key, uint16_t index);
 void clearHashTables();
 #endif /* HASHTABLES_HASHTABLES_HPP_ */

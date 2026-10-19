@@ -8,7 +8,13 @@
 #ifndef SEARCH_SEARCH_HPP_
 #define SEARCH_SEARCH_HPP_
 #include <assert.h>
+#include <stdlib.h>
+#include <iostream>
 #include <userInterface/interfaceStructs.hpp>
+
+//a position has at most 218 legal moves; the generator produces pseudo-legal ones, so leave some room
+#define MAX_MOVES_PER_PLY 256
+#define MOVE_STACK_LEVELS 128
 #define HISTORY_CUTOFF (1ULL << 12)
 #define NO_REFUTATION 64
 
@@ -133,7 +139,7 @@ struct searchDebugData {
     uint64_t threefold_repetitions;
     uint64_t nodes[40];
     uint64_t totalNodes;
-    uint64_t bestIndex[40][150];
+    uint64_t bestIndex[40][MAX_MOVES_PER_PLY];
     uint64_t futility_tried;
     uint64_t futility_successful;
     uint64_t wentToSearch;
@@ -144,15 +150,18 @@ struct searchDebugData {
 
 
 class moveStack {
-    chessMove moveArray[7500];
+    chessMove moveArray[MOVE_STACK_LEVELS*MAX_MOVES_PER_PLY];
     uint16_t counter = 0;
 
  public:
     vdt_vector<chessMove> getNext() {
-        assert(counter < 45);
+        if (counter >= MOVE_STACK_LEVELS) {
+            std::cout << "move stack overflow" << std::endl;
+            abort();
+        }
         counter++;
         //std::cout << counter << std::endl;
-        return vdt_vector<chessMove>(moveArray+(counter-1)*150, 150);
+        return vdt_vector<chessMove>(moveArray+(counter-1)*MAX_MOVES_PER_PLY, MAX_MOVES_PER_PLY);
     }
 
     void release() {

@@ -114,7 +114,7 @@ static inline void get_extensions_reductions(chessPosition* position, uint16_t* 
                 }
             }
         }
-        bool closeToPromotion = (move->type == pawnMove) && ((move->targetField > 48) || (move->targetField < 16));
+        bool closeToPromotion = (move->type == pawnMove) && ((move->targetField >= 48) || (move->targetField < 16));
 
         if ((closeToPromotion || (move->type == promotionQueen)) && (plyinfo.ply+depth+*extension < plyinfo.max_ply-1)) {
             *extension = *extension+1;
@@ -219,29 +219,21 @@ static inline bool checkHashTable(int16_t* eval, uint16_t* hashMove, uint16_t* h
     assert(!((*hashMove != 0) && !isHit));
     if (setting == hashprobe_enabled) {
         if (isHit) {
-            int16_t oldEval  = hashVal.eval;
-            bool isMateScore = (std::abs(oldEval) > 10000) && (std::abs(oldEval) < 30001);
+            int16_t oldEval  = evalFromHash(hashVal.eval, ply);
 
             if ((depth <= hashVal.depth) && (oldEval != 0)) { //TODO: the != 0 is stupid, but somewhere something goes wrong with 3fold rep scores, so excluded here for safety
-                if (((hashVal.flag == FAILHIGH) || (hashVal.flag == FULLSEARCH)) && (oldEval >= *beta) && (!isMateScore || oldEval > *beta+1000)) {
+                if (((hashVal.flag == FAILHIGH) || (hashVal.flag == FULLSEARCH)) && (oldEval >= *beta)) {
                     setSearchId(searchId, zobristHash, hashVal.index);
                     *eval = *beta;
                     return true;
-                } else if (((hashVal.flag == FAILLOW) || (hashVal.flag == FULLSEARCH)) && (oldEval <= *alpha) && (!isMateScore || oldEval < *alpha-1000)) {
+                } else if (((hashVal.flag == FAILLOW) || (hashVal.flag == FULLSEARCH)) && (oldEval <= *alpha)) {
                     setSearchId(searchId, zobristHash, hashVal.index);
                     *eval =  *alpha; //node will fail low
                     return true;
                 } else if ((hashVal.flag == FULLSEARCH)) { //TODO: this condition can be vastly improved
                     setSearchId(searchId, zobristHash, hashVal.index);
-                    if (isMateScore) {
-                        if (oldEval < 0) {
-                            oldEval += ply;
-                        } else {
-                            oldEval -= ply;
-                        }
-                    }
                     *eval = oldEval; //guaranteed to be in (alpha, beta)
-                    assert(((oldEval > *alpha) && (oldEval < *beta)) || isMateScore);
+                    assert((oldEval > *alpha) && (oldEval < *beta));
                     return true;
                 }
             }
@@ -265,7 +257,7 @@ static inline void updateHistoryTables(chessMove* bestMove, int16_t depth, vdt_v
 }
 
 static inline void handleBetaCutoff(chessMove* bestMove, uint64_t zobristHash, int16_t beta, int16_t depth, uint16_t ply, uint8_t searchId) {
-    setHashEntry(FAILHIGH, beta, depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), zobristHash);
+    setHashEntry(FAILHIGH, evalToHash(beta, ply), depth, searchId, (bestMove->sourceField | (bestMove->targetField << 8)), zobristHash);
     if (bestMove->captureType == none) {
         uint16_t toRemember = (bestMove->sourceField | (bestMove->targetField << 8));
         killerTable* table = getKillerTable();
@@ -464,7 +456,7 @@ static inline searchLoopResults negamax_internal_move_loop(chessPosition* positi
 static inline int16_t negamax_internal(chessPosition* position, plyInfo plyinfo, AlphaBeta alphabeta, pvLine* PV, searchSettings settings, sortInfo sortinfo) {
     //generate moves
     //------------------
-    uint16_t stackCounter = qmvStack.getCounter();
+    __attribute__((unused)) uint16_t stackCounter = qmvStack.getCounter();
     vdt_vector<chessMove> moves = qmvStack.getNext();
     generateAllMoves(&moves, position);
 
@@ -496,6 +488,7 @@ static inline int16_t negamax_internal(chessPosition* position, plyInfo plyinfo,
     //mate scores originate here!
     //------------------------------
     if (res.noMovesAvailable()) {
+        PV->numMoves = 0;
         if (sortinfo.movingSideInCheck) {
             alphabeta.mate(plyinfo.ply);
         } else {
@@ -510,24 +503,14 @@ static inline int16_t negamax_internal(chessPosition* position, plyInfo plyinfo,
         updateHistoryTables(&PV->line[0], plyinfo.depth, &moves, res.bestIndex, position->toMove);
         searchCounts.bestIndex[plyinfo.depth][res.bestIndex]++;
 
-        int16_t eval = alphabeta.alpha;
-        bool isMateScore = (std::abs(eval) > 10000) && (std::abs(eval) < 30001);
-        if (isMateScore) {
-            if (eval < 0) {
-                eval -= plyinfo.ply;
-            } else {
-                eval += plyinfo.ply;
-            }
-        }
-
-        setHashEntry(FULLSEARCH, eval, plyinfo.depth, settings.searchId, (PV->line[0].sourceField | (PV->line[0].targetField << 8)), position->zobristHash);
+        setHashEntry(FULLSEARCH, evalToHash(alphabeta.alpha, plyinfo.ply), plyinfo.depth, settings.searchId, (PV->line[0].sourceField | (PV->line[0].targetField << 8)), position->zobristHash);
         if (PV->line[0].captureType == none) {
                 uint16_t toRemember = (PV->line[0].sourceField | (PV->line[0].targetField << 8));
                 killerTable* table = getKillerTable();
                 table->setKillerMove(plyinfo.ply, toRemember);
             }
     } else { //we failed low, remember as well
-        setHashEntry(FAILLOW, alphabeta.alpha, plyinfo.depth, settings.searchId, 0, position->zobristHash);
+        setHashEntry(FAILLOW, evalToHash(alphabeta.alpha, plyinfo.ply), plyinfo.depth, settings.searchId, 0, position->zobristHash);
     }
 
     //return memory

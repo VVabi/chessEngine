@@ -137,4 +137,7 @@ void zeroInitPosition(chessPosition* position);
 
 #define INLINE __attribute__((always_inline)) static inline
 
+//capacity of the made-move history: the game so far plus the plies of the current search
+#define MAX_GAME_PLIES 2048
+
 #endif /* LIB_BASICS_HPP_ */

@@ -356,6 +356,15 @@ def format_status(stats: Stats, sprt: Optional[Sprt]) -> str:
     return text
 
 
+def print_report(stats: Stats, sprt: Optional[Sprt], num_games: int, elapsed: float) -> None:
+    """One-line summary, easy to grep for when the output goes to a log file."""
+    rate = stats.games / elapsed * 60 if elapsed > 0 else 0.0
+    eta = (num_games - stats.games) / rate if rate > 0 else 0.0
+    terminations = ", ".join(f"{k} {v}" for k, v in sorted(stats.terminations.items(), key=lambda kv: -kv[1]))
+    print(f"REPORT {stats.games}/{num_games}  {format_status(stats, sprt)}  |  {terminations}  |  "
+          f"{rate:.1f} games/min, elapsed {elapsed / 60:.0f} min, remaining <= {eta:.0f} min", flush=True)
+
+
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
 
@@ -389,6 +398,8 @@ def parse_args() -> argparse.Namespace:
     match.add_argument("--max-moves", type=int, default=0,
                        help="adjudicate a draw after this many moves from the opening (default: 0 = off)")
     match.add_argument("--pgn", type=Path, help="append all games to this PGN file")
+    match.add_argument("--report-every", type=int, default=50, metavar="N",
+                       help="print a summary line starting with 'REPORT' every N games, 0 to disable (default: 50)")
 
     sp = p.add_argument_group("SPRT (stop early once a decision is reached)")
     sp.add_argument("--sprt", nargs=2, type=float, metavar=("ELO0", "ELO1"),
@@ -448,6 +459,7 @@ def main() -> int:
     pgn_file = open(args.pgn, "a") if args.pgn else None
     decision = None
 
+    start_time = time.monotonic()
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=args.concurrency)
     try:
         futures = [
@@ -471,6 +483,8 @@ def main() -> int:
 
             print(f"[{stats.games:>{len(str(num_games))}}/{num_games}] {res.white} - {res.black} "
                   f"{res.result} ({res.termination})  |  {format_status(stats, sprt)}", flush=True)
+            if args.report_every > 0 and stats.games % args.report_every == 0:
+                print_report(stats, sprt, num_games, time.monotonic() - start_time)
 
             if sprt and decision is None:
                 llr = stats.llr(sprt.elo0, sprt.elo1)

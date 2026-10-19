@@ -310,6 +310,26 @@ void generateChecks(vdt_vector<chessMove>* vec, chessPosition* position) {
     generateBishopMoves(vec, position, queen, bishopChecks & nonCaptures);
 }
 
+//queen promotions without capture. Quiescence search needs these, underpromotions are left out
+__attribute__((always_inline)) static inline void generateQuietQueenPromotions(vdt_vector<chessMove>* vec, chessPosition* position) {
+    playerColor toMove = position->toMove;
+    uint64_t occupancy  = position->pieces[white] | position->pieces[black];
+    uint64_t pawns     = position->pieceTables[toMove][pawn];
+    uint64_t forward   = (toMove? pawns >> 8: pawns << 8) & (~occupancy) & promotionRows[toMove];
+
+    while (forward != 0)  {
+        uint64_t target = LOWESTBITONLY(forward);
+        uint64_t source = (toMove? target << 8: target >> 8);
+        chessMove move;
+        move.type = promotionQueen;
+        move.captureType = none;
+        move.sourceField = findLSB(source);
+        move.targetField = findLSB(target);
+        vec->add(&move);
+        forward = forward & (~target);
+    }
+}
+
 void generateAllCaptureMoves(vdt_vector<chessMove>* vec, chessPosition* position) {
     playerColor toMove = position->toMove;
     uint64_t captures = position->pieces[1-toMove];
@@ -320,6 +340,7 @@ void generateAllCaptureMoves(vdt_vector<chessMove>* vec, chessPosition* position
     generateBishopMoves(vec, position, bishop, captures);
     generateBishopMoves(vec, position, queen, captures);
     generatePawnMoves(vec, position, captures);
+    generateQuietQueenPromotions(vec, position);
     generateEnPassant(vec, position);
 }
 

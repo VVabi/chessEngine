@@ -30,8 +30,8 @@ inline figureType toFigureType(uint16_t num) {
 
 void zeroInitPosition(chessPosition* position) {
     memset(position, 0, sizeof(chessPosition));
-    position->madeMoves = vdt_vector<chessMove>(600);
-    position->dataStack = vdt_vector<pathDependentPositionData>(600);
+    position->madeMoves = vdt_vector<chessMove>(MAX_GAME_PLIES);
+    position->dataStack = vdt_vector<pathDependentPositionData>(MAX_GAME_PLIES);
     position->zobristHash    = calcZobristHash(position);
     position->data.castlingRights = 0;
     position->data.fiftyMoveRuleCounter  = 0;

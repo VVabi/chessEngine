@@ -12,6 +12,7 @@ option(VABI_EXPERIMENTAL       "Enable experimental features (EXPERIMENTAL)"    
 option(VABI_UNROLL_LOOPS       "Compile with -funroll-loops"                      OFF)
 option(VABI_WARNINGS_AS_ERRORS "Treat compiler warnings as errors"                ON)
 option(VABI_PEDANTIC           "Compile with -pedantic -pedantic-errors"          OFF)
+option(VABI_ASSERTS            "Keep asserts in non-Debug builds"                 OFF)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -35,6 +36,7 @@ target_compile_definitions(Vabi PRIVATE
     $<$<BOOL:${VABI_RANDOMEVAL}>:RANDOMEVAL>
     $<$<BOOL:${VABI_EXPERIMENTAL}>:EXPERIMENTAL>
     $<$<CONFIG:Debug>:DEBUG>
+    $<$<AND:$<NOT:$<CONFIG:Debug>>,$<NOT:$<BOOL:${VABI_ASSERTS}>>>:NDEBUG>
 )
 
 if(VABI_WARNINGS_AS_ERRORS)
