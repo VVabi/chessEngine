@@ -30,3 +30,28 @@ Without presets, the usual CMake workflow works too; the `VABI_*` options in `Cp
 cmake -S Cpp -B build -DCMAKE_BUILD_TYPE=Release -DVABI_RANDOMEVAL=ON
 cmake --build build -j
 ```
+
+## Testing changes with self-play
+
+`tools/selfplay/selfplay.py` plays a match between two engine binaries and reports W/L/D, Elo difference with 95% error bars, likelihood of superiority (LOS) and optionally an SPRT. Engine 1 is the candidate, engine 2 the baseline.
+
+Set up the Python environment once (needs conda):
+
+```sh
+conda env create -f tools/selfplay/environment.yml
+conda activate chessengine
+```
+
+Keep a copy of the baseline binary before making changes, then for example:
+
+```sh
+cp Cpp/Release/Vabi ~/Vabi-baseline
+# ... change code, rebuild ...
+python tools/selfplay/selfplay.py --engine1 Cpp/Release/Vabi --engine2 ~/Vabi-baseline \
+    --tc 10+0.1 --games 1000 --concurrency 6 --sprt 0 5 --pgn games.pgn
+```
+
+- Time control: `--tc BASE+INC` (seconds), `--movetime SEC`, `--depth N` or `--nodes N`
+- `--concurrency/-j N` games in parallel (keep it at or below the number of physical cores)
+- `--openings FILE` FEN/EPD start positions (default `ChessHelper/src/Tools/openingPositions.txt`); each opening is played with both colors
+- `--sprt ELO0 ELO1` stops as soon as the result is statistically clear; see `--help` for all options
