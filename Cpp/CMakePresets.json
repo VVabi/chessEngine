@@ -1,0 +1,69 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/${presetName}"
+        },
+        {
+            "name": "Debug",
+            "displayName": "Debug (DEBUG checks, -O0 -g3, pedantic)",
+            "inherits": "base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "VABI_PEDANTIC": "ON"
+            }
+        },
+        {
+            "name": "Release",
+            "displayName": "Release (-O3)",
+            "inherits": "base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "TestRelease",
+            "displayName": "TestRelease (-O3 -funroll-loops)",
+            "inherits": "Release",
+            "cacheVariables": {
+                "VABI_UNROLL_LOOPS": "ON"
+            }
+        },
+        {
+            "name": "uciChallengeRelease",
+            "displayName": "uciChallengeRelease (RANDOMEVAL + EXPERIMENTAL)",
+            "inherits": "TestRelease",
+            "cacheVariables": {
+                "VABI_RANDOMEVAL": "ON",
+                "VABI_EXPERIMENTAL": "ON"
+            }
+        },
+        {
+            "name": "uciDefenderRelease",
+            "displayName": "uciDefenderRelease (RANDOMEVAL)",
+            "inherits": "TestRelease",
+            "cacheVariables": {
+                "VABI_RANDOMEVAL": "ON",
+                "VABI_WARNINGS_AS_ERRORS": "OFF"
+            }
+        },
+        {
+            "name": "Windows",
+            "displayName": "Windows (MinGW-w64 cross-compile)",
+            "inherits": "Release",
+            "toolchainFile": "${sourceDir}/cmake/mingw-w64-x86_64.cmake"
+        }
+    ],
+    "buildPresets": [
+        { "name": "Debug",               "configurePreset": "Debug" },
+        { "name": "Release",             "configurePreset": "Release" },
+        { "name": "TestRelease",         "configurePreset": "TestRelease" },
+        { "name": "uciChallengeRelease", "configurePreset": "uciChallengeRelease" },
+        { "name": "uciDefenderRelease",  "configurePreset": "uciDefenderRelease" },
+        { "name": "Windows",             "configurePreset": "Windows" }
+    ]
+}

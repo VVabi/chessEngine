@@ -65,4 +65,4 @@
 +whitespace/semicolon,\
 +whitespace/tab,\
 +whitespace/todo \
-$(find ../Cpp -type f -regex ".*\.\(c\|h\|hpp\|cpp\)" | grep -v "../Cpp/src/lib/Defines/bishopMoveTables.cpp" | grep -v "../Cpp/src/lib/Defines/rookMoveTables.cpp" | grep -v "../Cpp/src/util/mingw.mutex.h" | grep -v "../Cpp/src/util/mingw.thread.h" | grep -v "../src/userInterface/json/jsoncpp.cpp" | grep -v "../src/userInterface/json/json.h" | grep -v "../src/userInterface/json/json-forwards.h")
+$(find ../Cpp/src -type f -regex ".*\.\(c\|h\|hpp\|cpp\)" | grep -v "../Cpp/src/lib/Defines/bishopMoveTables.cpp" | grep -v "../Cpp/src/lib/Defines/rookMoveTables.cpp" | grep -v "../Cpp/src/util/mingw.mutex.h" | grep -v "../Cpp/src/util/mingw.thread.h" | grep -v "../src/userInterface/json/jsoncpp.cpp" | grep -v "../src/userInterface/json/json.h" | grep -v "../src/userInterface/json/json-forwards.h")

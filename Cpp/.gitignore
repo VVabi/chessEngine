@@ -1,7 +1,8 @@
+# CMake preset build directories
+/Debug/
 /Release/
 /TestRelease/
-/uciRelease/
-/uciDebug/
 /uciChallengeRelease/
 /uciDefenderRelease/
 /Windows/
+/build/
